@@ -38,7 +38,6 @@ export default function BasicInfo() {
             case 'tekkom': return 'TekKom'
             case 'bedkom': return 'BedKom'
             case 'satkom': return 'SATkom'
-            case 'eventkom':
             case 'evntkom': return 'EvntKom'
             case 'ctfkom': return 'CTFkom'
             case 's2g': return 'S2G'

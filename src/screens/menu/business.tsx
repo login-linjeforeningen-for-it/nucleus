@@ -44,8 +44,8 @@ function Content(): JSX.Element {
 
     const logo = {
         bedpres: isDark
-            ? require("@assets/committee/eventkom/bedpres-white.png")
-            : require("@assets/committee/eventkom/bedpres-black.png"),
+            ? require("@assets/committee/evntkom/bedpres-white.png")
+            : require("@assets/committee/evntkom/bedpres-black.png"),
         pr: isDark
             ? require("@assets/committee/bedkom/pr-white.png")
             : require("@assets/committee/bedkom/pr-black.png"),
@@ -53,11 +53,11 @@ function Content(): JSX.Element {
             ? require("@assets/committee/ctfkom/ctfkom-white.png")
             : require("@assets/committee/ctfkom/ctfkom-black.png"),
         workshop: isDark
-            ? require("@assets/committee/eventkom/workshop.png")
-            : require("@assets/committee/eventkom/workshop-black.png"),
+            ? require("@assets/committee/evntkom/workshop.png")
+            : require("@assets/committee/evntkom/workshop-black.png"),
         profiling: isDark
-            ? require("@assets/committee/eventkom/utlysning.png")
-            : require("@assets/committee/eventkom/utlysning-black.png")
+            ? require("@assets/committee/evntkom/utlysning.png")
+            : require("@assets/committee/evntkom/utlysning-black.png")
     }
 
     return (

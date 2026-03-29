@@ -32,7 +32,7 @@ function Content({ state, descriptors, navigation }: FooterProps) {
         <>
             <BlurView
                 style={{ ...MS.bMenu, bottom }}
-                experimentalBlurMethod='dimezisBlurView'
+                blurMethod='dimezisBlurView'
                 intensity={Platform.OS === 'ios' ? 30 : 20}
             />
             <View style={{ ...MS.bMenu, bottom, backgroundColor: theme.transparentAndroid }} />

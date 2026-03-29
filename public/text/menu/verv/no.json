@@ -67,14 +67,14 @@
         "title": "Hva gjør man med verv?",
         "intro": "Login består av 5 komitéer med ulike arbeidsoppgaver. Nedenfor finner du en kort beskrivelse av hva hver enkelt komité gjør, og deres typiske arbeidsoppgaver.",
         "board": {
-            "eventkom": "EventKom leder",
+            "evntkom": "EvntKom leder",
             "pr": "PR leder",
             "bedkom": "BedKom leder",
             "tekkom": "TekKom leder",
             "ctfkom": "CTFkom leder",
             "satkom": "SATkom leder"
           },
-        "eventkom": {
+        "evntkom": {
             "title": "EvntKom",
             "intro": "EvntKom er ansvarlig for Login sine arrangementer.",
             "body": "Med verv i EvntKom vil man være svært synlig i foreningen. Man hjelper til å arrangere og får være med på arrangementene til Login. Dette er komitéen for deg som liker å ha ansvar, men samtidig være sosial og finne på ting."

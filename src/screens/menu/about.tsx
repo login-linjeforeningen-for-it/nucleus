@@ -27,9 +27,10 @@ import Swipe from "@components/nav/swipe"
 import { SvgXml } from "react-native-svg"
 import prkomSVG from "@assets/committee/prkom/pr-icon.svg"
 import ctfkomSVG from "@assets/committee/ctfkom/ctfkom-icon.svg"
-import eventkomSVG from "@assets/committee/eventkom/eventkom-icon.svg"
+import evntkomSVG from "@assets/committee/evntkom/evntkom-icon.svg"
 import satkomSVG from "@assets/committee/satkom/satkom-icon.svg"
 import bedkomSVG from "@assets/committee/bedkom/bedkom-icon.svg"
+import barkomSVG from "@assets/committee/barkom/barkom-icon.svg"
 import tekkomSVG from "@assets/committee/tekkom/tekkom-icon.svg"
 import styretSVG from "@assets/committee/styret/styret-icon.svg"
 import { TextLink } from "@components/shared/link"
@@ -64,12 +65,13 @@ type CommitteeInfo = {
 
 const committeeImages = [
     styretSVG,
-    eventkomSVG,
+    evntkomSVG,
     tekkomSVG,
     prkomSVG,
     ctfkomSVG,
     satkomSVG,
     bedkomSVG,
+    barkomSVG
 ]
 
 export default function AboutScreen(): JSX.Element {
@@ -223,7 +225,7 @@ function CommitteeImage({ id, theme, style }: getCommitteeImageProps) {
 }
 
 function CommitteePerson({ committee }: CommitteePersonProps) {
-    const committees = ["evntkom", "tekkom", "pr", "ctf", "eco"]
+    const committees = ["evntkom", "tekkom", "pr", "ctf", "eco", "bedkom", "barkom"]
 
     if (committees[committee - 1]) {
         return Person({ person: committees[committee - 1] })
@@ -248,7 +250,7 @@ function CommitteeView({ setCommittee, committee }: CommitteeViewProps) {
         <View style={{ display: "flex", aspectRatio: numCols / numRows, justifyContent: 'space-between' }}>
             {rows.map((row, rowIndex) => (
                 <View key={rowIndex} style={{ display: 'flex', width: '100%', flexDirection: 'row', justifyContent: 'space-between' }}>
-                    {row.map((xml, index) => (
+                    {row.map((_, index) => (
                         <TouchableOpacity key={index}
                             onPress={() => {
                                 setCommittee(rowIndex * numCols + index)

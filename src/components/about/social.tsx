@@ -94,6 +94,7 @@ export function AllComitees(): JSX.Element {
             <Person person="ctf" />
             <Person person="eco" />
             <Person person="bedkom" />
+            <Person person="barkom" />
         </View>
     )
 }
@@ -131,10 +132,10 @@ export function Social() {
                 : require("@assets/social/linkedin-black.png")
         },
         gitlab: {
-            link: config.gitlab_url,
+            link: config.github_url,
             logo: isDark
-                ? require("@assets/social/gitlab-white.png")
-                : require("@assets/social/gitlab-black.png")
+                ? require("@assets/social/github-white.png")
+                : require("@assets/social/github-black.png")
         },
         wiki: {
             link: config.wiki_url,
@@ -181,7 +182,7 @@ export function Styret() {
         <View>
             <Image
                 style={{ ...GS.aboutImage }}
-                source={{ uri: `${config.cdn}/board/gruppebilde.JPG` }}
+                source={{ uri: `${config.cdn}/board/group/styret_2026.jpg` }}
             />
             <CornerSquare corner={corner} type={true} />
         </View>
@@ -208,11 +209,11 @@ export function Contact() {
 
     return (
         <View>
-            <Text style={{ ...T.centeredBold20, color: color }}>{info.contact}</Text>
-            <Text style={{ ...T.centered15, color: color }}>{info.name}</Text>
-            <Text style={{ ...T.centered15, color: color }}>{info.location}</Text>
-            <Text style={{ ...T.centered15, color: color }}>{info.address}</Text>
-            <Text style={{ ...T.centered15, color: color }}>{info.post}</Text>
+            <Text style={{ ...T.centeredBold20, color }}>{info.contact}</Text>
+            <Text style={{ ...T.centered15, color }}>{info.name}</Text>
+            <Text style={{ ...T.centered15, color }}>{info.location}</Text>
+            <Text style={{ ...T.centered15, color }}>{info.address}</Text>
+            <Text style={{ ...T.centered15, color }}>{info.post}</Text>
 
             <TextLink
                 url={config.mailto_url}
@@ -259,7 +260,7 @@ export function StaticImage({ category }: StaticImageProps): JSX.Element {
         sosialt: require(`../../../public/assets/categories/sosialt.png`),
         social: require(`../../../public/assets/categories/sosialt.png`),
         login: require(`../../../public/assets/categories/login.png`),
-        annet: require(`../../../public/assets/categories/annet.png`),
+        annet: require(`../../../public/assets/categories/annet.png`)
     }
 
     const image = category ? images[category.toLowerCase()] : images.annet

@@ -147,7 +147,7 @@ function BlurWrapper(props: PropsWithChildren) {
         <>
             <BlurView
                 style={{ height }}
-                experimentalBlurMethod='dimezisBlurView'
+                blurMethod='dimezisBlurView'
                 intensity={Platform.OS === "ios" ? 30 : 20}
             />
             <View style={{

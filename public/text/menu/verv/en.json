@@ -67,14 +67,14 @@
         "title": "What do you do with verv?",
         "intro": "Login consists of 5 committees with different tasks. Below you will find a short description of each committee and their typical tasks.",
         "board": {
-            "eventkom": "EventKom leader",
+            "evntkom": "EvntKom leader",
             "pr": "PR leader",
             "bedkom": "BedKom leader",
             "tekkom": "TekKom leader",
             "ctfkom": "CTFkom leader",
             "satkom": "SATkom leader"
           },
-        "eventkom": {
+        "evntkom": {
             "title": "Evntkom",
             "intro": "Evntkom are responsible for Logins events.",
             "body": "With verv in Evntkom you will be very visible on campus. You help host, and get to join the events of Login. This is the committee for you if you like to be responsible, but at the same time be social and try new things."
