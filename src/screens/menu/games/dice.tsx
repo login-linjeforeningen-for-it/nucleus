@@ -23,7 +23,7 @@ export default function DiceScreen() {
     const spin = rotateAnimation.interpolate({
         inputRange: [0, 1],
         outputRange: direction ? ['0deg', '360deg'] : ['360deg', '0deg'],
-    });
+    })
 
     function handlePress() {
         setIsAnimating(true)
@@ -32,9 +32,9 @@ export default function DiceScreen() {
         setSteps(Math.floor(Math.random() * 2) + 3)
     }
 
+    // Rotates the dice
     useEffect(() => {
         if (isAnimating) {
-            // Sequence of animations to change the dice value multiple times
             const animations = Array.from({ length: steps }, (_, i) =>
                 Animated.timing(rotateAnimation, {
                     toValue: (i + 1) / steps,
@@ -44,23 +44,20 @@ export default function DiceScreen() {
                 })
             )
 
-            // Start the animations and update the dice value
             Animated.sequence(animations).start(() => {
-                setIsAnimating(false); // Stop the animation
-                rotateAnimation.setValue(0); // Reset the rotation to 0
-                setDiceValue(Math.floor(Math.random() * 6) + 1) // Final value
+                setIsAnimating(false)
+                rotateAnimation.setValue(0)
+                setDiceValue(Math.floor(Math.random() * 6) + 1)
             })
 
-            // Change the dice value at each step
             const valueChangeInterval = setInterval(() => {
                 const newValue = Math.floor(Math.random() * 6) + 1
                 setDiceValue(newValue)
             }, duration)
 
-            // Clear the interval after the animation is done
             setTimeout(() => clearInterval(valueChangeInterval), steps * duration)
         }
-    }, [isAnimating, rotateAnimation]);
+    }, [isAnimating, rotateAnimation])
 
     return (
         <View style={{
@@ -88,7 +85,7 @@ export default function DiceScreen() {
                 </Animated.View>
             </TouchableOpacity>
         </View>
-    );
+    )
 }
 
 function DiceDots({ amount }: DotsProps) {
@@ -137,5 +134,5 @@ function DiceDots({ amount }: DotsProps) {
                 <View key={index} style={[dotStyle, { top: pos.top, left: pos.left, position: 'absolute' }]} />
             ))}
         </View>
-    );
+    )
 }

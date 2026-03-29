@@ -1,16 +1,14 @@
 import T from '@styles/text'
 import { useState } from 'react'
 import { Text, View, Dimensions } from 'react-native'
-import { PanGestureHandler } from 'react-native-gesture-handler'
+import { Gesture, GestureDetector } from 'react-native-gesture-handler'
 import Animated, {
-    // @ts-expect-error Doesnt exist anymore, but still works
-    useAnimatedGestureHandler,
     useAnimatedStyle,
     useSharedValue,
     withSpring,
-    runOnJS,
     interpolate,
 } from 'react-native-reanimated'
+import { scheduleOnRN } from 'react-native-worklets'
 import { useSelector } from 'react-redux'
 
 type GameListContentProps = {
@@ -33,6 +31,7 @@ export default function Swiper({ game, mode, school, ntnu }: GameListContentProp
     const [currentIndex, setCurrentIndex] = useState(0)
     const translateX = useSharedValue(0)
     const totalCards = game.length
+    const startX = useSharedValue(0)
 
     // Function to calculate next index in a circular manner
     function getNextIndex(currentIndex: number) {
@@ -172,34 +171,34 @@ export default function Swiper({ game, mode, school, ntnu }: GameListContentProp
         }, 200)
     }
 
-    const gestureHandler = useAnimatedGestureHandler({
-        // @ts-expect-error Doesnt exist anymore, but stil works
-        onStart: (_, context) => {
-            context.startX = translateX.value
-        },
-        // @ts-expect-error Doesnt exist anymore, but stil works
-        onActive: (event, context) => {
-            translateX.value = context.startX + event.translationX
-        },
-        // @ts-expect-error Doesnt exist anymore, but stil works
-        onEnd: (event) => {
+    const panGesture = Gesture.Pan()
+        .onBegin(() => {
+            // Equivalent of onStart
+            startX.value = translateX.value
+        })
+        .onUpdate((event) => {
+            // Equivalent of onActive
+            translateX.value = startX.value + event.translationX
+        })
+        .onEnd((event) => {
             if (event.translationX > SWIPE_THRESHOLD) {
-                runOnJS(onSwipeRight)()
+                scheduleOnRN(onSwipeRight)
+
                 translateX.value = withSpring(SCREEN_WIDTH * 1.1, {}, () => {
-                    // Resets the position after the card is swiped
+                    // optional callback
                 })
-                runOnJS(resetTranslateX)()
+
+                scheduleOnRN(resetTranslateX)
             } else if (event.translationX < -SWIPE_THRESHOLD) {
                 translateX.value = withSpring(-SCREEN_WIDTH - 10, {}, () => {
-                    runOnJS(onSwipeLeft)()
+                    scheduleOnRN(onSwipeLeft)
                 })
-                runOnJS(resetTranslateX200ms)()
+
+                scheduleOnRN(resetTranslateX200ms)
             } else {
-                // No significant swipe, reset position
                 translateX.value = withSpring(0)
             }
-        },
-    })
+        })
 
     // Animated styles for the top card (current card)
     const animatedStyle = useAnimatedStyle(() => {
@@ -437,7 +436,7 @@ export default function Swiper({ game, mode, school, ntnu }: GameListContentProp
             </Animated.View>
 
             {/* Top card (current card) */}
-            <PanGestureHandler onGestureEvent={gestureHandler}>
+            <GestureDetector gesture={panGesture}>
                 <Animated.View style={[{
                     justifyContent: 'center',
                     alignItems: 'center',
@@ -464,7 +463,7 @@ export default function Swiper({ game, mode, school, ntnu }: GameListContentProp
                     </Text>
                     <GameContent game={game[currentIndex]} />
                 </Animated.View>
-            </PanGestureHandler>
+            </GestureDetector>
 
             {/* Previous (hidden) card */}
             {currentIndex > 0 && <Animated.View style={[{

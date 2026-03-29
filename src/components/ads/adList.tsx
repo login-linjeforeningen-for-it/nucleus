@@ -18,7 +18,6 @@ export default function AdList(): JSX.Element {
 
     async function getDetails() {
         const ads = await fetchAds()
-
         if (ads.length) {
             const detailedAdPromises = ads.map(async (ad) => {
                 const details = await fetchAdDetails(ad.id)

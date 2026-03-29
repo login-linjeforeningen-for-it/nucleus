@@ -1,12 +1,13 @@
+import handleSwipe from "@utils/handleSwipe"
 import { Navigation } from "@/interfaces"
 import { useNavigation } from "@react-navigation/native"
-import handleSwipe from "@utils/handleSwipe"
 import { ReactNode } from "react"
 import { View } from "react-native"
+import { scheduleOnRN } from 'react-native-worklets'
 import {
-    GestureHandlerRootView,
-    PanGestureHandler,
-    PanGestureHandlerGestureEvent
+    Gesture,
+    GestureDetector,
+    GestureHandlerRootView
 } from "react-native-gesture-handler"
 
 type SwipeProps = {
@@ -16,18 +17,23 @@ type SwipeProps = {
 }
 
 export default function Swipe({ children, left, right }: SwipeProps) {
-
     const navigation: Navigation = useNavigation()
 
-    function handleGesture(event: PanGestureHandlerGestureEvent) {
-        handleSwipe({ navigation, event, screenLeft: left, screenRight: right })
-    }
+    const panGesture = Gesture.Pan()
+        .onEnd((event) => {
+            scheduleOnRN(handleSwipe, {
+                navigation,
+                event,
+                screenLeft: left,
+                screenRight: right
+            })
+        })
 
     return (
         <GestureHandlerRootView>
-            <PanGestureHandler onGestureEvent={handleGesture}>
+            <GestureDetector gesture={panGesture}>
                 <View>{children}</View>
-            </PanGestureHandler>
+            </GestureDetector>
         </GestureHandlerRootView>
     )
 }

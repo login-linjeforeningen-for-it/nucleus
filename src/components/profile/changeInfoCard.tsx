@@ -1,4 +1,4 @@
-import { GestureHandlerRootView, PanGestureHandler } from "react-native-gesture-handler"
+import { Gesture, GestureDetector, GestureHandlerRootView } from "react-native-gesture-handler"
 import { useDispatch, useSelector } from "react-redux"
 import PS from "@styles/profileStyles"
 import { Line } from "@/components/shared/utils"
@@ -11,16 +11,13 @@ import {
     TextInput,
     Keyboard,
     View,
-    Text,
+    Text
 } from "react-native"
 
 import Animated, {
-    // @ts-expect-error Doesnt exist but still works
-    useAnimatedGestureHandler,
     useAnimatedStyle,
     useSharedValue,
-    withTiming,
-    runOnJS,
+    withTiming
 } from "react-native-reanimated"
 
 import {
@@ -30,6 +27,7 @@ import {
     setSchoolyear,
     setDegree
 } from "@redux/profile"
+import { scheduleOnRN } from 'react-native-worklets'
 
 type ChangeInfoCardProps = {
     type: string
@@ -76,6 +74,7 @@ ChangeInfoCardProps) {
 
     // Shared value for reanimated library
     const translateY = useSharedValue(height)
+    const startY = useSharedValue(0)
 
     // Trigger for slideUp animation
     const [shouldTrigger, setShouldTrigger] = useState(trigger)
@@ -85,32 +84,30 @@ ChangeInfoCardProps) {
     function tryToHide() {
         if (!hiding) {
             setHiding(true)
-            runOnJS(() => hide())
+            scheduleOnRN(() => hide())
         }
     }
 
     // Starts increasing value when swiping starts
-    const gestureHandler = useAnimatedGestureHandler({
-        // @ts-expect-error Doesnt exist but still works
-        onStart: (_, ctx: CTX) => {
-            ctx.startY = translateY.value
-        },
-        // Changes height according to swiping
-        // @ts-expect-error Doesnt exist but still works
-        onActive: (event, ctx) => {
-            translateY.value = ctx.startY + event.translationY
-        },
-        // @ts-expect-error Doesnt exist but still works
-        // Sets the component to hidden when its not visible
-        onEnd: (event) => {
-            if (event.velocityY > height/2) {
-                translateY.value = withTiming(height)
-                runOnJS(Keyboard.dismiss)()
-            } else {
-                translateY.value = withTiming(0)
-            }
-        },
+    const panGesture = Gesture.Pan()
+    .onBegin(() => {
+        // replaces onStart
+        startY.value = translateY.value;
     })
+    .onUpdate((event) => {
+        // replaces onActive
+        translateY.value = startY.value + event.translationY;
+    })
+    .onEnd((event) => {
+        if (event.velocityY > height / 2) {
+        translateY.value = withTiming(height);
+
+        // new API
+        scheduleOnRN(Keyboard.dismiss);
+        } else {
+        translateY.value = withTiming(0);
+        }
+    });
 
     // Animates the sliding
     const animation = useAnimatedStyle(() => {
@@ -183,7 +180,7 @@ ChangeInfoCardProps) {
     // Returns the visual card component
     return (
         <GestureHandlerRootView>
-            <PanGestureHandler onGestureEvent={gestureHandler}>
+            <GestureDetector gesture={panGesture}>
                 <Animated.View style={[
                     PS.animatedCard, animation,
                     {backgroundColor: theme.darker}
@@ -222,7 +219,7 @@ ChangeInfoCardProps) {
                         </View>
                     </View>
                 </Animated.View>
-            </PanGestureHandler>
+            </GestureDetector>
         </GestureHandlerRootView>
     )
 }

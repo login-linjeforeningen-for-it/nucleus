@@ -25,16 +25,13 @@
  * ├── InfoModal
  * └── NotificationModal
  */
-import { createBottomTabNavigator } from "@react-navigation/bottom-tabs"
-import { NavigationContainer } from "@react-navigation/native"
+
 import Footer from "@nav/footer"
-import { useSelector } from "react-redux"
 import AdScreen from "@screens/ads"
 import EventScreen from "@screens/event"
 import MenuScreen from "@screens/menu"
 import MS from "@styles/menuStyles"
 import TagInfo from "@components/shared/tagInfo"
-import { Image, Platform } from "react-native"
 import NotificationModal from "@components/shared/notificationModal"
 import NotificationScreen from "@screens/menu/notifications"
 import ProfileScreen from "@screens/menu/profile"
@@ -52,6 +49,10 @@ import DiceScreen from "@screens/menu/games/dice"
 import Header from "./header"
 import * as SystemUI from 'expo-system-ui'
 import * as NavigationBar from "expo-navigation-bar"
+import { createBottomTabNavigator } from "@react-navigation/bottom-tabs"
+import { NavigationContainer } from "@react-navigation/native"
+import { useSelector } from "react-redux"
+import { Image, Platform } from "react-native"
 import {
     AdStackParamList,
     EventStackParamList,
@@ -211,7 +212,7 @@ function Tabs(): JSX.Element {
  * @returns Application with navigation
  */
 export default function Navigator(): JSX.Element {
-    SystemUI.setBackgroundColorAsync("black");
+    SystemUI.setBackgroundColorAsync("black")
 
     const config = {
         animation: 'timing',

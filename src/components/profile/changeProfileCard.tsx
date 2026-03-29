@@ -1,4 +1,4 @@
-import { GestureHandlerRootView, PanGestureHandler } from "react-native-gesture-handler"
+import { Gesture, GestureDetector, GestureHandlerRootView } from "react-native-gesture-handler"
 import { useDispatch, useSelector } from "react-redux"
 import * as ImagePicker from "expo-image-picker"
 import PS from "@styles/profileStyles"
@@ -15,12 +15,9 @@ import {
 } from "react-native"
 
 import Animated, {
-    // @ts-expect-error Doesnt exist but still works
-    useAnimatedGestureHandler,
     useAnimatedStyle,
     useSharedValue,
     withTiming,
-    runOnJS,
 } from "react-native-reanimated"
 
 type ChangeProfileCardProps = {
@@ -52,32 +49,26 @@ export default function ChangeProfileCard({ hide, trigger }:
 
     // Shared value for reanimated library
     let translateY = useSharedValue(windowHeight)
+    const startY = useSharedValue(0)
 
     // Trigger for slideUp animation
     let [shouldTrigger, setShouldTrigger] = useState(trigger)
 
     // Starts increasing value when swiping starts
-    const gestureHandler = useAnimatedGestureHandler({
-        // @ts-expect-error Doesnt exist but still works
-        onStart: (_, ctx: CTX) => {
-            ctx.startY = translateY.value
-        },
-        // Changes height according to swiping
-        // @ts-expect-error Doesnt exist but still works
-        onActive: (event, ctx) => {
-            translateY.value = ctx.startY + event.translationY
-        },
-        // Sets the component to hidden when its not visible
-        // @ts-expect-error Doesnt exist but still works
-        onEnd: (event) => {
+   const panGesture = Gesture.Pan()
+        .onBegin(() => {
+            startY.value = translateY.value
+        })
+        .onUpdate((event) => {
+            translateY.value = startY.value + event.translationY
+        })
+        .onEnd((event) => {
             if (event.velocityY > windowHeight / 3) {
                 translateY.value = withTiming(windowHeight)
-                // tryToHide() not sure if this is needed
             } else {
                 translateY.value = withTiming(0)
             }
-        },
-    })
+        })
 
     // Animates the sliding
     const animation = useAnimatedStyle(() => {
@@ -115,7 +106,7 @@ export default function ChangeProfileCard({ hide, trigger }:
     // Returns the visual card component
     return (
         <GestureHandlerRootView>
-            <PanGestureHandler onGestureEvent={gestureHandler}>
+            <GestureDetector gesture={panGesture}>
                 <Animated.View style={[PS.animatedProfileChangeCard, animation,
                 { backgroundColor: theme.darker }]}>
                     <View style={[PS.animatedView, {
@@ -137,7 +128,7 @@ export default function ChangeProfileCard({ hide, trigger }:
                         </TouchableOpacity>
                     </View>
                 </Animated.View>
-            </PanGestureHandler>
+            </GestureDetector>
         </GestureHandlerRootView>
     )
 }

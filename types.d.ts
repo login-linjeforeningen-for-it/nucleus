@@ -473,12 +473,12 @@ type Editing = {
 type Card = {
     question: string
     alternatives: string[]
-    source: string
     correct: number[]
-    help?: string
-    theme?: string
+    source: string
     rating: number
     votes: Vote[]
+    help?: string
+    theme?: string
 }
 
 type User = {
@@ -504,9 +504,15 @@ type CourseAsList = {
 type Course = {
     id: string
     cards: Card[]
-    unreviewed: Card[]
     notes: string
-    mark?: boolean
+    files: Files
+}
+
+type Files = {
+    name: string
+    content: string
+    files: Files[]
+    parent?: string
 }
 
 type Game = {

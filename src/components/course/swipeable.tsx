@@ -1,15 +1,13 @@
 import { Dispatch, SetStateAction, useState } from 'react'
 import { View, Dimensions, Platform } from 'react-native'
-import { PanGestureHandler } from 'react-native-gesture-handler'
+import { Gesture, GestureDetector } from 'react-native-gesture-handler'
 import Animated, {
-    // @ts-expect-error Removed but still works
-    useAnimatedGestureHandler,
     useAnimatedStyle,
     useSharedValue,
     withSpring,
-    runOnJS,
     interpolate,
 } from 'react-native-reanimated'
+import { scheduleOnRN } from 'react-native-worklets'
 import { useSelector } from 'react-redux'
 import CourseContent from './content'
 import ReadOnly from './readonly'
@@ -25,14 +23,17 @@ const { height: SCREEN_HEIGHT } = Dimensions.get('window')
 const SWIPE_THRESHOLD = SCREEN_WIDTH * 0.25
 
 export default function Swiper({ course, clicked, setClicked }: CourseContentProps) {
-    if (course.mark) return <ReadOnly text={course.textUnreviewed.join('\n')} />
-
     const { theme } = useSelector((state: ReduxState) => state.theme)
     const [currentIndex, setCurrentIndex] = useState(0)
     const translateX = useSharedValue(0)
     const [cardID, setCardID] = useState<number>(0)
     const next = cardID + 1
     const previous = cardID - 1
+    const startX = useSharedValue(0)
+
+    if (!course.cards.length) {
+        return <ReadOnly text={course.notes} />
+    }
 
     function handlePrevious() {
         setClicked([])
@@ -40,7 +41,6 @@ export default function Swiper({ course, clicked, setClicked }: CourseContentPro
     }
 
     function handleNext() {
-        // check question logic and reveal answer
         setClicked([])
         setCardID(next < course.cards.length ? next : cardID)
     }
@@ -54,7 +54,6 @@ export default function Swiper({ course, clicked, setClicked }: CourseContentPro
         return currentIndex
     }
 
-    // Function to calculate previous index in a circular manner
     function getPreviousIndex(currentIndex: number) {
         if (currentIndex > 0) {
             return currentIndex - 1
@@ -75,39 +74,37 @@ export default function Swiper({ course, clicked, setClicked }: CourseContentPro
 
     function resetTranslateX() {
         setTimeout(() => {
-            translateX.value = 0;
-        }, 400);
-    };
+            translateX.value = 0
+        }, 400)
+    }
 
     function resetTranslateX200ms() {
         setTimeout(() => {
-            translateX.value = 0;
-        }, 200);
-    };
+            translateX.value = 0
+        }, 200)
+    }
 
-    const gestureHandler = useAnimatedGestureHandler({
-        onStart: (_: any, context: any) => {
-            context.startX = translateX.value
-        },
-        onActive: (event: any, context: any) => {
-            translateX.value = context.startX + event.translationX
-        },
-        onEnd: (event: any) => {
+    const panGesture = Gesture.Pan()
+        .onBegin(() => {
+            startX.value = translateX.value
+        })
+        .onUpdate((event) => {
+            translateX.value = startX.value + event.translationX
+        })
+        .onEnd((event) => {
             if (event.translationX > SWIPE_THRESHOLD) {
-                runOnJS(onSwipeRight)()
-                translateX.value = withSpring(SCREEN_WIDTH * 1.2)
-                runOnJS(resetTranslateX)();
+                scheduleOnRN(onSwipeRight)
+                scheduleOnRN(resetTranslateX)
             } else if (event.translationX < -SWIPE_THRESHOLD) {
                 translateX.value = withSpring(-SCREEN_WIDTH - 10, {}, () => {
-                    runOnJS(onSwipeLeft)()
+                    scheduleOnRN(onSwipeLeft)
                 })
-                runOnJS(resetTranslateX200ms)();
+
+                scheduleOnRN(resetTranslateX200ms)
             } else {
-                // No significant swipe, reset position
                 translateX.value = withSpring(0)
             }
-        },
-    })
+        })
 
     // Animated styles for the top card (current card)
     const animatedStyle = useAnimatedStyle(() => {
@@ -364,7 +361,7 @@ export default function Swiper({ course, clicked, setClicked }: CourseContentPro
             </Animated.View>
 
             {/* Top card (current card) */}
-            <PanGestureHandler onGestureEvent={gestureHandler}>
+            <GestureDetector gesture={panGesture}>
                 <Animated.View style={[{
                     justifyContent: 'center',
                     alignItems: 'center',
@@ -391,7 +388,7 @@ export default function Swiper({ course, clicked, setClicked }: CourseContentPro
                         next={next}
                     />
                 </Animated.View>
-            </PanGestureHandler>
+            </GestureDetector>
 
             {/* Previous (hidden) card */}
             {cardID !== 0 && <Animated.View style={[{

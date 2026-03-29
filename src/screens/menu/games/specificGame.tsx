@@ -27,9 +27,9 @@ export default function SpecificGameScreen({ route }: MenuProps<"SpecificGameScr
 
     useEffect(() => {
         if (localTitle?.screen !== route.params?.gameName) {
-            dispatch(setLocalTitle({ title: route.params?.gameName, screen: "SpecificGameScreen" }));
+            dispatch(setLocalTitle({ title: route.params?.gameName, screen: "SpecificGameScreen" }))
         }
-    }, [localTitle?.screen, route.params?.gameName, dispatch]);
+    }, [localTitle?.screen, route.params?.gameName, dispatch])
 
     async function fetchGame() {
         const game = await determineGame()
