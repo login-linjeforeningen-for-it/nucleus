@@ -22,7 +22,9 @@ export default function Notification({ category, skip }: NotificationProps) {
     const { theme } = useSelector((state: ReduxState) => state.theme)
     const dispatch = useDispatch()
 
-    if (!skip) topic({ lang, notification, dispatch })
+    if (!skip) {
+        topic({ lang, notification, dispatch })
+    }
 
     return (
         <View>

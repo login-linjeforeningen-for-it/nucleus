@@ -26,21 +26,13 @@ export default function Reminders() {
         { id: 8, source: "annet", title: lang ? "Annet" : "Other" }
     ]
 
-    function showCategory(val: number) {
-        if (category === val) {
-            setCategory(-1)
-        } else {
-            setCategory(val)
-        }
-    }
-
     return (
         <View>
             {categories.map((cat, index) => (
                 <View key={index}>
                     <TouchableOpacity
                         key={index}
-                        onPress={() => showCategory(index)}
+                        onPress={() => setCategory(category === index ? -1 : index)}
                     >
                         <View style={{
                             ...GS.reminderDropdown,

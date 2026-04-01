@@ -31,7 +31,7 @@ export const GS = StyleSheet.create({
     // Left view of notificationScreen
     view: {
         alignSelf: "center",
-        width: "85%",
+        width: "84%",
     },
     // Right view of notificationScreen
     view2: {
