@@ -173,21 +173,14 @@ export default function Swiper({ game, mode, school, ntnu }: GameListContentProp
 
     const panGesture = Gesture.Pan()
         .onBegin(() => {
-            // Equivalent of onStart
             startX.value = translateX.value
         })
         .onUpdate((event) => {
-            // Equivalent of onActive
             translateX.value = startX.value + event.translationX
         })
         .onEnd((event) => {
             if (event.translationX > SWIPE_THRESHOLD) {
                 scheduleOnRN(onSwipeRight)
-
-                translateX.value = withSpring(SCREEN_WIDTH * 1.1, {}, () => {
-                    // optional callback
-                })
-
                 scheduleOnRN(resetTranslateX)
             } else if (event.translationX < -SWIPE_THRESHOLD) {
                 translateX.value = withSpring(-SCREEN_WIDTH - 10, {}, () => {
@@ -228,8 +221,8 @@ export default function Swiper({ game, mode, school, ntnu }: GameListContentProp
             width: SCREEN_WIDTH * 0.85,
             transform: [
                 { translateX: translateX.value },
-                { rotate: rotate },
-            ],
+                { rotate }
+            ]
         }
     })
 
@@ -239,25 +232,25 @@ export default function Swiper({ game, mode, school, ntnu }: GameListContentProp
             const translateY = interpolate(
                 translateX.value,
                 [-SCREEN_WIDTH, 0, SCREEN_WIDTH],
-                [10, 0, 10],
+                [10, 0, 10]
             )
 
             const width = interpolate(
                 translateX.value,
                 [-SCREEN_WIDTH, 0, SCREEN_WIDTH],
-                [SCREEN_WIDTH * 0.75, SCREEN_WIDTH * 0.8, SCREEN_WIDTH * 0.75],
+                [SCREEN_WIDTH * 0.75, SCREEN_WIDTH * 0.8, SCREEN_WIDTH * 0.75]
             )
 
             return {
                 width,
-                transform: [{ translateY }],
+                transform: [{ translateY }]
             }
         }
 
         const translateY = interpolate(
             translateX.value,
             [SCREEN_HEIGHT * 0.45, 0, SCREEN_HEIGHT * 0.45],
-            [-9, 0, -9],
+            [-9, 0, -9]
         )
 
         const width = interpolate(

@@ -188,14 +188,10 @@ function FilterItem({ text }: { text: string }) {
     if (!text) return null
 
     const { theme } = useSelector((state: ReduxState) => state.theme)
-    const { lang } = useSelector((state: ReduxState) => state.lang)
     const event = useSelector((state: ReduxState) => state.event)
     const ad = useSelector((state: ReduxState) => state.ad)
     const dispatch = useDispatch()
     const route = useRoute()
-    const cat = lang ? event.categories.no : event.categories.en
-    // Clones cat because it is read only
-    const categories = [...cat]
     const isFilteringOnEventScreen = event.search && route.name === "EventScreen"
     const checked = event.search && event.clickedCategories.includes(text) ||
         ad.search && ad.clickedSkills.includes(text)
@@ -219,7 +215,13 @@ function FilterItem({ text }: { text: string }) {
     return (
         <View style={ES.clusterCategoryView}>
             <TouchableOpacity onPress={() => checked ? handleUnchecked(text) : handleChecked(text)}>
-                <View style={{ flexDirection: "row", maxHeight: 50, minHeight: 30, alignItems: "center", width: Dimensions.get("window").width / 4 }}>
+                <View style={{
+                    flexDirection: "row",
+                    maxHeight: 50,
+                    minHeight: 30,
+                    alignItems: "center",
+                    width: Dimensions.get("window").width / 4
+                }}>
                     {checked ? <CheckedBox /> : <CheckBox />}
                     <Text style={{
                         ...T.filterCategoryText,

@@ -209,7 +209,14 @@ export const GS = StyleSheet.create({
     trashCan: {
         height: 50,
         width: 50
-    }
+    },
+    errorImage: {
+        alignSelf: "center",
+        width: Dimensions.get("window").width - 30,
+        resizeMode: "stretch",
+        height: 300,
+        marginTop: 8
+    },
 })
 
 export default GS

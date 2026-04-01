@@ -3,7 +3,9 @@ import { View, Text } from "react-native"
 import ES from "@styles/eventStyles"
 import T from "@styles/text"
 import { JSX, ReactNode } from "react"
-
+import GS from '@styles/globalStyles'
+import { Animated, Pressable } from "react-native"
+import { useRef } from "react"
 
 // Ony children or height can be defined at the same time. Both cant be arguments at the same time
 type LineProps = {
@@ -108,11 +110,45 @@ export function ErrorMessage({ argument, screen }: ErrorMessageProps): JSX.Eleme
         "nomatch": lang ? error[0] : error[1]
     }
 
+    const scale = useRef(new Animated.Value(1)).current
+
+    function handlePress() {
+        Animated.sequence([
+            Animated.timing(scale, {
+                toValue: 1.1,
+                duration: 250,
+                useNativeDriver: true,
+            }),
+            Animated.timing(scale, {
+                toValue: 1,
+                duration: 250,
+                useNativeDriver: true
+            })
+        ]).start()
+    }
+
     return (
         <View style={{ alignSelf: "center", justifyContent: "center", display: "flex", flex: 1 }}>
-            <Text style={{ ...T.centered20, color: theme.textColor }}>
-                {text[argument]}
-            </Text>
+            <Pressable onPress={handlePress}>
+                <Animated.Text style={{ 
+                    ...T.centered20, 
+                    fontWeight: 600, 
+                    color: theme.textColor, 
+                    marginBottom: 50 ,
+                    transform: [{ scale }]
+                }}>
+                    {text[argument]}
+                </Animated.Text>
+                <Animated.Image
+                    style={[
+                        GS.errorImage,
+                        {
+                            transform: [{ scale }],
+                        },
+                    ]}
+                    source={require("../../../public/assets/icons/404.jpg")}
+                />
+            </Pressable>
         </View>
     )
 }

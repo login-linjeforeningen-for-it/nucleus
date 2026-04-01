@@ -68,7 +68,7 @@ export async function fetchAds(): Promise<GetJobProps[]> {
         }
 
         const data = await response.json()
-        return data.jobs
+        return data.jobs || []
     } catch (error) {
         console.log(error)
         return []
