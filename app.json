@@ -2,7 +2,7 @@
   "expo": {
     "owner": "loginapp",
     "slug": "Login",
-    "version": "2.4.0",
+    "version": "2.5.0",
     "orientation": "portrait",
     "icon": "./public/assets/logo/icon.png",
     "userInterfaceStyle": "dark",
@@ -63,7 +63,7 @@
       },
       "package": "com.login.Login",
       "googleServicesFile": "./google-services.json",
-      "versionCode": 92,
+      "versionCode": 93,
       "permissions": [
         "INTERNET",
         "NOTIFICATIONS",
