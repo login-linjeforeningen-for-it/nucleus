@@ -107,13 +107,31 @@ export default function Swiper({ game, mode, school, ntnu }: GameListContentProp
 
             const nextIndex = resolveNextIndex()
 
-            if (nextIndex === currentIndex) {
+            if (prev.uxIndex === 1 && !isForward) {
                 return prev
             }
 
-            return {
-                dataIndex: nextIndex,
-                uxIndex: isForward ? prev.uxIndex + 1 : Math.max(1, prev.uxIndex - 1),
+            if (!isForward) {
+                return {
+                    dataIndex: nextIndex,
+                    uxIndex: isForward ? prev.uxIndex + 1 : Math.max(1, prev.uxIndex - 1),
+                }
+            } else {
+                setTimeout(() => {
+                    scheduleOnRN(() => {
+                        setNav((prev) => ({
+                            ...prev,
+                            uxIndex: isForward
+                                ? prev.uxIndex + 1
+                                : Math.max(1, prev.uxIndex - 1),
+                        }))
+                    })
+                }, 25)
+
+                return {
+                    ...prev,
+                    dataIndex: nextIndex,
+                }
             }
         })
     }
@@ -381,7 +399,7 @@ export default function Swiper({ game, mode, school, ntnu }: GameListContentProp
                 padding: 16,
             }, animatedHiddenCardStyle]} >
                 <Text style={{ ...textStyle }}>
-                    {nav.uxIndex}
+                    {nav.uxIndex - 1}
                 </Text>
                 <GameContent game={game[Math.max(0, nav.dataIndex - 1)]} />
             </Animated.View>}
