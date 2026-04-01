@@ -72,7 +72,7 @@ function CourseList({ course, navigation }: CourseListProps): JSX.Element {
     const { theme } = useSelector((state: ReduxState) => state.theme)
 
     function handlePress() {
-        navigation.navigate("SpecificCourseScreen", { courseID: course.id })
+        navigation.navigate("SpecificCourseScreen", { code: course.code, id: course.id })
     }
 
     return (

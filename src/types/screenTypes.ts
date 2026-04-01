@@ -64,7 +64,7 @@ export type MenuStackParamList = {
     InternalScreen: undefined
     MenuScreen: undefined
     CourseScreen: undefined
-    SpecificCourseScreen: { courseID: string }
+    SpecificCourseScreen: { code: string, id: number }
     GameScreen: undefined
     SpecificGameScreen: { gameID: number, gameName: string }
     DiceScreen: undefined

@@ -20,12 +20,12 @@ export default function SpecificCourseScreen({ route }: MenuProps<"SpecificCours
     const dispatch = useDispatch()
     const height = Dimensions.get("window").height
 
-    if (route.params.courseID !== localTitle?.title) {
-        dispatch(setLocalTitle({ title: route.params.courseID, screen: "SpecificCourseScreen" }))
+    if (route.params.code !== localTitle?.title) {
+        dispatch(setLocalTitle({ title: route.params.code, screen: "SpecificCourseScreen" }))
     }
 
     async function fetchCourse() {
-        const course = await getCourse(route.params.courseID)
+        const course = await getCourse(route.params.id)
 
         if (course) {
             setCourse(course)

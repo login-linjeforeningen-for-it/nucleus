@@ -495,7 +495,7 @@ type Vote = {
 }
 
 type CourseAsList = {
-    id: string
+    id: number
     code: string
     cards: Card[]
     count: number
