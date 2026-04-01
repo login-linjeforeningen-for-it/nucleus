@@ -4,6 +4,7 @@
     },
     "build": {
         "development": {
+            "node": "25.8.1",
             "developmentClient": true,
             "distribution": "internal",
             "ios": {
@@ -11,13 +12,16 @@
             }
         },
         "preview": {
+            "node": "25.8.1",
             "distribution": "internal"
         },
         "production": {
+            "node": "25.8.1",
             "distribution": "store",
             "autoIncrement": true,
             "ios": {
-                "resourceClass": "m-medium"
+                "resourceClass": "m-medium",
+                "image": "latest"
             }
         }
     }
