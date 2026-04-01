@@ -1,6 +1,6 @@
 import T from '@styles/text'
-import { useState } from 'react'
-import { Text, View, Dimensions } from 'react-native'
+import { useEffect, useState } from 'react'
+import { Text, View, Dimensions, StyleProp, TextStyle } from 'react-native'
 import { Gesture, GestureDetector } from 'react-native-gesture-handler'
 import Animated, {
     useAnimatedStyle,
@@ -32,57 +32,25 @@ export default function Swiper({ game, mode, school, ntnu }: GameListContentProp
     const translateX = useSharedValue(0)
     const totalCards = game.length
     const startX = useSharedValue(0)
-
-    // Function to calculate next index in a circular manner
-    function getNextIndex(currentIndex: number) {
-        if (!game[0].hasOwnProperty('categories')) {
-            return currentIndex + 1
-        }
-
-        if (currentIndex < game.length - 1) {
-            // Skip questions based on mode and category
-            if (mode === 0) {
-                for (let i = currentIndex + 1; i < game.length; i++) {
-                    // @ts-expect-error
-                    if (!game[i].categories.includes('Wild')) {
-                        return i
-                    }
-                }
-            }
-
-            if (mode === 2) {
-                for (let i = currentIndex + 1; i < game.length; i++) {
-                    // @ts-expect-error
-                    if (game[i].categories.includes('Wild')) {
-                        return i
-                    }
-                }
-            }
-
-            if (!school) {
-                for (let i = currentIndex + 1; i < game.length; i++) {
-                    // @ts-expect-error
-                    if (!game[i].categories.includes('School')) {
-                        return i
-                    }
-                }
-            }
-
-            if (!ntnu) {
-                for (let i = currentIndex + 1; i < game.length; i++) {
-                    // @ts-expect-error
-                    if (!game[i].categories.includes('NTNU')) {
-                        return i
-                    }
-                }
-            }
-
-            if (mode === 1) {
-                return currentIndex + 1
-            }
-        }
-
-        return currentIndex
+    const [uxIndex, setUxIndex] = useState(1)
+    const textStyle: StyleProp<TextStyle> = {
+        position: 'absolute',
+        bottom: 15,
+        left: 15,
+        ...T.text20,
+        color: theme.orange,
+        fontWeight: '600'
+    }
+    const cardStyle: StyleProp<TextStyle> = {
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: theme.contrast,
+        borderRadius: 20,
+        elevation: 10,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 10 },
+        shadowOpacity: 0.3,
+        shadowRadius: 10,
     }
 
     // Function to calculate previous index in a circular manner
@@ -110,7 +78,7 @@ export default function Swiper({ game, mode, school, ntnu }: GameListContentProp
             }
 
             if (mode === 2) {
-                for (let i = currentIndex - 1; i < game.length; i--) {
+                for (let i = currentIndex - 1; i >= 0; i--) {
                     if (i < 0) {
                         return 0
                     }
@@ -152,23 +120,136 @@ export default function Swiper({ game, mode, school, ntnu }: GameListContentProp
     }
 
     function onSwipeRight() {
-        setCurrentIndex(getNextIndex(currentIndex))
+        const { nextIndex, shouldAdvanceUx } = getNextState(currentIndex)
+
+        setCurrentIndex(nextIndex)
+
+        if (shouldAdvanceUx) {
+            setUxIndex((prev) => prev + 1)
+        }
     }
 
     function onSwipeLeft() {
-        setCurrentIndex(getPreviousIndex(currentIndex))
+        const { nextIndex, shouldDecreaseUx } = getPreviousState(currentIndex)
+
+        setCurrentIndex(nextIndex)
+
+        if (shouldDecreaseUx) {
+            setUxIndex((prev) => Math.max(1, prev - 1))
+        }
     }
 
     function resetTranslateX() {
         setTimeout(() => {
             translateX.value = 0
-        }, 400)
+        }, 50)
     }
 
     function resetTranslateX200ms() {
         setTimeout(() => {
             translateX.value = 0
         }, 200)
+    }
+
+    function getNextState(currentIndex: number) {
+        let nextIndex = currentIndex
+
+        if (!game[0].hasOwnProperty('categories')) {
+            nextIndex = currentIndex + 1
+            return { nextIndex, shouldAdvanceUx: true }
+        }
+
+        // Mode + category filtering (forward scan)
+        if (mode === 0) {
+            for (let i = currentIndex + 1; i < game.length; i++) {
+                // @ts-expect-error
+                if (!game[i].categories.includes('Wild')) {
+                    return { nextIndex: i, shouldAdvanceUx: true }
+                }
+            }
+        }
+
+        if (mode === 2) {
+            for (let i = currentIndex + 1; i < game.length; i++) {
+                // @ts-expect-error
+                if (game[i].categories.includes('Wild')) {
+                    return { nextIndex: i, shouldAdvanceUx: true }
+                }
+            }
+        }
+
+        if (!school) {
+            for (let i = currentIndex + 1; i < game.length; i++) {
+                // @ts-expect-error
+                if (!game[i].categories.includes('School')) {
+                    return { nextIndex: i, shouldAdvanceUx: true }
+                }
+            }
+        }
+
+        if (!ntnu) {
+            for (let i = currentIndex + 1; i < game.length; i++) {
+                // @ts-expect-error
+                if (!game[i].categories.includes('NTNU')) {
+                    return { nextIndex: i, shouldAdvanceUx: true }
+                }
+            }
+        }
+
+        if (mode === 1) {
+            return { nextIndex: currentIndex + 1, shouldAdvanceUx: true }
+        }
+
+        return { nextIndex: currentIndex, shouldAdvanceUx: false }
+    }
+
+    function getPreviousState(currentIndex: number) {
+        if (!game[0].hasOwnProperty('categories')) {
+            const prev = currentIndex <= 0 ? 0 : currentIndex - 1
+            return { nextIndex: prev, shouldDecreaseUx: currentIndex > 0 }
+        }
+
+        if (currentIndex <= 0) {
+            return { nextIndex: 0, shouldDecreaseUx: false }
+        }
+
+        if (mode === 0) {
+            for (let i = currentIndex - 1; i >= 0; i--) {
+                // @ts-expect-error
+                if (!game[i].categories.includes('Wild')) {
+                    return { nextIndex: i, shouldDecreaseUx: true }
+                }
+            }
+        }
+
+        if (mode === 2) {
+            for (let i = currentIndex - 1; i >= 0; i--) {
+                // @ts-expect-error
+                if (game[i].categories.includes('Wild')) {
+                    return { nextIndex: i, shouldDecreaseUx: true }
+                }
+            }
+        }
+
+        if (!school) {
+            for (let i = currentIndex - 1; i >= 0; i--) {
+                // @ts-expect-error
+                if (!game[i].categories.includes('School')) {
+                    return { nextIndex: i, shouldDecreaseUx: true }
+                }
+            }
+        }
+
+        if (!ntnu) {
+            for (let i = currentIndex - 1; i >= 0; i--) {
+                // @ts-expect-error
+                if (!game[i].categories.includes('NTNU')) {
+                    return { nextIndex: i, shouldDecreaseUx: true }
+                }
+            }
+        }
+
+        return { nextIndex: currentIndex - 1, shouldDecreaseUx: true }
     }
 
     const panGesture = Gesture.Pan()
@@ -351,6 +432,10 @@ export default function Swiper({ game, mode, school, ntnu }: GameListContentProp
         }
     })
 
+    useEffect(() => {
+        setUxIndex(1)
+    }, [mode, school, ntnu, game])
+
     return (
         <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
             {/* Fifth card */}
@@ -359,71 +444,32 @@ export default function Swiper({ game, mode, school, ntnu }: GameListContentProp
                 width: SCREEN_WIDTH * 0.7,
                 height: SCREEN_HEIGHT * 0.45,
                 top: SCREEN_HEIGHT * 0.16 + 30,
-                justifyContent: 'center',
-                alignItems: 'center',
-                backgroundColor: theme.contrast,
-                borderRadius: 20,
-                elevation: 10,
-                shadowColor: '#000',
-                shadowOffset: { width: 0, height: 10 },
-                shadowOpacity: 0.3,
-                shadowRadius: 10,
+                ...cardStyle,
             }]} />
 
             {/* Forth card */}
             <Animated.View style={[{
                 position: 'absolute',
                 top: SCREEN_HEIGHT * 0.16 + 30,
-                justifyContent: 'center',
-                alignItems: 'center',
-                backgroundColor: theme.contrast,
-                borderRadius: 20,
-                elevation: 10,
-                shadowColor: '#000',
-                shadowOffset: { width: 0, height: 10 },
-                shadowOpacity: 0.3,
-                shadowRadius: 10,
+                ...cardStyle,
             }, animatedFourthCardStyle]} />
 
             {/* Third card */}
             <Animated.View style={[{
                 position: 'absolute',
                 top: SCREEN_HEIGHT * 0.16 + 20,
-                justifyContent: 'center',
-                alignItems: 'center',
-                backgroundColor: theme.contrast,
-                borderRadius: 20,
-                elevation: 10,
-                shadowColor: '#000',
-                shadowOffset: { width: 0, height: 10 },
-                shadowOpacity: 0.3,
-                shadowRadius: 10,
+                ...cardStyle,
             }, animatedThirdCardStyle]} />
 
             {/* Second card (next card) */}
             <Animated.View style={[{
                 position: 'absolute',
                 top: SCREEN_HEIGHT * 0.16 + 10,
-                justifyContent: 'center',
-                alignItems: 'center',
-                backgroundColor: theme.contrast,
-                borderRadius: 20,
-                elevation: 10,
-                shadowColor: '#000',
-                shadowOffset: { width: 0, height: 10 },
-                shadowOpacity: 0.3,
-                shadowRadius: 10,
+                ...cardStyle,
                 padding: 16,
             }, animatedSecondCardStyle]}>
-                <Text style={{
-                    position: 'absolute',
-                    bottom: 15,
-                    left: 15,
-                    ...T.text20,
-                    color: theme.orange,
-                    fontWeight: '600'
-                }}>
-                    {(currentIndex + 1) % totalCards}
+                <Text style={textStyle}>
+                    {uxIndex + 1}
                 </Text>
                 <GameContent game={game[(currentIndex) % totalCards]} />
             </Animated.View>
@@ -431,28 +477,13 @@ export default function Swiper({ game, mode, school, ntnu }: GameListContentProp
             {/* Top card (current card) */}
             <GestureDetector gesture={panGesture}>
                 <Animated.View style={[{
-                    justifyContent: 'center',
-                    alignItems: 'center',
-                    backgroundColor: theme.contrast,
-                    borderRadius: 20,
-                    shadowColor: '#000',
-                    shadowOffset: { width: 0, height: 10 },
-                    shadowOpacity: 0.3,
-                    shadowRadius: 10,
-                    elevation: 10,
+                    ...cardStyle,
                     padding: 16,
                     height: SCREEN_HEIGHT * 0.45,
                     top: SCREEN_HEIGHT * 0.16,
                 }, animatedStyle]}>
-                    <Text style={{
-                        position: 'absolute',
-                        bottom: 15,
-                        left: 15,
-                        ...T.text20,
-                        color: theme.orange,
-                        fontWeight: '600'
-                    }}>
-                        {currentIndex + 1}
+                    <Text style={textStyle}>
+                        {uxIndex}
                     </Text>
                     <GameContent game={game[currentIndex]} />
                 </Animated.View>
@@ -461,33 +492,16 @@ export default function Swiper({ game, mode, school, ntnu }: GameListContentProp
             {/* Previous (hidden) card */}
             {currentIndex > 0 && <Animated.View style={[{
                 position: 'absolute',
-                justifyContent: 'center',
-                alignItems: 'center',
-                backgroundColor: theme.contrast,
-                borderRadius: 20,
-                elevation: 10,
-                shadowColor: '#000',
-                shadowOffset: { width: 0, height: 10 },
-                shadowOpacity: 0.3,
-                shadowRadius: 10,
+                ...cardStyle,
                 padding: 16,
                 height: SCREEN_HEIGHT * 0.45,
                 top: SCREEN_HEIGHT * 0.16,
                 width: SCREEN_WIDTH * 0.85,
             }, animatedHiddenCardStyle]} >
-                <Text style={{
-                    position: 'absolute',
-                    bottom: 15,
-                    left: 15,
-                    ...T.text20,
-                    color: theme.orange,
-                    fontWeight: '600'
-                }}>
+                <Text style={{ ...textStyle }}>
                     {getPreviousIndex(currentIndex + 1)}
                 </Text>
-                <GameContent game={
-                    game[getPreviousIndex(currentIndex + 1)]
-                } />
+                <GameContent game={ game[getPreviousIndex(currentIndex + 1)] } />
             </Animated.View>}
         </View>
     )

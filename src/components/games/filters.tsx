@@ -12,122 +12,119 @@ type FiltersProps = {
     setNTNU: Dispatch<SetStateAction<boolean>>
 }
 
-export default function Filters({ mode, school, ntnu, setMode, setSchool, setNTNU }: FiltersProps) {
+function Slash({ size }: { size: number }) {
+    return (
+        <View
+            style={{
+                position: "absolute",
+                width: size,
+                height: 2,
+                backgroundColor: "red",
+                transform: [{ rotate: "45deg" }],
+                zIndex: 10,
+                top: "50%",
+                left: "50%",
+                marginLeft: -size / 2,
+                marginTop: -1
+            }}
+        />
+    )
+}
+
+export default function Filters({
+    mode,
+    school,
+    ntnu,
+    setMode,
+    setSchool,
+    setNTNU
+}: FiltersProps) {
+
     const { theme } = useSelector((state: ReduxState) => state.theme)
     const { lang } = useSelector((state: ReduxState) => state.lang)
-    const paddingHorizontal = lang ?
-        Platform.OS === 'ios' ? 15 : 30 :
-        Platform.OS === 'ios' ? 25 : 40
 
-    function handleModeChange(index: number) {
-        setMode(index)
-    }
-
-    function handleSchoolChange() {
-        setSchool(!school)
-    }
-
-    function handleNTNUChange() {
-        setNTNU(!ntnu)
-    }
+    const paddingHorizontal =
+        lang
+            ? Platform.OS === 'ios' ? 15 : 30
+            : Platform.OS === 'ios' ? 25 : 40
 
     return (
         <>
-            <View style={{
-                flexDirection: 'row',
-                width: '100%',
-                justifyContent: 'space-evenly',
-                maxWidth: '80%',
-                position: 'absolute',
-                borderWidth: 2,
-                borderRadius: 4,
-                top: '5%',
-                borderColor: theme.contrast,
-                overflow: 'hidden',
-            }}>
-                <TouchableOpacity
-                    style={{
-                        backgroundColor: mode == 0 ? theme.contrast : undefined,
-                        paddingHorizontal,
-                        paddingVertical: 2,
-                    }}
-                    onPress={() => handleModeChange(0)}>
-                    <Text style={{ color: theme.textColor, ...T.text20 }}>
-                        {lang ? 'Snill' : 'Kind'}
-                    </Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                    style={{
-                        backgroundColor: mode == 1 ? theme.contrast : undefined,
-                        paddingHorizontal,
-                        paddingVertical: 2
-                    }}
-                    onPress={() => handleModeChange(1)}>
-                    <Text style={{ color: theme.textColor, ...T.text20 }}>
-                        {lang ? 'Blandet' : 'Mix'}
-                    </Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                    style={{
-                        backgroundColor: mode == 2 ? theme.contrast : undefined,
-                        paddingHorizontal,
-                        paddingVertical: 2
-                    }}
-                    onPress={() => handleModeChange(2)}>
-                    <Text style={{ color: theme.textColor, ...T.text20 }}>
-                        {lang ? 'Dristig' : 'Bold'}
-                    </Text>
-                </TouchableOpacity>
+            {/* MODE SELECTOR */}
+            <View
+                style={{
+                    flexDirection: 'row',
+                    width: '100%',
+                    justifyContent: 'space-evenly',
+                    maxWidth: '80%',
+                    position: 'absolute',
+                    borderWidth: 2,
+                    borderRadius: 4,
+                    top: '5%',
+                    borderColor: theme.contrast,
+                    overflow: 'hidden',
+                }}
+            >
+                {[0, 1, 2].map((index) => (
+                    <TouchableOpacity
+                        key={index}
+                        style={{
+                            backgroundColor: mode === index ? theme.contrast : undefined,
+                            paddingHorizontal,
+                            paddingVertical: 2,
+                        }}
+                        onPress={() => setMode(index)}
+                    >
+                        <Text style={{ color: theme.textColor, ...T.text20 }}>
+                            {lang
+                                ? index === 0
+                                    ? "Snill"
+                                    : index === 1
+                                        ? "Blandet"
+                                        : "Dristig"
+                                : index === 0
+                                    ? "Kind"
+                                    : index === 1
+                                        ? "Mix"
+                                        : "Bold"}
+                        </Text>
+                    </TouchableOpacity>
+                ))}
             </View>
-            <View style={{
-                flexDirection: 'row',
-                width: '100%',
-                justifyContent: 'space-evenly',
-                maxWidth: '80%',
-                position: 'absolute',
-                borderRadius: 4,
-                top: '18%',
-                overflow: 'hidden',
-            }}>
-                <TouchableOpacity
-                    style={{
-                        paddingHorizontal: 10,
-                        paddingVertical: 2
-                    }}
-                    onPress={handleSchoolChange}>
-                    <Text style={{ color: theme.textColor, ...T.text30 }}>
-                        🎓
-                    </Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                    style={{
-                        paddingHorizontal: 10,
-                        paddingVertical: 2
-                    }}
-                    onPress={handleNTNUChange}>
-                    <Image
-                        style={{ width: 50, height: 50, top: Platform.OS === 'ios' ? -10 : -2.5 }}
-                        source={require('@assets/icons/NTNU-black.png')}
-                    />
-                </TouchableOpacity>
-                {!school && <View style={{
+
+            {/* ICON FILTERS */}
+            <View
+                style={{
+                    flexDirection: 'row',
+                    width: '100%',
+                    justifyContent: 'space-evenly',
+                    maxWidth: '80%',
                     position: 'absolute',
-                    backgroundColor: 'red',
-                    width: Platform.OS === 'ios' ? 45 : 50,
-                    height: 2,
-                    top: Platform.OS === 'ios' ? 17 : 23,
-                    marginLeft: Platform.OS === 'ios' ? 4 : 5,
-                    transform: [{ rotate: '45deg' }],
-                }} />}
-                {!ntnu && <View style={{
-                    position: 'absolute',
-                    backgroundColor: 'red',
-                    width: Platform.OS === 'ios' ? 45 : 50,
-                    height: 2,
-                    top: Platform.OS === 'ios' ? 17 : 25,
-                    right: Platform.OS === 'ios' ? 55 : 81,
-                    transform: [{ rotate: '45deg' }],
-                }} />}
+                    top: '18%',
+                }}
+            >
+                {/* SCHOOL */}
+                <View style={{ alignItems: "center", justifyContent: "center" }}>
+                    <TouchableOpacity onPress={() => setSchool(!school)}>
+                        <Text style={{ color: theme.textColor, ...T.text30 }}>
+                            🎓
+                        </Text>
+                    </TouchableOpacity>
+
+                    {!school && <Slash size={35} />}
+                </View>
+
+                {/* NTNU */}
+                <View style={{ alignItems: "center", justifyContent: "center" }}>
+                    <TouchableOpacity onPress={() => setNTNU(!ntnu)}>
+                        <Image
+                            style={{ width: 50, height: 50 }}
+                            source={require('@assets/icons/NTNU-black.png')}
+                        />
+                    </TouchableOpacity>
+
+                    {!ntnu && <Slash size={50} />}
+                </View>
             </View>
         </>
     )
