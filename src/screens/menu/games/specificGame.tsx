@@ -25,12 +25,6 @@ export default function SpecificGameScreen({ route }: MenuProps<"SpecificGameScr
     const dispatch = useDispatch()
     const height = Dimensions.get("window").height
 
-    useEffect(() => {
-        if (localTitle?.screen !== route.params?.gameName) {
-            dispatch(setLocalTitle({ title: route.params?.gameName, screen: "SpecificGameScreen" }))
-        }
-    }, [localTitle?.screen, route.params?.gameName, dispatch])
-
     async function fetchGame() {
         const game = await determineGame()
 
@@ -47,6 +41,15 @@ export default function SpecificGameScreen({ route }: MenuProps<"SpecificGameScr
             default: return await getQuestions()
         }
     }
+
+    useEffect(() => {
+        if (localTitle?.screen !== route.params?.gameName) {
+            dispatch(setLocalTitle({ 
+                title: route.params?.gameName,
+                screen: "SpecificGameScreen"
+            }))
+        }
+    }, [localTitle?.screen, route.params?.gameName, dispatch])
 
     useEffect(() => {
         (async () => {
@@ -93,8 +96,9 @@ export default function SpecificGameScreen({ route }: MenuProps<"SpecificGameScr
 
 function Game({ game }: GameProps) {
     const [mode, setMode] = useState(0)
-    const [school, setSchool] = useState(true)
-    const [ntnu, setNTNU] = useState(true)
+    const hasSchool = game.some(entry => entry.categories.includes('NTNU'))
+    const [school, setSchool] = useState(hasSchool)
+    const [ntnu, setNTNU] = useState(hasSchool)
 
     function shuffleArray(array: any[]) {
         for (let i = array.length - 1; i > 0; i--) {
@@ -117,6 +121,8 @@ function Game({ game }: GameProps) {
                 setMode={setMode}
                 setSchool={setSchool}
                 setNTNU={setNTNU}
+                displaySchool={hasSchool}
+                displayNTNU={hasSchool}
             />}
         </View>
     )

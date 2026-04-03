@@ -2,16 +2,23 @@ import Cluster from "@/components/shared/cluster"
 import Space from "@/components/shared/utils"
 import CS from "@styles/clusterStyles"
 import GS from "@styles/globalStyles"
-import { useSelector } from "react-redux"
 import T from "@styles/text"
 import Swipe from "@components/nav/swipe"
-import { RefreshControl, ScrollView } from "react-native-gesture-handler"
 import CourseError from "@components/course/courseError"
+import { useSelector } from "react-redux"
 import { JSX, useCallback, useEffect, useState } from "react"
-import { View, Image, TouchableOpacity, Dimensions, Text, Platform } from "react-native"
+import { RefreshControl, ScrollView } from "react-native-gesture-handler"
 import { MenuProps, MenuStackParamList } from "@type/screenTypes"
 import { StackNavigationProp } from "@react-navigation/stack"
 import { getGames } from "@utils/game"
+import {
+    View,
+    Image,
+    TouchableOpacity,
+    Dimensions,
+    Text,
+    Platform
+} from "react-native"
 
 type GameListProps = {
     game: Game
@@ -25,9 +32,9 @@ type HardCodedGameProps = {
 
 export default function GameScreen({ navigation }: MenuProps<'GameScreen'>): JSX.Element {
     const [games, setGames] = useState<string | Game[]>([])
+    const [refresh, setRefresh] = useState(false)
     const { theme } = useSelector((state: ReduxState) => state.theme)
     const { lang } = useSelector((state: ReduxState) => state.lang)
-    const [refresh, setRefresh] = useState(false)
     const height = Dimensions.get("window").height
     const extraHeight = Platform.OS === 'ios' ? 0 : height > 800 && height < 900 ? 20 : 10
 

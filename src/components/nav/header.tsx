@@ -6,6 +6,7 @@
  * so it might be worth rewriting this component/checking if the default header can be used
  */
 import GS from '@styles/globalStyles'
+import GM from '@styles/gameStyles'
 import MS from '@styles/menuStyles'
 import getHeight from '@utils/getHeight'
 import getCategories from '@utils/getCategories'
@@ -30,6 +31,7 @@ export default function Header({ options, route, navigation }: HeaderProps): Rea
     const SES = route.name === "SpecificEventScreen"
     const SAS = route.name === "SpecificAdScreen"
     const orangeIcon = require('@assets/icons/goback-orange.png')
+    const exceptions = ['SpecificGameScreen']
 
     const [title, setTitle] = useState<string>(route.name && (lang
         ? require('@text/no.json').screens[route.name]
@@ -78,7 +80,7 @@ export default function Header({ options, route, navigation }: HeaderProps): Rea
                         </TouchableOpacity>
                     }
                 </View>
-                <Text style={{
+                {!exceptions.includes(route.name) && <Text style={{
                     ...GS.headerTitle,
                     color: theme.titleTextColor,
                     width: 300,
@@ -86,7 +88,7 @@ export default function Header({ options, route, navigation }: HeaderProps): Rea
                     top: title?.length > 30 ? Platform.OS === 'ios' ? 4 : -6 : undefined
                 }}>
                     {title}
-                </Text>
+                </Text>}
                 <View style={GS.innerHeaderViewTwo}>
                     {options.headerComponents?.right?.map((node, index) => (
                         <View style={index === 1
@@ -113,6 +115,10 @@ function BlurWrapper(props: PropsWithChildren) {
     const event = useSelector((state: ReduxState) => state.event)
     const ad = useSelector((state: ReduxState) => state.ad)
     const route = useRoute()
+    const exceptions = ['SpecificGameScreen']
+    const backgroundColor = !exceptions.includes(route.name)
+        ? theme.transparentAndroid
+        : 'none'
 
     const defaultHeight =
         Dimensions.get('window').height * 8 // Base decrementor for both platforms
@@ -143,18 +149,34 @@ function BlurWrapper(props: PropsWithChildren) {
                     : -defaultHeight / 5
     )
 
+    const gameID = (route.params as any)?.gameID
+    const gameImages = [
+        { style: GM.terning, icon: require("@assets/games/terning.png")},
+        { style: GM.questions, icon: require("@assets/games/100questions.png")},
+        { style: GM.neverhaveiever, icon: require("@assets/games/neverhaveiever.png")},
+        { style: GM.okredflagdealbreaker, icon: require("@assets/games/okredflagdealbreaker.png")}
+    ]
+
     return (
         <>
-            <BlurView
+            {!exceptions.includes(route.name) && <BlurView
                 style={{ height }}
                 blurMethod='dimezisBlurView'
                 intensity={Platform.OS === "ios" ? 30 : 20}
-            />
+            />}
             <View style={{
                 ...GS.blurBackgroundView,
                 height,
-                backgroundColor: theme.transparentAndroid
+                backgroundColor
             }}>
+                {Object.keys(route.params || {}).includes('gameID') && <Image
+                    style={gameImages[gameID + 1].style}
+                    source={gameImages[gameID + 1].icon}
+                />}
+                {route.name === 'DiceScreen' && <Image
+                    style={GM.terning}
+                    source={gameImages[0].icon}
+                />}
                 {props.children}
             </View>
         </>

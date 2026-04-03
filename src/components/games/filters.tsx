@@ -10,6 +10,8 @@ type FiltersProps = {
     setMode: Dispatch<SetStateAction<number>>
     setSchool: Dispatch<SetStateAction<boolean>>
     setNTNU: Dispatch<SetStateAction<boolean>>
+    displaySchool: boolean
+    displayNTNU: boolean
 }
 
 function Slash({ size }: { size: number }) {
@@ -37,11 +39,13 @@ export default function Filters({
     ntnu,
     setMode,
     setSchool,
-    setNTNU
+    setNTNU,
+    displaySchool,
+    displayNTNU
 }: FiltersProps) {
-
     const { theme } = useSelector((state: ReduxState) => state.theme)
     const { lang } = useSelector((state: ReduxState) => state.lang)
+    const secondLine = displaySchool && displayNTNU
 
     const paddingHorizontal =
         lang
@@ -60,7 +64,7 @@ export default function Filters({
                     position: 'absolute',
                     borderWidth: 2,
                     borderRadius: 4,
-                    top: '5%',
+                    top: secondLine ? '5%' : '20%',
                     borderColor: theme.contrast,
                     overflow: 'hidden',
                 }}
@@ -93,7 +97,7 @@ export default function Filters({
             </View>
 
             {/* ICON FILTERS */}
-            <View
+            {secondLine && <View
                 style={{
                     flexDirection: 'row',
                     width: '100%',
@@ -104,7 +108,7 @@ export default function Filters({
                 }}
             >
                 {/* SCHOOL */}
-                <View style={{ alignItems: "center", justifyContent: "center" }}>
+                {displaySchool && <View style={{ alignItems: "center", justifyContent: "center" }}>
                     <TouchableOpacity onPress={() => setSchool(!school)}>
                         <Text style={{ color: theme.textColor, ...T.text30 }}>
                             🎓
@@ -112,10 +116,10 @@ export default function Filters({
                     </TouchableOpacity>
 
                     {!school && <Slash size={35} />}
-                </View>
+                </View>}
 
                 {/* NTNU */}
-                <View style={{ alignItems: "center", justifyContent: "center" }}>
+                {displayNTNU && <View style={{ alignItems: "center", justifyContent: "center" }}>
                     <TouchableOpacity onPress={() => setNTNU(!ntnu)}>
                         <Image
                             style={{ width: 50, height: 50 }}
@@ -124,8 +128,8 @@ export default function Filters({
                     </TouchableOpacity>
 
                     {!ntnu && <Slash size={50} />}
-                </View>
-            </View>
+                </View>}
+            </View>}
         </>
     )
 }

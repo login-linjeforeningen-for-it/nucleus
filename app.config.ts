@@ -5,7 +5,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     owner: "loginapp",
     name: "Login",
     slug: "Login",
-    version: "2.5.2",
+    version: "2.5.3",
     orientation: "portrait",
     icon: "./public/assets/logo/icon.png",
     userInterfaceStyle: "dark",
