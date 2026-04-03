@@ -5,7 +5,7 @@ import Animated, {
     useAnimatedStyle,
     useSharedValue,
     withSpring,
-    interpolate,
+    interpolate
 } from 'react-native-reanimated'
 import { scheduleOnRN } from 'react-native-worklets'
 import { useSelector } from 'react-redux'

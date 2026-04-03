@@ -1,39 +1,50 @@
-import handleSwipe from "@utils/handleSwipe"
-import { Navigation } from "@/interfaces"
+import { useRef } from "react"
 import { useNavigation } from "@react-navigation/native"
-import { ReactNode } from "react"
-import { View } from "react-native"
-import { scheduleOnRN } from 'react-native-worklets'
 import {
-    Gesture,
-    GestureDetector,
-    GestureHandlerRootView
-} from "react-native-gesture-handler"
+    PanResponder,
+    View,
+    GestureResponderEvent,
+    PanResponderGestureState
+} from "react-native"
 
-type SwipeProps = {
-    children?: ReactNode
-    left?: string
-    right?: string
-}
+export default function Swipe({ children, left, right }: any) {
+    const navigation = useNavigation()
 
-export default function Swipe({ children, left, right }: SwipeProps) {
-    const navigation: Navigation = useNavigation()
+    const panResponder = useRef(
+        PanResponder.create({
+            onStartShouldSetPanResponder: () => false,
 
-    const panGesture = Gesture.Pan()
-        .onEnd((event) => {
-            scheduleOnRN(handleSwipe, {
-                navigation,
-                event,
-                screenLeft: left,
-                screenRight: right
-            })
+            onMoveShouldSetPanResponder: (_, gesture) => {
+                const { dx, dy } = gesture
+
+                const absX = Math.abs(dx)
+                const absY = Math.abs(dy)
+
+                return absX > absY
+            },
+
+            onPanResponderRelease: (_: GestureResponderEvent, gesture: PanResponderGestureState) => {
+                const { dx, dy, vx } = gesture
+
+                const absX = Math.abs(dx)
+                const absY = Math.abs(dy)
+
+                if (absX > absY * 0.25) {
+                    if (vx > 0.2 && left) {
+                        navigation.navigate(left)
+                    }
+
+                    if (vx < -0.2 && right) {
+                        navigation.navigate(right)
+                    }
+                }
+            }
         })
+    ).current
 
     return (
-        <GestureHandlerRootView>
-            <GestureDetector gesture={panGesture}>
-                <View>{children}</View>
-            </GestureDetector>
-        </GestureHandlerRootView>
+        <View style={{ flex: 1 }} {...panResponder.panHandlers}>
+            {children}
+        </View>
     )
 }

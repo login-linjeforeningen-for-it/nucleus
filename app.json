@@ -2,7 +2,7 @@
   "expo": {
     "owner": "loginapp",
     "slug": "Login",
-    "version": "2.5.1",
+    "version": "2.5.2",
     "orientation": "portrait",
     "icon": "./public/assets/logo/icon.png",
     "userInterfaceStyle": "dark",
@@ -47,7 +47,7 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.eirikhanasand.Login",
-      "buildNumber": "134",
+      "buildNumber": "135",
       "googleServicesFile": "./GoogleService-Info.plist",
       "infoPlist": {
         "UIBackgroundModes": [
@@ -63,7 +63,7 @@
       },
       "package": "com.login.Login",
       "googleServicesFile": "./google-services.json",
-      "versionCode": 97,
+      "versionCode": 98,
       "permissions": [
         "INTERNET",
         "NOTIFICATIONS",
