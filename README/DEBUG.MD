@@ -46,4 +46,4 @@ so that the owner of the repository can resolve the issue.
 Invalid version numbers or version number already used?
 You forgot to update the version number before you built the ipa or aab file.
 Increment the version numbers as explained in step 2. of physical testing in the
-DEPLOY.MD file, then try again.
+deploy.md file, then try again.
