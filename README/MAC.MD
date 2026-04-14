@@ -13,7 +13,8 @@ You can install Node.js (which includes npm) in one of the following ways:
 Alternatively via terminal:
 
 ```bash
-npm install node
+brew install nvm
+nvm install node
 ```
 
 ## 2. Clone the repository
