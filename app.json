@@ -2,6 +2,7 @@
   "expo": {
     "owner": "loginapp",
     "slug": "Login",
+    "scheme": "login",
     "version": "2.5.3",
     "orientation": "portrait",
     "icon": "./public/assets/logo/icon.png",
@@ -49,6 +50,9 @@
       "bundleIdentifier": "com.eirikhanasand.Login",
       "buildNumber": "139",
       "googleServicesFile": "./GoogleService-Info.plist",
+      "associatedDomains": [
+        "applinks:login.no"
+      ],
       "infoPlist": {
         "UIBackgroundModes": [
           "fetch",
@@ -70,6 +74,38 @@
         "PUSH_NOTIFICATIONS",
         "READ_CALENDAR",
         "WRITE_CALENDAR"
+      ],
+      "intentFilters": [
+        {
+          "action": "VIEW",
+          "autoVerify": true,
+          "data": [
+            {
+              "scheme": "https",
+              "host": "login.no",
+              "pathPrefix": "/events/"
+            },
+            {
+              "scheme": "https",
+              "host": "login.no",
+              "pathPrefix": "/career/"
+            },
+            {
+              "scheme": "https",
+              "host": "login.no",
+              "pathPrefix": "/about"
+            },
+            {
+              "scheme": "https",
+              "host": "login.no",
+              "pathPrefix": "/companies"
+            }
+          ],
+          "category": [
+            "BROWSABLE",
+            "DEFAULT"
+          ]
+        }
       ],
       "softwareKeyboardLayoutMode": "pan"
     },

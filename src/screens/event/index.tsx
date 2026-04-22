@@ -1,8 +1,6 @@
 import React, { JSX, useEffect, useState } from "react"
 import EventList from "@components/event/eventList"
 import GS from "@styles/globalStyles"
-import NavigateFromPushNotification
-    from "@utils/notification/navigateFromPushNotification"
 import initializeNotifications
     from "@utils/notification/notificationSetup"
 import LastFetch, { fetchEvents } from "@/utils/fetch"
@@ -42,9 +40,6 @@ export default function EventScreen({ navigation }: EventScreenProps<'EventScree
     const { lastSave } = useSelector((state: ReduxState) => state.event)
     const { theme, isDark } = useSelector((state: ReduxState) => state.theme)
     const dispatch = useDispatch()
-
-    // Navigates if the app is opened by a push notification
-    NavigateFromPushNotification()
 
     // Fetches events when screen is focused
     useFocusEffect(

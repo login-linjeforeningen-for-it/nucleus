@@ -2,10 +2,14 @@ import { useRef } from "react"
 import { useNavigation } from "@react-navigation/native"
 import {
     PanResponder,
+    Platform,
     View,
     GestureResponderEvent,
     PanResponderGestureState
 } from "react-native"
+
+const SWIPE_VELOCITY_THRESHOLD = Platform.OS === 'ios' ? 0.2 : 0.32
+const SWIPE_DIRECTION_RATIO = Platform.OS === 'ios' ? 0.25 : 0.45
 
 export default function Swipe({ children, left, right }: any) {
     const navigation = useNavigation()
@@ -29,12 +33,12 @@ export default function Swipe({ children, left, right }: any) {
                 const absX = Math.abs(dx)
                 const absY = Math.abs(dy)
 
-                if (absX > absY * 0.25) {
-                    if (vx > 0.2 && left) {
+                if (absX > absY * SWIPE_DIRECTION_RATIO) {
+                    if (vx > SWIPE_VELOCITY_THRESHOLD && left) {
                         navigation.navigate(left)
                     }
 
-                    if (vx < -0.2 && right) {
+                    if (vx < -SWIPE_VELOCITY_THRESHOLD && right) {
                         navigation.navigate(right)
                     }
                 }

@@ -6,6 +6,8 @@ import Navigator from "@nav/tabs"
 import store from "@redux/store"
 import ForceUpdate from "@components/menu/forceUpdate"
 import { requestNotificationPermission } from "@utils/notification/notificationSetup"
+import { useEffect } from "react"
+import { hydrateAuthFromInitialUrl, registerAuthListener } from "@utils/auth"
 
 let persistor = persistStore(store)
 
@@ -24,7 +26,16 @@ let persistor = persistStore(store)
  */
 export default function App() {
     AppRegistry.registerComponent("app", () => App)
-    requestNotificationPermission()
+
+    useEffect(() => {
+        requestNotificationPermission()
+        hydrateAuthFromInitialUrl()
+        const subscription = registerAuthListener()
+
+        return () => {
+            subscription.remove()
+        }
+    }, [])
 
     return (
         <Provider store={store}>

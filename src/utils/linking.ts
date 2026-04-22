@@ -41,7 +41,7 @@ import { RootStackParamList } from "../types/screenTypes"
 const prefix = Linking.createURL('/')
 
 const linking: LinkingOptions<RootStackParamList> = {
-    prefixes: [prefix, 'https://login.no'],
+    prefixes: [prefix, 'login://', 'https://login.no'],
     config: {
         screens: {
             Tabs: {

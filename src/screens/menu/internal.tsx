@@ -10,9 +10,12 @@ import Text from "@components/shared/text"
 import ManageTopics from "@components/notification/manageTopics"
 import TopicManager from "@utils/notification/topicManager"
 import { JSX } from 'react'
+import { startLogin } from "@utils/auth"
+import { MenuProps } from "@type/screenTypes"
 
-export default function InternalScreen(): JSX.Element {
+export default function InternalScreen({ navigation }: MenuProps<"InternalScreen">): JSX.Element {
     const { theme } = useSelector((state: ReduxState) => state.theme)
+    const { login, groups } = useSelector((state: ReduxState) => state.login)
 
     return (
         <ScrollView>
@@ -22,6 +25,30 @@ export default function InternalScreen(): JSX.Element {
                         <Space height={Dimensions.get("window").height / 8} />
                         <ManageTopics />
                         <Space height={Dimensions.get("window").height / 8} />
+                        <TouchableOpacity onPress={() => login ? navigation.navigate("AiScreen") : startLogin('gpt')}>
+                            <Cluster>
+                                <Text style={{ ...T.centered20, color: theme.textColor }}>
+                                    {login ? 'Open GPT workspace' : 'Connect Login account'}
+                                </Text>
+                            </Cluster>
+                        </TouchableOpacity>
+                        <Space height={20} />
+                        <TouchableOpacity onPress={() => login ? navigation.navigate("AdminScreen") : startLogin('queenbee')}>
+                            <Cluster>
+                                <Text style={{ ...T.centered20, color: theme.textColor }}>
+                                    {login ? 'Open admin tools' : 'Login for Queenbee'}
+                                </Text>
+                            </Cluster>
+                        </TouchableOpacity>
+                        <Space height={20} />
+                        <View style={{ paddingHorizontal: 20 }}>
+                            <Text style={{ ...T.centered20, color: theme.textColor }}>
+                                {login
+                                    ? `Authenticated${groups.length ? ` · ${groups.join(', ')}` : ''}`
+                                    : 'Not authenticated yet'}
+                            </Text>
+                        </View>
+                        <Space height={20} />
                         <Space height={50} />
                         <TouchableOpacity onPress={() => TopicManager({ topic: 'maintenance' })}>
                             <Cluster>

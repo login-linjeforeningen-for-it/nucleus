@@ -41,6 +41,8 @@ export type MenuRoutes =
     | "CourseScreen"
     | "SpecificCourseScreen"
     | "LoginScreen"
+    | "AiScreen"
+    | "AdminScreen"
     | "InternalScreen"
     | "GameScreen"
     | "SpecificGameScreen"
@@ -61,6 +63,8 @@ export type MenuStackParamList = {
     AboutScreen: undefined
     BusinessScreen: undefined
     LoginScreen: undefined
+    AiScreen: undefined
+    AdminScreen: undefined
     InternalScreen: undefined
     MenuScreen: undefined
     CourseScreen: undefined

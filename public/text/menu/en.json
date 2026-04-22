@@ -36,6 +36,16 @@
             "id": 7, 
             "nav": "GameScreen",
             "title": "Games"
+        },
+        {
+            "id": 8,
+            "nav": "AiScreen",
+            "title": "Login AI"
+        },
+        {
+            "id": 9,
+            "nav": "AdminScreen",
+            "title": "Admin"
         }
     ],
     "version": "Version ",

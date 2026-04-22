@@ -39,6 +39,9 @@ import SettingScreen from "@screens/menu/settings"
 import AboutScreen from "@screens/menu/about"
 import BusinessScreen from "@screens/menu/business"
 import InternalScreen from "@screens/menu/internal"
+import LoginScreen from "@screens/menu/login"
+import AiScreen from "@screens/menu/ai"
+import AdminScreen from "@screens/menu/admin"
 import GameScreen from "@screens/menu/games/index"
 import CourseScreen from "@screens/menu/course/index"
 import SpecificEventScreen from "@screens/event/specificEvent"
@@ -51,6 +54,9 @@ import * as SystemUI from 'expo-system-ui'
 import * as NavigationBar from "expo-navigation-bar"
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs"
 import { NavigationContainer } from "@react-navigation/native"
+import linking from "@utils/linking"
+import NotificationRuntime from "@utils/notification/navigateFromPushNotification"
+import { navigationRef } from "@utils/navigationRef"
 import { useSelector } from "react-redux"
 import { Image, Platform } from "react-native"
 import {
@@ -116,6 +122,9 @@ function Menu() {
             <MenuStack.Screen name="NotificationScreen" component={NotificationScreen} />
             <MenuStack.Screen name="AboutScreen" component={AboutScreen} />
             <MenuStack.Screen name="BusinessScreen" component={BusinessScreen} />
+            <MenuStack.Screen name="LoginScreen" component={LoginScreen} />
+            <MenuStack.Screen name="AiScreen" component={AiScreen} />
+            <MenuStack.Screen name="AdminScreen" component={AdminScreen} />
             <MenuStack.Screen name="InternalScreen" component={InternalScreen} />
             <MenuStack.Screen name="CourseScreen" component={CourseScreen} />
             <MenuStack.Screen name="SpecificCourseScreen" component={SpecificCourseScreen} />
@@ -222,7 +231,8 @@ export default function Navigator(): JSX.Element {
     } as any
 
     return (
-        <NavigationContainer>
+        <NavigationContainer ref={navigationRef} linking={linking}>
+            <NotificationRuntime />
             <Root.Navigator screenOptions={{ headerShown: false }}>
                 <Root.Screen name="Tabs" component={Tabs} />
                 {/* <Root.Screen name="NotificationScreen" component={NotificationScreen as any} /> */}

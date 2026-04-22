@@ -14,24 +14,34 @@ export default function JoinButton() {
     const dispatch = useDispatch()
     const text = lang ? "Meld meg på" : "Join event"
 
+    if (!event) {
+        return null
+    }
+
+    const currentEvent = event
+
     function updateStorage() {
-        if (!clickedEvents.some(clicked => clicked.id === event.id)) {
-            dispatch(setClickedEvents([...clickedEvents, event]))
+        if (!clickedEvents.some(clicked => clicked.id === currentEvent.id)) {
+            dispatch(setClickedEvents([...clickedEvents, currentEvent]))
         }
     }
 
-    if (event.link_signup) {
-        return (
-            <TouchableOpacity onPress={() => {
-                updateStorage()
-                Linking.openURL(event.link_signup!)
-            }}>
-                <View style={{ ...ES.eventButton, backgroundColor: theme.orange }}>
-                    <Text style={{ ...T.centered20, color: theme.textColor, paddingTop: 8 }}>
-                        {text}
-                    </Text>
-                </View>
-            </TouchableOpacity>
-        )
+    if (!currentEvent.link_signup) {
+        return null
     }
+
+    const signupUrl = currentEvent.link_signup
+
+    return (
+        <TouchableOpacity onPress={() => {
+            updateStorage()
+            Linking.openURL(signupUrl)
+        }}>
+            <View style={{ ...ES.eventButton, backgroundColor: theme.orange }}>
+                <Text style={{ ...T.centered20, color: theme.textColor, paddingTop: 8 }}>
+                    {text}
+                </Text>
+            </View>
+        </TouchableOpacity>
+    )
 }

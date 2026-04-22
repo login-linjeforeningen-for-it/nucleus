@@ -1,43 +1,72 @@
 import * as Notifications from 'expo-notifications'
-import Constants from 'expo-constants'
-import { useEffect, useState } from 'react'
+import { useEffect } from 'react'
 import AsyncStorage from '@react-native-async-storage/async-storage'
-import { useNavigation } from '@react-navigation/native'
-import { Navigation } from '@/interfaces'
+import { configureNotificationChannel, getPushToken } from './getPushToken'
+import { navigationRef } from '@utils/navigationRef'
 
 type StoreNotificationProps = {
     title: string
     body: string
-    data: any
+    data: Record<string, unknown>
 }
 
-/**
- * Navigates from a push notification to the relevant page using Expo Notifications.
- */
-export default function NavigateFromPushNotification() {
-    const navigation: Navigation = useNavigation()
-    const [event, setEvent] = useState<{ [key: string]: any } | undefined>(undefined)
-
+export default function NotificationRuntime() {
     useEffect(() => {
-        // Request permissions on mount
-        registerForPushNotificationsAsync()
-
-        // Listener for notifications received while app is in foreground
-        const foregroundSubscription = Notifications.addNotificationReceivedListener(notification => {
-            const { title, body, data } = notification.request.content
-            StoreNotification({ title: title || '', body: body || '', data })
-            navigation.navigate('NotificationModal', { title, body, data })
+        Notifications.setNotificationHandler({
+            handleNotification: async () => ({
+                shouldPlaySound: true,
+                shouldSetBadge: false,
+                shouldShowBanner: true,
+                shouldShowList: true,
+            }),
         })
 
-        // Listener for notifications tapped/opened by the user
-        const responseSubscription = Notifications.addNotificationResponseReceivedListener(response => {
+        void registerForPushNotificationsAsync()
+
+        void Notifications.getLastNotificationResponseAsync().then((response) => {
+            const data = response?.notification.request.content.data
+            if (data && Object.keys(data).length) {
+                navigateFromNotification(data as Record<string, unknown>)
+            }
+        })
+
+        const foregroundSubscription = Notifications.addNotificationReceivedListener((notification) => {
+            const { title, body, data } = notification.request.content
+            void storeNotification({
+                title: title || '',
+                body: body || '',
+                data: (data || {}) as Record<string, unknown>,
+            })
+
+            if (navigationRef.isReady()) {
+                navigationRef.navigate('NotificationModal', {
+                    title: title || '',
+                    body: body || '',
+                    data,
+                })
+            }
+        })
+
+        const responseSubscription = Notifications.addNotificationResponseReceivedListener((response) => {
             const { title, body, data } = response.notification.request.content
-            StoreNotification({ title: title || '', body: body || '', data })
+            void storeNotification({
+                title: title || '',
+                body: body || '',
+                data: (data || {}) as Record<string, unknown>,
+            })
 
             if (Object.keys(data || {}).length) {
-                setEvent(data)
-            } else {
-                navigation.navigate('NotificationScreen')
+                navigateFromNotification((data || {}) as Record<string, unknown>)
+                return
+            }
+
+            if (navigationRef.isReady()) {
+                navigationRef.navigate('Tabs', {
+                    screen: 'MenuNav',
+                    params: {
+                        screen: 'NotificationScreen',
+                    },
+                })
             }
         })
 
@@ -47,53 +76,102 @@ export default function NavigateFromPushNotification() {
         }
     }, [])
 
-    // Navigate to specific event if needed
-    useEffect(() => {
-        if (event) {
-            const temp = event
-            setEvent(undefined)
-            navigation.navigate('SpecificEventScreen', { item: temp })
-        }
-    }, [event])
+    return null
 }
 
-/**
- * Stores notifications in AsyncStorage
- */
-async function StoreNotification({ title, body, data }: StoreNotificationProps) {
+async function storeNotification({ title, body, data }: StoreNotificationProps) {
     const storedString = await AsyncStorage.getItem('notificationList')
-    let storedArray: any[] = []
+    const storedArray = storedString ? JSON.parse(storedString) as NotificationListProps[] : []
 
-    if (storedString) {
-        storedArray = JSON.parse(storedString)
-    }
+    storedArray.unshift({
+        id: Date.now(),
+        title,
+        body,
+        data: data as Record<string, unknown> as NotificationListProps['data'],
+        time: new Date().toISOString(),
+    })
 
-    storedArray.unshift({ title, body, data, time: new Date() })
     await AsyncStorage.setItem('notificationList', JSON.stringify(storedArray))
 }
 
-/**
- * Requests Expo Push Notification permissions and returns the token if granted
- */
 async function registerForPushNotificationsAsync(): Promise<string | null> {
-    if (!Constants.isDevice) {
-        console.warn('Push notifications are not supported on simulators')
+    try {
+        await configureNotificationChannel()
+        return await getPushToken()
+    } catch {
         return null
     }
+}
 
-    const { status: existingStatus } = await Notifications.getPermissionsAsync()
-    let finalStatus = existingStatus
-
-    if (existingStatus !== 'granted') {
-        const { status } = await Notifications.requestPermissionsAsync()
-        finalStatus = status
+function navigateFromNotification(data: Record<string, unknown>) {
+    if (!navigationRef.isReady()) {
+        return
     }
 
-    if (finalStatus !== 'granted') {
-        alert('Failed to get push token for push notifications!')
-        return null
+    const id = Number(data.id)
+    const target = typeof data.target === 'string' ? data.target : null
+    const screen = typeof data.screen === 'string' ? data.screen : null
+    const isAd = typeof data.title_no === 'string' || typeof data.title_en === 'string'
+    const isEvent = typeof data.name_no === 'string' || typeof data.name_en === 'string'
+
+    if (target === 'menu' && screen) {
+        navigationRef.navigate('Tabs', {
+            screen: 'MenuNav',
+            params: {
+                screen: screen as any,
+            },
+        })
+        return
     }
 
-    const token = (await Notifications.getExpoPushTokenAsync()).data
-    return token
+    if (target === 'ad' && Number.isFinite(id)) {
+        navigationRef.navigate('Tabs', {
+            screen: 'AdNav',
+            params: {
+                screen: 'SpecificAdScreen',
+                params: { adID: id },
+            },
+        })
+        return
+    }
+
+    if (target === 'event' && Number.isFinite(id)) {
+        navigationRef.navigate('Tabs', {
+            screen: 'EventNav',
+            params: {
+                screen: 'SpecificEventScreen',
+                params: { eventID: id },
+            },
+        })
+        return
+    }
+
+    if (Number.isFinite(id) && isAd) {
+        navigationRef.navigate('Tabs', {
+            screen: 'AdNav',
+            params: {
+                screen: 'SpecificAdScreen',
+                params: { adID: id },
+            },
+        })
+        return
+    }
+
+    if (Number.isFinite(id) && isEvent) {
+        navigationRef.navigate('Tabs', {
+            screen: 'EventNav',
+            params: {
+                screen: 'SpecificEventScreen',
+                params: { eventID: id },
+            },
+        })
+        return
+    }
+
+    navigationRef.navigate('Tabs', {
+        screen: 'MenuNav',
+        params: {
+            screen: 'NotificationScreen',
+        },
+    })
 }

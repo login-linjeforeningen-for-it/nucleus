@@ -70,6 +70,77 @@ type GetEventsProps = {
     total_count: number
 }
 
+type System = {
+    ram: string
+    processes: number
+    disk: string
+    load: string
+    containers: number
+}
+
+type DatabaseOverviewQuery = {
+    database: string
+    user: string | null
+    application: string | null
+    ageSeconds: number
+    waitEventType: string | null
+    query: string
+}
+
+type DatabaseOverviewAverageQuery = {
+    lastMinute: number | null
+    lastFiveMinutes: number | null
+    lastHour: number | null
+    lastDay: number | null
+}
+
+type DatabaseOverviewTable = {
+    schema: string
+    name: string
+    estimatedRows: number
+    tableBytes: number
+    indexBytes: number
+    totalBytes: number
+}
+
+type DatabaseOverviewItem = {
+    name: string
+    sizeBytes: number
+    tableCount: number
+    activeQueries: number
+    currentConnections: number
+    longestQuerySeconds: number | null
+    averageQuerySeconds: DatabaseOverviewAverageQuery
+    largestTable: string | null
+    tables: DatabaseOverviewTable[]
+}
+
+type DatabaseOverviewCluster = {
+    id: string
+    name: string
+    project: string
+    status: string
+    databaseCount: number
+    totalSizeBytes: number
+    activeQueries: number
+    currentConnections: number
+    longestQuery: DatabaseOverviewQuery | null
+    averageQuerySeconds: DatabaseOverviewAverageQuery
+    databases: DatabaseOverviewItem[]
+    error: string | null
+}
+
+type GetDatabaseOverview = {
+    generatedAt: string
+    clusterCount: number
+    databaseCount: number
+    totalSizeBytes: number
+    activeQueries: number
+    longestQuery: DatabaseOverviewQuery | null
+    averageQuerySeconds: DatabaseOverviewAverageQuery
+    clusters: DatabaseOverviewCluster[]
+}
+
 // Jobs
 type Job = {
     visible: boolean
@@ -216,6 +287,9 @@ type ReduxState = {
     }
     login: {
         login: boolean
+        token: string | null
+        groups: string[]
+        target: string | null
     }
     lang: {
         lang: boolean
@@ -542,4 +616,63 @@ type OkRedFlagDealBreaker = {
     title_no: string
     title_en: string
     categories: string[]
+}
+
+type NativeModelMetrics = {
+    conversationId: string | null
+    status: "idle" | "preparing" | "generating" | "error"
+    currentTokens: number
+    maxTokens: number
+    promptTokens: number
+    generatedTokens: number
+    contextTokens: number
+    contextMaxTokens: number
+    tps: number
+    lastUpdated: string | null
+    lastError: string | null
+}
+
+type NativeClient = {
+    name: string
+    model: NativeModelMetrics
+}
+
+type NativeConversationSummary = {
+    id: string
+    title: string
+    originalClientName: string
+    activeClientName: string
+    createdAt: string
+    updatedAt: string
+    lastMessagePreview: string | null
+    messageCount: number
+}
+
+type NativeStoredMessage = {
+    id: string
+    role: "system" | "user" | "assistant"
+    content: string
+    error: boolean
+    clientName: string | null
+    createdAt: string
+}
+
+type NativeConversationRecord = NativeConversationSummary & {
+    messages: NativeStoredMessage[]
+}
+
+type NativeLoadBalancingSite = {
+    id: number
+    name: string
+    ip: string
+    primary: boolean
+    operational: boolean
+    maintenance: boolean
+    note: string | null
+    updated_at: string
+}
+
+type RequestOptions = {
+    method?: "GET" | "POST" | "PUT" | "DELETE"
+    body?: object
 }

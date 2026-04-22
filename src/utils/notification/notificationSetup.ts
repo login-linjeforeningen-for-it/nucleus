@@ -5,6 +5,7 @@ import { resetTheme } from "@redux/theme"
 import { Alert, Platform } from "react-native"
 import { requestPermissionsAsync, getPermissionsAsync } from 'expo-notifications'
 import { isDevice } from 'expo-device'
+import { configureNotificationChannel } from './getPushToken'
 
 type initializeNotificationsProps = {
     shouldRun: boolean
@@ -40,6 +41,7 @@ export default function initializeNotifications({ shouldRun, hasBeenSet,
 export async function notificationSetup(dispatch: Dispatch<UnknownAction>) {
     const granted = await requestNotificationPermission()
     if (granted) {
+        await configureNotificationChannel()
         const topics = ["IMPORTANT", "BEDPRES", "TEKKOM", "CTF", "SOCIAL", "KARRIEREDAG", "FADDERUKA", "LOGIN", "ANNET"]
 
         for (const topic of topics) {

@@ -1,6 +1,6 @@
 {
   "name": "login",
-  "version": "2.5.3",
+  "version": "2.5.4",
   "private": true,
   "main": "index.ts",
   "scripts": {
@@ -13,7 +13,7 @@
     "build": "eas build -p all --auto-submit",
     "buildi": "eas build -p ios --local",
     "builda": "eas build -p android --local",
-    "test": "jest"
+    "test": "jest --watchman=false"
   },
   "dependencies": {
     "@react-native-async-storage/async-storage": "2.2.0",

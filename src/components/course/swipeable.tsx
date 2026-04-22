@@ -20,7 +20,7 @@ type CourseContentProps = {
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window')
 const { height: SCREEN_HEIGHT } = Dimensions.get('window')
-const SWIPE_THRESHOLD = SCREEN_WIDTH * 0.25
+const SWIPE_THRESHOLD = SCREEN_WIDTH * (Platform.OS === 'ios' ? 0.25 : 0.32)
 
 export default function Swiper({ course, clicked, setClicked }: CourseContentProps) {
     const { theme } = useSelector((state: ReduxState) => state.theme)

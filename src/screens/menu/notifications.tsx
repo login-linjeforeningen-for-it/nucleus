@@ -120,9 +120,21 @@ function Notification({ item, list, id, setList, hideOld, setHideOld, readIndex 
     const swipeableRef = useRef<Swipeable | null>(null)
 
     function navigateIfPossible() {
-        // Checks if the object has any properties, and if so navigates to SES
-        if (Object.keys(item.data).length) {
-            navigation.navigate("SpecificEventScreen", { item: item.data })
+        if (!Object.keys(item.data).length) {
+            return
+        }
+
+        const id = Number(item.data.id)
+        const isAd = typeof item.data.title_no === 'string' || typeof item.data.title_en === 'string'
+        const isEvent = typeof item.data.name_no === 'string' || typeof item.data.name_en === 'string'
+
+        if (Number.isFinite(id) && isAd) {
+            navigation.navigate("SpecificAdScreen", { adID: id })
+            return
+        }
+
+        if (Number.isFinite(id) && isEvent) {
+            navigation.navigate("SpecificEventScreen", { eventID: id })
         }
     }
 
