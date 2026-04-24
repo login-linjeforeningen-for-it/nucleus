@@ -607,12 +607,16 @@ type CourseAsList = {
 
 type Course = {
     id: string
+    code: string
+    name: string
     cards: Card[]
     notes: string
+    learningBased: boolean
     files: Files
 }
 
 type Files = {
+    id?: number
     name: string
     content: string
     files: Files[]

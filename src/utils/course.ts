@@ -1,5 +1,59 @@
 import config from "../constants"
 
+function normalizeCourseList(raw: unknown): CourseAsList[] {
+    if (!Array.isArray(raw)) {
+        throw new Error("Invalid course list response")
+    }
+
+    return raw.map((course) => {
+        const item = course as Record<string, unknown>
+        return {
+            id: Number(item.id),
+            code: String(item.code || ''),
+            cards: [],
+            count: Number(item.cardCount ?? item.count ?? 0),
+        }
+    })
+}
+
+function normalizeCard(raw: unknown): Card {
+    const item = raw as Record<string, unknown>
+    return {
+        question: String(item.question || ''),
+        alternatives: Array.isArray(item.alternatives) ? item.alternatives.map(String) : [],
+        correct: Array.isArray(item.answers)
+            ? item.answers.map((answer) => Number(answer))
+            : Array.isArray(item.correct)
+                ? item.correct.map((answer) => Number(answer))
+                : [],
+        source: String(item.source || ''),
+        rating: Number(item.rating ?? 0),
+        votes: Array.isArray(item.votes)
+            ? item.votes.map((vote) => vote as Vote)
+            : [],
+        help: typeof item.help === 'string' ? item.help : undefined,
+        theme: typeof item.theme === 'string' ? item.theme : undefined,
+    }
+}
+
+function normalizeCourse(raw: unknown): Course {
+    const item = raw as Record<string, unknown>
+    return {
+        id: String(item.id || ''),
+        code: String(item.code || ''),
+        name: String(item.name || ''),
+        learningBased: Boolean(item.learningBased),
+        notes: String(item.notes || ''),
+        cards: Array.isArray(item.cards) ? item.cards.map(normalizeCard) : [],
+        files: {
+            id: 0,
+            name: 'root',
+            content: '',
+            files: [],
+        },
+    }
+}
+
 // Fetches courses from server, different url based on location, therefore the 
 // location parameter to ensure all requests are successful
 export async function getCourses(): Promise<CourseAsList[] | string> {
@@ -16,8 +70,7 @@ export async function getCourses(): Promise<CourseAsList[] | string> {
             throw new Error(data)
         }
 
-        const courses = await response.json()
-        return courses
+        return normalizeCourseList(await response.json())
     } catch (error) {
         const err = error as Error
         return err.message
@@ -41,8 +94,7 @@ export async function getCourse(id: number): Promise<Course | string> {
             throw new Error(data)
         }
 
-        const course = await response.json()
-        return course
+        return normalizeCourse(await response.json())
     } catch (error) {
         const err = error as Error
         return err.message
