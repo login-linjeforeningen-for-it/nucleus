@@ -141,6 +141,36 @@ type GetDatabaseOverview = {
     clusters: DatabaseOverviewCluster[]
 }
 
+type SeverityLevel = 'critical' | 'high' | 'medium' | 'low' | 'unknown'
+type SeverityCount = Record<SeverityLevel, number>
+
+type ImageVulnerabilityReport = {
+    image: string
+    scannedAt: string
+    totalVulnerabilities: number
+    severity: SeverityCount
+    scanError: string | null
+}
+
+type DockerScoutScanStatus = {
+    isRunning: boolean
+    startedAt: string | null
+    finishedAt: string | null
+    lastSuccessAt: string | null
+    lastError: string | null
+    totalImages: number | null
+    completedImages: number
+    currentImage: string | null
+    estimatedCompletionAt: string | null
+}
+
+type GetVulnerabilities = {
+    generatedAt: string | null
+    imageCount: number
+    images: ImageVulnerabilityReport[]
+    scanStatus: DockerScoutScanStatus
+}
+
 // Jobs
 type Job = {
     visible: boolean

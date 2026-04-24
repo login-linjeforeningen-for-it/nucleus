@@ -16,6 +16,7 @@ const config = {
     queenbee_url: "https://queenbee.login.no",
     beekeeper_api_url: "https://beekeeper.login.no/api",
     beekeeper_wss_url: "wss://beekeeper.login.no/api",
+    tekkom_bot_api_url: "https://bot.login.no/api",
     internal_api_url: "https://internal.login.no/api",
     support_mail: "tekkom@login.no",
     api: "https://workerbee.login.no/api/v2",

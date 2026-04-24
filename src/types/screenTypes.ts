@@ -46,6 +46,10 @@ export type MenuRoutes =
     | "InternalScreen"
     | "GameScreen"
     | "SpecificGameScreen"
+    | "SearchScreen"
+    | "StatusScreen"
+    | "MusicScreen"
+    | "DashboardScreen"
 
 export type ItemProps = {
     id: number
@@ -66,6 +70,10 @@ export type MenuStackParamList = {
     AiScreen: undefined
     AdminScreen: undefined
     InternalScreen: undefined
+    SearchScreen: undefined
+    StatusScreen: undefined
+    MusicScreen: undefined
+    DashboardScreen: undefined
     MenuScreen: undefined
     CourseScreen: undefined
     SpecificCourseScreen: { code: string, id: number }

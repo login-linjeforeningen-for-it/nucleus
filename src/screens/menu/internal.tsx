@@ -25,10 +25,10 @@ export default function InternalScreen({ navigation }: MenuProps<"InternalScreen
                         <Space height={Dimensions.get("window").height / 8} />
                         <ManageTopics />
                         <Space height={Dimensions.get("window").height / 8} />
-                        <TouchableOpacity onPress={() => login ? navigation.navigate("AiScreen") : startLogin('gpt')}>
+                        <TouchableOpacity onPress={() => navigation.navigate("AiScreen")}>
                             <Cluster>
                                 <Text style={{ ...T.centered20, color: theme.textColor }}>
-                                    {login ? 'Open GPT workspace' : 'Connect Login account'}
+                                    Open Login AI
                                 </Text>
                             </Cluster>
                         </TouchableOpacity>

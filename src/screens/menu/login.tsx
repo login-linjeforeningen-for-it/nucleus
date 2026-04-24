@@ -5,7 +5,7 @@ import T from "@styles/text"
 import Swipe from "@components/nav/swipe"
 import Text from "@components/shared/text"
 import { JSX } from "react"
-import { ScrollView, TouchableOpacity, View } from "react-native"
+import { Dimensions, ScrollView, TouchableOpacity, View } from "react-native"
 import { useDispatch, useSelector } from "react-redux"
 import { clearSession } from "@redux/loginStatus"
 import { setID, setMail, setName } from "@redux/profile"
@@ -29,7 +29,7 @@ export default function LoginScreen({ navigation }: MenuProps<"LoginScreen">): J
         <ScrollView>
             <Swipe left="MenuScreen">
                 <View style={{ ...GS.content, backgroundColor: theme.darker }}>
-                    <Space height={80} />
+                    <Space height={Dimensions.get("window").height / 8.1} />
                     <Cluster>
                         <Text style={{ ...T.centeredBold20, color: theme.textColor }}>
                             {login ? "Connected to Login" : "Connect your Login account"}
@@ -40,22 +40,22 @@ export default function LoginScreen({ navigation }: MenuProps<"LoginScreen">): J
                         <Text style={{ ...T.centered15, color: theme.oppositeTextColor }}>
                             {login
                                 ? `${name || "Unknown user"} · ${mail || "No email"}`
-                                : "Sign in once to unlock AI, Queenbee, and internal tools directly in the app."}
+                                : "Sign in to unlock Queenbee and internal tools. Login AI is available without signing in."}
                         </Text>
                     </Cluster>
                     <Space height={20} />
-                    <TouchableOpacity onPress={() => login ? navigation.navigate("AiScreen") : startLogin("app")}>
+                    <TouchableOpacity onPress={() => navigation.navigate("AiScreen")}>
                         <Cluster>
                             <Text style={{ ...T.centered20, color: theme.textColor }}>
-                                {login ? "Open Login AI" : "Sign in"}
+                                Open Login AI
                             </Text>
                         </Cluster>
                     </TouchableOpacity>
                     <Space height={12} />
-                    <TouchableOpacity onPress={() => navigation.navigate("AdminScreen")}>
+                    <TouchableOpacity onPress={() => login ? navigation.navigate("AdminScreen") : startLogin("queenbee")}>
                         <Cluster>
                             <Text style={{ ...T.centered20, color: theme.textColor }}>
-                                Open admin tools
+                                {login ? "Open admin tools" : "Sign in for admin tools"}
                             </Text>
                         </Cluster>
                     </TouchableOpacity>

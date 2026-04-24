@@ -18,6 +18,7 @@ import {
     getInternalDashboard,
     getLoadBalancingSites,
     getProtectedEvent,
+    getVulnerabilitiesOverview,
     listProtectedEvents,
     updateProtectedEvent
 } from "@utils/adminApi"
@@ -62,13 +63,14 @@ export default function AdminScreen(): JSX.Element {
     const [system, setSystem] = useState<System | null>(null)
     const [sites, setSites] = useState<{ name: string, primary: boolean, operational: boolean, maintenance: boolean }[]>([])
     const [databaseOverview, setDatabaseOverview] = useState<GetDatabaseOverview | null>(null)
+    const [vulnerabilities, setVulnerabilities] = useState<GetVulnerabilities | null>(null)
     const [loading, setLoading] = useState(false)
     const [saving, setSaving] = useState(false)
     const [error, setError] = useState<string | null>(null)
     const [success, setSuccess] = useState<string | null>(null)
 
     const canAdmin = useMemo(() =>
-        groups.map(group => group.toLowerCase()).some(group => ["queenbee", "tekkom"].includes(group)),
+        groups.map(group => group.toLowerCase()).includes("queenbee"),
     [groups])
 
     useEffect(() => {
@@ -83,16 +85,18 @@ export default function AdminScreen(): JSX.Element {
         try {
             setLoading(true)
             setError(null)
-            const [eventsPayload, systemPayload, sitesPayload, databasePayload] = await Promise.all([
+            const [eventsPayload, systemPayload, sitesPayload, databasePayload, vulnerabilityPayload] = await Promise.all([
                 listProtectedEvents(20),
                 getInternalDashboard().catch(() => null),
                 getLoadBalancingSites().catch(() => []),
                 getDatabaseOverview().catch(() => null),
+                getVulnerabilitiesOverview().catch(() => null),
             ])
             setEvents(eventsPayload.events || [])
             setSystem(systemPayload)
             setSites(sitesPayload)
             setDatabaseOverview(databasePayload)
+            setVulnerabilities(vulnerabilityPayload)
         } catch (err) {
             setError(err instanceof Error ? err.message : "Failed to load admin tools.")
         } finally {
@@ -254,6 +258,17 @@ export default function AdminScreen(): JSX.Element {
                             {databaseOverview
                                 ? `${databaseOverview.clusterCount} clusters · ${databaseOverview.databaseCount} databases · ${databaseOverview.activeQueries} active queries`
                                 : "Database overview unavailable right now."}
+                        </Text>
+                    </View>
+
+                    <Space height={10} />
+                    <View style={{ borderRadius: 18, backgroundColor: theme.contrast, padding: 14 }}>
+                        <Text style={{ ...T.text20, color: theme.textColor }}>Vulnerabilities</Text>
+                        <Space height={8} />
+                        <Text style={{ ...T.text15, color: theme.oppositeTextColor }}>
+                            {vulnerabilities
+                                ? `${vulnerabilities.imageCount} images · ${vulnerabilities.images.reduce((sum, image) => sum + image.totalVulnerabilities, 0)} findings`
+                                : "Vulnerability overview unavailable right now."}
                         </Text>
                     </View>
 

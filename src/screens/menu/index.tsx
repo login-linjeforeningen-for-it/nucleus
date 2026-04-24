@@ -96,7 +96,7 @@ export default function MenuScreen({ navigation }: MenuProps<'MenuScreen'>): JSX
                                 {login ? "Connected" : "Connect Login"}
                             </Text>
                             <Text style={{ ...T.text15, color: theme.oppositeTextColor }}>
-                                {login ? "AI and Queenbee unlocked" : "Sign in for AI and Queenbee"}
+                                {login ? "Queenbee unlocked" : "Sign in for Queenbee"}
                             </Text>
                         </View>
                     </Cluster>

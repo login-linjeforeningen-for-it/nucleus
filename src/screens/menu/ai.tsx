@@ -15,14 +15,14 @@ import { useSelector } from "react-redux"
 import {
     createAiConversation,
     defaultNativeModelMetrics,
+    getAiOwner,
     getAiConversation,
     getBeekeeperWsUrl,
     listAiClients,
     listAiConversations,
-    normalizeNativeClient,
+    selectBestNativeClient,
     switchAiConversationClient
 } from "@utils/adminApi"
-import { startLogin } from "@utils/auth"
 
 type NativeChatSession = {
     conversationId: string
@@ -56,7 +56,6 @@ function pendingAssistantMessage(conversationId: string): NativeStoredMessage {
 export default function AiScreen(): JSX.Element {
     const { theme } = useSelector((state: ReduxState) => state.theme)
     const { login } = useSelector((state: ReduxState) => state.login)
-    const { id } = useSelector((state: ReduxState) => state.profile)
     const [clients, setClients] = useState<NativeClient[]>([])
     const [conversations, setConversations] = useState<NativeConversationSummary[]>([])
     const [session, setSession] = useState<NativeChatSession | null>(null)
@@ -66,18 +65,10 @@ export default function AiScreen(): JSX.Element {
     const socketRef = useRef<WebSocket | null>(null)
 
     useEffect(() => {
-        if (!login) {
-            return
-        }
-
         void refresh()
-    }, [login])
+    }, [])
 
     useEffect(() => {
-        if (!login) {
-            return
-        }
-
         const ws = new WebSocket(getBeekeeperWsUrl())
         socketRef.current = ws
 
@@ -98,7 +89,23 @@ export default function AiScreen(): JSX.Element {
             socketRef.current = null
             ws.close()
         }
-    }, [login, session?.conversationId])
+    }, [session?.conversationId])
+
+    useEffect(() => {
+        if (loading || session) {
+            return
+        }
+
+        if (conversations.length) {
+            void openConversation(conversations[0].id)
+            return
+        }
+
+        const bestClient = selectBestNativeClient(clients)
+        if (bestClient) {
+            void createConversationForClient(bestClient.name)
+        }
+    }, [clients, conversations, loading, session])
 
     async function refresh() {
         try {
@@ -109,7 +116,7 @@ export default function AiScreen(): JSX.Element {
                 listAiConversations()
             ])
 
-            setClients(nextClients.map(client => normalizeNativeClient(client)))
+            setClients(nextClients)
             setConversations(nextConversations)
         } catch (err) {
             setError(err instanceof Error ? err.message : "Failed to load AI workspace.")
@@ -140,6 +147,7 @@ export default function AiScreen(): JSX.Element {
     async function createConversationForClient(clientName: string) {
         try {
             setLoading(true)
+            setError(null)
             const conversation = await createAiConversation(clientName)
             setSession({
                 conversationId: conversation.id,
@@ -164,6 +172,7 @@ export default function AiScreen(): JSX.Element {
         }
 
         try {
+            setError(null)
             const conversation = await switchAiConversationClient(session.conversationId, clientName)
             setSession({
                 conversationId: conversation.id,
@@ -181,7 +190,13 @@ export default function AiScreen(): JSX.Element {
 
     function handleSocketMessage(message: NativeSocketMessage) {
         if (message.type === "update" && message.client) {
-            const nextClient = normalizeNativeClient(message.client)
+            const nextClient: NativeClient = {
+                ...message.client,
+                model: {
+                    ...defaultNativeModelMetrics(),
+                    ...(message.client.model || {})
+                }
+            }
             setClients(prev => {
                 const existing = prev.find(client => client.name === nextClient.name)
                 return existing
@@ -262,11 +277,12 @@ export default function AiScreen(): JSX.Element {
         }
     }
 
-    function sendPrompt() {
+    async function sendPrompt() {
         if (!session || !input.trim() || !socketRef.current) {
             return
         }
 
+        const owner = await getAiOwner()
         const userMessage: NativeStoredMessage = {
             id: `${Date.now()}`,
             role: "user",
@@ -287,8 +303,8 @@ export default function AiScreen(): JSX.Element {
             type: "prompt_request",
             conversationId: session.conversationId,
             clientName: session.clientName,
-            ownerUserId: id,
-            ownerSessionId: null,
+            ownerUserId: owner.userId,
+            ownerSessionId: owner.sessionId,
             messages: [...session.messages, userMessage].map(message => ({
                 role: message.role,
                 content: message.content,
@@ -302,29 +318,6 @@ export default function AiScreen(): JSX.Element {
 
     const activeClient = useMemo(() => clients.find(client => client.name === session?.clientName) || null, [clients, session?.clientName])
 
-    if (!login) {
-        return (
-            <ScrollView>
-                <Swipe left="MenuScreen">
-                    <View style={{ ...GS.content, backgroundColor: theme.darker }}>
-                        <Space height={80} />
-                        <Text style={{ ...T.centeredBold20, color: theme.textColor }}>Login AI</Text>
-                        <Space height={14} />
-                        <Text style={{ ...T.centered15, color: theme.oppositeTextColor }}>
-                            Sign in to keep conversations, choose between connected models, and use GPT directly in the app.
-                        </Text>
-                        <Space height={20} />
-                        <TouchableOpacity onPress={() => startLogin("gpt")}>
-                            <View style={{ borderRadius: 18, backgroundColor: theme.orange, padding: 14 }}>
-                                <Text style={{ ...T.centered20, color: theme.darker }}>Sign in for AI</Text>
-                            </View>
-                        </TouchableOpacity>
-                    </View>
-                </Swipe>
-            </ScrollView>
-        )
-    }
-
     return (
         <ScrollView>
             <Swipe left="MenuScreen">
@@ -333,7 +326,11 @@ export default function AiScreen(): JSX.Element {
                     <Text style={{ ...T.centeredBold20, color: theme.textColor }}>Login AI</Text>
                     <Space height={10} />
                     <Text style={{ ...T.centered15, color: theme.oppositeTextColor }}>
-                        {activeClient ? `${activeClient.name} · ${activeClient.model.status}` : "Choose a model to start a native chat."}
+                        {activeClient
+                            ? `${activeClient.name} · ${activeClient.model.status}`
+                            : loading
+                                ? "Preparing AI workspace..."
+                                : "Connecting you to the fastest available model."}
                     </Text>
                     <Space height={16} />
                     {loading && <ActivityIndicator color={theme.orange} />}
@@ -412,7 +409,9 @@ export default function AiScreen(): JSX.Element {
                         ))}
                         {!session && (
                             <Text style={{ ...T.centered15, color: theme.oppositeTextColor }}>
-                                Pick a model above to create your first conversation.
+                                {login
+                                    ? "Preparing your conversation history."
+                                    : "Starting a temporary conversation. Sign in later if you want to keep it with your account."}
                             </Text>
                         )}
                     </View>
@@ -434,7 +433,7 @@ export default function AiScreen(): JSX.Element {
                                 paddingVertical: 12
                             }}
                         />
-                        <TouchableOpacity onPress={sendPrompt}>
+                        <TouchableOpacity onPress={() => void sendPrompt()}>
                             <View style={{
                                 borderRadius: 16,
                                 backgroundColor: theme.orange,

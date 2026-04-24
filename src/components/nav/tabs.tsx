@@ -44,6 +44,10 @@ import AiScreen from "@screens/menu/ai"
 import AdminScreen from "@screens/menu/admin"
 import GameScreen from "@screens/menu/games/index"
 import CourseScreen from "@screens/menu/course/index"
+import SearchScreen from "@screens/menu/search"
+import StatusScreen from "@screens/menu/status"
+import MusicScreen from "@screens/menu/music"
+import DashboardScreen from "@screens/menu/dashboard"
 import SpecificEventScreen from "@screens/event/specificEvent"
 import SpecificAdScreen from "@screens/ads/specificAd"
 import SpecificCourseScreen from "@screens/menu/course/specificCourse"
@@ -126,6 +130,10 @@ function Menu() {
             <MenuStack.Screen name="AiScreen" component={AiScreen} />
             <MenuStack.Screen name="AdminScreen" component={AdminScreen} />
             <MenuStack.Screen name="InternalScreen" component={InternalScreen} />
+            <MenuStack.Screen name="SearchScreen" component={SearchScreen} />
+            <MenuStack.Screen name="StatusScreen" component={StatusScreen} />
+            <MenuStack.Screen name="MusicScreen" component={MusicScreen} />
+            <MenuStack.Screen name="DashboardScreen" component={DashboardScreen} />
             <MenuStack.Screen name="CourseScreen" component={CourseScreen} />
             <MenuStack.Screen name="SpecificCourseScreen" component={SpecificCourseScreen} />
             <MenuStack.Screen name="GameScreen" component={GameScreen} />
