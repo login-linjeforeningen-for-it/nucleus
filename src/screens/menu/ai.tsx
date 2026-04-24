@@ -6,6 +6,7 @@ import Text from "@components/shared/text"
 import { JSX, useEffect, useMemo, useRef, useState } from "react"
 import {
     ActivityIndicator,
+    Dimensions,
     ScrollView,
     TextInput,
     TouchableOpacity,
@@ -322,7 +323,7 @@ export default function AiScreen(): JSX.Element {
         <ScrollView>
             <Swipe left="MenuScreen">
                 <View style={{ ...GS.content, backgroundColor: theme.darker }}>
-                    <Space height={70} />
+                    <Space height={Dimensions.get("window").height / 8} />
                     <Text style={{ ...T.centeredBold20, color: theme.textColor }}>Login AI</Text>
                     <Space height={10} />
                     <Text style={{ ...T.centered15, color: theme.oppositeTextColor }}>

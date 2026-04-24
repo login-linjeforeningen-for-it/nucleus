@@ -8,7 +8,7 @@ import T from "@styles/text"
 import { MenuProps } from "@type/screenTypes"
 import { getSafeMusicActivity, type NativeMusicActivity } from "@utils/discoveryApi"
 import { JSX, useEffect, useState } from "react"
-import { Image, RefreshControl, ScrollView, View } from "react-native"
+import { Dimensions, Image, RefreshControl, ScrollView, View } from "react-native"
 import { useSelector } from "react-redux"
 
 export default function MusicScreen(_: MenuProps<"MusicScreen">): JSX.Element {
@@ -40,14 +40,13 @@ export default function MusicScreen(_: MenuProps<"MusicScreen">): JSX.Element {
                 style={{ ...GS.content, backgroundColor: theme.darker }}
                 contentContainerStyle={{ paddingHorizontal: 12, paddingBottom: 80 }}
             >
-                <Space height={90} />
+                <Space height={Dimensions.get("window").height / 8} />
                 <Cluster>
                     <View style={{ padding: 12 }}>
                         <Text style={{ ...T.text25, color: theme.textColor }}>Music</Text>
                         <Space height={6} />
                     </View>
                 </Cluster>
-                <Space height={12} />
                 {error ? (
                     <Cluster>
                         <View style={{ padding: 12 }}>

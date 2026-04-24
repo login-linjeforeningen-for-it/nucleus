@@ -8,7 +8,7 @@ import { MenuProps } from "@type/screenTypes"
 import { buildSearchAnimationLink } from "@utils/discoveryApi"
 import Clipboard from "@react-native-clipboard/clipboard"
 import { JSX, useMemo, useState } from "react"
-import { Alert, Linking, TextInput, TouchableOpacity, View } from "react-native"
+import { Alert, Dimensions, Linking, TextInput, TouchableOpacity, View } from "react-native"
 import { useSelector } from "react-redux"
 
 type Engine = "brave" | "google" | "duckduckgo"
@@ -48,7 +48,7 @@ export default function SearchScreen(_: MenuProps<"SearchScreen">): JSX.Element 
     return (
         <Swipe left="MenuScreen">
             <View style={{ ...GS.content, backgroundColor: theme.darker, paddingHorizontal: 12 }}>
-                <Space height={90} />
+                <Space height={Dimensions.get("window").height / 8} />
                 <Cluster>
                     <View style={{ padding: 12 }}>
                         <Text style={{ ...T.text25, color: theme.textColor }}>
