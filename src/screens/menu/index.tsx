@@ -1,6 +1,5 @@
 import { nativeApplicationVersion } from "expo-application"
 import Feedback from "@/components/menu/feedback"
-import NotificationIcon from "@components/notification/notificationIcon"
 import Cluster from "@/components/shared/cluster"
 import LogoNavigation from "@/components/shared/logoNavigation"
 import Space from "@/components/shared/utils"
@@ -236,24 +235,19 @@ function MenuItem({ item, navigation, subtitle }: MenuItemProps): JSX.Element {
             <Cluster style={{ paddingHorizontal: 0 }}>
                 <View style={{
                     flexDirection: "row",
-                    alignItems: "center",
+                    alignItems: "flex-start",
                     paddingHorizontal: 14,
                     paddingVertical: 14,
                     gap: 12,
                 }}>
                     <View style={{
-                        width: 12,
-                        alignItems: "center",
-                        justifyContent: "center",
+                        width: 3,
+                        alignSelf: "stretch",
+                        borderRadius: 99,
+                        backgroundColor: theme.orange,
+                        opacity: 0.55,
+                        marginTop: 2,
                     }}>
-                        {item.nav === "NotificationScreen"
-                            ? <NotificationIcon position='left' />
-                            : <View style={{
-                                width: 6,
-                                height: 6,
-                                borderRadius: 10,
-                                backgroundColor: "rgba(253,135,56,0.7)",
-                            }} />}
                     </View>
                     <View style={{ flex: 1 }}>
                         <Text style={{ ...T.text20, color: theme.textColor, marginBottom: 4 }}>
