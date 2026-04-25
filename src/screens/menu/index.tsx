@@ -1,57 +1,62 @@
 import { nativeApplicationVersion } from "expo-application"
 import Feedback from "@/components/menu/feedback"
-import Cluster from "@/components/shared/cluster"
-import Space from "@/components/shared/utils"
-import CS from "@styles/clusterStyles"
-import GS from "@styles/globalStyles"
-import { useDispatch, useSelector } from "react-redux"
-import { JSX, useEffect, useState } from "react"
-import en from "@text/menu/en.json"
-import no from "@text/menu/no.json"
-import T from "@styles/text"
-import LogoNavigation from "@/components/shared/logoNavigation"
-import Text from "@components/shared/text"
-import { View, Image, TouchableOpacity, Dimensions, Platform } from "react-native"
-import { ItemProps, MenuProps, MenuStackParamList } from "@type/screenTypes"
-import { NavigationProp } from "@react-navigation/native"
 import NotificationIcon from "@components/notification/notificationIcon"
+import Cluster from "@/components/shared/cluster"
+import LogoNavigation from "@/components/shared/logoNavigation"
+import Space from "@/components/shared/utils"
 import Swipe from "@components/nav/swipe"
+import Text from "@components/shared/text"
+import { NavigationProp } from "@react-navigation/native"
+import { ItemProps, MenuProps, MenuStackParamList } from "@type/screenTypes"
 import { fetchAds, fetchEvents } from "@utils/fetch"
+import LastFetch from "@utils/fetch"
+import { JSX, useEffect, useMemo, useState } from "react"
+import { useDispatch, useSelector } from "react-redux"
+import { Image, ScrollView, TouchableOpacity, View } from "react-native"
 import { setAds, setLastFetch as setAdLastFetch } from "@redux/ad"
 import { setEvents, setLastFetch as setEventLastFetch } from "@redux/event"
-import LastFetch from "@utils/fetch"
+import GS from "@styles/globalStyles"
+import T from "@styles/text"
+import en from "@text/menu/en.json"
+import no from "@text/menu/no.json"
 
 type MenuItemProps = {
-    index: number
     item: ItemProps
-    navigation: NavigationProp<MenuStackParamList, 'MenuScreen'>
-    setting: SettingProps[]
-    feedback: boolean
-    toggleFeedback: () => void
-    login: boolean
+    navigation: NavigationProp<MenuStackParamList, "MenuScreen">
+    subtitle: string
 }
 
+type MenuDescriptionMap = Record<string, string>
 
-export default function MenuScreen({ navigation }: MenuProps<'MenuScreen'>): JSX.Element {
-
+export default function MenuScreen({ navigation }: MenuProps<"MenuScreen">): JSX.Element {
     const { lang } = useSelector((state: ReduxState) => state.lang)
     const { login } = useSelector((state: ReduxState) => state.login)
     const { theme } = useSelector((state: ReduxState) => state.theme)
     const events = useSelector((state: ReduxState) => state.event.events)
     const ads = useSelector((state: ReduxState) => state.ad.ads)
-    const { id, name, image } = useSelector((state: ReduxState) =>
-        state.profile)
-    const profile = { id, name, image }
+    const { name, image, degree, schoolyear } = useSelector((state: ReduxState) => state.profile)
     const text: Setting = lang ? no as Setting : en as Setting
-    const height = Dimensions.get("window").height
+    const versionLabel = `${(text as any).version}${nativeApplicationVersion}`
     const dispatch = useDispatch()
-
-    // Feedback options visibility boolean
     const [feedback, setFeedback] = useState(false)
 
-    // --- UPDATES FEEDBACK STATE ---
+    const descriptions = useMemo<MenuDescriptionMap>(() => ({
+        SettingScreen: lang ? "App, språk og varsler" : "App, language, and notification settings",
+        NotificationScreen: lang ? "Se siste varsler og oppdateringer" : "See your latest alerts and updates",
+        AboutScreen: lang ? "Les om Login, komiteene og folkene" : "Read about Login, the committees, and the people",
+        BusinessScreen: lang ? "Informasjon for bedrifter og samarbeid" : "Information for companies and partnerships",
+        CourseScreen: lang ? "Emner, eksamener og studentverktøy" : "Courses, exams, and student tools",
+        GameScreen: lang ? "Festspill og raske icebreakers" : "Party games and quick icebreakers",
+        AiScreen: lang ? "Chat med Login AI direkte i appen" : "Chat with Login AI directly in the app",
+        QueenbeeScreen: lang ? "Intern oversikt og administrative verktøy" : "Internal overview and administrative tools",
+        DashboardScreen: lang ? "Siste aktivitet og oppdateringer" : "Latest activity and updates",
+        StatusScreen: lang ? "Driftsstatus for Login sine tjenester" : "Operational status for Login's services",
+        SearchScreen: lang ? "Søk og åpne direkte fra appen" : "Search and open directly from the app",
+        MusicScreen: lang ? "Live musikkstatistikk fra Login" : "Live music statistics from Login",
+    }), [lang])
+
     function toggleFeedback() {
-        setFeedback(prevFeedback => !prevFeedback)
+        setFeedback((current) => !current)
     }
 
     useEffect(() => {
@@ -84,91 +89,189 @@ export default function MenuScreen({ navigation }: MenuProps<'MenuScreen'>): JSX
 
     return (
         <Swipe left="AdNav">
-            <View style={{
-                ...GS.content,
-                backgroundColor: theme.darker
-            }}>
-                <Space height={height / (Platform.OS === 'ios' ? 8 : height > 800 && height < 900 ? 6.5 : 8)} />
-                <TouchableOpacity onPress={() => navigation.navigate(login ? "LoginScreen" : "LoginScreen")}>
-                    <Cluster>
-                        <View>
-                            <Text style={{ ...T.text20, color: theme.textColor }}>
-                                {login ? "Connected" : "Connect Login"}
-                            </Text>
-                            <Text style={{ ...T.text15, color: theme.oppositeTextColor }}>
-                                {login ? "Queenbee unlocked" : "Sign in for Queenbee"}
-                            </Text>
-                        </View>
-                    </Cluster>
-                </TouchableOpacity>
-                <Space height={10} />
-                {/* <SmallProfile navigation={navigation} profile={profile} login={login} /> */}
-                {text.setting.map((item, index) => {
-                    if (item.nav === "ProfileScreen") {
-                        return null
-                    }
+            <View style={{ ...GS.content, backgroundColor: theme.darker }}>
+                <ScrollView
+                    showsVerticalScrollIndicator={false}
+                    contentContainerStyle={{
+                        paddingTop: 96,
+                        paddingBottom: 120,
+                    }}
+                >
+                    <TouchableOpacity
+                        onPress={() => navigation.navigate("ProfileScreen")}
+                        activeOpacity={0.9}
+                    >
+                        <Cluster style={{ paddingHorizontal: 0 }}>
+                            <View style={{
+                                paddingHorizontal: 14,
+                                paddingVertical: 16,
+                                flexDirection: "row",
+                                alignItems: "center",
+                                gap: 14,
+                            }}>
+                                <View style={{
+                                    width: 64,
+                                    height: 64,
+                                    borderRadius: 32,
+                                    overflow: "hidden",
+                                    backgroundColor: "rgba(253,135,56,0.12)",
+                                    alignItems: "center",
+                                    justifyContent: "center",
+                                }}>
+                                    {image ? (
+                                        <Image
+                                            source={{ uri: image }}
+                                            style={{ width: 64, height: 64, resizeMode: "cover" }}
+                                        />
+                                    ) : (
+                                        <ProfilePlaceholder />
+                                    )}
+                                </View>
+                                <View style={{ flex: 1 }}>
+                                    <Text style={{ ...T.text20, color: theme.textColor, marginBottom: 6 }}>
+                                        {login ? (name || (lang ? "Profil" : "Profile")) : (lang ? "Profil" : "Profile")}
+                                    </Text>
+                                    <Text style={{ ...T.text15, color: theme.oppositeTextColor }}>
+                                        {login
+                                            ? [schoolyear, degree].filter(Boolean).join(" · ")
+                                                || (lang ? "Konto og personlige verktøy" : "Account, and personal tools")
+                                            : (lang ? "Innlogging og kontoverktøy" : "Sign-in and account tools")}
+                                    </Text>
+                                </View>
+                                <Text style={{
+                                    ...T.text20,
+                                    color: theme.orange,
+                                    fontWeight: "700",
+                                }}>
+                                    ›
+                                </Text>
+                            </View>
+                        </Cluster>
+                    </TouchableOpacity>
 
-                    return (
-                        <MenuItem
-                            index={index}
-                            item={item}
-                            navigation={navigation}
+                    <Space height={14} />
+                    <Text style={{
+                        ...T.text15,
+                        color: theme.oppositeTextColor,
+                        letterSpacing: 0.5,
+                        textTransform: "uppercase",
+                        marginLeft: 4,
+                        marginBottom: 8,
+                    }}>
+                        {lang ? "Utforsk" : "Explore"}
+                    </Text>
+
+                    {text.setting.map((item) => {
+                        if (item.nav === "ProfileScreen") {
+                            return null
+                        }
+
+                        return (
+                            <MenuItem
+                                key={item.id}
+                                item={item}
+                                navigation={navigation}
+                                subtitle={descriptions[item.nav] || ""}
+                            />
+                        )
+                    })}
+
+                    <Space height={12} />
+                    <View style={{ alignItems: "center" }}>
+                        <Feedback
+                            index={text.setting.length - 1}
                             setting={text.setting}
                             feedback={feedback}
                             toggleFeedback={toggleFeedback}
-                            login={login}
-                            key={index}
                         />
-                    )
-                })}
-                <Space height={height / 10} />
+                        <TouchableOpacity onPress={() => navigation.navigate("InternalScreen")}>
+                            <Text style={{ ...T.contact, color: theme.oppositeTextColor }}>
+                                {versionLabel}
+                            </Text>
+                        </TouchableOpacity>
+                    </View>
+                </ScrollView>
             </View>
         </Swipe>
     )
 }
 
-function MenuItem({ index, item, navigation, setting, feedback, toggleFeedback }: MenuItemProps) {
-    const { lang } = useSelector((state: ReduxState) => state.lang)
+function ProfilePlaceholder(): JSX.Element {
+    return (
+        <View style={{
+            width: 64,
+            height: 64,
+            alignItems: "center",
+            justifyContent: "center",
+        }}>
+            <View style={{
+                width: 20,
+                height: 20,
+                borderRadius: 10,
+                backgroundColor: "rgba(255,255,255,0.14)",
+                marginBottom: 4,
+            }} />
+            <View style={{
+                width: 30,
+                height: 18,
+                borderTopLeftRadius: 16,
+                borderTopRightRadius: 16,
+                borderBottomLeftRadius: 10,
+                borderBottomRightRadius: 10,
+                backgroundColor: "rgba(255,255,255,0.10)",
+            }} />
+        </View>
+    )
+}
+
+function MenuItem({ item, navigation, subtitle }: MenuItemProps): JSX.Element {
     const { theme } = useSelector((state: ReduxState) => state.theme)
-    const info = lang ? no : en
-    const version = `${info.version}${nativeApplicationVersion}`
 
     return (
-        <View>
-            <TouchableOpacity onPress={() => navigation.navigate(item.nav as any)}>
-                <Cluster>
-                    <View style={{ ...CS.clusterBack }}>
-                        <View style={CS.twinLeft}>
-                            {item.nav === "NotificationScreen" && <NotificationIcon position="left" />}
-                            <Text style={{ ...T.text20, color: theme.textColor }}>
-                                {item.title}
-                            </Text>
-                        </View>
-                        <View style={CS.twinRight}>
-                            <Image
-                                style={CS.arrowImage}
-                                source={require("@assets/icons/dropdownBase.png")}
-                            />
-                        </View>
+        <TouchableOpacity
+            onPress={() => navigation.navigate(item.nav as any)}
+            activeOpacity={0.88}
+            style={{ marginBottom: 10 }}
+        >
+            <Cluster style={{ paddingHorizontal: 0 }}>
+                <View style={{
+                    flexDirection: "row",
+                    alignItems: "center",
+                    paddingHorizontal: 14,
+                    paddingVertical: 14,
+                    gap: 12,
+                }}>
+                    <View style={{
+                        width: 12,
+                        alignItems: "center",
+                        justifyContent: "center",
+                    }}>
+                        {item.nav === "NotificationScreen"
+                            ? <NotificationIcon position='left' />
+                            : <View style={{
+                                width: 6,
+                                height: 6,
+                                borderRadius: 10,
+                                backgroundColor: "rgba(253,135,56,0.7)",
+                            }} />}
                     </View>
-                </Cluster>
-            </TouchableOpacity>
-            <View>
-                <Space height={10} />
-                <Feedback
-                    index={index}
-                    setting={setting}
-                    feedback={feedback}
-                    toggleFeedback={toggleFeedback}
-                />
-            </View>
-            {index === setting.length - 1
-                ? <TouchableOpacity onPress={() => navigation.navigate('InternalScreen')}>
-                    <Text style={{ ...T.contact, color: theme.oppositeTextColor }}>
-                        {version}
+                    <View style={{ flex: 1 }}>
+                        <Text style={{ ...T.text20, color: theme.textColor, marginBottom: 4 }}>
+                            {item.title}
+                        </Text>
+                        <Text style={{ ...T.text15, color: theme.oppositeTextColor }}>
+                            {subtitle}
+                        </Text>
+                    </View>
+                    <Text style={{
+                        ...T.text20,
+                        color: theme.orange,
+                        fontWeight: "700",
+                    }}>
+                        ›
                     </Text>
-                </TouchableOpacity>
-                : null}
-        </View>
+                </View>
+            </Cluster>
+        </TouchableOpacity>
     )
 }

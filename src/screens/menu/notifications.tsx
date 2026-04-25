@@ -23,6 +23,13 @@ import { Swipeable } from 'react-native-gesture-handler'
 import TrashCan from "@components/menu/navigation"
 import { NotificationSeperator } from "@components/event/seperator"
 import T from "@styles/text"
+import {
+    getFirstReadIndex,
+    markNotificationsRead,
+    parseNotificationList,
+    pruneOldNotifications,
+    resolveNotificationTarget,
+} from "@utils/notification/list"
 
 type NotificationModalProps = {
     item: NotificationListProps
@@ -36,15 +43,10 @@ type NotificationModalProps = {
 
 type NotificationList = {
     list: NotificationListProps[]
-    getList: () => Promise<true | undefined>
     setList: React.Dispatch<React.SetStateAction<NotificationListProps[]>>
     hideOld: boolean
     setHideOld: React.Dispatch<React.SetStateAction<boolean>>
     readIndex: number
-}
-
-type ListProps = {
-    list: NotificationListProps[]
 }
 
 type ReadListProps = {
@@ -62,15 +64,14 @@ export default function NotificationScreen(): JSX.Element {
 
     async function getList() {
         const temp = await AsyncStorage.getItem("notificationList")
+        const storedList = parseNotificationList(temp)
+        const prunedList = pruneOldNotifications(storedList)
+        const nextList = markNotificationsRead(prunedList)
 
-        if (temp) {
-            const list = JSON.parse(temp)
-            setList(list)
-            findIndexOfFirstReadIfAny({ list, setReadIndex })
-            markListAsRead({ list })
-            removeOlderThanOneMonth({ list })
-            return true
-        }
+        setList(nextList)
+        findIndexOfFirstReadIfAny({ list: nextList, setReadIndex })
+        await AsyncStorage.setItem("notificationList", JSON.stringify(nextList))
+        return true
     }
 
     useEffect(() => {
@@ -79,12 +80,9 @@ export default function NotificationScreen(): JSX.Element {
 
     const onRefresh = useCallback(async () => {
         setRefresh(true)
-        const temp = await getList()
-
-        if (temp) {
-            setRefresh(false)
-        }
-    }, [refresh])
+        await getList()
+        setRefresh(false)
+    }, [])
 
     return (
         <Swipe left="MenuScreen">
@@ -98,7 +96,7 @@ export default function NotificationScreen(): JSX.Element {
                     >
                         <RefreshControl refreshing={refresh} onRefresh={onRefresh} />
                         {Array.isArray(list) && list.length
-                            ? <List list={list} getList={getList} setList={setList} hideOld={hideOld} setHideOld={setHideOld} readIndex={readIndex} />
+                            ? <List list={list} setList={setList} hideOld={hideOld} setHideOld={setHideOld} readIndex={readIndex} />
                             : <Text style={{ ...NS.error, color: theme.oppositeTextColor }}>
                                 {lang
                                     ? "Ingen varslinger. Kom tilbake senere."
@@ -120,72 +118,21 @@ function Notification({ item, list, id, setList, hideOld, setHideOld, readIndex 
     const swipeableRef = useRef<Swipeable | null>(null)
 
     function navigateIfPossible() {
-        if (!Object.keys(item.data).length) {
+        const target = resolveNotificationTarget(item.data)
+
+        if (target?.kind === 'ad') {
+            navigation.navigate("SpecificAdScreen", { adID: target.adID })
             return
         }
 
-        const id = Number(item.data.id)
-        const isAd = typeof item.data.title_no === 'string' || typeof item.data.title_en === 'string'
-        const isEvent = typeof item.data.name_no === 'string' || typeof item.data.name_en === 'string'
-
-        if (Number.isFinite(id) && isAd) {
-            navigation.navigate("SpecificAdScreen", { adID: id })
-            return
+        if (target?.kind === 'event') {
+            navigation.navigate("SpecificEventScreen", { eventID: target.eventID })
         }
-
-        if (Number.isFinite(id) && isEvent) {
-            navigation.navigate("SpecificEventScreen", { eventID: id })
-        }
-    }
-
-    function renderRightActions(_: any, dragX: any) {
-        const velocity = dragX._parent._a?._animation?._lastVelocity
-        let position = dragX._parent._a?._animation?._lastPosition
-
-        // Checks if the user is swiping to the right (without the intent of
-        // closing a notification delete indent) by checking speed and position change
-        if (velocity > 1500 || position > 150) {
-            navigation.navigate("MenuScreen")
-        }
-
-        // Checks if the user is trying to delete a notification, and if so deletes the notification
-        if (position < -Dimensions.get("window").width / 2) {
-            deleteNotification()
-            // Cannot use the position variable here since it does not update 
-            // in time, and deletes multiple notifications as a result
-            dragX._parent._a._animation._lastPosition = 0
-        }
-
-        const scale = dragX.interpolate({
-            inputRange: [-100, 0],
-            outputRange: [1, 0],
-            extrapolate: 'clamp',
-        })
-
-        // Note that this return statement is only for the trash icon, not for the notification itself
-        return (
-            <TouchableOpacity onPress={() => deleteNotification()}>
-                <View style={{
-                    minWidth: 70,
-                    backgroundColor: 'red',
-                    padding: 10,
-                    flexDirection: 'row',
-                    alignItems: 'center',
-                    justifyContent: 'flex-end',
-                    height: "100%"
-                }}>
-                    <Animated.View style={{ transform: [{ scale }] }}>
-                        <TrashCan />
-                    </Animated.View>
-                </View>
-            </TouchableOpacity>
-        )
     }
 
     async function deleteNotification() {
         // Copies the list to ensure that React detects the change since splice mutates the list undetectably.
-        const newList: NotificationListProps[] = [...list]
-        newList.splice(id, 1)
+        const newList = list.filter((_, index) => index !== id)
         setList(newList)
         await AsyncStorage.setItem("notificationList", JSON.stringify(newList))
         swipeableRef.current?.close()
@@ -211,7 +158,9 @@ function Notification({ item, list, id, setList, hideOld, setHideOld, readIndex 
         <>
             {id == readIndex && <DisplayPrevious />}
             <Swipeable
-                renderRightActions={renderRightActions}
+                renderRightActions={(_progress, dragX) => (
+                    <DeleteAction dragX={dragX} onDelete={deleteNotification} />
+                )}
                 ref={swipeableRef}
                 // Red background when deleting item
                 containerStyle={{ backgroundColor: "red" }}
@@ -222,6 +171,13 @@ function Notification({ item, list, id, setList, hideOld, setHideOld, readIndex 
                 // Removes borderRadius on close
                 onSwipeableWillClose={() => {
                     setIsSwiping(false)
+                }}
+                rightThreshold={Dimensions.get("window").width * 0.28}
+                overshootRight={false}
+                onSwipeableOpen={(direction) => {
+                    if (direction === 'right') {
+                        void deleteNotification()
+                    }
                 }}
             >
                 {/*
@@ -257,6 +213,10 @@ function Notification({ item, list, id, setList, hideOld, setHideOld, readIndex 
 function displayTime(time: string): string {
     const date = new Date(time)
     const currentTime = new Date()
+
+    if (Number.isNaN(date.getTime())) {
+        return ""
+    }
 
     // Calculate the time difference in milliseconds
     const timeDifference = currentTime.getTime() - date.getTime()
@@ -294,38 +254,34 @@ function List({ list, setList, hideOld, setHideOld, readIndex }: NotificationLis
 }
 
 function findIndexOfFirstReadIfAny({ list, setReadIndex }: ReadListProps): void {
-    for (let i = 0; i < list.length; i++) {
-        if (list[i].read == true) {
-            setReadIndex(i)
-            return
-        }
-    }
+    setReadIndex(getFirstReadIndex(list))
 }
 
-function markListAsRead({ list }: ListProps) {
-    if (list) {
-        for (let i = 0; i < list.length; i++) {
-            list[i].read = true
-        }
+function DeleteAction({ dragX, onDelete }: {
+    dragX: Animated.AnimatedInterpolation<number>
+    onDelete: () => void
+}): JSX.Element {
+    const scale = dragX.interpolate({
+        inputRange: [-100, 0],
+        outputRange: [1, 0],
+        extrapolate: 'clamp',
+    })
 
-        AsyncStorage.setItem('notificationList', JSON.stringify(list))
-    }
-}
-
-function removeOlderThanOneMonth({ list }: ListProps) {
-    if (list) {
-        const newList: NotificationListProps[] = [...list]
-        const now = new Date().getTime()
-        const oneMonth = 2592000
-
-        for (let i = 0; i < list.length; i++) {
-            const isMoreThanAMonthAway = now - new Date(list[i].time).getTime() > oneMonth
-
-            if (isMoreThanAMonthAway) {
-                newList.splice(i, 1)
-            }
-        }
-
-        AsyncStorage.setItem('notificationList', JSON.stringify(newList))
-    }
+    return (
+        <TouchableOpacity onPress={onDelete}>
+            <View style={{
+                minWidth: 70,
+                backgroundColor: 'red',
+                padding: 10,
+                flexDirection: 'row',
+                alignItems: 'center',
+                justifyContent: 'flex-end',
+                height: "100%"
+            }}>
+                <Animated.View style={{ transform: [{ scale }] }}>
+                    <TrashCan />
+                </Animated.View>
+            </View>
+        </TouchableOpacity>
+    )
 }

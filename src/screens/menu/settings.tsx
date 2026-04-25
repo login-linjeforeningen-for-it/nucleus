@@ -39,6 +39,83 @@ export default function SettingScreen(): JSX.Element {
     )
 }
 
+function SectionHeader({ title }: { title: string }) {
+    const { theme } = useSelector((state: ReduxState) => state.theme)
+
+    return (
+        <View style={{ marginBottom: 8 }}>
+            <Text style={{
+                ...T.text18,
+                color: theme.orange,
+                letterSpacing: 0.3,
+            }}>
+                {title}
+            </Text>
+        </View>
+    )
+}
+
+function SettingRow({
+    title,
+    description,
+    control,
+}: {
+    title: string
+    description?: string
+    control: JSX.Element
+}) {
+    const { theme } = useSelector((state: ReduxState) => state.theme)
+
+    return (
+        <Cluster marginHorizontal={0}>
+            <View style={{
+                ...GS.notificationBack,
+                paddingVertical: 4,
+            }}>
+                <View style={{
+                    width: 3,
+                    alignSelf: "stretch",
+                    borderRadius: 99,
+                    backgroundColor: theme.orange,
+                    marginRight: 10,
+                    opacity: 0.75,
+                }} />
+                <View style={{
+                    flex: 1,
+                    minWidth: 0,
+                }}>
+                    <Text style={{
+                        ...T.text18,
+                        color: theme.textColor
+                    }}>
+                        {title}
+                    </Text>
+                    {description ? (
+                        <Text style={{
+                            ...T.text12,
+                            color: theme.oppositeTextColor,
+                            lineHeight: 17,
+                            marginTop: 2,
+                        }}>
+                            {description}
+                        </Text>
+                    ) : null}
+                </View>
+                <View style={{
+                    ...GS.view2,
+                    minWidth: 52,
+                    marginLeft: 12,
+                    alignSelf: "center",
+                    alignItems: "center",
+                    justifyContent: "center",
+                }}>
+                    {control}
+                </View>
+            </View>
+        </Cluster>
+    )
+}
+
 function Content(): JSX.Element {
     const { theme } = useSelector((state: ReduxState) => state.theme)
     const { lang } = useSelector((state: ReduxState) => state.lang)
@@ -49,54 +126,23 @@ function Content(): JSX.Element {
     return (
         <ScrollView showsVerticalScrollIndicator={false}>
             <Space height={Dimensions.get("window").height / 8.1 + extraHeight} />
-            <Cluster marginHorizontal={0}>
-                <View style={GS.notificationBack}>
-                    <View style={GS.view}>
-                        <Text style={{
-                            ...GS.notificationText,
-                            color: theme.textColor
-                        }}>
-                            {info[0].title}
-                        </Text>
-                        <Text style={{
-                            ...GS.notificationTip,
-                            color: theme.oppositeTextColor
-                        }}>
-                            {info[0].description}
-                        </Text>
-                    </View>
-                    <View style={GS.view2}><ThemeSwitch /></View>
-                </View>
-            </Cluster>
+            <SettingRow
+                title={info[0].title}
+                description={info[0].description}
+                control={<ThemeSwitch />}
+            />
 
-            <Cluster>
-                <View style={GS.notificationBack}>
-                    <View style={GS.view}>
-                        <Text style={{ ...GS.notificationText, color: theme.textColor }}>
-                            {info[1].title}
-                        </Text>
-                        <Text style={{
-                            ...GS.notificationTip,
-                            color: theme.oppositeTextColor
-                        }}>
-                            {info[1].description}
-                        </Text>
-                    </View>
-                    <Language />
-                </View>
-            </Cluster>
+            <SettingRow
+                title={info[1].title}
+                description={info[1].description}
+                control={<Language />}
+            />
 
-            <Space height={10} />
-            <Text style={{ ...T.text30, color: theme.oppositeTextColor }}>
-                {info[2].title}
-            </Text>
-            <Space height={10} />
+            <Space height={12} />
+            <SectionHeader title={info[2].title} />
             <SwitchCluster obj={info[3]} category="IMPORTANT" />
-            <Space height={10} />
-            <Text style={{ ...T.text25, color: theme.oppositeTextColor }}>
-                {info[4].title}
-            </Text>
-            <Space height={10} />
+            <Space height={12} />
+            <SectionHeader title={info[4].title} />
             <SwitchCluster obj={info[5]} category="BEDPRES" />
             <SwitchCluster obj={info[6]} category="TEKKOM" />
             <SwitchCluster obj={info[7]} category="CTF" />
@@ -106,11 +152,8 @@ function Content(): JSX.Element {
             <SwitchCluster obj={info[11]} category="LOGIN" />
             <SwitchCluster obj={info[12]} category="ANNET" />
 
-            <Space height={10} />
-            <Text style={{ ...T.text25, color: theme.oppositeTextColor }}>
-                {info[13].title}
-            </Text>
-            <Space height={10} />
+            <Space height={12} />
+            <SectionHeader title={info[13].title} />
             <Reminders />
             <Space height={Dimensions.get("window").height / (Platform.OS === 'ios' ? 6 : 7)} />
         </ScrollView>
@@ -121,25 +164,51 @@ function SwitchCluster({ obj, category }: ClusterWithSwitchProps) {
     const { theme } = useSelector((state: ReduxState) => state.theme)
 
     return (
-        <Cluster>
-            <View style={GS.notificationBack}>
-                <View style={GS.view}>
-                    <Text style={{
-                        ...GS.notificationText,
-                        color: theme.textColor
+        <View style={{ marginBottom: 8 }}>
+            <Cluster marginHorizontal={0}>
+                <View style={{
+                    ...GS.notificationBack,
+                    paddingVertical: 4,
+                }}>
+                    <View style={{
+                        width: 3,
+                        alignSelf: "stretch",
+                        borderRadius: 99,
+                        backgroundColor: theme.orange,
+                        marginRight: 10,
+                        opacity: 0.45,
+                    }} />
+                    <View style={{
+                        flex: 1,
+                        minWidth: 0,
                     }}>
-                        {obj.title}
-                    </Text>
-                    <Text style={{
-                        ...GS.notificationTip,
-                        color: theme.oppositeTextColor
+                        <Text style={{
+                            ...T.text16,
+                            color: theme.textColor
+                        }}>
+                            {obj.title}
+                        </Text>
+                        <Text style={{
+                            ...T.text12,
+                            color: theme.oppositeTextColor,
+                            lineHeight: 17,
+                            marginTop: 2,
+                        }}>
+                            {obj.description}
+                        </Text>
+                    </View>
+                    <View style={{
+                        ...GS.view2,
+                        minWidth: 52,
+                        marginLeft: 12,
+                        alignSelf: "center",
+                        alignItems: "center",
+                        justifyContent: "center",
                     }}>
-                        {obj.description}
-                    </Text>
+                        <Notification category={category} />
+                    </View>
                 </View>
-                <Notification category={category} />
-            </View>
-            <Space height={5} />
-        </Cluster>
+            </Cluster>
+        </View>
     )
 }

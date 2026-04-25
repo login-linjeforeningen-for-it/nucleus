@@ -70,9 +70,31 @@ export default function AdInfo({ ad }: { ad: GetJobProps | undefined }) {
  * @returns               Small banner image
  */
 export function AdBanner({ url }: { url: string | null }) {
+    const [ratio, setRatio] = useState(5 / 2)
+
+    useEffect(() => {
+        if (!url || url.endsWith(".svg")) {
+            return
+        }
+
+        const sourceUrl = validFileType(url) && !url.startsWith("http")
+            ? `${config.cdn}/jobs/${url}`
+            : url
+
+        if (!sourceUrl) {
+            return
+        }
+
+        Image.getSize(sourceUrl, (width, height) => {
+            if (width > 0 && height > 0) {
+                setRatio(width / height)
+            }
+        })
+    }, [url])
+
     if (!url) return null
 
-    if (url?.endsWith(".svg")) {
+    if (url.endsWith(".svg")) {
         return <SvgUri
             style={{ alignSelf: "center", backgroundColor: "white" }}
             width={(Dimensions.get("window").width) / 1.2}
@@ -81,30 +103,20 @@ export function AdBanner({ url }: { url: string | null }) {
         />
     }
 
-    if (validFileType(url) && !url?.startsWith("http")) {
-        const [width, setWidth] = useState(1)
-        const [height, setHeight] = useState(1)
-
-        useEffect(() => {
-            Image.getSize(`${config.cdn}/jobs/${url}`, (width, height) => {
-                setWidth(width)
-                setHeight(height)
-            })
-        }), [url]
-
+    if (validFileType(url) && !url.startsWith("http")) {
         return <Image
-            style={{ ...AS.adBanner, aspectRatio: width / height }}
-            source={{ uri: `${config.cdn}/jobs/${url}` }}
+            style={{ ...AS.adBanner, aspectRatio: ratio, borderRadius: 18 }}
+            source={{ uri: `${config.cdn}/jobs/${url}`, cache: "force-cache" }}
         />
     }
 
-    if (validFileType(url) && url?.includes("http")) {
-        return <Image style={AS.adBanner} source={{ uri: url }} />
+    if (validFileType(url) && url.includes("http")) {
+        return <Image style={{ ...AS.adBanner, aspectRatio: ratio, borderRadius: 18 }} source={{ uri: url, cache: "force-cache" }} />
     }
 
     return <Image
-        style={AS.adBanner}
-        source={{ uri: `${config.cdn}/jobs/adbanner.png` }}
+        style={{ ...AS.adBanner, aspectRatio: ratio, borderRadius: 18 }}
+        source={{ uri: `${config.cdn}/jobs/adbanner.png`, cache: "force-cache" }}
     />
 }
 
@@ -358,4 +370,3 @@ function InfoView({ titleNO, titleEN, text }: InfoViewProps) {
         </View>
     )
 }
-

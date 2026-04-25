@@ -22,6 +22,8 @@ type GameContentProps = {
     game: Question | NeverHaveIEver | OkRedFlagDealBreaker
 }
 
+type CategorizedGame = Question | NeverHaveIEver | OkRedFlagDealBreaker
+
 type NavState = {
     dataIndex: number
     uxIndex: number
@@ -77,7 +79,7 @@ export default function Swiper({ game, mode, school, ntnu }: GameListContentProp
                 const boundary = isForward ? game.length : -1
 
                 while (i !== boundary) {
-                    const item = game[i] as any
+                    const item = game[i] as CategorizedGame
 
                     if (mode === 0 && item.categories.includes('Wild')) {
                         i += step

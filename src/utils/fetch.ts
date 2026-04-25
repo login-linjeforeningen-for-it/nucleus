@@ -85,11 +85,16 @@ export async function fetchAds(): Promise<GetJobProps[]> {
 export async function fetchAdDetails(adID: number): Promise<GetJobProps | null> {
     try {
         const response = await fetch(`${config.api}/jobs/${adID}`)
+        if (!response.ok) {
+            throw new Error("Failed to fetch ad details from API")
+        }
 
         // Dev
         // const response = await fetch(`${testapi}jobs/${ad.id}`)
         const adDetails = await response.json()
-        return adDetails
+        return adDetails && typeof adDetails === "object" && typeof adDetails.id === "number"
+            ? adDetails as GetJobProps
+            : null
     } catch (error) {
         return null
     }

@@ -4,9 +4,10 @@ import T from "./text"
 export const SS = StyleSheet.create({
     // lightSwitchImage in notificationScreen
     lightSwitchImage: {
-        left: "-23%",
         aspectRatio: 1 / 1,
-        height: 100,
+        height: 72,
+        width: 72,
+        alignSelf: "center",
     },
     // langSwitch text style in notificationScreen
     langSwitch: {

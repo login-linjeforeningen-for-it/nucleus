@@ -171,6 +171,40 @@ type GetVulnerabilities = {
     scanStatus: DockerScoutScanStatus
 }
 
+type LogEntry = {
+    fingerprint: string
+    raw: string
+    message: string
+    level: string
+    timestamp: string | null
+    isError: boolean
+    structured: boolean
+}
+
+type LogContainer = {
+    id: string
+    name: string
+    service: string
+    status: string
+    sourceType: 'container' | 'journal' | 'file' | 'history' | 'deployment'
+    matchedLines: number
+    entries: LogEntry[]
+}
+
+type LogsPayload = {
+    server: string
+    checkedAt: string
+    filters: {
+        service?: string
+        container?: string
+        search?: string
+        level: 'all' | 'error'
+        tail: number
+    }
+    totalContainers: number
+    containers: LogContainer[]
+}
+
 // Jobs
 type Job = {
     visible: boolean
@@ -509,7 +543,7 @@ type NotificationProps = {
 type NotificationListProps = {
     title: string
     body: string
-    data: DetailedEvent
+    data: Record<string, unknown>
     time: string
     id: number
     read?: boolean

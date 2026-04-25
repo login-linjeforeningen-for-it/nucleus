@@ -3,7 +3,8 @@ import T from "./text"
 
 export const AS = StyleSheet.create({
     content: {
-        height: Dimensions.get("window").height + 200,
+        flex: 1,
+        minHeight: "100%",
     },
     adBack: {
         flexDirection: "row",

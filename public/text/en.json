@@ -11,6 +11,94 @@
         "LoginScreen": "Login",
         "InternalScreen": "Internal",
         "ProfileScreen": "Profile",
-        "GameScreen": "Games"
+        "GameScreen": "Games",
+        "AiScreen": "Login AI",
+        "QueenbeeScreen": "Queenbee",
+        "SearchScreen": "Search",
+        "StatusScreen": "Status",
+        "MusicScreen": "Music",
+        "DashboardScreen": "Dashboard",
+        "LoadBalancingScreen": "Load balancing",
+        "DatabaseScreen": "Databases",
+        "VulnerabilitiesScreen": "Vulnerabilities",
+        "LogsScreen": "Logs"
+    },
+    "search": {
+        "intro": "Search from the app and preview the motion before it opens.",
+        "placeholder": "Search for anything...",
+        "missingQueryTitle": "Missing query",
+        "missingQueryBody": "Write something first.",
+        "copiedTitle": "Copied",
+        "copiedBody": "Search animation link copied to clipboard.",
+        "typingFallback": "...",
+        "opening": "Opening search...",
+        "openAnimation": "Open animation",
+        "tapToCopy": "Tap to copy"
+    },
+    "music": {
+        "intro": "Have you ever wondered what Login is listening to? Here is the answer!",
+        "failedToLoad": "Failed to load music",
+        "stats": {
+            "totalMinutes": "Total minutes",
+            "thisYear": "This year",
+            "songsPlayed": "Songs played",
+            "averageLength": "Average length",
+            "minutesShort": "min"
+        },
+        "sections": {
+            "playingNow": "Playing now",
+            "topToday": "Top today",
+            "topThisWeek": "Top this week",
+            "topThisMonth": "Top this month"
+        },
+        "metrics": {
+            "plays": "plays",
+            "listener": "listener",
+            "listeners": "listeners"
+        }
+    },
+    "status": {
+        "intro": "See whether Login's services are healthy right now, and how they have behaved over the latest checks.",
+        "failedToLoad": "Failed to load status",
+        "noUrl": "No URL",
+        "healthy": "Healthy",
+        "issue": "Issue",
+        "uptime": "Uptime",
+        "response": "Response",
+        "noDelay": "No delay",
+        "ms": "ms"
+    },
+    "games": {
+        "intro": "Pick a game and have fun.",
+        "featured": "Featured",
+        "library": "Game library",
+        "diceTitle": "Dice",
+        "diceBody": "A simple choice that suits most events.",
+        "communityDeck": "Community deck",
+        "tapToOpen": "Open"
+    },
+    "ai": {
+        "workspaceLoading": "Preparing AI workspace...",
+        "connectingFastest": "Connecting you to the fastest available model.",
+        "socketDisconnected": "AI socket disconnected.",
+        "failedWorkspace": "Failed to load AI workspace.",
+        "failedOpenConversation": "Failed to open conversation.",
+        "failedCreateConversation": "Failed to create conversation.",
+        "failedSwitchModel": "Failed to switch model.",
+        "modelFailed": "The model failed to answer.",
+        "conversations": "Chats",
+        "newConversation": "New conversation",
+        "currentConversation": "Current conversation",
+        "composerPlaceholder": "Ask Login AI...",
+        "typing": "...",
+        "preparingConversation": "Preparing your conversation history.",
+        "temporaryConversation": "Starting a temporary conversation. Sign in later if you want to keep it with your account.",
+        "copiedTitle": "Copied",
+        "copiedBody": "Message copied to clipboard.",
+        "status": {
+            "idle": "Idle",
+            "busy": "Busy",
+            "offline": "Offline"
+        }
     }
 }

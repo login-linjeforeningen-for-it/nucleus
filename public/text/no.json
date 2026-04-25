@@ -11,6 +11,94 @@
         "LoginScreen": "Login",
         "InternalScreen": "Vedlikehold",
         "ProfileScreen": "Profil",
-        "GameScreen": "Spill"
+        "GameScreen": "Spill",
+        "AiScreen": "Login AI",
+        "QueenbeeScreen": "Queenbee",
+        "SearchScreen": "Søk",
+        "StatusScreen": "Status",
+        "MusicScreen": "Musikk",
+        "DashboardScreen": "Dashboard",
+        "LoadBalancingScreen": "Lastbalansering",
+        "DatabaseScreen": "Databaser",
+        "VulnerabilitiesScreen": "Sårbarheter",
+        "LogsScreen": "Logger"
+    },
+    "search": {
+        "intro": "Søk fra appen og se animasjonen før den åpnes.",
+        "placeholder": "Søk etter hva som helst...",
+        "missingQueryTitle": "Mangler søk",
+        "missingQueryBody": "Skriv noe først.",
+        "copiedTitle": "Kopiert",
+        "copiedBody": "Søkelenken ble kopiert til utklippstavlen.",
+        "typingFallback": "...",
+        "opening": "Åpner søk...",
+        "openAnimation": "Åpne animasjon",
+        "tapToCopy": "Trykk for å kopiere"
+    },
+    "music": {
+        "intro": "Har du noen gang lurt på hva Login hører på? Her er svaret!",
+        "failedToLoad": "Kunne ikke laste musikk",
+        "stats": {
+            "totalMinutes": "Totale minutter",
+            "thisYear": "I år",
+            "songsPlayed": "Spilte sanger",
+            "averageLength": "Gjennomsnittslengde",
+            "minutesShort": "min"
+        },
+        "sections": {
+            "playingNow": "Spilles nå",
+            "topToday": "Topp i dag",
+            "topThisWeek": "Topp denne uken",
+            "topThisMonth": "Topp denne måneden"
+        },
+        "metrics": {
+            "plays": "avspillinger",
+            "listener": "lytter",
+            "listeners": "lyttere"
+        }
+    },
+    "status": {
+        "intro": "Se om Login sine tjenester er friske akkurat nå, og hvordan de har oppført seg i det siste.",
+        "failedToLoad": "Kunne ikke laste status",
+        "noUrl": "Ingen URL",
+        "healthy": "Frisk",
+        "issue": "Problem",
+        "uptime": "Oppetid",
+        "response": "Respons",
+        "noDelay": "Ingen forsinkelse",
+        "ms": "ms"
+    },
+    "games": {
+        "intro": "Velg et spill, og ha det gøy.",
+        "featured": "Utvalgt",
+        "library": "Spillbibliotek",
+        "diceTitle": "Terning",
+        "diceBody": "Et enkelt valg som passer til det meste.",
+        "communityDeck": "Felles kortstokk",
+        "tapToOpen": "Åpne"
+    },
+    "ai": {
+        "workspaceLoading": "Gjør klar AI-arbeidsområdet...",
+        "connectingFastest": "Kobler deg til den raskeste tilgjengelige modellen.",
+        "socketDisconnected": "AI-tilkoblingen ble brutt.",
+        "failedWorkspace": "Kunne ikke laste AI-arbeidsområdet.",
+        "failedOpenConversation": "Kunne ikke åpne samtalen.",
+        "failedCreateConversation": "Kunne ikke opprette samtalen.",
+        "failedSwitchModel": "Kunne ikke bytte modell.",
+        "modelFailed": "Modellen klarte ikke å svare.",
+        "conversations": "Samtaler",
+        "newConversation": "Ny samtale",
+        "currentConversation": "Aktiv samtale",
+        "composerPlaceholder": "Spør Login AI...",
+        "typing": "...",
+        "preparingConversation": "Gjør klar samtalehistorikken din.",
+        "temporaryConversation": "Starter en midlertidig samtale. Logg inn senere hvis du vil beholde den på kontoen din.",
+        "copiedTitle": "Kopiert",
+        "copiedBody": "Meldingen ble kopiert til utklippstavlen.",
+        "status": {
+            "idle": "Klar",
+            "busy": "Opptatt",
+            "offline": "Frakoblet"
+        }
     }
 }

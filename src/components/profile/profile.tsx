@@ -18,7 +18,7 @@ type SmallProfileImageProps = {
 type MainProfileInfoProps = {
     show: boolean
     profile: ProfileProps
-    year: string
+    year: string | null
 }
 
 /**
@@ -55,7 +55,7 @@ export default function Profile({profile} : ProfileElementprops) {
         case "10": y = yearArray[9]; break
     }
 
-    const year = y + " "
+    const year = y ? `${y} ` : null
 
     function handlePress() {
         setShow(true)
@@ -84,19 +84,39 @@ export default function Profile({profile} : ProfileElementprops) {
 }
 
 function SmallProfileImage({show, profile}: SmallProfileImageProps) {
-    const { isDark } = useSelector((state: ReduxState) => state.theme)
-    
     return (
         <View style={PS.smallProfileImageView}>
             {!show &&
-                <Image
-                    style={PS.midProfileImage}
-                    source={profile.image
-                        ? {uri: profile.image}
-                        : isDark
-                            ? require("@assets/icons/loginperson-white.png")
-                            : require("@assets/icons/loginperson-black.png")}
-                />
+                (profile.image ? (
+                    <Image
+                        style={PS.midProfileImage}
+                        source={{uri: profile.image}}
+                    />
+                ) : (
+                    <View style={{
+                        ...PS.midProfileImage,
+                        alignItems: "center",
+                        justifyContent: "center",
+                        backgroundColor: "rgba(255,255,255,0.04)",
+                    }}>
+                        <View style={{
+                            width: 28,
+                            height: 28,
+                            borderRadius: 14,
+                            backgroundColor: "rgba(255,255,255,0.14)",
+                            marginBottom: 6,
+                        }} />
+                        <View style={{
+                            width: 40,
+                            height: 24,
+                            borderTopLeftRadius: 18,
+                            borderTopRightRadius: 18,
+                            borderBottomLeftRadius: 12,
+                            borderBottomRightRadius: 12,
+                            backgroundColor: "rgba(255,255,255,0.10)",
+                        }} />
+                    </View>
+                ))
             }
         </View>
     )
@@ -105,22 +125,35 @@ function SmallProfileImage({show, profile}: SmallProfileImageProps) {
 function MainProfileInfo({show, profile, year}: MainProfileInfoProps) {
     const { theme } = useSelector((state: ReduxState) => state.theme)
     const { lang } = useSelector((state: ReduxState) => state.lang)
+    const studyLine = [year?.trim(), profile.degree].filter(Boolean).join(" · ")
+    const metaParts = [
+        profile.id ? `ID: ${profile.id}` : null,
+        profile.joinedevents
+            ? `${profile.joinedevents} ${lang ? "Arrangementer" : "Events"}`
+            : null
+    ].filter(Boolean)
 
     if (!show) return (
         <>
             <Text style={{...T.text20, color: theme.textColor}}>
                 {profile.name}
             </Text>
-            <Space height={5} />
-            <Text style={{...T.text15,color: theme.oppositeTextColor}}>
-                {year + profile.degree}
-            </Text>
-            <Space height={5} />
-            <Text style={{ ...T.text15, color: theme.oppositeTextColor}}>
-                ID: {profile.id} · {profile.joinedevents} {lang 
-                    ? "Arrangementer"
-                    : "Events"}
-            </Text>
+            {studyLine ? (
+                <>
+                    <Space height={5} />
+                    <Text style={{...T.text15,color: theme.oppositeTextColor}}>
+                        {studyLine}
+                    </Text>
+                </>
+            ) : null}
+            {metaParts.length ? (
+                <>
+                    <Space height={5} />
+                    <Text style={{ ...T.text15, color: theme.oppositeTextColor}}>
+                        {metaParts.join(" · ")}
+                    </Text>
+                </>
+            ) : null}
         </>
     )
 }

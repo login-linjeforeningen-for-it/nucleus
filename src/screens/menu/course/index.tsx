@@ -1,6 +1,5 @@
 import Cluster from "@/components/shared/cluster"
 import Space from "@/components/shared/utils"
-import CS from "@styles/clusterStyles"
 import GS from "@styles/globalStyles"
 import { useSelector } from "react-redux"
 import T from "@styles/text"
@@ -62,6 +61,7 @@ export default function CourseScreen({ navigation }: MenuProps<'CourseScreen'>):
                             navigation={navigation} 
                         />
                     )}
+                    <Space height={Dimensions.get("window").height / 8.5} />
                 </ScrollView>
             </View>
         </Swipe>
@@ -70,23 +70,53 @@ export default function CourseScreen({ navigation }: MenuProps<'CourseScreen'>):
 
 function CourseList({ course, navigation }: CourseListProps): JSX.Element {
     const { theme } = useSelector((state: ReduxState) => state.theme)
+    const { lang } = useSelector((state: ReduxState) => state.lang)
 
     function handlePress() {
         navigation.navigate("SpecificCourseScreen", { code: course.code, id: course.id })
     }
 
     return (
-        <TouchableOpacity style={{ marginBottom: 6 }} onPress={handlePress}>
-            <Cluster>
-                <View style={{...CS.clusterBack}}>
-                    <View style={CS.twinLeft}>
-                        <Text style={{...T.text20, color: theme.textColor}}>
+        <TouchableOpacity style={{ marginBottom: 8 }} onPress={handlePress}>
+            <Cluster marginHorizontal={0}>
+                <View style={{
+                    ...GS.notificationBack,
+                    paddingVertical: 4,
+                }}>
+                    <View style={{
+                        width: 3,
+                        alignSelf: "stretch",
+                        borderRadius: 99,
+                        backgroundColor: theme.orange,
+                        marginRight: 10,
+                        opacity: 0.45,
+                    }} />
+                    <View style={{ flex: 1, minWidth: 0 }}>
+                        <Text style={{ ...T.text18, color: theme.textColor }}>
                             {course.code}
                         </Text>
+                        <Text style={{
+                            ...T.text12,
+                            color: theme.oppositeTextColor,
+                            marginTop: 2,
+                        }}>
+                            {course.count} {lang ? "spørsmål" : "questions"}
+                        </Text>
                     </View>
-                    <View style={CS.twinRight}>
+                    <View style={{
+                        minWidth: 28,
+                        marginLeft: 12,
+                        alignSelf: "center",
+                        alignItems: "center",
+                        justifyContent: "center",
+                    }}>
                         <Image
-                            style={CS.arrowImage}
+                            style={{
+                                height: 14,
+                                width: 14,
+                                resizeMode: "contain",
+                                tintColor: theme.orange,
+                            }}
                             source={require("@assets/icons/dropdownBase.png")}
                         />
                     </View>

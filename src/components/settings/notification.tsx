@@ -19,8 +19,12 @@ export default function Notification({ category, skip }: NotificationProps) {
     // Fetches states
     const notification = useSelector((state: ReduxState) => state.notification)
     const { lang } = useSelector((state: ReduxState) => state.lang)
-    const { theme } = useSelector((state: ReduxState) => state.theme)
+    const { theme, isDark } = useSelector((state: ReduxState) => state.theme)
     const dispatch = useDispatch()
+    const inactiveThumbColor = isDark ? "#2F241C" : "#47352A"
+    const inactiveTrackColor = isDark ? theme.trackBackgroundColor : "#1A1A1A"
+    const activeThumbColor = isDark ? "#E07A36" : "#D97534"
+    const activeTrackColor = isDark ? "rgba(253, 135, 56, 0.22)" : "rgba(253, 135, 56, 0.18)"
 
     if (!skip) {
         topic({ lang, notification, dispatch })
@@ -29,12 +33,12 @@ export default function Notification({ category, skip }: NotificationProps) {
     return (
         <View>
             <Switch
-                trackColor={{ true: theme.trackColor }}
+                trackColor={{ false: inactiveTrackColor, true: activeTrackColor }}
                 thumbColor={notification[category][0]
-                    ? theme.switchOffState
-                    : theme.switchOnState
+                    ? activeThumbColor
+                    : inactiveThumbColor
                 }
-                ios_backgroundColor={theme.trackBackgroundColor}
+                ios_backgroundColor={inactiveTrackColor}
                 onValueChange={(value) => {
                     dispatch(changeNotificationState({ value, category }))
                 }}

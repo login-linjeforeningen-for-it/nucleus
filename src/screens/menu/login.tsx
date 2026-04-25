@@ -26,59 +26,101 @@ export default function LoginScreen({ navigation }: MenuProps<"LoginScreen">): J
     }
 
     return (
-        <ScrollView>
-            <Swipe left="MenuScreen">
-                <View style={{ ...GS.content, backgroundColor: theme.darker }}>
+        <Swipe left="MenuScreen">
+            <View style={{ flex: 1, backgroundColor: theme.darker }}>
+                <ScrollView
+                    style={GS.content}
+                    contentContainerStyle={{ paddingBottom: 40 }}
+                    showsVerticalScrollIndicator={false}
+                >
                     <Space height={Dimensions.get("window").height / 8.1} />
                     <Cluster>
-                        <Text style={{ ...T.centeredBold20, color: theme.textColor }}>
-                            {login ? "Connected to Login" : "Connect your Login account"}
-                        </Text>
-                    </Cluster>
-                    <Space height={16} />
-                    <Cluster>
-                        <Text style={{ ...T.centered15, color: theme.oppositeTextColor }}>
-                            {login
-                                ? `${name || "Unknown user"} · ${mail || "No email"}`
-                                : "Sign in to unlock Queenbee and internal tools. Login AI is available without signing in."}
-                        </Text>
+                        <View style={{ padding: 12 }}>
+                            <Text style={{ ...T.centeredBold20, color: theme.textColor }}>
+                                {login ? "Connected to Login" : "Connect your Login account"}
+                            </Text>
+                            <Space height={8} />
+                            <Text style={{ ...T.centered15, color: theme.oppositeTextColor }}>
+                                {login
+                                    ? `${name || "Unknown user"} · ${mail || "No email"}`
+                                    : "Sign in to unlock your profile, Queenbee tools, and internal workflows. Login AI is open for everyone."}
+                            </Text>
+                        </View>
                     </Cluster>
                     <Space height={20} />
                     <TouchableOpacity onPress={() => navigation.navigate("AiScreen")}>
-                        <Cluster>
+                        <View style={{
+                            borderRadius: 18,
+                            borderWidth: 1,
+                            borderColor: "#fd873844",
+                            backgroundColor: "#fd873814",
+                            padding: 14
+                        }}>
                             <Text style={{ ...T.centered20, color: theme.textColor }}>
                                 Open Login AI
                             </Text>
-                        </Cluster>
+                        </View>
                     </TouchableOpacity>
                     <Space height={12} />
-                    <TouchableOpacity onPress={() => login ? navigation.navigate("AdminScreen") : startLogin("queenbee")}>
-                        <Cluster>
+                    {login && (
+                        <>
+                            <TouchableOpacity onPress={() => navigation.navigate("ProfileScreen")}>
+                                <View style={{
+                                    borderRadius: 18,
+                                    borderWidth: 1,
+                                    borderColor: "#ffffff12",
+                                    backgroundColor: theme.contrast,
+                                    padding: 14
+                                }}>
+                                    <Text style={{ ...T.centered20, color: theme.textColor }}>
+                                        Open profile
+                                    </Text>
+                                </View>
+                            </TouchableOpacity>
+                            <Space height={12} />
+                        </>
+                    )}
+                    <TouchableOpacity onPress={() => login ? navigation.navigate("QueenbeeScreen") : startLogin("queenbee")}>
+                        <View style={{
+                            borderRadius: 18,
+                            borderWidth: 1,
+                            borderColor: "#ffffff12",
+                            backgroundColor: theme.contrast,
+                            padding: 14
+                        }}>
                             <Text style={{ ...T.centered20, color: theme.textColor }}>
-                                {login ? "Open admin tools" : "Sign in for admin tools"}
+                                {login ? "Open Queenbee" : "Sign in for Queenbee"}
                             </Text>
-                        </Cluster>
+                        </View>
                     </TouchableOpacity>
                     {login && (
                         <>
                             <Space height={20} />
                             <Cluster>
-                                <Text style={{ ...T.centered15, color: theme.oppositeTextColor }}>
-                                    {groups.length ? `Groups: ${groups.join(", ")}` : "No groups reported"}
-                                </Text>
+                                <View style={{ padding: 12 }}>
+                                    <Text style={{ ...T.centered15, color: theme.oppositeTextColor }}>
+                                        {groups.length ? `Groups: ${groups.join(", ")}` : "No groups reported"}
+                                    </Text>
+                                </View>
                             </Cluster>
                             <Space height={12} />
                             <TouchableOpacity onPress={handleLogout}>
-                                <Cluster>
+                                <View style={{
+                                    borderRadius: 18,
+                                    borderWidth: 1,
+                                    borderColor: "#ffffff12",
+                                    backgroundColor: theme.contrast,
+                                    padding: 14
+                                }}>
                                     <Text style={{ ...T.centered20, color: theme.textColor }}>
                                         Clear local session
                                     </Text>
-                                </Cluster>
+                                </View>
                             </TouchableOpacity>
                         </>
                     )}
-                </View>
-            </Swipe>
-        </ScrollView>
+                </ScrollView>
+            </View>
+        </Swipe>
     )
 }

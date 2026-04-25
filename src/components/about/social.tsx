@@ -1,4 +1,5 @@
 import CornerSquare from "@/components/about/cornerSquare"
+import DefaultBanner from "@components/event/defaultBanner"
 import ES from "@styles/eventStyles"
 import GS from "@styles/globalStyles"
 import Link, { TextLink } from "@components/shared/link"
@@ -59,21 +60,23 @@ export default function Person({ person }: PersonProps): JSX.Element {
 
     return (
         <View style={{ marginBottom: 20 }}>
-            <Image style={{ ...GS.personImage }} source={{ uri: obj.img }} />
+            <Image style={{ ...GS.personImage }} source={{ uri: obj.img, cache: "force-cache" }} />
             <CornerSquare corner={corner} />
-            <Text style={T.leaderTitle}>{obj.title}</Text>
-            <Text style={{ ...T.leaderName, color: theme.textColor }}>
-                {obj.name}
-            </Text>
-            <Link url={obj.dclink}>
-                <Text style={{ ...T.discord, color: theme.discord }}>
-                    <Image
-                        style={GS.tiny}
-                        source={require("@assets/social/discord-colored.png")}
-                    />
-                    {obj.tag}
+            <View style={{ width: "72%", alignSelf: "center" }}>
+                <Text style={{ ...T.leaderTitle, left: 0 }}>{obj.title}</Text>
+                <Text style={{ ...T.leaderName, left: 0, color: theme.textColor }}>
+                    {obj.name}
                 </Text>
-            </Link>
+                <Link url={obj.dclink}>
+                    <Text style={{ ...T.discord, left: 0, color: theme.discord }}>
+                        <Image
+                            style={GS.tiny}
+                            source={require("@assets/social/discord-colored.png")}
+                        />
+                        {obj.tag}
+                    </Text>
+                </Link>
+            </View>
         </View>
     )
 }
@@ -182,7 +185,7 @@ export function Styret() {
         <View>
             <Image
                 style={{ ...GS.aboutImage }}
-                source={{ uri: `${config.cdn}/board/group/styret_2026.jpg` }}
+                source={{ uri: `${config.cdn}/board/group/styret_2026.jpg`, cache: "force-cache" }}
             />
             <CornerSquare corner={corner} type={true} />
         </View>
@@ -253,16 +256,11 @@ function MediaLogo({ link, logo }: MediaLogoProps) {
 }
 
 export function StaticImage({ category }: StaticImageProps): JSX.Element {
-    const images: Record<string, ImageSourcePropType> = {
-        tekkom: require(`../../../public/assets/committee/tekkom/tekkom.png`),
-        ctf: require(`../../../public/assets/committee/ctfkom/ctf.png`),
-        bedpres: require(`../../../public/assets/committee/bedkom/bedkom.png`),
-        sosialt: require(`../../../public/assets/categories/sosialt.png`),
-        social: require(`../../../public/assets/categories/sosialt.png`),
-        login: require(`../../../public/assets/categories/login.png`),
-        annet: require(`../../../public/assets/categories/annet.png`)
-    }
-
-    const image = category ? images[category.toLowerCase()] : images.annet
-    return <Image style={ES.specificEventImage} source={image} />
+    return (
+        <DefaultBanner
+            category={category}
+            height={ES.specificEventImage.height as number}
+            borderRadius={18}
+        />
+    )
 }

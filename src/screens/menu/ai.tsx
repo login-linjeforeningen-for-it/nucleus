@@ -1,4 +1,8 @@
 import Space from "@/components/shared/utils"
+import { MenuProps } from "@/types/screenTypes"
+import AiComposer from "@components/menu/ai/composer"
+import AiConversationPicker from "@components/menu/ai/conversationPicker"
+import AiMessageList from "@components/menu/ai/messageList"
 import GS from "@styles/globalStyles"
 import T from "@styles/text"
 import Swipe from "@components/nav/swipe"
@@ -7,11 +11,12 @@ import { JSX, useEffect, useMemo, useRef, useState } from "react"
 import {
     ActivityIndicator,
     Dimensions,
-    ScrollView,
-    TextInput,
-    TouchableOpacity,
+    KeyboardAvoidingView,
+    Platform,
+    Pressable,
     View
 } from "react-native"
+import { useSafeAreaInsets } from "react-native-safe-area-context"
 import { useSelector } from "react-redux"
 import {
     createAiConversation,
@@ -23,7 +28,7 @@ import {
     listAiConversations,
     selectBestNativeClient,
     switchAiConversationClient
-} from "@utils/adminApi"
+} from "@utils/queenbeeApi"
 
 type NativeChatSession = {
     conversationId: string
@@ -43,27 +48,33 @@ type NativeSocketMessage = {
     error?: string
 }
 
-function pendingAssistantMessage(conversationId: string): NativeStoredMessage {
-    return {
-        id: `${conversationId}-assistant`,
-        role: "assistant",
-        content: "",
-        error: false,
-        clientName: null,
-        createdAt: new Date().toISOString()
-    }
-}
-
-export default function AiScreen(): JSX.Element {
-    const { theme } = useSelector((state: ReduxState) => state.theme)
+export default function AiScreen({ navigation }: MenuProps<"AiScreen">): JSX.Element {
+    const { theme, isDark } = useSelector((state: ReduxState) => state.theme)
     const { login } = useSelector((state: ReduxState) => state.login)
+    const { lang } = useSelector((state: ReduxState) => state.lang)
+    const text = lang ? require("@text/no.json").ai : require("@text/en.json").ai
+    const insets = useSafeAreaInsets()
     const [clients, setClients] = useState<NativeClient[]>([])
     const [conversations, setConversations] = useState<NativeConversationSummary[]>([])
     const [session, setSession] = useState<NativeChatSession | null>(null)
     const [input, setInput] = useState("")
+    const [owner, setOwner] = useState<{ userId?: string | null, sessionId?: string | null }>({})
+    const [showConversations, setShowConversations] = useState(false)
+    const [showModels, setShowModels] = useState(false)
     const [loading, setLoading] = useState(false)
     const [error, setError] = useState<string | null>(null)
     const socketRef = useRef<WebSocket | null>(null)
+
+    function formatClientSubtitle(client: NativeClient) {
+        const parts = []
+        const localizedStatus = text.status[client.model.status as keyof typeof text.status]
+            || client.model.status.charAt(0).toUpperCase() + client.model.status.slice(1)
+        parts.push(localizedStatus)
+        if (client.model.tps) {
+            parts.push(`${Math.round(client.model.tps)} tps`)
+        }
+        return parts.join(" · ")
+    }
 
     useEffect(() => {
         void refresh()
@@ -83,14 +94,14 @@ export default function AiScreen(): JSX.Element {
         }
 
         ws.onerror = () => {
-            setError("AI socket disconnected.")
+            setError(text.socketDisconnected)
         }
 
         return () => {
             socketRef.current = null
             ws.close()
         }
-    }, [session?.conversationId])
+    }, [session?.conversationId, text.socketDisconnected])
 
     useEffect(() => {
         if (loading || session) {
@@ -108,19 +119,63 @@ export default function AiScreen(): JSX.Element {
         }
     }, [clients, conversations, loading, session])
 
+    useEffect(() => {
+        navigation.setOptions({
+            headerComponents: {
+                right: [
+                    <Pressable
+                        key='ai-conversations'
+                        onPress={() => {
+                            setShowModels(false)
+                            setShowConversations((current) => !current)
+                        }}
+                        style={({ pressed }) => ({
+                            marginRight: 10,
+                            width: 42,
+                            height: 42,
+                            borderRadius: 21,
+                            borderWidth: 1,
+                            borderColor: showConversations ? "rgba(253,135,56,0.24)" : "rgba(255,255,255,0.08)",
+                            backgroundColor: showConversations
+                                ? "rgba(253,135,56,0.12)"
+                                : pressed
+                                    ? "rgba(255,255,255,0.10)"
+                                    : "rgba(255,255,255,0.05)",
+                            alignItems: "center",
+                            justifyContent: "center",
+                        })}
+                    >
+                        <Text style={{
+                            ...T.text20,
+                            color: theme.orange,
+                            fontSize: 24,
+                            lineHeight: 24,
+                            fontWeight: "700",
+                            marginTop: Platform.OS === "ios" ? -1 : -3,
+                        }}>
+                            ≡
+                        </Text>
+                    </Pressable>
+                ]
+            }
+        } as any)
+    }, [navigation, showConversations, theme.orange])
+
     async function refresh() {
         try {
             setLoading(true)
             setError(null)
-            const [nextClients, nextConversations] = await Promise.all([
+            const [nextClients, nextConversations, nextOwner] = await Promise.all([
                 listAiClients(),
-                listAiConversations()
+                listAiConversations(),
+                getAiOwner().catch(() => ({}))
             ])
 
             setClients(nextClients)
             setConversations(nextConversations)
+            setOwner(nextOwner)
         } catch (err) {
-            setError(err instanceof Error ? err.message : "Failed to load AI workspace.")
+            setError(err instanceof Error ? err.message : text.failedWorkspace)
         } finally {
             setLoading(false)
         }
@@ -139,7 +194,7 @@ export default function AiScreen(): JSX.Element {
                 isSending: false,
             })
         } catch (err) {
-            setError(err instanceof Error ? err.message : "Failed to open conversation.")
+            setError(err instanceof Error ? err.message : text.failedOpenConversation)
         } finally {
             setLoading(false)
         }
@@ -160,10 +215,22 @@ export default function AiScreen(): JSX.Element {
             })
             setConversations(prev => [conversation, ...prev.filter(item => item.id !== conversation.id)])
         } catch (err) {
-            setError(err instanceof Error ? err.message : "Failed to create conversation.")
+            setError(err instanceof Error ? err.message : text.failedCreateConversation)
         } finally {
             setLoading(false)
         }
+    }
+
+    async function createNewConversation() {
+        const nextClientName = session?.clientName || selectBestNativeClient(clients)?.name
+
+        if (!nextClientName) {
+            setError(text.failedCreateConversation)
+            return
+        }
+
+        setShowConversations(false)
+        await createConversationForClient(nextClientName)
     }
 
     async function changeModel(clientName: string) {
@@ -185,7 +252,7 @@ export default function AiScreen(): JSX.Element {
             })
             await refresh()
         } catch (err) {
-            setError(err instanceof Error ? err.message : "Failed to switch model.")
+            setError(err instanceof Error ? err.message : text.failedSwitchModel)
         }
     }
 
@@ -259,7 +326,7 @@ export default function AiScreen(): JSX.Element {
             setSession(prev => {
                 if (!prev) return prev
                 const messages = [...prev.messages]
-                const content = message.error || "The model failed to answer."
+                const content = message.error || text.modelFailed
                 const last = messages[messages.length - 1]
                 if (last?.role === "assistant") {
                     messages[messages.length - 1] = { ...last, content, error: true }
@@ -283,7 +350,11 @@ export default function AiScreen(): JSX.Element {
             return
         }
 
-        const owner = await getAiOwner()
+        if (socketRef.current.readyState !== WebSocket.OPEN) {
+            setError(text.socketDisconnected)
+            return
+        }
+
         const userMessage: NativeStoredMessage = {
             id: `${Date.now()}`,
             role: "user",
@@ -320,134 +391,152 @@ export default function AiScreen(): JSX.Element {
     const activeClient = useMemo(() => clients.find(client => client.name === session?.clientName) || null, [clients, session?.clientName])
 
     return (
-        <ScrollView>
-            <Swipe left="MenuScreen">
-                <View style={{ ...GS.content, backgroundColor: theme.darker }}>
+        <Swipe left="MenuScreen">
+            <KeyboardAvoidingView
+                style={{ flex: 1, backgroundColor: theme.darker }}
+                behavior={Platform.OS === "ios" ? "padding" : undefined}
+            >
+                <View style={{ ...GS.content, flex: 1, paddingBottom: 0 }}>
                     <Space height={Dimensions.get("window").height / 8} />
-                    <Text style={{ ...T.centeredBold20, color: theme.textColor }}>Login AI</Text>
-                    <Space height={10} />
-                    <Text style={{ ...T.centered15, color: theme.oppositeTextColor }}>
-                        {activeClient
-                            ? `${activeClient.name} · ${activeClient.model.status}`
-                            : loading
-                                ? "Preparing AI workspace..."
-                                : "Connecting you to the fastest available model."}
-                    </Text>
-                    <Space height={16} />
+                    {activeClient ? (
+                        <View style={{
+                            flexDirection: "row",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            flexWrap: "wrap",
+                            gap: 6,
+                        }}>
+                            <Pressable onPress={() => {
+                                setShowConversations(false)
+                                setShowModels((current) => !current)
+                            }}>
+                                <Text style={{
+                                    ...T.text15,
+                                    color: theme.orange,
+                                }}>
+                                    {activeClient.name}
+                                </Text>
+                            </Pressable>
+                            <Text style={{ ...T.text15, color: theme.oppositeTextColor }}>
+                                ·
+                            </Text>
+                            <Text style={{ ...T.text15, color: theme.oppositeTextColor }}>
+                                {formatClientSubtitle(activeClient)}
+                            </Text>
+                        </View>
+                    ) : (
+                        <Text style={{ ...T.centered15, color: theme.oppositeTextColor }}>
+                            {loading ? text.workspaceLoading : text.connectingFastest}
+                        </Text>
+                    )}
+                    <Space height={14} />
                     {loading && <ActivityIndicator color={theme.orange} />}
                     {error && <Text style={{ ...T.centered15, color: "red" }}>{error}</Text>}
 
-                    <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-                        <View style={{ flexDirection: "row", gap: 10 }}>
-                            {clients.map(client => (
-                                <TouchableOpacity key={client.name} onPress={() => void changeModel(client.name)}>
-                                    <View style={{
-                                        borderRadius: 16,
-                                        borderWidth: 1,
-                                        borderColor: session?.clientName === client.name ? theme.orange : theme.contrast,
-                                        backgroundColor: theme.contrast,
-                                        paddingHorizontal: 14,
-                                        paddingVertical: 10,
-                                        minWidth: 140
-                                    }}>
-                                        <Text style={{ ...T.text15, color: theme.textColor }}>{client.name}</Text>
-                                        <Text style={{ ...T.text12, color: theme.oppositeTextColor }}>
-                                            {client.model.status} · {Math.round(client.model.tps || 0)} tps
-                                        </Text>
-                                    </View>
-                                </TouchableOpacity>
-                            ))}
-                        </View>
-                    </ScrollView>
-
-                    <Space height={16} />
-                    <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-                        <View style={{ flexDirection: "row", gap: 10 }}>
-                            {conversations.map(conversation => (
-                                <TouchableOpacity key={conversation.id} onPress={() => void openConversation(conversation.id)}>
-                                    <View style={{
-                                        borderRadius: 14,
-                                        backgroundColor: session?.conversationId === conversation.id ? theme.orange : theme.contrast,
-                                        paddingHorizontal: 12,
-                                        paddingVertical: 8,
-                                        maxWidth: 220
-                                    }}>
-                                        <Text style={{ ...T.text15, color: session?.conversationId === conversation.id ? theme.darker : theme.textColor }}>
-                                            {conversation.title}
-                                        </Text>
-                                        <Text style={{ ...T.text12, color: session?.conversationId === conversation.id ? theme.darker : theme.oppositeTextColor }}>
-                                            {conversation.activeClientName}
-                                        </Text>
-                                    </View>
-                                </TouchableOpacity>
-                            ))}
-                        </View>
-                    </ScrollView>
-
-                    <Space height={16} />
-                    <View style={{
-                        borderRadius: 20,
-                        borderWidth: 1,
-                        borderColor: theme.contrast,
-                        backgroundColor: theme.contrast,
-                        padding: 14,
-                        minHeight: 360,
-                    }}>
-                        {(session?.messages || []).map(message => (
-                            <View key={message.id} style={{
-                                alignSelf: message.role === "user" ? "flex-end" : "flex-start",
-                                maxWidth: "92%",
-                                backgroundColor: message.role === "user" ? theme.orange : "#1a1a1a",
-                                borderRadius: 18,
-                                paddingHorizontal: 12,
-                                paddingVertical: 10,
-                                marginBottom: 10
-                            }}>
-                                <Text style={{ ...T.text15, color: message.role === "user" ? theme.darker : theme.textColor }}>
-                                    {message.content || (session?.isSending ? "..." : "")}
-                                </Text>
-                            </View>
-                        ))}
-                        {!session && (
-                            <Text style={{ ...T.centered15, color: theme.oppositeTextColor }}>
-                                {login
-                                    ? "Preparing your conversation history."
-                                    : "Starting a temporary conversation. Sign in later if you want to keep it with your account."}
-                            </Text>
-                        )}
+                    <Space height={14} />
+                    <View style={{ flex: 1, minHeight: 0, paddingBottom: 108 + insets.bottom }}>
+                        <AiMessageList session={session} theme={theme} isLoggedIn={login} text={text} />
                     </View>
-                    <Space height={12} />
-                    <View style={{ flexDirection: "row", gap: 10, alignItems: "center" }}>
-                        <TextInput
+                    {showModels ? (
+                        <View style={{
+                            position: "absolute",
+                            top: Dimensions.get("window").height / 8 + 18,
+                            right: 12,
+                            left: 12,
+                            zIndex: 21,
+                            borderRadius: 22,
+                            backgroundColor: "#121112ee",
+                            borderWidth: 1,
+                            borderColor: "rgba(255,255,255,0.08)",
+                            padding: 12,
+                            gap: 8,
+                        }}>
+                            {clients.map((client) => {
+                                const isActive = session?.clientName === client.name
+
+                                return (
+                                    <Pressable
+                                        key={client.name}
+                                        onPress={() => {
+                                            setShowModels(false)
+                                            void changeModel(client.name)
+                                        }}
+                                        style={{
+                                            borderRadius: 16,
+                                            backgroundColor: isActive ? "#fd873814" : "#ffffff08",
+                                            paddingHorizontal: 14,
+                                            paddingVertical: 10,
+                                        }}
+                                    >
+                                        <Text style={{
+                                            ...T.text15,
+                                            color: isActive ? theme.orange : theme.textColor,
+                                            fontWeight: isActive ? "700" : "500",
+                                        }}>
+                                            {client.name}
+                                        </Text>
+                                        <Text style={{ ...T.text12, color: theme.oppositeTextColor }}>
+                                            {Math.round(client.model.tps || 0)} tps
+                                        </Text>
+                                    </Pressable>
+                                )
+                            })}
+                        </View>
+                    ) : null}
+                    {showConversations ? (
+                        <View style={{
+                            position: "absolute",
+                            top: Dimensions.get("window").height / 8 + 42,
+                            right: 12,
+                            left: 12,
+                            zIndex: 20,
+                            borderRadius: 22,
+                            backgroundColor: "#121112ee",
+                            borderWidth: 1,
+                            borderColor: "rgba(255,255,255,0.08)",
+                            padding: 12,
+                        }}>
+                            <AiConversationPicker
+                                conversations={conversations}
+                                activeConversationId={session?.conversationId}
+                                theme={theme}
+                                onCreate={() => void createNewConversation()}
+                                onSelect={(conversationId) => {
+                                    setShowConversations(false)
+                                    void openConversation(conversationId)
+                                }}
+                                currentConversationLabel={text.currentConversation}
+                                newConversationLabel={text.newConversation}
+                            />
+                        </View>
+                    ) : null}
+                    <View style={{
+                        position: "absolute",
+                        left: 12,
+                        right: 12,
+                        bottom: 84 + insets.bottom,
+                    }}>
+                        <AiComposer
                             value={input}
                             onChangeText={setInput}
-                            placeholder='Ask Login AI...'
-                            placeholderTextColor={theme.oppositeTextColor}
-                            style={{
-                                flex: 1,
-                                borderRadius: 16,
-                                borderWidth: 1,
-                                borderColor: theme.contrast,
-                                backgroundColor: theme.contrast,
-                                color: theme.textColor,
-                                paddingHorizontal: 14,
-                                paddingVertical: 12
-                            }}
+                            onSend={() => void sendPrompt()}
+                            theme={theme}
+                            placeholder={text.composerPlaceholder}
                         />
-                        <TouchableOpacity onPress={() => void sendPrompt()}>
-                            <View style={{
-                                borderRadius: 16,
-                                backgroundColor: theme.orange,
-                                paddingHorizontal: 16,
-                                paddingVertical: 12
-                            }}>
-                                <Text style={{ ...T.text15, color: theme.darker }}>Send</Text>
-                            </View>
-                        </TouchableOpacity>
                     </View>
-                    <Space height={30} />
                 </View>
-            </Swipe>
-        </ScrollView>
+            </KeyboardAvoidingView>
+        </Swipe>
     )
+}
+
+function pendingAssistantMessage(conversationId: string): NativeStoredMessage {
+    return {
+        id: `${conversationId}-assistant`,
+        role: "assistant",
+        content: "",
+        error: false,
+        clientName: null,
+        createdAt: new Date().toISOString()
+    }
 }

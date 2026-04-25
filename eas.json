@@ -5,6 +5,9 @@
     "build": {
         "development": {
             "node": "25.8.1",
+            "env": {
+                "PATH": "/usr/bin:/bin:/usr/sbin:/sbin:/opt/homebrew/bin:/opt/homebrew/sbin:/usr/local/bin:/usr/local/sbin"
+            },
             "developmentClient": true,
             "distribution": "internal",
             "ios": {
@@ -13,10 +16,16 @@
         },
         "preview": {
             "node": "25.8.1",
+            "env": {
+                "PATH": "/usr/bin:/bin:/usr/sbin:/sbin:/opt/homebrew/bin:/opt/homebrew/sbin:/usr/local/bin:/usr/local/sbin"
+            },
             "distribution": "internal"
         },
         "production": {
             "node": "25.8.1",
+            "env": {
+                "PATH": "/usr/bin:/bin:/usr/sbin:/sbin:/opt/homebrew/bin:/opt/homebrew/sbin:/usr/local/bin:/usr/local/sbin"
+            },
             "distribution": "store",
             "autoIncrement": true,
             "ios": {

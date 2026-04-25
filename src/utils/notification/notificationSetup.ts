@@ -3,7 +3,7 @@ import { subscribeToTopic } from "@utils/notification/subscribeToTopic"
 import { Dispatch, UnknownAction } from "redux"
 import { resetTheme } from "@redux/theme"
 import { Alert, Platform } from "react-native"
-import { requestPermissionsAsync, getPermissionsAsync } from 'expo-notifications'
+import { getPermissionsAsync, requestPermissionsAsync } from 'expo-notifications'
 import { isDevice } from 'expo-device'
 import { configureNotificationChannel } from './getPushToken'
 
@@ -60,15 +60,15 @@ export async function requestNotificationPermission() {
         }
 
         if (Platform.OS === 'android' && Platform.Version >= 33) {
-            const { status: existingStatus } = await getPermissionsAsync()
-            let finalStatus = existingStatus
+            const existingPermissions = await getPermissionsAsync()
+            let granted = isNotificationsGranted(existingPermissions)
 
-            if (existingStatus !== 'granted') {
-                const { status } = await requestPermissionsAsync()
-                finalStatus = status
+            if (!granted) {
+                const requestedPermissions = await requestPermissionsAsync()
+                granted = isNotificationsGranted(requestedPermissions)
             }
 
-            if (finalStatus !== 'granted') {
+            if (!granted) {
                 Alert.alert(
                     'Notification Permission Denied',
                     'Please enable notifications in Settings to receive updates.',
@@ -81,9 +81,9 @@ export async function requestNotificationPermission() {
             return true
         } else {
             // iOS or older Android versions
-            const { status } = await requestPermissionsAsync()
+            const requestedPermissions = await requestPermissionsAsync()
 
-            if (status !== 'granted') {
+            if (!isNotificationsGranted(requestedPermissions)) {
                 Alert.alert(
                     'Notification Permission Denied',
                     'Please enable notifications in Settings to receive updates.',
@@ -105,4 +105,14 @@ export async function requestNotificationPermission() {
 
         return false
     }
+}
+
+function isNotificationsGranted(permissions: unknown) {
+    if (!permissions || typeof permissions !== "object") {
+        return false
+    }
+
+    const maybePermissions = permissions as { granted?: boolean, status?: string }
+
+    return maybePermissions.granted === true || maybePermissions.status === "granted"
 }

@@ -6,29 +6,40 @@ import { useNavigation } from "@react-navigation/native"
 import { useSelector } from "react-redux"
 import { RootStackProps } from "@type/screenTypes"
 import { JSX } from 'react'
+import { resolveNotificationTarget } from "@utils/notification/list"
 
 export default function NotificationModal({ route: { params } }: RootStackProps<'NotificationModal'>): JSX.Element {
     const { theme } = useSelector((state: ReduxState) => state.theme)
     const navigation: Navigation = useNavigation()
     const isIOS = Platform.OS === "ios"
-
-    // Makes a deep clone since params is read only
-    const item = JSON.parse(JSON.stringify(params))
-
-    if (!('title' in item)) {
-        item.title = ""
-    }
-
-    if (!('body' in item)) {
-        item.body = ""
-    }
-
-    if (!('data' in item)) {
-        item.data = {}
+    const item = {
+        title: typeof params.title === 'string' ? params.title : '',
+        body: typeof params.body === 'string' ? params.body : '',
+        data: params.data || {},
     }
 
     const title = item.title.length > 35 ? `${item.title.slice(0, 35)}...` : item.title
     const body = item.body.length > 70 ? `${item.body.slice(0, 70)}...` : item.body
+    const target = resolveNotificationTarget(item.data)
+
+    function handleOpen() {
+        if (target?.kind === 'menu') {
+            navigation.navigate(target.screen as never)
+            return
+        }
+
+        if (target?.kind === 'event') {
+            navigation.navigate("SpecificEventScreen", { eventID: target.eventID })
+            return
+        }
+
+        if (target?.kind === 'ad') {
+            navigation.navigate("SpecificAdScreen", { adID: target.adID })
+            return
+        }
+
+        navigation.navigate("NotificationScreen")
+    }
 
     return (
         <TouchableOpacity
@@ -45,13 +56,7 @@ export default function NotificationModal({ route: { params } }: RootStackProps<
                     ...GS.notificationDropdownTouchable,
                     backgroundColor: isIOS ? undefined : theme.transparent
                 }}
-                onPress={() => {
-                    if (Object.keys(item.data).length) {
-                        navigation.navigate("SpecificEventScreen", { item: item.data })
-                    } else {
-                        navigation.navigate("NotificationScreen")
-                    }
-                }}
+                onPress={handleOpen}
             >
                 <View testID="NotificationModal">
                     <Text style={{

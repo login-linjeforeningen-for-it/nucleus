@@ -1,4 +1,4 @@
-import { Dispatch, SetStateAction, useState } from 'react'
+import { Dispatch, SetStateAction, useEffect, useState } from 'react'
 import { View, Dimensions, Platform } from 'react-native'
 import { Gesture, GestureDetector } from 'react-native-gesture-handler'
 import Animated, {
@@ -24,7 +24,6 @@ const SWIPE_THRESHOLD = SCREEN_WIDTH * (Platform.OS === 'ios' ? 0.25 : 0.32)
 
 export default function Swiper({ course, clicked, setClicked }: CourseContentProps) {
     const { theme } = useSelector((state: ReduxState) => state.theme)
-    const [currentIndex, setCurrentIndex] = useState(0)
     const translateX = useSharedValue(0)
     const [cardID, setCardID] = useState<number>(0)
     const next = cardID + 1
@@ -45,44 +44,26 @@ export default function Swiper({ course, clicked, setClicked }: CourseContentPro
         setCardID(next < course.cards.length ? next : cardID)
     }
 
-    // Function to calculate next index
-    function getNextIndex(currentIndex: number) {
-        if (currentIndex < course.cards.length - 1) {
-            return currentIndex + 1
-        }
-
-        return currentIndex
-    }
-
-    function getPreviousIndex(currentIndex: number) {
-        if (currentIndex > 0) {
-            return currentIndex - 1
-        }
-
-        return 0
-    }
-
     function onSwipeRight() {
-        setCurrentIndex(getNextIndex(currentIndex))
         handleNext()
     }
 
     function onSwipeLeft() {
-        setCurrentIndex(getPreviousIndex(currentIndex))
         handlePrevious()
     }
 
-    function resetTranslateX() {
-        setTimeout(() => {
-            translateX.value = 0
-        }, 400)
+    function finishSwipeRight() {
+        onSwipeRight()
     }
 
-    function resetTranslateX200ms() {
-        setTimeout(() => {
-            translateX.value = 0
-        }, 200)
+    function finishSwipeLeft() {
+        onSwipeLeft()
     }
+
+    useEffect(() => {
+        translateX.value = 0
+        startX.value = 0
+    }, [cardID, startX, translateX])
 
     const panGesture = Gesture.Pan()
         .onBegin(() => {
@@ -93,14 +74,13 @@ export default function Swiper({ course, clicked, setClicked }: CourseContentPro
         })
         .onEnd((event) => {
             if (event.translationX > SWIPE_THRESHOLD) {
-                scheduleOnRN(onSwipeRight)
-                scheduleOnRN(resetTranslateX)
+                translateX.value = withSpring(SCREEN_WIDTH + 10, {}, () => {
+                    scheduleOnRN(finishSwipeRight)
+                })
             } else if (event.translationX < -SWIPE_THRESHOLD) {
                 translateX.value = withSpring(-SCREEN_WIDTH - 10, {}, () => {
-                    scheduleOnRN(onSwipeLeft)
+                    scheduleOnRN(finishSwipeLeft)
                 })
-
-                scheduleOnRN(resetTranslateX200ms)
             } else {
                 translateX.value = withSpring(0)
             }
@@ -121,16 +101,29 @@ export default function Swiper({ course, clicked, setClicked }: CourseContentPro
                 [SCREEN_WIDTH * 0.9, SCREEN_WIDTH * 0.95, SCREEN_WIDTH * 0.9],
             )
 
+            const opacity = interpolate(
+                translateX.value,
+                [-SCREEN_WIDTH * 1.1, -SCREEN_WIDTH * 0.75, 0],
+                [0, 0.1, 1],
+            )
+
             return {
                 width,
+                opacity,
                 transform: [{ translateY }],
             }
         }
 
         const rotate = `${(translateX.value / SCREEN_WIDTH) * 15}deg`
+        const opacity = interpolate(
+            translateX.value,
+            [0, SCREEN_WIDTH * 0.75, SCREEN_WIDTH * 1.1],
+            [1, 0.1, 0],
+        )
 
         return {
             width: SCREEN_WIDTH * 0.95,
+            opacity,
             transform: [
                 { translateX: translateX.value },
                 { rotate: rotate },
@@ -259,7 +252,7 @@ export default function Swiper({ course, clicked, setClicked }: CourseContentPro
         const left = interpolate(
             translateX.value,
             [-SCREEN_WIDTH, 0, SCREEN_WIDTH],
-            [0, SCREEN_WIDTH * 1.2, 0],
+            [SCREEN_WIDTH * 0.125, SCREEN_WIDTH * 2, SCREEN_WIDTH * 0.125],
         )
 
         const rotation = interpolate(
@@ -354,9 +347,11 @@ export default function Swiper({ course, clicked, setClicked }: CourseContentPro
                     clicked={clicked}
                     setClicked={setClicked}
                     cardID={cardID}
+                    displayCardID={next < course.cards.length ? next : cardID}
                     setCardID={setCardID}
                     previous={previous}
                     next={next}
+                    showFooter={false}
                 />
             </Animated.View>
 
@@ -393,6 +388,7 @@ export default function Swiper({ course, clicked, setClicked }: CourseContentPro
             {/* Previous (hidden) card */}
             {cardID !== 0 && <Animated.View style={[{
                 position: 'absolute',
+                left: SCREEN_WIDTH * 0.025,
                 justifyContent: 'center',
                 alignItems: 'center',
                 backgroundColor: theme.contrast,
@@ -414,9 +410,11 @@ export default function Swiper({ course, clicked, setClicked }: CourseContentPro
                     clicked={clicked}
                     setClicked={setClicked}
                     cardID={cardID}
+                    displayCardID={previous >= 0 ? previous : cardID}
                     setCardID={setCardID}
                     previous={previous}
                     next={next}
+                    showFooter={false}
                 />
             </Animated.View>}
         </View>

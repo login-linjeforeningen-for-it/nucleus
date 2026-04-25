@@ -1,4 +1,5 @@
 import GS from "@styles/globalStyles"
+import Cluster from "@/components/shared/cluster"
 import { useState } from "react"
 import T from "@styles/text"
 import Link from "@components/shared/link"
@@ -75,7 +76,7 @@ export default function Dropdown() {
     }
 
     return (
-        <View style={{ marginVertical: 10 }}>
+        <View style={{ marginTop: 2, marginBottom: 4 }}>
             <DropdownItem title="Bachelor" course={course} selectedDegree={selectedDegree} courses={bcourses} degree={1} />
             <DropdownItem title="Master" course={course} selectedDegree={selectedDegree} courses={mcourses} degree={2} />
             <DropdownItem title="Ph.d" course={course} selectedDegree={selectedDegree} courses={pcourses} degree={3} />
@@ -92,12 +93,35 @@ function DropdownItem({ title, course, selectedDegree, courses, degree }: Dropdo
     return (
         <>
             <TouchableOpacity onPress={() => selectedDegree(degree)}>
-                <View style={{ ...GS.dropdown, backgroundColor: theme.contrast }}>
-                    <Image style={GS.dropImage} source={arrow} />
-                    <Text style={{ ...T.centered, color: theme.textColor }}>
-                        {title}
-                    </Text>
-                </View>
+                <Cluster marginHorizontal={0}>
+                    <View style={{
+                        ...GS.dropdown,
+                        backgroundColor: theme.contrast,
+                        marginBottom: course === degree ? 2 : 6,
+                        borderRadius: 12,
+                        paddingRight: 10,
+                        paddingLeft: 0,
+                        height: 46,
+                    }}>
+                        <View style={{
+                            width: 3,
+                            alignSelf: "stretch",
+                            borderRadius: 99,
+                            backgroundColor: theme.orange,
+                            marginRight: 10,
+                            opacity: course === degree ? 0.75 : 0.45,
+                        }} />
+                        <Image style={{ ...GS.dropImage, height: 44, width: 28 }} source={arrow} />
+                        <Text style={{
+                            ...T.text18,
+                            color: theme.textColor,
+                            flex: 1,
+                            textAlign: "left",
+                        }}>
+                            {title}
+                        </Text>
+                    </View>
+                </Cluster>
             </TouchableOpacity>
 
             <View>
@@ -105,22 +129,36 @@ function DropdownItem({ title, course, selectedDegree, courses, degree }: Dropdo
                     courses.map((selectedCourse, index) => {
                         return (
                             <Link key={index} url={selectedCourse.link}>
-                                <View style={{
-                                    ...GS.dropdownContent,
-                                    backgroundColor: theme.contrast
-                                }}>
-                                    <Text style={{
-                                        ...T.text15,
-                                        maxWidth: "91%",
-                                        color: theme.textColor
+                                <Cluster marginHorizontal={0}>
+                                    <View style={{
+                                        ...GS.dropdownContent,
+                                        backgroundColor: theme.contrast,
+                                        marginBottom: index === courses.length - 1 ? 8 : 4,
+                                        paddingRight: 10,
+                                        paddingLeft: 0,
+                                        minHeight: 40,
                                     }}>
-                                        {selectedCourse.title}
-                                    </Text>
-                                    <Image
-                                        style={GS.smallDropImage}
-                                        source={require("@assets/icons/linkicon-white.png")}
-                                    />
-                                </View>
+                                        <View style={{
+                                            width: 3,
+                                            alignSelf: "stretch",
+                                            borderRadius: 99,
+                                            backgroundColor: theme.orange,
+                                            marginRight: 10,
+                                            opacity: 0.22,
+                                        }} />
+                                        <Text style={{
+                                            ...T.text15,
+                                            flex: 1,
+                                            color: theme.textColor
+                                        }}>
+                                            {selectedCourse.title}
+                                        </Text>
+                                        <Image
+                                            style={{ ...GS.smallDropImage, height: 22, width: 18 }}
+                                            source={require("@assets/icons/linkicon-white.png")}
+                                        />
+                                    </View>
+                                </Cluster>
                             </Link>
                         )
                     })

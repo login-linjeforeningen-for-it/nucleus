@@ -105,9 +105,8 @@ export default function AboutScreen(): JSX.Element {
 
     return (
         <Swipe left="MenuScreen">
-            <View>
-                <View style={{ ...GS.content, backgroundColor: theme.darker }}>
-                    <ScrollView showsVerticalScrollIndicator={false}>
+            <View style={{ flex: 1, backgroundColor: theme.darker }}>
+                <ScrollView style={GS.content} showsVerticalScrollIndicator={false}>
                         <Space height={Dimensions.get("window").height / 8.1 + extraHeight} />
                         <Cluster>
                             <Text style={{ ...T.bold40, color: theme.textColor }}>
@@ -122,11 +121,14 @@ export default function AboutScreen(): JSX.Element {
                                     {text.intro}
                                 </Text>
                             </Line>
+                            <Space height={12} />
                             <Dropdown />
+                            <Space height={14} />
                             <Styret />
                             <Text style={{
                                 ...T.bold25,
-                                marginVertical: 15,
+                                marginTop: 18,
+                                marginBottom: 12,
                                 color: theme.textColor
                             }}>
                                 {text.about.title}
@@ -142,6 +144,7 @@ export default function AboutScreen(): JSX.Element {
                             <Text style={{
                                 ...T.paragraph,
                                 marginTop: 10,
+                                lineHeight: 22,
                                 color: theme.textColor
                             }}>
                                 {text.about.body.p1}
@@ -149,20 +152,22 @@ export default function AboutScreen(): JSX.Element {
                             <Text style={{
                                 ...T.paragraph,
                                 marginTop: 10,
+                                lineHeight: 22,
                                 color: theme.textColor
                             }}>
                                 {text.about.body.p2}
                             </Text>
                             <Text style={{
                                 ...T.bold25,
-                                marginTop: 15,
+                                marginTop: 20,
                                 color: theme.textColor
                             }}>
                                 {text.committeeSection.title}
                             </Text>
                             <Text style={{
                                 ...T.boldParagraph,
-                                marginVertical: 10,
+                                marginTop: 8,
+                                marginBottom: 14,
                                 color: theme.textColor
                             }}>
                                 {text.committeeSection.intro}
@@ -171,6 +176,7 @@ export default function AboutScreen(): JSX.Element {
                                 setCommittee={setCommittee}
                                 committee={committee}
                             />
+                            <Space height={12} />
                             {
                                 info.map((relevantCommittee, index) => {
                                     if (relevantCommittee.id === committee) {
@@ -183,10 +189,12 @@ export default function AboutScreen(): JSX.Element {
                                 })
                             }
 
+                            <Space height={8} />
                             <CommitteePerson committee={committee} />
                             <Text style={{
                                 ...T.text25,
-                                marginTop: 10,
+                                marginTop: 6,
+                                marginBottom: 8,
                                 color: theme.textColor
                             }}>
                                 {text.publicDocs.title}
@@ -204,11 +212,11 @@ export default function AboutScreen(): JSX.Element {
                                 </Text>
                             </View>
                             <Social />
+                            <Space height={8} />
                             <Copyright />
                         </Cluster>
                         <Space height={Dimensions.get("window").height / getOffset()} />
-                    </ScrollView>
-                </View>
+                </ScrollView>
             </View>
         </Swipe>
     )
@@ -221,17 +229,27 @@ function CommitteeImage({ id, theme, style }: getCommitteeImageProps) {
         light: '#000000'
     }
 
-    return <SvgXml xml={committeeImages[id]} color={colors[theme] || '#fd8738'} style={style} />
+    const barkomScaleStyle = id === 7
+        ? { transform: [{ scale: 1.05 }] }
+        : undefined
+
+    return (
+        <SvgXml
+            xml={committeeImages[id]}
+            color={colors[theme] || '#fd8738'}
+            style={[style, barkomScaleStyle]}
+        />
+    )
 }
 
 function CommitteePerson({ committee }: CommitteePersonProps) {
     const committees = ["evntkom", "tekkom", "pr", "ctf", "eco", "bedkom", "barkom"]
 
     if (committees[committee - 1]) {
-        return Person({ person: committees[committee - 1] })
+        return <Person person={committees[committee - 1]} />
     }
 
-    return AllComitees()
+    return <AllComitees />
 }
 
 function CommitteeView({ setCommittee, committee }: CommitteeViewProps) {
@@ -247,32 +265,61 @@ function CommitteeView({ setCommittee, committee }: CommitteeViewProps) {
 
 
     return (
-        <View style={{ display: "flex", aspectRatio: numCols / numRows, justifyContent: 'space-between' }}>
-            {rows.map((row, rowIndex) => (
-                <View key={rowIndex} style={{ display: 'flex', width: '100%', flexDirection: 'row', justifyContent: 'space-between' }}>
-                    {row.map((_, index) => (
-                        <TouchableOpacity key={index}
-                            onPress={() => {
-                                setCommittee(rowIndex * numCols + index)
-                            }}
-                            style={{
-                                ...GS.committee,
-                                backgroundColor: theme.contrast,
-                                width: Dimensions.get('window').width / numCols - Dimensions.get('window').width / numCols * 15 / 100,
-                                aspectRatio: 1,
-                                justifyContent: 'space-between',
-                                marginLeft: 'auto',
-                                marginRight: 'auto'
-                            }}>
-                            <CommitteeImage
-                                id={rowIndex * numCols + index}
-                                theme={committee == rowIndex * numCols + index ? "" : isDark ? "dark" : "gray"}
-                                style={{ alignSelf: 'center', marginTop: 'auto', marginBottom: 'auto', width: '80%', aspectRatio: 1 }}
-                            />
-                        </TouchableOpacity>
-                    ))}
-                </View>
-            ))}
+        <View style={{
+            backgroundColor: theme.contrast,
+            borderRadius: 16,
+            paddingHorizontal: 10,
+            paddingVertical: 10,
+            marginBottom: 2,
+        }}>
+            <View style={{
+                display: "flex",
+                aspectRatio: numCols / numRows,
+                justifyContent: 'space-between',
+            }}>
+                {rows.map((row, rowIndex) => (
+                    <View
+                        key={rowIndex}
+                        style={{
+                            display: 'flex',
+                            width: '100%',
+                            flexDirection: 'row',
+                            justifyContent: 'space-between',
+                            gap: 8,
+                        }}
+                    >
+                        {row.map((_, index) => {
+                            const itemId = rowIndex * numCols + index
+                            const isActive = committee == itemId
+
+                            return (
+                                <TouchableOpacity
+                                    key={index}
+                                    onPress={() => {
+                                        setCommittee(itemId)
+                                    }}
+                                    style={{
+                                        ...GS.committee,
+                                        backgroundColor: isActive ? "rgba(253, 135, 56, 0.12)" : theme.darker,
+                                        flex: 1,
+                                        aspectRatio: 1,
+                                        justifyContent: 'center',
+                                        alignItems: 'center',
+                                        borderWidth: isActive ? 1 : 0,
+                                        borderColor: isActive ? theme.orange : "transparent",
+                                    }}
+                                >
+                                    <CommitteeImage
+                                        id={itemId}
+                                        theme={isActive ? "" : isDark ? "dark" : "gray"}
+                                        style={{ width: '76%', aspectRatio: 1 }}
+                                    />
+                                </TouchableOpacity>
+                            )
+                        })}
+                    </View>
+                ))}
+            </View>
         </View>
     )
 }

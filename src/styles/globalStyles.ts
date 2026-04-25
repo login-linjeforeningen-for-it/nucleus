@@ -4,7 +4,9 @@ import T from "./text"
 export const GS = StyleSheet.create({
     // Main view of every screen
     content: {
-        height: Dimensions.get("window").height + 60,
+        flex: 1,
+        minHeight: "100%",
+        width: "100%",
         paddingHorizontal: 12
     },
     // Horizontal card views on setting notifications

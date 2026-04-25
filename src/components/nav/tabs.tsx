@@ -41,13 +41,17 @@ import BusinessScreen from "@screens/menu/business"
 import InternalScreen from "@screens/menu/internal"
 import LoginScreen from "@screens/menu/login"
 import AiScreen from "@screens/menu/ai"
-import AdminScreen from "@screens/menu/admin"
+import QueenbeeScreen from "@screens/menu/queenbee"
 import GameScreen from "@screens/menu/games/index"
 import CourseScreen from "@screens/menu/course/index"
 import SearchScreen from "@screens/menu/search"
 import StatusScreen from "@screens/menu/status"
 import MusicScreen from "@screens/menu/music"
 import DashboardScreen from "@screens/menu/dashboard"
+import LoadBalancingScreen from "@screens/menu/loadBalancing"
+import DatabaseScreen from "@screens/menu/database"
+import VulnerabilitiesScreen from "@screens/menu/vulnerabilities"
+import LogsScreen from "@screens/menu/logs"
 import SpecificEventScreen from "@screens/event/specificEvent"
 import SpecificAdScreen from "@screens/ads/specificAd"
 import SpecificCourseScreen from "@screens/menu/course/specificCourse"
@@ -128,12 +132,16 @@ function Menu() {
             <MenuStack.Screen name="BusinessScreen" component={BusinessScreen} />
             <MenuStack.Screen name="LoginScreen" component={LoginScreen} />
             <MenuStack.Screen name="AiScreen" component={AiScreen} />
-            <MenuStack.Screen name="AdminScreen" component={AdminScreen} />
+            <MenuStack.Screen name="QueenbeeScreen" component={QueenbeeScreen} />
             <MenuStack.Screen name="InternalScreen" component={InternalScreen} />
             <MenuStack.Screen name="SearchScreen" component={SearchScreen} />
             <MenuStack.Screen name="StatusScreen" component={StatusScreen} />
             <MenuStack.Screen name="MusicScreen" component={MusicScreen} />
             <MenuStack.Screen name="DashboardScreen" component={DashboardScreen} />
+            <MenuStack.Screen name="LoadBalancingScreen" component={LoadBalancingScreen} />
+            <MenuStack.Screen name="DatabaseScreen" component={DatabaseScreen} />
+            <MenuStack.Screen name="VulnerabilitiesScreen" component={VulnerabilitiesScreen} />
+            <MenuStack.Screen name="LogsScreen" component={LogsScreen} />
             <MenuStack.Screen name="CourseScreen" component={CourseScreen} />
             <MenuStack.Screen name="SpecificCourseScreen" component={SpecificCourseScreen} />
             <MenuStack.Screen name="GameScreen" component={GameScreen} />

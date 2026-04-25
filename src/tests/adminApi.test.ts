@@ -17,9 +17,9 @@ jest.mock('@redux/store', () => ({
     }
 }))
 
-import { listAiClients, selectBestNativeClient } from '@/utils/adminApi'
+import { listAiClients, selectBestNativeClient } from '@utils/queenbeeApi'
 
-describe('adminApi AI helpers', () => {
+describe('queenbeeApi AI helpers', () => {
     beforeEach(() => {
         jest.clearAllMocks()
     })

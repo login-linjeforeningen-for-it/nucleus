@@ -1,4 +1,4 @@
-import { StaticImage } from "@components/about/social"
+import DefaultBanner from "@components/event/defaultBanner"
 import Skeleton from "@components/shared/skeleton"
 import config from "@/constants"
 import ES from "@styles/eventStyles"
@@ -41,7 +41,14 @@ export default function SpecificEventImage() {
                 source={{ uri: `${config.cdn}/events/${url}` }}
             />
         } else {
-            return <StaticImage category={event.category?.name_no} />
+            return (
+                <DefaultBanner
+                    category={event.category?.name_no || event.category?.name_en}
+                    color={event.category?.color}
+                    height={ES.specificEventImage.height as number}
+                    borderRadius={18}
+                />
+            )
         }
     }
 

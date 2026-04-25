@@ -3,6 +3,10 @@ import { useEffect } from 'react'
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import { configureNotificationChannel, getPushToken } from './getPushToken'
 import { navigationRef } from '@utils/navigationRef'
+import {
+    parseNotificationList,
+    resolveNotificationTarget,
+} from './list'
 
 type StoreNotificationProps = {
     title: string
@@ -42,7 +46,7 @@ export default function NotificationRuntime() {
                 navigationRef.navigate('NotificationModal', {
                     title: title || '',
                     body: body || '',
-                    data,
+                    data: (data || {}) as Record<string, unknown>,
                 })
             }
         })
@@ -81,13 +85,13 @@ export default function NotificationRuntime() {
 
 async function storeNotification({ title, body, data }: StoreNotificationProps) {
     const storedString = await AsyncStorage.getItem('notificationList')
-    const storedArray = storedString ? JSON.parse(storedString) as NotificationListProps[] : []
+    const storedArray = parseNotificationList(storedString)
 
     storedArray.unshift({
         id: Date.now(),
         title,
         body,
-        data: data as Record<string, unknown> as NotificationListProps['data'],
+        data,
         time: new Date().toISOString(),
     })
 
@@ -108,61 +112,35 @@ function navigateFromNotification(data: Record<string, unknown>) {
         return
     }
 
-    const id = Number(data.id)
-    const target = typeof data.target === 'string' ? data.target : null
-    const screen = typeof data.screen === 'string' ? data.screen : null
-    const isAd = typeof data.title_no === 'string' || typeof data.title_en === 'string'
-    const isEvent = typeof data.name_no === 'string' || typeof data.name_en === 'string'
+    const target = resolveNotificationTarget(data)
 
-    if (target === 'menu' && screen) {
+    if (target?.kind === 'menu') {
         navigationRef.navigate('Tabs', {
             screen: 'MenuNav',
             params: {
-                screen: screen as any,
+                screen: target.screen as any,
             },
         })
         return
     }
 
-    if (target === 'ad' && Number.isFinite(id)) {
+    if (target?.kind === 'ad') {
         navigationRef.navigate('Tabs', {
             screen: 'AdNav',
             params: {
                 screen: 'SpecificAdScreen',
-                params: { adID: id },
+                params: { adID: target.adID },
             },
         })
         return
     }
 
-    if (target === 'event' && Number.isFinite(id)) {
+    if (target?.kind === 'event') {
         navigationRef.navigate('Tabs', {
             screen: 'EventNav',
             params: {
                 screen: 'SpecificEventScreen',
-                params: { eventID: id },
-            },
-        })
-        return
-    }
-
-    if (Number.isFinite(id) && isAd) {
-        navigationRef.navigate('Tabs', {
-            screen: 'AdNav',
-            params: {
-                screen: 'SpecificAdScreen',
-                params: { adID: id },
-            },
-        })
-        return
-    }
-
-    if (Number.isFinite(id) && isEvent) {
-        navigationRef.navigate('Tabs', {
-            screen: 'EventNav',
-            params: {
-                screen: 'SpecificEventScreen',
-                params: { eventID: id },
+                params: { eventID: target.eventID },
             },
         })
         return

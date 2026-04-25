@@ -12,9 +12,11 @@ type CourseContentProps = {
     clicked: number[]
     setClicked: Dispatch<SetStateAction<number[]>>
     cardID: number
+    displayCardID?: number
     setCardID: Dispatch<SetStateAction<number>>
     previous: number
     next: number
+    showFooter?: boolean
 }
 
 type CardProps = {
@@ -34,12 +36,23 @@ type CardFooterProps = {
     correct: number[]
 }
 
-export default function CourseContent({ course, clicked, setClicked, cardID, setCardID, previous, next }: CourseContentProps) {
+export default function CourseContent({
+    course,
+    clicked,
+    setClicked,
+    cardID,
+    displayCardID,
+    setCardID,
+    previous,
+    next,
+    showFooter = true,
+}: CourseContentProps) {
     const { theme } = useSelector((state: ReduxState) => state.theme)
     const height = Dimensions.get("window").height
     const [shuffledAlternatives, setShuffledAlternatives] = useState<string[]>([])
     const [indexMapping, setIndexMapping] = useState<number[]>([])
-    const card = course.cards[cardID]
+    const resolvedCardID = displayCardID ?? cardID
+    const card = course.cards[resolvedCardID]
     const length = course.cards.length
 
     function handlePress(index: number) {
@@ -91,7 +104,7 @@ export default function CourseContent({ course, clicked, setClicked, cardID, set
             >
                 <Card
                     card={card}
-                    cardID={cardID}
+                    cardID={resolvedCardID}
                     shuffledAlternatives={shuffledAlternatives}
                     indexMapping={indexMapping}
                     length={length}
@@ -99,47 +112,70 @@ export default function CourseContent({ course, clicked, setClicked, cardID, set
                     getBackground={getBackground}
                 />
             </ScrollView>
-            <CardFooter
-                votes={card?.votes.length}
-                clicked={clicked}
-                setClicked={setClicked}
-                correct={card?.correct}
-            />
+            {showFooter ? (
+                <CardFooter
+                    votes={card?.votes.length}
+                    clicked={clicked}
+                    setClicked={setClicked}
+                    correct={card?.correct}
+                />
+            ) : null}
         </View>
     )
 }
 
 function Card({ card, cardID, shuffledAlternatives, indexMapping, length, handlePress, getBackground }: CardProps) {
     const { theme } = useSelector((state: ReduxState) => state.theme)
+    const { lang } = useSelector((state: ReduxState) => state.lang)
+    const progressText = `${cardID + 1}${cardID >= (length - 5) ? ` / ${length}` : ''}`
+    const modeText = card?.correct.length > 1
+        ? (lang ? 'Flervalg' : 'Multiple choice')
+        : card?.theme || (lang ? 'Kort' : 'Card')
 
     return (
         <>
-            <View>
-                <View>
-                    {card?.correct.length > 1 && <Text style={{
-                        ...T.text18,
-                        marginBottom: 4,
-                        color: theme.oppositeTextColor
-                    }}>
-                        {cardID + 1} {cardID >= (length - 5) ? `/ ${length} ` : ''}- Multiple choice
-                    </Text>}
-                    {<Text style={{
-                        ...T.text18,
-                        marginBottom: 4,
-                        color: theme.oppositeTextColor
-                    }}>
-                        {!(card?.correct.length > 1) && cardID + 1}{cardID >= (length - 5) ? ` / ${length} ` : ''}{card?.theme && ' - '}{card?.theme}
-                    </Text>}
+            <View style={{
+                flexDirection: 'row',
+                alignItems: 'flex-start',
+                justifyContent: 'space-between',
+                marginBottom: 10,
+            }}>
+                <View style={{ flexDirection: 'row', flex: 1, minWidth: 0 }}>
+                    <View style={{
+                        width: 3,
+                        alignSelf: 'stretch',
+                        borderRadius: 99,
+                        backgroundColor: theme.orange,
+                        marginRight: 10,
+                        opacity: 0.55,
+                    }} />
+                    <View style={{ flex: 1, minWidth: 0 }}>
+                        <Text style={{
+                            ...T.text16,
+                            color: theme.textColor,
+                        }}>
+                            {progressText}
+                        </Text>
+                        <Text style={{
+                            ...T.text12,
+                            color: theme.oppositeTextColor,
+                            marginTop: 2,
+                        }}>
+                            {modeText}
+                        </Text>
+                    </View>
                 </View>
-                <View style={{ position: 'absolute', right: 0 }}>
+                {card?.source ? (
                     <Text style={{
-                        ...T.text18,
-                        marginBottom: 4,
-                        color: theme.oppositeTextColor
+                        ...T.text12,
+                        color: theme.oppositeTextColor,
+                        marginLeft: 10,
+                        maxWidth: '42%',
+                        textAlign: 'right',
                     }}>
-                        {card?.source}
+                        {card.source}
                     </Text>
-                </View>
+                ) : null}
             </View>
             <Markdown text={card.question} />
             <View style={{ marginBottom: 30 }}>

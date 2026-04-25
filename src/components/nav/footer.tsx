@@ -3,6 +3,7 @@ import { useSelector } from "react-redux"
 import MS from "@styles/menuStyles"
 import { BlurView } from "expo-blur"
 import NotificationIcon from "@components/notification/notificationIcon"
+import { BottomTabNavigationOptions } from '@react-navigation/bottom-tabs'
 import {
     NavigationHelpers,
     ParamListBase,
@@ -14,7 +15,9 @@ import { JSX } from 'react'
 
 export type FooterProps = {
     state: TabNavigationState<ParamListBase>
-    descriptors: any
+    descriptors: Record<string, {
+        options: BottomTabNavigationOptions
+    } & Record<string, unknown>>
     navigation: NavigationHelpers<ParamListBase, BottomTabNavigationEventMap>
 }
 

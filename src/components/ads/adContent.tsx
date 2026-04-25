@@ -1,7 +1,7 @@
 import AS from "@styles/adStyles"
-import validFileType from "@utils/validFileType"
 import { Image, Platform, View, Text, Dimensions } from "react-native"
 import { SvgUri } from "react-native-svg"
+import React from "react"
 import { useSelector } from "react-redux"
 import capitalizeFirstLetter from "@utils/capitalizeFirstLetter"
 import config from "@/constants"
@@ -15,38 +15,105 @@ type AdClusterLocationProps = {
  * @param {string} banner Link to the advertisement banner
  * @returns               Small banner image
  */
-export function AdClusterImage({ url }: { url: string | undefined }) {
+export function AdClusterImage({
+    logoUrl,
+    bannerUrl,
+    compact
+}: {
+    logoUrl?: string | undefined
+    bannerUrl?: string | undefined
+    compact?: boolean
+}) {
+    const resolvedLogoUrl = resolveOrganizationLogo(logoUrl)
+    const resolvedBannerUrl = resolveJobBanner(bannerUrl)
+    const width = compact ? 74 : 90
+    const height = compact ? 60 : 60
+    const [candidateIndex, setCandidateIndex] = React.useState(0)
+    const candidates = React.useMemo(
+        () => [
+            resolvedLogoUrl ? { uri: resolvedLogoUrl, kind: "logo" as const } : null,
+            resolvedBannerUrl ? { uri: resolvedBannerUrl, kind: "banner" as const } : null
+        ].filter(Boolean) as { uri: string, kind: "logo" | "banner" }[],
+        [resolvedBannerUrl, resolvedLogoUrl]
+    )
+    const currentCandidate = candidates[candidateIndex]
+    const resolvedUrl = currentCandidate?.uri || ""
+    const isLogo = currentCandidate?.kind === "logo"
+
+    React.useEffect(() => {
+        setCandidateIndex(0)
+    }, [resolvedBannerUrl, resolvedLogoUrl])
+
+    const imageWrapperStyle = {
+        width,
+        height,
+        borderRadius: compact ? 12 : 14,
+        backgroundColor: isLogo ? "#ffffff" : "#101010",
+        alignItems: "center" as const,
+        justifyContent: "center" as const,
+        overflow: "hidden" as const,
+    }
 
     // Handles svg icons
-    if (url?.endsWith(".svg")) {
-        return <SvgUri
-            style={{ alignSelf: "center", backgroundColor: "white", borderRadius: 5 }}
-            width={90}
-            height={60}
-            uri={`${config.cdn}/organizations/${url}`}
-        />
+    if (resolvedUrl.endsWith(".svg")) {
+        return (
+            <View style={imageWrapperStyle}>
+                <SvgUri
+                    width={isLogo ? width - 12 : width}
+                    height={isLogo ? height - 20 : height}
+                    uri={resolvedUrl}
+                    onError={() => setCandidateIndex((current) => current + 1)}
+                />
+            </View>
+        )
     }
 
-    // Handles png, jpg and gif icons from Login CDN
-    if (validFileType(url) && !url?.startsWith("http")) {
-        return <Image
-            style={AS.adBannerSmall}
-            source={{ uri: `${config.cdn}/organizations/${url}` }}
-        />
+    if (resolvedUrl) {
+        return (
+            <View style={imageWrapperStyle}>
+                    <Image
+                        style={{
+                        width: isLogo ? width - 12 : width,
+                        height: isLogo ? height - 18 : height,
+                        resizeMode: isLogo ? "contain" : "cover",
+                    }}
+                        source={{ uri: resolvedUrl, cache: "force-cache" }}
+                        onError={() => setCandidateIndex((current) => current + 1)}
+                    />
+            </View>
+        )
     }
 
-    // Handles png, jpg and gif icons from extern location
-    if (validFileType(url) && url?.includes("http")) {
-        return <Image style={AS.adBannerSmall} source={{ uri: url }} />
-    }
-
-    // Handles missing asset (default png)
+    // Only use the fallback icon when no logo or banner exists at all.
     return (
         <View style={AS.adClusterImage}>
-            <Image
-                style={AS.adBannerSmall}
-                source={{ uri: `${config.cdn}/organizations/adcompany.png` }}
-            />
+            <View
+                style={{
+                    width,
+                    height,
+                    alignItems: "center",
+                    justifyContent: "center",
+                }}
+            >
+                <View style={{
+                    width: compact ? 38 : 72,
+                    height: compact ? 38 : 48,
+                    borderRadius: 14,
+                    backgroundColor: "rgba(255,255,255,0.08)",
+                    alignItems: "center",
+                    justifyContent: "center",
+                }}>
+                    <Image
+                        source={require("@assets/menu/business-orange.png")}
+                        style={{
+                            width: compact ? 22 : 30,
+                            height: compact ? 22 : 30,
+                            resizeMode: "contain",
+                            opacity: 0.85,
+                        }}
+                    />
+                </View>
+            </View>
         </View>
     )
 }
@@ -99,4 +166,38 @@ export function AdClusterLocation({ ad }: AdClusterLocationProps) {
             </View>
         </View>
     )
+}
+
+export function getAdClusterMeta(ad: GetJobProps | undefined, lang: boolean) {
+    const type = capitalizeFirstLetter(lang ? ad?.job_type?.name_no : ad?.job_type?.name_en)
+    const location = ad?.cities?.map(city => capitalizeFirstLetter(city)).join(", ")
+    const orgName = lang
+        ? ad?.organization?.name_no || ad?.organization?.name_en
+        : ad?.organization?.name_en || ad?.organization?.name_no
+
+    return [type, location, orgName].filter(Boolean).join(" · ")
+}
+
+function resolveOrganizationLogo(url: string | undefined) {
+    if (!url) {
+        return ""
+    }
+
+    if (url.startsWith("http://") || url.startsWith("https://")) {
+        return url
+    }
+
+    return `${config.cdn}/organizations/${url.replace(/^\/+/, "")}`
+}
+
+function resolveJobBanner(url: string | undefined) {
+    if (!url) {
+        return ""
+    }
+
+    if (url.startsWith("http://") || url.startsWith("https://")) {
+        return url
+    }
+
+    return `${config.cdn}/jobs/${url.replace(/^\/+/, "")}`
 }

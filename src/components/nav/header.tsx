@@ -7,19 +7,19 @@
  */
 import GS from '@styles/globalStyles'
 import GM from '@styles/gameStyles'
-import MS from '@styles/menuStyles'
 import getHeight from '@utils/getHeight'
 import getCategories from '@utils/getCategories'
-import { PropsWithChildren, ReactNode, useEffect, useState } from 'react'
+import { PropsWithChildren, ReactNode, useEffect, useMemo } from 'react'
 import { BlurView } from 'expo-blur'
-import { Dimensions, Platform, View, Text, StatusBar } from 'react-native'
+import { Dimensions, Platform, View, Text, StatusBar, Pressable } from 'react-native'
 import { HeaderProps } from '@/interfaces'
 import { useSelector } from 'react-redux'
 import { useRoute } from '@react-navigation/native'
-import { TouchableOpacity } from 'react-native'
 import { Image } from "react-native"
 import { useDispatch } from 'react-redux'
 import { setTag } from '@redux/event'
+
+const MAX_COMPACT_HEADER_TITLE_LENGTH = 37
 
 export default function Header({ options, route, navigation }: HeaderProps): ReactNode {
     const { theme, isDark } = useSelector((state: ReduxState) => state.theme)
@@ -30,37 +30,37 @@ export default function Header({ options, route, navigation }: HeaderProps): Rea
     const dispatch = useDispatch()
     const SES = route.name === "SpecificEventScreen"
     const SAS = route.name === "SpecificAdScreen"
-    const orangeIcon = require('@assets/icons/goback-orange.png')
     const exceptions = ['SpecificGameScreen']
 
-    const [title, setTitle] = useState<string>(route.name && (lang
-        ? require('@text/no.json').screens[route.name]
-        : require('@text/en.json').screens[route.name]))
+    const title = useMemo(() => {
+        if (route.name === localTitle?.screen && localTitle.title) {
+            return localTitle.title
+        }
 
-    useEffect(() => {
         if (SES) {
-            setTitle(options.title || eventName || (lang ? "Arrangement" : "Event"))
+            return getCompactHeaderTitle({
+                value: options.title || eventName,
+                fallback: lang ? "Arrangement" : "Event"
+            })
         }
-        else if (SAS) {
-            setTitle(options.title || adName || (lang ? "Jobbanonse" : "Job ad"))
-        }
-    }, [eventName, adName])
 
-    if (route.name === localTitle?.screen && localTitle.title !== title) {
-        setTitle(localTitle.title)
-    }
+        if (SAS) {
+            return getCompactHeaderTitle({
+                value: options.title || adName,
+                fallback: lang ? "Jobbannonse" : "Job ad"
+            })
+        }
+
+        return route.name && (lang
+            ? require('@text/no.json').screens[route.name]
+            : require('@text/en.json').screens[route.name])
+    }, [SAS, SES, adName, eventName, lang, localTitle?.screen, localTitle?.title, options.title, route.name])
 
     if (route.name === "ProfileScreen") {
         return <></>
     }
 
-    const [backIcon, setBackIcon] = useState(isDark
-        ? require('@assets/icons/goback777.png')
-        : require('@assets/icons/goback111.png'))
-
     function handlePress() {
-        setBackIcon(orangeIcon)
-
         if (tag?.title) {
             dispatch(setTag({ title: "", body: "" }))
         }
@@ -75,23 +75,66 @@ export default function Header({ options, route, navigation }: HeaderProps): Rea
                     {options.headerComponents?.left ? options.headerComponents?.left.map((node, index) =>
                         <View style={GS.logo} key={index}>{node}</View>
                     ) :
-                        <TouchableOpacity onPress={handlePress}>
-                            <Image style={{ ...MS.tMenuIcon, left: 5 }} source={backIcon}></Image>
-                        </TouchableOpacity>
+                        <Pressable
+                            onPress={handlePress}
+                            style={({ pressed }) => ({
+                                marginLeft: 18,
+                                width: 42,
+                                height: 42,
+                                borderRadius: 21,
+                                borderWidth: 1,
+                                borderColor: isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.08)",
+                                backgroundColor: pressed
+                                    ? (isDark ? "rgba(255,255,255,0.12)" : "rgba(0,0,0,0.05)")
+                                    : (isDark ? "rgba(255,255,255,0.07)" : "rgba(255,255,255,0.46)"),
+                                alignItems: "center",
+                                justifyContent: "center",
+                                shadowColor: "#000",
+                                shadowOpacity: isDark ? 0.12 : 0.05,
+                                shadowRadius: 8,
+                                shadowOffset: { width: 0, height: 3 },
+                                elevation: 3,
+                            })}
+                        >
+                            <Text style={{
+                                color: theme.orange,
+                                fontSize: 26,
+                                lineHeight: 28,
+                                fontWeight: "600",
+                                marginLeft: -2,
+                                marginTop: Platform.OS === "ios" ? -1 : -3,
+                            }}>
+                                ‹
+                            </Text>
+                        </Pressable>
                     }
                 </View>
                 {!exceptions.includes(route.name) && <Text style={{
                     ...GS.headerTitle,
-                    color: theme.titleTextColor,
-                    width: 300,
+                    color: theme.textColor,
+                    width: 260,
                     textAlign: "center",
-                    top: title?.length > 30 ? Platform.OS === 'ios' ? 4 : -6 : undefined
+                    top: title?.length > 30 ? Platform.OS === 'ios' ? 4 : -6 : undefined,
+                    fontWeight: "700",
+                    letterSpacing: 0.2,
+                    textShadowColor: isDark ? "rgba(0,0,0,0.16)" : "rgba(255,255,255,0.12)",
+                    textShadowOffset: { width: 0, height: 1 },
+                    textShadowRadius: 6,
+                    backgroundColor: isDark ? "rgba(255,255,255,0.05)" : "rgba(255,255,255,0.42)",
+                    borderRadius: 16,
+                    overflow: "hidden",
+                    paddingHorizontal: 14,
+                    paddingVertical: 8,
+                    borderWidth: 1,
+                    borderColor: isDark ? "rgba(255,255,255,0.06)" : "rgba(255,255,255,0.28)",
                 }}>
                     {title}
                 </Text>}
                 <View style={GS.innerHeaderViewTwo}>
                     {options.headerComponents?.right?.map((node, index) => (
-                        <View style={index === 1
+                        <View style={route.name === "AiScreen"
+                            ? { marginRight: 0 }
+                            : index === 1
                             ? {
                                 ...GS.customMenuIcon,
                                 width: Platform.OS === "ios" ? 28 : 5,
@@ -181,4 +224,20 @@ function BlurWrapper(props: PropsWithChildren) {
             </View>
         </>
     )
+}
+
+function getCompactHeaderTitle({
+    value,
+    fallback,
+}: {
+    value?: string
+    fallback: string
+}) {
+    const normalized = value?.trim()
+
+    if (!normalized) {
+        return fallback
+    }
+
+    return normalized.length > MAX_COMPACT_HEADER_TITLE_LENGTH ? fallback : normalized
 }

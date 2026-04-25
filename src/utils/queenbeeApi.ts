@@ -354,3 +354,38 @@ export async function getDatabaseOverview(): Promise<GetDatabaseOverview> {
 export async function getVulnerabilitiesOverview(): Promise<GetVulnerabilities> {
     return await requestApi<GetVulnerabilities>(config.internal_api_url, "/vulnerabilities")
 }
+
+export async function triggerVulnerabilityScan(): Promise<{ message: string, status: GetVulnerabilities["scanStatus"] }> {
+    return await requestApi<{ message: string, status: GetVulnerabilities["scanStatus"] }>(
+        config.beekeeper_api_url,
+        "/vulnerabilities/scan",
+        {
+            method: "POST",
+            body: {}
+        }
+    )
+}
+
+export async function setPrimaryLoadBalancingSite(id: number) {
+    return await requestApi<NativeLoadBalancingSite[]>(config.beekeeper_api_url, `/site/primary/${id}`)
+}
+
+export async function getInternalLogs(params?: {
+    service?: string
+    search?: string
+    level?: "all" | "error"
+    tail?: number
+}) {
+    const query = new URLSearchParams()
+
+    if (params?.service) query.set("service", params.service)
+    if (params?.search) query.set("search", params.search)
+    if (params?.level) query.set("level", params.level)
+    if (params?.tail) query.set("tail", String(params.tail))
+
+    const suffix = query.toString()
+    return await requestApi<LogsPayload>(
+        config.beekeeper_api_url,
+        suffix ? `/docker/logs?${suffix}` : "/docker/logs"
+    )
+}

@@ -51,18 +51,44 @@ function TopicSwitch({ topic, textNo, textEn }: TopicSwitchProps): JSX.Element {
     const { theme } = useSelector((state: ReduxState) => state.theme)
 
     return (
-        <Cluster>
-            <View style={GS.notificationBack}>
-                <View style={GS.view}>
-                    <Text style={{
-                        ...GS.notificationText, color:
-                            theme.oppositeTextColor
+        <View style={{ marginBottom: 6 }}>
+            <Cluster marginHorizontal={0}>
+                <View style={{
+                    ...GS.notificationBack,
+                    paddingVertical: 2,
+                }}>
+                    <View style={{
+                        width: 3,
+                        alignSelf: "stretch",
+                        borderRadius: 99,
+                        backgroundColor: theme.orange,
+                        marginRight: 10,
+                        opacity: 0.22,
+                    }} />
+                    <View style={{
+                        flex: 1,
+                        minWidth: 0,
                     }}>
-                        {lang ? textNo : textEn}
-                    </Text>
+                        <Text style={{
+                            ...GS.notificationText,
+                            color: theme.oppositeTextColor,
+                            fontSize: 16,
+                        }}>
+                            {lang ? textNo : textEn}
+                        </Text>
+                    </View>
+                    <View style={{
+                        ...GS.view2,
+                        minWidth: 52,
+                        marginLeft: 12,
+                        alignSelf: "center",
+                        alignItems: "center",
+                        justifyContent: "center",
+                    }}>
+                        <Notification category={topic} skip />
+                    </View>
                 </View>
-                <View style={GS.view2}>{Notification({ category: topic, skip: true })}</View>
-            </View>
-        </Cluster>
+            </Cluster>
+        </View>
     )
 }

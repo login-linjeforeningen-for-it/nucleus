@@ -42,7 +42,7 @@ export type MenuRoutes =
     | "SpecificCourseScreen"
     | "LoginScreen"
     | "AiScreen"
-    | "AdminScreen"
+    | "QueenbeeScreen"
     | "InternalScreen"
     | "GameScreen"
     | "SpecificGameScreen"
@@ -50,6 +50,10 @@ export type MenuRoutes =
     | "StatusScreen"
     | "MusicScreen"
     | "DashboardScreen"
+    | "LoadBalancingScreen"
+    | "DatabaseScreen"
+    | "VulnerabilitiesScreen"
+    | "LogsScreen"
 
 export type ItemProps = {
     id: number
@@ -68,12 +72,16 @@ export type MenuStackParamList = {
     BusinessScreen: undefined
     LoginScreen: undefined
     AiScreen: undefined
-    AdminScreen: undefined
+    QueenbeeScreen: undefined
     InternalScreen: undefined
     SearchScreen: undefined
     StatusScreen: undefined
     MusicScreen: undefined
     DashboardScreen: undefined
+    LoadBalancingScreen: undefined
+    DatabaseScreen: undefined
+    VulnerabilitiesScreen: undefined
+    LogsScreen: undefined
     MenuScreen: undefined
     CourseScreen: undefined
     SpecificCourseScreen: { code: string, id: number }
@@ -91,7 +99,7 @@ export type TabBarParamList = {
 export type RootStackParamList = {
     Tabs: NavigatorScreenParams<TabBarParamList>
     InfoModal: undefined
-    NotificationModal: { title: string, body: string, data: any }
+    NotificationModal: { title: string, body: string, data: Record<string, unknown> }
 }
 
 export type RootStackProps<T extends keyof RootStackParamList> =

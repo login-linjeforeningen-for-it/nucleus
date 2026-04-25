@@ -33,10 +33,10 @@ export default function InternalScreen({ navigation }: MenuProps<"InternalScreen
                             </Cluster>
                         </TouchableOpacity>
                         <Space height={20} />
-                        <TouchableOpacity onPress={() => login ? navigation.navigate("AdminScreen") : startLogin('queenbee')}>
+                        <TouchableOpacity onPress={() => login ? navigation.navigate("QueenbeeScreen") : startLogin('queenbee')}>
                             <Cluster>
                                 <Text style={{ ...T.centered20, color: theme.textColor }}>
-                                    {login ? 'Open admin tools' : 'Login for Queenbee'}
+                                    {login ? 'Queenbee' : 'Login for Queenbee'}
                                 </Text>
                             </Cluster>
                         </TouchableOpacity>

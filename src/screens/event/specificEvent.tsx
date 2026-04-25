@@ -5,18 +5,14 @@ import ES from "@styles/eventStyles"
 import { Dimensions, Platform, View, Text } from "react-native"
 import { RefreshControl, ScrollView } from "react-native-gesture-handler"
 import Swipe from "@components/nav/swipe"
-import SpecificEventImage from "@components/event/specificEventImage"
-import Countdown from "@components/event/countdown"
-import BasicInfo from "@components/event/basicInfo"
-import Description from "@components/event/description"
+import Cluster from "@components/shared/cluster"
+import T from "@styles/text"
+import SpecificEventSections from "@components/event/specificEventSections"
 import { useDispatch } from "react-redux"
 import { fetchEventDetails } from "@utils/fetch"
-import Tag from "@components/shared/tag"
 import { EventScreenProps } from "@type/screenTypes"
 import { EventContext } from "@utils/contextProvider"
 import { setEventName } from "@redux/event"
-import JoinButton from "@components/event/joinButton"
-import Rules from "@components/event/rules"
 
 /**
  * @param eventID - The ID of the event to be displayed
@@ -30,6 +26,7 @@ export default function SpecificEventScreen({ route: { params: { eventID } } }: 
     const dispatch = useDispatch()
     const height = Dimensions.get("window").height
     const [event, setEvent] = useState({} as GetEventProps)
+    const [error, setError] = useState("")
 
     /**
      * Sets the title of the screen in the header
@@ -50,8 +47,10 @@ export default function SpecificEventScreen({ route: { params: { eventID } } }: 
         const response = await fetchEventDetails(eventID)
         if (response) {
             setEvent(response)
+            setError("")
             return true
         } else {
+            setError("Failed to load event")
             return false
         }
     }
@@ -78,16 +77,15 @@ export default function SpecificEventScreen({ route: { params: { eventID } } }: 
                         scrollEventThrottle={100}
                         refreshControl={<RefreshControl refreshing={refresh} onRefresh={onRefresh} />}
                     >
-                        <Tag event={event} />
-                        <SpecificEventImage />
                         <Space height={10} />
-                        <Countdown />
-                        <BasicInfo />
-                        <Description />
-                        <Rules />
-                        <Space height={10} />
-                        <JoinButton />
-                        <Text style={{ ...ES.id, color: theme.oppositeTextColor }}>Event ID: {event.id}</Text>
+                        {error ? (
+                            <Cluster marginHorizontal={12}>
+                                <View style={{ padding: 14 }}>
+                                    <Text style={{ ...T.text15, color: "#ff8b8b" }}>{error}</Text>
+                                </View>
+                            </Cluster>
+                        ) : null}
+                        {event?.id ? <SpecificEventSections event={event} /> : null}
                         <Space height={Dimensions.get("window").height / (Platform.OS === 'ios' ? 3 : 2.75)} />
                     </ScrollView>
                 </View>

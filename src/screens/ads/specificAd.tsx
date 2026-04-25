@@ -1,17 +1,13 @@
-import { View, Dimensions } from "react-native"
+import { View, Dimensions, Text } from "react-native"
 import { RefreshControl, ScrollView } from "react-native-gesture-handler"
 import Cluster from "@/components/shared/cluster"
 import AS from "@styles/adStyles"
 import { useDispatch, useSelector } from "react-redux"
 import { useCallback, useState, useEffect, JSX } from "react"
 import Swipe from "@components/nav/swipe"
-import AdInfo, {
-    AdBanner,
-    AdDescription,
-    AdMedia,
-    AdTitle,
-    AdUpdateInfo
-} from "@/components/ads/ad"
+import Space from "@/components/shared/utils"
+import T from "@styles/text"
+import SpecificAdSections from "@/components/ads/specificAdSections"
 import { setAdName } from "@redux/ad"
 import { fetchAdDetails } from "@utils/fetch"
 import { AdScreenProps } from "@type/screenTypes"
@@ -22,6 +18,7 @@ export default function SpecificAdScreen({ route: { params: { adID } } }: AdScre
     const { lang } = useSelector((state: ReduxState) => state.lang)
     const [ad, setAd] = useState({} as GetJobProps)
     const [refresh, setRefresh] = useState(false)
+    const [error, setError] = useState("")
     const dispatch = useDispatch()
     const height = Dimensions.get("window").height
 
@@ -42,8 +39,12 @@ export default function SpecificAdScreen({ route: { params: { adID } } }: AdScre
 
         if (response) {
             setAd(response)
+            setError("")
             return true
         }
+
+        setError("Failed to load job ad")
+        return false
     }
 
     // Handels the refresh of the page
@@ -59,28 +60,27 @@ export default function SpecificAdScreen({ route: { params: { adID } } }: AdScre
     return (
         <AdContext.Provider value={ad}>
             <Swipe left="AdScreen">
-                <View>
-                    <View style={{
-                        ...AS.content,
-                        backgroundColor: theme.darker,
-                        paddingTop: Dimensions.get("window").height / 9.7 + (height > 800 && height < 900 ? 15 : 0),
-                        paddingBottom: Dimensions.get("window").height / 3
-                    }}>
-                        <ScrollView
-                            showsVerticalScrollIndicator={false}
-                            scrollEventThrottle={100}
-                            refreshControl={<RefreshControl refreshing={refresh} onRefresh={onRefresh} />}
-                        >
-                            <Cluster marginHorizontal={12} marginVertical={22}>
-                                <AdBanner url={ad.banner_image} />
-                                <AdTitle ad={ad} />
-                                <AdInfo ad={ad} />
-                                <AdDescription ad={ad} />
-                                <AdMedia ad={ad} />
-                                <AdUpdateInfo ad={ad} />
+                <View style={{ flex: 1, backgroundColor: theme.darker }}>
+                    <ScrollView
+                        style={AS.content}
+                        contentContainerStyle={{
+                            paddingTop: Dimensions.get("window").height / 9.7 + (height > 800 && height < 900 ? 15 : 0),
+                            paddingBottom: 100
+                        }}
+                        showsVerticalScrollIndicator={false}
+                        scrollEventThrottle={100}
+                        refreshControl={<RefreshControl refreshing={refresh} onRefresh={onRefresh} />}
+                    >
+                        {error ? (
+                            <Cluster marginHorizontal={12}>
+                                <View style={{ padding: 14 }}>
+                                    <Text style={{ ...T.text15, color: "#ff8b8b" }}>{error}</Text>
+                                </View>
                             </Cluster>
-                        </ScrollView>
-                    </View>
+                        ) : null}
+                        {ad?.id ? <SpecificAdSections ad={ad} /> : null}
+                        <Space height={22} />
+                    </ScrollView>
                 </View>
             </Swipe>
         </AdContext.Provider>

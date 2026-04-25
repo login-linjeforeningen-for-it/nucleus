@@ -84,6 +84,13 @@ export default function ProfileInfo({ profile }: ProfileInfoProps) {
 function ProfileInfoContent({ type, index, profile, selectedIndex }:
     ProfileInfoContentProps) {
     const { theme } = useSelector((state: ReduxState) => state.theme)
+    const value = Object.values(profile)[index]
+    const normalizedValue = Array.isArray(value)
+        ? value.filter(Boolean).join(", ")
+        : value
+    const displayValue = typeof normalizedValue === "string" || typeof normalizedValue === "number"
+        ? String(normalizedValue)
+        : ""
 
     return (
         <Cluster noColor={true} marginHorizontal={12}>
@@ -100,7 +107,7 @@ function ProfileInfoContent({ type, index, profile, selectedIndex }:
                             textAlign: "right",
                             color: theme.oppositeTextColor
                         }}>
-                            {Object.keys(profile)[index] || ''}
+                            {displayValue || "—"}
                         </Text>
                     </View>
                     <View style={CS.twinRight}>
