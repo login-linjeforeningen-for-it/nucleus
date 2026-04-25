@@ -48,7 +48,7 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.eirikhanasand.Login",
-      "buildNumber": "149",
+      "buildNumber": "150",
       "googleServicesFile": "./GoogleService-Info.plist",
       "associatedDomains": [
         "applinks:login.no"
@@ -67,7 +67,7 @@
       },
       "package": "com.login.Login",
       "googleServicesFile": "./google-services.json",
-      "versionCode": 102,
+      "versionCode": 103,
       "permissions": [
         "INTERNET",
         "NOTIFICATIONS",
