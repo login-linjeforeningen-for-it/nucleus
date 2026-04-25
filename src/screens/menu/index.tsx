@@ -230,14 +230,13 @@ function MenuItem({ item, navigation, subtitle }: MenuItemProps): JSX.Element {
         <TouchableOpacity
             onPress={() => navigation.navigate(item.nav as any)}
             activeOpacity={0.88}
-            style={{ marginBottom: 10 }}
         >
             <Cluster style={{ paddingHorizontal: 0 }}>
                 <View style={{
                     flexDirection: "row",
                     alignItems: "flex-start",
                     paddingHorizontal: 14,
-                    paddingVertical: 14,
+                    paddingVertical: 6,
                     gap: 12,
                 }}>
                     <View style={{
