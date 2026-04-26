@@ -1710,8 +1710,10 @@ function MonitoringPage({ data }: { data: DashboardData }) {
 }
 
 function MonitoringServiceCard({ service }: { service: DashboardData['statusServices'][number] }) {
+  const [editing, setEditing] = useState(false)
   const latest = service.bars?.[0]
   const up = latest?.status === true || latest?.status === 1
+  const record = service as EditableRow
   return (
     <article className="service-admin-card">
       <div>
@@ -1724,9 +1726,33 @@ function MonitoringServiceCard({ service }: { service: DashboardData['statusServ
         <span>{up ? 'UP' : 'CHECK'}</span>
       </div>
       <div className="editor-actions">
+        <button onClick={() => setEditing((value) => !value)}><Pencil size={14} />{editing ? 'Close edit' : 'Edit'}</button>
         <InternalActionButton label="Delete service" path={`monitoring/${service.id}`} method="DELETE" dangerous confirm={`Delete monitoring service ${service.name}?`} />
         <button onClick={() => openInAppBrowser(`https://queenbee.login.no/internal/monitoring?service=${service.id}`)}>Queenbee <ExternalLink size={14} /></button>
       </div>
+      {editing ? (
+        <InternalMiniForm
+          title={`Update ${service.name}`}
+          path={`monitoring/${service.id}`}
+          method="PUT"
+          confirm={`Update monitoring service ${service.name}?`}
+          defaults={record}
+          fields={[
+            { name: 'name', label: 'Name', required: true },
+            { name: 'type', label: 'Type', required: true },
+            { name: 'url', label: 'URL' },
+            { name: 'interval', label: 'Interval seconds', type: 'number' },
+            { name: 'port', label: 'TCP port', type: 'number' },
+            { name: 'userAgent', label: 'User agent' },
+            { name: 'maxConsecutiveFailures', label: 'Max consecutive failures', type: 'number' },
+            { name: 'note', label: 'Note', type: 'textarea' },
+            { name: 'notification', label: 'Notification ID', type: 'number' },
+            { name: 'expectedDown', label: 'Expected down', type: 'boolean' },
+            { name: 'upsideDown', label: 'Upside down', type: 'boolean' },
+            { name: 'enabled', label: 'Enabled', type: 'boolean' },
+          ]}
+        />
+      ) : null}
     </article>
   )
 }
@@ -2434,12 +2460,14 @@ function InternalMiniForm({
   method = 'POST',
   fields,
   confirm,
+  defaults = null,
 }: {
   title: string
   path: string
   method?: 'POST' | 'PUT'
   fields: EditorField[]
   confirm: string
+  defaults?: EditableRow | null
 }) {
   const [state, setState] = useState<'idle' | 'busy' | 'done' | 'error'>('idle')
   const tokenReady = hasQueenbeeToken()
@@ -2460,7 +2488,7 @@ function InternalMiniForm({
   return (
     <form className="mini-admin-form" onSubmit={submit}>
       <h3>{title}</h3>
-      {fields.map((field) => <EditorInput key={field.name} field={field} row={null} />)}
+      {fields.map((field) => <EditorInput key={field.name} field={field} row={defaults} />)}
       <button type="submit" disabled={!tokenReady || state === 'busy'}>
         {state === 'busy' ? <Loader2 size={14} className="spin" /> : state === 'done' ? <CheckCircle2 size={14} /> : state === 'error' ? <AlertCircle size={14} /> : <Plus size={14} />}
         {state === 'done' ? 'Done' : state === 'error' ? 'Failed' : 'Submit'}

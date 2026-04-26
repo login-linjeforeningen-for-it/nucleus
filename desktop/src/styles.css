@@ -1543,6 +1543,10 @@ button { font: inherit; }
   font-size: 12px;
 }
 
+.service-admin-card .mini-admin-form {
+  grid-column: 1 / -1;
+}
+
 .editor-preview-panel {
   min-height: 0;
 }
@@ -2465,9 +2469,7 @@ button { font: inherit; }
   border: 1px solid rgba(245,139,69,0.30);
   border-radius: 22px;
   padding: 24px;
-  background:
-    radial-gradient(circle at 18% 12%, rgba(245,139,69,0.28), transparent 35%),
-    linear-gradient(145deg, color-mix(in srgb, var(--panel-strong) 92%, transparent), var(--panel));
+  background: color-mix(in srgb, var(--panel-strong) 92%, var(--panel));
   box-shadow: inset 0 1px 0 rgba(255,255,255,0.04);
 }
 
@@ -2475,13 +2477,13 @@ button { font: inherit; }
 .notification-preview small {
   color: var(--muted);
   font-size: 12px;
-  letter-spacing: 0.12em;
+  letter-spacing: 0;
   text-transform: uppercase;
 }
 
 .notification-preview strong {
-  font-size: clamp(24px, 4vw, 42px);
-  letter-spacing: -0.06em;
+  font-size: 34px;
+  letter-spacing: 0;
 }
 
 .notification-preview p {
