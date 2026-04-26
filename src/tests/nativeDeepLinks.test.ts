@@ -3,6 +3,7 @@ import getExpoConfig from '../../app.config'
 const publicPaths = [
     '/events',
     '/career',
+    '/profile',
     '/about',
     '/companies',
     '/ai',

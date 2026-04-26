@@ -34,6 +34,7 @@ const linking: LinkingOptions<RootStackParamList> = {
                     },
                     MenuNav: {
                         screens: {
+                            ProfileScreen: 'profile',
                             AboutScreen: 'about',
                             BusinessScreen: 'companies',
                             AiScreen: 'ai',

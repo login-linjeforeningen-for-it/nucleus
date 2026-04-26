@@ -3,6 +3,7 @@ import { ExpoConfig, ConfigContext } from '@expo/config'
 const publicUniversalLinkPaths = [
     '/events',
     '/career',
+    '/profile',
     '/about',
     '/companies',
     '/ai',
