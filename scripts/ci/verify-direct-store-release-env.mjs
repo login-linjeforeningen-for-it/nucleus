@@ -1,4 +1,5 @@
 import { existsSync, readFileSync } from 'node:fs'
+import { spawnSync } from 'node:child_process'
 
 const strict = process.argv.includes('--strict')
 const failures = []
@@ -34,6 +35,11 @@ if (existsSync('package.json')) {
 }
 
 if (strict) {
+    const xcode = spawnSync('xcodebuild', ['-version'], { encoding: 'utf8' })
+    if (xcode.status !== 0) {
+        failures.push('Full Xcode is required on the Mac mini runner; xcodebuild -version failed')
+    }
+
     for (const key of requiredEnv) {
         if (!process.env[key]) {
             failures.push(`Missing required CI secret/env: ${key}`)
