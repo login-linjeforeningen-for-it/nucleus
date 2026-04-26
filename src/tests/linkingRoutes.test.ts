@@ -6,6 +6,8 @@ import { getStateFromPath, NavigationState, PartialState } from '@react-navigati
 import linking from '@utils/linking'
 
 const expectedRoutes = [
+    ['events/42', 'SpecificEventScreen'],
+    ['career/3', 'SpecificAdScreen'],
     ['profile', 'ProfileScreen'],
     ['ai', 'AiScreen'],
     ['internal/ai', 'AiScreen'],
