@@ -16,6 +16,7 @@ import {
   Grid2X2,
   Handshake,
   Image,
+  Images,
   Loader2,
   Logs,
   Laptop,
@@ -63,7 +64,7 @@ import type { BrowserTarget } from './lib/inAppBrowser'
 import { openInAppBrowser } from './lib/inAppBrowser'
 import './styles.css'
 
-type PageKey = 'dashboard' | 'events' | 'announcements' | 'albums' | 'jobs' | 'organizations' | 'locations' | 'rules' | 'alerts' | 'honey' | 'partners' | 'music' | 'status' | 'nucleusAdmin' | 'internal' | 'loadbalancing' | 'databases' | 'monitoring' | 'services' | 'serviceDetail' | 'traffic' | 'trafficRecords' | 'trafficMap' | 'backups' | 'vulnerabilities' | 'logs' | 'ai' | 'settings'
+type PageKey = 'dashboard' | 'events' | 'announcements' | 'albums' | 'albumImages' | 'jobs' | 'organizations' | 'locations' | 'rules' | 'alerts' | 'honey' | 'partners' | 'music' | 'status' | 'nucleusAdmin' | 'nucleusDocs' | 'internal' | 'loadbalancing' | 'databases' | 'dbRestore' | 'monitoring' | 'services' | 'serviceDetail' | 'traffic' | 'trafficRecords' | 'trafficMap' | 'backups' | 'vulnerabilities' | 'logs' | 'ai' | 'settings'
 type ThemePreference = 'light' | 'dark' | 'system'
 
 type NavItem = { key: PageKey; label: string; icon: React.ComponentType<{ size?: number }> }
@@ -100,6 +101,7 @@ const menu: NavItem[] = [
   { key: 'events', label: 'Events', icon: CalendarDays },
   { key: 'announcements', label: 'Announcements', icon: Megaphone },
   { key: 'albums', label: 'Albums', icon: Image },
+  { key: 'albumImages', label: 'Album Images', icon: Images },
   { key: 'jobs', label: 'Jobs', icon: BriefcaseBusiness },
   { key: 'organizations', label: 'Organizations', icon: UsersRound },
   { key: 'locations', label: 'Locations', icon: MapPin },
@@ -110,9 +112,11 @@ const menu: NavItem[] = [
   { key: 'music', label: 'Music', icon: Music2 },
   { key: 'status', label: 'Status', icon: Monitor },
   { key: 'nucleusAdmin', label: 'Nucleus', icon: Bell },
+  { key: 'nucleusDocs', label: 'Nucleus Docs', icon: FileText },
   { key: 'internal', label: 'Internal', icon: ShieldCheck },
   { key: 'loadbalancing', label: 'Load Balancing', icon: Scale },
   { key: 'databases', label: 'Databases', icon: Database },
+  { key: 'dbRestore', label: 'DB Restore', icon: Database },
   { key: 'monitoring', label: 'Monitoring', icon: Monitor },
   { key: 'services', label: 'Services', icon: Server },
   { key: 'serviceDetail', label: 'Service Detail', icon: Server },
@@ -549,6 +553,7 @@ function PageRouter({ page, data, updateState }: { page: PageKey; data: Dashboar
     case 'events': return <EventsPage data={data} />
     case 'announcements': return <AnnouncementsPage data={data} />
     case 'albums': return <AlbumsPage data={data} />
+    case 'albumImages': return <AlbumImagesPage data={data} />
     case 'jobs': return <JobsPage data={data} />
     case 'organizations': return <OrganizationsPage data={data} />
     case 'locations': return <LocationsPage data={data} />
@@ -559,9 +564,11 @@ function PageRouter({ page, data, updateState }: { page: PageKey; data: Dashboar
     case 'music': return <MusicPage data={data} />
     case 'status': return <StatusPage data={data} />
     case 'nucleusAdmin': return <NucleusAdminPage data={data} />
+    case 'nucleusDocs': return <NucleusDocsPage />
     case 'internal': return <InternalPage data={data} />
     case 'loadbalancing': return <LoadBalancingPage data={data} />
     case 'databases': return <DatabasesPage data={data} />
+    case 'dbRestore': return <DbRestorePage />
     case 'monitoring': return <MonitoringPage data={data} />
     case 'services': return <ServicesPage data={data} />
     case 'serviceDetail': return <ServiceDetailPage data={data} />
@@ -653,6 +660,7 @@ function pageMeta(page: PageKey, data: DashboardData | null) {
     events: { title: 'Events', kicker: `${data?.events.length ?? 0} loaded`, description: `${count(data?.counts.events)} public events from Workerbee.`, icon: CalendarDays },
     announcements: { title: 'Announcements', kicker: `${data?.announcements.length ?? 0} loaded`, description: `${count(data?.counts.announcements)} Discord announcements from TekKom Bot.`, icon: Megaphone },
     albums: { title: 'Albums', kicker: `${data?.albums.length ?? 0} loaded`, description: `${count(data?.counts.albums)} albums from Workerbee.`, icon: Image },
+    albumImages: { title: 'Album Images', kicker: 'Dynamic', description: 'Queenbee album image upload, cover, delete, and compression workflow.', icon: Images },
     jobs: { title: 'Jobs', kicker: `${data?.jobs.length ?? 0} loaded`, description: `${count(data?.counts.jobs)} career posts from Workerbee.`, icon: BriefcaseBusiness },
     organizations: { title: 'Organizations', kicker: `${data?.organizations.length ?? 0} loaded`, description: `${count(data?.counts.organizations)} organizations from Workerbee.`, icon: UsersRound },
     locations: { title: 'Locations', kicker: `${data?.locations.length ?? 0} loaded`, description: `${count(data?.counts.locations)} locations from Workerbee.`, icon: MapPin },
@@ -663,9 +671,11 @@ function pageMeta(page: PageKey, data: DashboardData | null) {
     music: { title: 'Music', kicker: data?.music ? `${formatNumber(data.music.stats.total_songs)} plays` : 'TekKom Bot', description: 'Live public listening stats from login.no/music.', icon: Music2 },
     status: { title: 'Status', kicker: `${data?.statusServices.length ?? 0} monitored`, description: 'Live Beekeeper monitoring data.', icon: Monitor },
     nucleusAdmin: { title: 'Nucleus', kicker: 'Notifications', description: 'Queenbee notification scheduling, resend, history, and Nucleus documentation shortcuts.', icon: Bell },
+    nucleusDocs: { title: 'Nucleus Docs', kicker: 'Documentation', description: 'Push notification topics, interval syntax, language prefixes, and examples.', icon: FileText },
     internal: { title: 'Internal', kicker: 'Queenbee', description: 'Internal Beekeeper dashboard and endpoint health.', icon: ShieldCheck },
     loadbalancing: { title: 'Load Balancing', kicker: `${data?.queenbee.sites.length ?? 0} sites`, description: 'Queenbee load-balancer site overview from Beekeeper.', icon: Scale },
     databases: { title: 'Databases', kicker: data?.health.db === 'live' ? 'Live' : 'Protected', description: 'Queenbee database overview and lock status.', icon: Database },
+    dbRestore: { title: 'DB Restore', kicker: 'Protected', description: 'Browse backup files and restore database snapshots.', icon: Database },
     monitoring: { title: 'Monitoring', kicker: `${data?.statusServices.length ?? 0} services`, description: 'Queenbee monitoring services and alert routing.', icon: Monitor },
     services: { title: 'Services', kicker: data?.health.docker === 'live' ? `${data.queenbee.docker?.count || 0} containers` : 'Protected', description: 'Queenbee Docker services, deploy controls, and container status.', icon: Server },
     serviceDetail: { title: 'Service Detail', kicker: data?.health.docker === 'live' ? 'Containers' : 'Protected', description: 'Focused Queenbee container detail with deploy, restart, and delete actions.', icon: Server },
@@ -763,6 +773,85 @@ function AnnouncementsPage({ data }: { data: DashboardData }) {
 
 function AlbumsPage({ data }: { data: DashboardData }) {
   return <EditorPage data={data} config={editorConfigs.albums} preview={<TileGrid rows={data.albums} status={data.health.albums} kind="album" />} />
+}
+
+function AlbumImagesPage({ data }: { data: DashboardData }) {
+  const [albumId, setAlbumId] = useState(String(data.albums[0]?.id || ''))
+  const [album, setAlbum] = useState<Record<string, unknown> | null>(null)
+  const [message, setMessage] = useState('Choose an album and load its images.')
+  const images = Array.isArray(album?.images) ? album.images as string[] : []
+
+  async function loadAlbum(event?: React.FormEvent) {
+    event?.preventDefault()
+    if (!albumId) return
+    setMessage('Loading album images...')
+    try {
+      const response = await fetch(`https://workerbee.login.no/api/v2/albums/${albumId}`)
+      const next = await response.json()
+      if (!response.ok) throw new Error(next?.message || next?.error || 'Unable to load album')
+      setAlbum(next)
+      setMessage(`Loaded ${Array.isArray(next.images) ? next.images.length : 0} images.`)
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : 'Unable to load album.')
+    }
+  }
+
+  async function setCover(imageName: string) {
+    if (!window.confirm(`Set ${imageName} as album cover?`)) return
+    try {
+      await queenbeeRequest({ service: 'workerbee', path: `albums/${albumId}/${imageName}`, method: 'PUT' })
+      setMessage('Cover image updated.')
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : 'Unable to update cover.')
+    }
+  }
+
+  async function deleteImage(imageName: string) {
+    if (!window.confirm(`Delete ${imageName} from album ${albumId}?`)) return
+    try {
+      await queenbeeRequest({ service: 'workerbee', path: `albums/${albumId}/${imageName}`, method: 'DELETE' })
+      setMessage('Image deleted. Reload the album to refresh.')
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : 'Unable to delete image.')
+    }
+  }
+
+  async function compressAlbums() {
+    if (!window.confirm('Run album image compression across Workerbee?')) return
+    try {
+      await queenbeeRequest({ service: 'workerbee', path: 'albums/compress', method: 'PUT' })
+      setMessage('Album compression triggered.')
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : 'Unable to trigger compression.')
+    }
+  }
+
+  return (
+    <PagePanel title="Album Images" status={data.health.albums}>
+      <form className="mini-admin-form inline" onSubmit={loadAlbum}>
+        <h3>Load album</h3>
+        <label className="editor-field"><span>Album ID</span><input value={albumId} onChange={(event) => setAlbumId(event.target.value)} list="album-id-options" /></label>
+        <datalist id="album-id-options">{data.albums.map((item) => <option key={item.id} value={String(item.id)}>{displayName(item)}</option>)}</datalist>
+        <button type="submit"><RefreshCcw size={14} />Load</button>
+        <button type="button" disabled={!hasQueenbeeToken()} onClick={compressAlbums}>Compress all albums</button>
+      </form>
+      <p className="editor-message">{message}</p>
+      <div className="album-image-grid">
+        {images.map((imageName) => (
+          <article className="album-image-card" key={imageName}>
+            <img src={albumImageUrl(albumId, imageName)} alt="" />
+            <strong>{imageName}</strong>
+            <div className="editor-actions">
+              <button onClick={() => setCover(imageName)}>Set cover</button>
+              <button className="danger-action" onClick={() => deleteImage(imageName)}>Delete</button>
+            </div>
+          </article>
+        ))}
+        {!images.length ? <EmptyState icon={<Images />} label="Load an album to manage images." /> : null}
+      </div>
+      <div className="editor-toolbar"><button onClick={() => openInAppBrowser(`https://queenbee.login.no/albums/images/${albumId || ''}`)}>Open Queenbee <ExternalLink size={14} /></button></div>
+    </PagePanel>
+  )
 }
 
 function JobsPage({ data }: { data: DashboardData }) {
@@ -982,6 +1071,28 @@ function NucleusAdminPage({ data }: { data: DashboardData }) {
   )
 }
 
+function NucleusDocsPage() {
+  const topics = ['TEKKOM', 'SOCIAL', 'CTF', 'KARRIEREDAG', 'FADDERUKA', 'BEDPRES', 'LOGIN', 'ANNET']
+  return (
+    <PagePanel title="Nucleus Documentation" status="live">
+      <div className="docs-card">
+        <h3>Varslinger (Push Notifications)</h3>
+        <p>Varslinger skal brukes like forsiktig som <code>@everyone</code> i Discord. Keep topics, intervals, and language prefixes consistent before scheduling push notifications.</p>
+        <h4>Topics</h4>
+        <div className="docs-chip-grid">{topics.map((topic) => <span key={topic}>{topic}</span>)}</div>
+        <h4>Intervals</h4>
+        <p><code>10m, 30m, 1h, 2h, 3h, 6h, 1d, 2d, 1w</code></p>
+        <h4>Prefixes</h4>
+        <div className="queenbee-grid">
+          <article className="queenbee-card"><FileText size={18} /><h3>Language</h3><p><code>n</code> for Norwegian, <code>e</code> for English.</p></article>
+          <article className="queenbee-card"><Megaphone size={18} /><h3>Ads</h3><p><code>a</code> after language prefix marks ad-style notification content.</p></article>
+        </div>
+        <button onClick={() => openInAppBrowser('https://queenbee.login.no/nucleus/documentation')}>Open Queenbee docs <ExternalLink size={14} /></button>
+      </div>
+    </PagePanel>
+  )
+}
+
 function LoadBalancingPage({ data }: { data: DashboardData }) {
   return (
     <PagePanel title="Load Balancing" status={data.health.sites}>
@@ -1141,12 +1252,36 @@ function ServicesPage({ data }: { data: DashboardData }) {
 function ServiceDetailPage({ data }: { data: DashboardData }) {
   const containers = data.queenbee.docker?.containers || []
   const [selectedId, setSelectedId] = useState(String(containers[0]?.id || containers[0]?.name || ''))
+  const [manualId, setManualId] = useState('')
+  const [fetchedDetail, setFetchedDetail] = useState<unknown>(null)
+  const [detailMessage, setDetailMessage] = useState('Select a loaded container or fetch a protected container id.')
   const selected = containers.find((container) => String(container.id || container.name || '') === selectedId) || containers[0]
   const deployment = selected ? (selected as Record<string, unknown>).deployment as Record<string, unknown> | undefined : undefined
+
+  async function fetchDetail(event: React.FormEvent) {
+    event.preventDefault()
+    if (!manualId.trim()) return
+    setDetailMessage('Loading container detail...')
+    try {
+      const result = await queenbeeRequest<unknown>({ service: 'beekeeper', path: `docker/${manualId.trim()}`, method: 'GET', timeoutMs: 15000 })
+      setFetchedDetail(result)
+      setDetailMessage('Container detail loaded.')
+    } catch (error) {
+      setDetailMessage(error instanceof Error ? error.message : 'Unable to load container detail.')
+    }
+  }
 
   return (
     <PagePanel title="Service Detail" status={data.health.docker}>
       <QueenbeeStatusBanner status={data.health.docker} path="/docker" />
+      <form className="mini-admin-form inline" onSubmit={fetchDetail}>
+        <h3>Inspect container</h3>
+        <label className="editor-field"><span>Container ID</span><input value={manualId} onChange={(event) => setManualId(event.target.value)} /></label>
+        <button type="submit" disabled={!hasQueenbeeToken()}><RefreshCcw size={14} />Load detail</button>
+        <button type="button" disabled={!manualId} onClick={() => openInAppBrowser(`https://queenbee.login.no/internal/services/${manualId}`)}>Queenbee <ExternalLink size={14} /></button>
+      </form>
+      <p className="editor-message">{detailMessage}</p>
+      {fetchedDetail ? <JsonPreview value={fetchedDetail} /> : null}
       {data.health.docker === 'live' && containers.length ? (
         <>
           <label className="editor-field editor-search">
@@ -1351,6 +1486,56 @@ function BackupsPage({ data }: { data: DashboardData }) {
           </article>
         ))}
         {data.health.backups === 'live' && !backups.length ? <EmptyState icon={<Database />} label="No backup services matched." /> : null}
+      </div>
+    </PagePanel>
+  )
+}
+
+function DbRestorePage() {
+  const [service, setService] = useState('')
+  const [date, setDate] = useState('')
+  const [files, setFiles] = useState<Array<Record<string, unknown>>>([])
+  const [message, setMessage] = useState('Search backup files by service/date.')
+
+  async function loadFiles(event: React.FormEvent) {
+    event.preventDefault()
+    const params = new URLSearchParams()
+    if (service) params.set('service', service)
+    if (date) params.set('date', date)
+    setMessage('Loading backup files...')
+    try {
+      const result = await queenbeeRequest<Array<Record<string, unknown>>>({ service: 'beekeeper', path: `backup/files?${params.toString()}`, method: 'GET', timeoutMs: 20000 })
+      setFiles(Array.isArray(result) ? result : [])
+      setMessage(`Loaded ${Array.isArray(result) ? result.length : 0} files.`)
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : 'Unable to load backup files.')
+    }
+  }
+
+  async function restore(file: Record<string, unknown>) {
+    const payload = { service: String(file.service || service), file: String(file.file || file.name || '') }
+    if (!payload.service || !payload.file || !window.confirm(`Restore ${payload.file} into ${payload.service}?`)) return
+    try {
+      await queenbeeRequest({ service: 'beekeeper', path: 'backup/restore', method: 'POST', data: payload, timeoutMs: 30000 })
+      setMessage('Restore started.')
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : 'Unable to restore backup.')
+    }
+  }
+
+  return (
+    <PagePanel title="DB Restore" status={hasQueenbeeToken() ? 'live' : 'locked'}>
+      <form className="mini-admin-form inline" onSubmit={loadFiles}>
+        <h3>Find backup files</h3>
+        <label className="editor-field"><span>Service</span><input value={service} onChange={(event) => setService(event.target.value)} /></label>
+        <label className="editor-field"><span>Date</span><input type="date" value={date} onChange={(event) => setDate(event.target.value)} /></label>
+        <button type="submit" disabled={!hasQueenbeeToken()}><RefreshCcw size={14} />Load</button>
+        <button type="button" onClick={() => openInAppBrowser('https://queenbee.login.no/internal/db/restore')}>Queenbee <ExternalLink size={14} /></button>
+      </form>
+      <p className="editor-message">{message}</p>
+      <div className="queenbee-grid">
+        {files.map((file, index) => <article className="queenbee-card" key={`${file.service}-${file.file}-${index}`}><Database size={18} /><h3>{String(file.service || 'service')}</h3><p>{String(file.file || file.name || 'backup file')}</p><span>{String(file.location || file.date || '')}</span><button className="danger-action" onClick={() => restore(file)}>Restore</button></article>)}
+        {!files.length ? <EmptyState icon={<Database />} label="No backup files loaded." /> : null}
       </div>
     </PagePanel>
   )
