@@ -13,6 +13,7 @@ type InternalNavRoute = Extract<keyof MenuStackParamList,
     | 'TrafficScreen'
     | 'TrafficRecordsScreen'
     | 'TrafficMapScreen'
+    | 'ContentScreen'
     | 'DatabaseScreen'
     | 'VulnerabilitiesScreen'
     | 'LogsScreen'
@@ -64,6 +65,11 @@ export default function InternalNavMenu({ activeRoute, navigation }: Props): JSX
                 label: 'Traffic map',
                 description: 'Live request hotspots and country focus',
                 route: 'TrafficMapScreen',
+            },
+            {
+                label: 'Content',
+                description: 'Rules, locations, and organizations',
+                route: 'ContentScreen',
             },
             {
                 label: 'Databases',

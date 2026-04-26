@@ -171,6 +171,57 @@ export async function fetchFundHoldingsHistory(range: FundHoldingsRange = '1m'):
     }
 }
 
+export async function fetchRules(limit = 20): Promise<GetRulesProps> {
+    try {
+        const response = await fetch(`${config.api}/rules?limit=${limit}`)
+        if (!response.ok) {
+            throw new Error('Failed to fetch rules')
+        }
+
+        const data = await response.json()
+        return {
+            rules: Array.isArray(data?.rules) ? data.rules : [],
+            total_count: typeof data?.total_count === 'number' ? data.total_count : 0,
+        }
+    } catch {
+        return { rules: [], total_count: 0 }
+    }
+}
+
+export async function fetchLocations(limit = 20): Promise<GetLocationsProps> {
+    try {
+        const response = await fetch(`${config.api}/locations?limit=${limit}`)
+        if (!response.ok) {
+            throw new Error('Failed to fetch locations')
+        }
+
+        const data = await response.json()
+        return {
+            locations: Array.isArray(data?.locations) ? data.locations : [],
+            total_count: typeof data?.total_count === 'number' ? data.total_count : 0,
+        }
+    } catch {
+        return { locations: [], total_count: 0 }
+    }
+}
+
+export async function fetchOrganizations(limit = 20): Promise<GetOrganizationsProps> {
+    try {
+        const response = await fetch(`${config.api}/organizations?limit=${limit}`)
+        if (!response.ok) {
+            throw new Error('Failed to fetch organizations')
+        }
+
+        const data = await response.json()
+        return {
+            organizations: Array.isArray(data?.organizations) ? data.organizations : [],
+            total_count: typeof data?.total_count === 'number' ? data.total_count : 0,
+        }
+    } catch {
+        return { organizations: [], total_count: 0 }
+    }
+}
+
 /**
  * Checks how long its been since a date object
  *

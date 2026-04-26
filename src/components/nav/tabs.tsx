@@ -59,6 +59,7 @@ import LogsScreen from '@screens/menu/logs'
 import TrafficScreen from '@screens/menu/traffic'
 import TrafficRecordsScreen from '@screens/menu/trafficRecords'
 import TrafficMapScreen from '@screens/menu/trafficMap'
+import ContentScreen from '@screens/menu/content'
 import SpecificEventScreen from '@screens/event/specificEvent'
 import SpecificAdScreen from '@screens/ads/specificAd'
 import SpecificAlbumScreen from '@screens/menu/specificAlbum'
@@ -148,6 +149,7 @@ function Menu() {
             <MenuStack.Screen name='TrafficScreen' component={TrafficScreen} />
             <MenuStack.Screen name='TrafficRecordsScreen' component={TrafficRecordsScreen} />
             <MenuStack.Screen name='TrafficMapScreen' component={TrafficMapScreen} />
+            <MenuStack.Screen name='ContentScreen' component={ContentScreen} />
             <MenuStack.Screen name='DatabaseScreen' component={DatabaseScreen} />
             <MenuStack.Screen name='VulnerabilitiesScreen' component={VulnerabilitiesScreen} />
             <MenuStack.Screen name='LogsScreen' component={LogsScreen} />

@@ -1420,6 +1420,101 @@ button { font: inherit; }
   opacity: 0.45;
 }
 
+.album-image-grid {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 10px;
+  margin: 12px 0;
+}
+
+.album-image-card {
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--panel-strong);
+  padding: 9px;
+  display: grid;
+  gap: 8px;
+}
+
+.album-image-card img {
+  width: 100%;
+  aspect-ratio: 1;
+  object-fit: cover;
+  border-radius: 9px;
+  background: var(--panel-soft);
+}
+
+.album-image-card strong {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 12px;
+}
+
+.docs-card {
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: var(--panel-strong);
+  padding: 18px;
+  display: grid;
+  gap: 14px;
+}
+
+.docs-card h3,
+.docs-card h4,
+.docs-card p {
+  margin: 0;
+}
+
+.docs-card code {
+  border-radius: 6px;
+  background: var(--panel-soft);
+  padding: 2px 5px;
+}
+
+.docs-chip-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.docs-chip-grid span {
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--panel-soft);
+  padding: 6px 9px;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.traffic-map-panel {
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background:
+    radial-gradient(circle at 82% 20%, rgba(76,141,255,0.16), transparent 32%),
+    var(--panel-strong);
+  min-height: 180px;
+  display: grid;
+  place-items: center;
+  text-align: center;
+  margin-bottom: 12px;
+}
+
+.traffic-map-panel svg {
+  color: var(--blue);
+}
+
+.traffic-map-panel strong {
+  display: block;
+  font-size: 34px;
+  letter-spacing: -0.06em;
+}
+
+.traffic-map-panel span {
+  color: var(--muted);
+  font-size: 13px;
+}
+
 .log-list {
   display: grid;
   gap: 8px;
@@ -2382,6 +2477,10 @@ button { font: inherit; }
 
   .service-admin-card {
     grid-template-columns: 1fr;
+  }
+
+  .album-image-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .music-summary {

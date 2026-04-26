@@ -116,6 +116,63 @@ type FundHoldingsHistory = {
     updatedAt: number
 }
 
+type WorkerbeeRule = {
+    id: number
+    name_no: string
+    name_en: string
+    description_no: string
+    description_en: string
+    created_at: string
+    updated_at: string
+}
+
+type WorkerbeeLocation = {
+    id: number
+    name_no: string
+    name_en: string
+    type: string
+    mazemap_campus_id?: number | null
+    mazemap_poi_id?: number | null
+    address_street?: string | null
+    address_postcode?: number | null
+    city_name?: string | null
+    coordinate_lat?: number | null
+    coordinate_lon?: number | null
+    url?: string | null
+    created_at: string
+    updated_at: string
+}
+
+type WorkerbeeOrganization = {
+    id: number
+    name_no: string
+    name_en: string
+    description_no: string
+    description_en: string
+    link_homepage?: string | null
+    link_linkedin?: string | null
+    link_facebook?: string | null
+    link_instagram?: string | null
+    logo?: string | null
+    created_at: string
+    updated_at: string
+}
+
+type GetRulesProps = {
+    rules: WorkerbeeRule[]
+    total_count: number
+}
+
+type GetLocationsProps = {
+    locations: WorkerbeeLocation[]
+    total_count: number
+}
+
+type GetOrganizationsProps = {
+    organizations: WorkerbeeOrganization[]
+    total_count: number
+}
+
 type System = {
     ram: string
     processes: number
@@ -576,6 +633,7 @@ type MenuRoutes =
     | 'TrafficScreen'
     | 'TrafficRecordsScreen'
     | 'TrafficMapScreen'
+    | 'ContentScreen'
     | 'DatabaseScreen'
     | 'VulnerabilitiesScreen'
     | 'LogsScreen'
@@ -612,6 +670,7 @@ type MenuStackParamList = {
     TrafficScreen: undefined
     TrafficRecordsScreen: undefined
     TrafficMapScreen: undefined
+    ContentScreen: undefined
     DatabaseScreen: undefined
     VulnerabilitiesScreen: undefined
     LogsScreen: undefined

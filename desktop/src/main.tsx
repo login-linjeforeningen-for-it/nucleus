@@ -63,7 +63,7 @@ import type { BrowserTarget } from './lib/inAppBrowser'
 import { openInAppBrowser } from './lib/inAppBrowser'
 import './styles.css'
 
-type PageKey = 'dashboard' | 'events' | 'announcements' | 'albums' | 'jobs' | 'organizations' | 'locations' | 'rules' | 'alerts' | 'honey' | 'partners' | 'music' | 'status' | 'nucleusAdmin' | 'internal' | 'loadbalancing' | 'databases' | 'monitoring' | 'services' | 'traffic' | 'trafficRecords' | 'backups' | 'vulnerabilities' | 'logs' | 'ai' | 'settings'
+type PageKey = 'dashboard' | 'events' | 'announcements' | 'albums' | 'jobs' | 'organizations' | 'locations' | 'rules' | 'alerts' | 'honey' | 'partners' | 'music' | 'status' | 'nucleusAdmin' | 'internal' | 'loadbalancing' | 'databases' | 'monitoring' | 'services' | 'serviceDetail' | 'traffic' | 'trafficRecords' | 'trafficMap' | 'backups' | 'vulnerabilities' | 'logs' | 'ai' | 'settings'
 type ThemePreference = 'light' | 'dark' | 'system'
 
 type NavItem = { key: PageKey; label: string; icon: React.ComponentType<{ size?: number }> }
@@ -115,8 +115,10 @@ const menu: NavItem[] = [
   { key: 'databases', label: 'Databases', icon: Database },
   { key: 'monitoring', label: 'Monitoring', icon: Monitor },
   { key: 'services', label: 'Services', icon: Server },
+  { key: 'serviceDetail', label: 'Service Detail', icon: Server },
   { key: 'traffic', label: 'Traffic', icon: Activity },
   { key: 'trafficRecords', label: 'Traffic Records', icon: Logs },
+  { key: 'trafficMap', label: 'Traffic Map', icon: Globe2 },
   { key: 'backups', label: 'Backups', icon: Database },
   { key: 'vulnerabilities', label: 'Vulnerabilities', icon: ShieldAlert },
   { key: 'logs', label: 'Logs', icon: Logs },
@@ -562,8 +564,10 @@ function PageRouter({ page, data, updateState }: { page: PageKey; data: Dashboar
     case 'databases': return <DatabasesPage data={data} />
     case 'monitoring': return <MonitoringPage data={data} />
     case 'services': return <ServicesPage data={data} />
+    case 'serviceDetail': return <ServiceDetailPage data={data} />
     case 'traffic': return <TrafficPage data={data} />
     case 'trafficRecords': return <TrafficRecordsPage data={data} />
+    case 'trafficMap': return <TrafficMapPage data={data} />
     case 'backups': return <BackupsPage data={data} />
     case 'vulnerabilities': return <VulnerabilitiesPage data={data} />
     case 'logs': return <LogsPage data={data} />
@@ -664,8 +668,10 @@ function pageMeta(page: PageKey, data: DashboardData | null) {
     databases: { title: 'Databases', kicker: data?.health.db === 'live' ? 'Live' : 'Protected', description: 'Queenbee database overview and lock status.', icon: Database },
     monitoring: { title: 'Monitoring', kicker: `${data?.statusServices.length ?? 0} services`, description: 'Queenbee monitoring services and alert routing.', icon: Monitor },
     services: { title: 'Services', kicker: data?.health.docker === 'live' ? `${data.queenbee.docker?.count || 0} containers` : 'Protected', description: 'Queenbee Docker services, deploy controls, and container status.', icon: Server },
+    serviceDetail: { title: 'Service Detail', kicker: data?.health.docker === 'live' ? 'Containers' : 'Protected', description: 'Focused Queenbee container detail with deploy, restart, and delete actions.', icon: Server },
     traffic: { title: 'Traffic', kicker: data?.health.traffic === 'live' ? `${formatNumber(data.queenbee.traffic?.total_requests)} requests` : 'Protected', description: 'Queenbee traffic metrics from Beekeeper.', icon: Activity },
     trafficRecords: { title: 'Traffic Records', kicker: 'Protected', description: 'Raw Queenbee traffic records and map analytics.', icon: Logs },
+    trafficMap: { title: 'Traffic Map', kicker: data?.health['traffic-records'] === 'live' ? `${formatNumber(data.queenbee.trafficRecords?.result?.length)} records` : 'Protected', description: 'Country and domain traffic rollups from Queenbee request records.', icon: Globe2 },
     backups: { title: 'Backups', kicker: 'Protected', description: 'Queenbee backup overview, file browser, and restore shortcuts.', icon: Database },
     vulnerabilities: { title: 'Vulnerabilities', kicker: data?.health.vulnerabilities === 'live' ? `${data.queenbee.vulnerabilities?.imageCount || 0} images` : 'Protected', description: 'Queenbee Docker vulnerability scan summary.', icon: ShieldAlert },
     logs: { title: 'Logs', kicker: data?.health.logs === 'live' ? 'Live' : 'Protected', description: 'Queenbee Docker log stream status.', icon: Logs },
@@ -1132,6 +1138,64 @@ function ServicesPage({ data }: { data: DashboardData }) {
   )
 }
 
+function ServiceDetailPage({ data }: { data: DashboardData }) {
+  const containers = data.queenbee.docker?.containers || []
+  const [selectedId, setSelectedId] = useState(String(containers[0]?.id || containers[0]?.name || ''))
+  const selected = containers.find((container) => String(container.id || container.name || '') === selectedId) || containers[0]
+  const deployment = selected ? (selected as Record<string, unknown>).deployment as Record<string, unknown> | undefined : undefined
+
+  return (
+    <PagePanel title="Service Detail" status={data.health.docker}>
+      <QueenbeeStatusBanner status={data.health.docker} path="/docker" />
+      {data.health.docker === 'live' && containers.length ? (
+        <>
+          <label className="editor-field editor-search">
+            <span>Service</span>
+            <select value={selectedId} onChange={(event) => setSelectedId(event.target.value)}>
+              {containers.map((container) => {
+                const id = String(container.id || container.name || container.image)
+                return <option key={id} value={id}>{container.name || container.image || id}</option>
+              })}
+            </select>
+          </label>
+          {selected ? (
+            <div className="queenbee-grid">
+              <article className="queenbee-card">
+                <Server size={18} />
+                <h3>{selected.name || selected.image || 'Container'}</h3>
+                <p>{selected.image || 'No image returned.'}</p>
+                <span>{selected.state || selected.status || 'unknown'}</span>
+              </article>
+              <article className="queenbee-card">
+                <Activity size={18} />
+                <h3>Deployment</h3>
+                <p>{deployment?.updateAvailable ? 'Update available' : 'No update flag returned'}</p>
+                <span>{String(deployment?.lastRun || deployment?.updatedAt || '')}</span>
+              </article>
+              <article className="queenbee-card">
+                <Logs size={18} />
+                <h3>Identifiers</h3>
+                <p>{selected.id || 'No container id'}</p>
+                <span>{selected.name || selected.image || 'Service detail'}</span>
+              </article>
+              <div className="editor-actions full-span">
+                {selected.id ? (
+                  <>
+                    <InternalActionButton label="Deploy update" path={`deployments/${selected.id}/run`} confirm={`Run deployment for ${selected.name || selected.id}?`} />
+                    <InternalActionButton label="Restart" path={`docker/${selected.id}/restart`} method="POST" confirm={`Restart ${selected.name || selected.id}?`} />
+                    <InternalActionButton label="Delete" path={`docker/${selected.id}`} method="DELETE" dangerous confirm={`Delete container ${selected.name || selected.id}?`} />
+                    <button onClick={() => openInAppBrowser(`https://queenbee.login.no/internal/services/${selected.id}`)}>Open Queenbee <ExternalLink size={14} /></button>
+                  </>
+                ) : null}
+              </div>
+            </div>
+          ) : null}
+        </>
+      ) : data.health.docker === 'live' ? <EmptyState icon={<Server />} label="No Docker containers returned." /> : <ProtectedQueenbeeGrid />}
+    </PagePanel>
+  )
+}
+
 function TrafficPage({ data }: { data: DashboardData }) {
   const [traffic, setTraffic] = useState(data.queenbee.traffic)
   const [trafficMessage, setTrafficMessage] = useState('Showing latest loaded traffic metrics.')
@@ -1223,6 +1287,36 @@ function TrafficRecordsPage({ data }: { data: DashboardData }) {
         </div>
       ) : data.health['traffic-records'] === 'live' ? <EmptyState icon={<Logs />} label="No traffic records returned." /> : <ProtectedQueenbeeGrid />}
       {traffic ? <div className="traffic-grid"><QueenbeeTopList title="Top domains" rows={traffic.top_domains} /><QueenbeeTopList title="Top paths" rows={traffic.top_paths} /></div> : null}
+    </PagePanel>
+  )
+}
+
+function TrafficMapPage({ data }: { data: DashboardData }) {
+  const records = data.queenbee.trafficRecords?.result || []
+  const countries = records.reduce<Record<string, number>>((map, record) => {
+    const key = record.country_iso || 'unknown'
+    map[key] = (map[key] || 0) + 1
+    return map
+  }, {})
+  const domains = records.reduce<Record<string, number>>((map, record) => {
+    const key = record.domain || 'unknown'
+    map[key] = (map[key] || 0) + 1
+    return map
+  }, {})
+  const countryRows = Object.entries(countries).sort((a, b) => b[1] - a[1]).map(([key, count]) => ({ key, count }))
+  const domainRows = Object.entries(domains).sort((a, b) => b[1] - a[1]).map(([key, count]) => ({ key, count }))
+  return (
+    <PagePanel title="Traffic Map" status={data.health['traffic-records'] || data.health.traffic}>
+      <QueenbeeStatusBanner status={data.health['traffic-records'] || data.health.traffic} path="/traffic/map" />
+      <div className="traffic-map-panel">
+        <Globe2 size={52} />
+        <div><strong>{formatNumber(records.length)}</strong><span>recent records mapped locally</span></div>
+      </div>
+      <div className="traffic-grid">
+        <QueenbeeTopList title="Countries" rows={countryRows} />
+        <QueenbeeTopList title="Domains" rows={domainRows} />
+      </div>
+      <button onClick={() => openInAppBrowser('https://queenbee.login.no/internal/traffic/map')}>Open live Queenbee map <ExternalLink size={14} /></button>
     </PagePanel>
   )
 }
