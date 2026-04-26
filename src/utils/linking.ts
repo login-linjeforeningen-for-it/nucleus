@@ -38,6 +38,7 @@ const linking: LinkingOptions<RootStackParamList> = {
                             BusinessScreen: 'companies',
                             AlbumsScreen: 'albums',
                             FundScreen: 'fund',
+                            VervScreen: 'verv',
                             SpecificAlbumScreen: {
                                 path: 'albums/:albumID',
                                 parse: {

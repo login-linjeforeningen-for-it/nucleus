@@ -20,6 +20,7 @@
         "AlbumsScreen": "Albums",
         "SpecificAlbumScreen": "Album",
         "FundScreen": "Login Fund",
+        "VervScreen": "Verv",
         "DashboardScreen": "Dashboard",
         "LoadBalancingScreen": "Load balancing",
         "DatabaseScreen": "Databases",
@@ -121,6 +122,95 @@
                 { "title": "Board Member", "name": "Jonas Kaarstein", "discord": "kaarstoned", "image": "" },
                 { "title": "Board Member", "name": "", "discord": "", "image": "" }
             ]
+        }
+    },
+    "verv": {
+        "title": "Verv",
+        "intro": "Verv is a voluntary position for those with an extra passion or desire to make Login better.",
+        "intro2": "A verv gives extra responsibility and requires more effort, but it also creates opportunities to build friendships and join internal events.",
+        "committeeTitle": "What do you do with verv?",
+        "committeeIntro": "Login is made up of committees with different responsibilities. Here is the quick native overview.",
+        "apply": {
+            "title": "Apply for verv",
+            "body": "The committees accept applications continuously. If you have questions, contact the relevant committee leader or send Login a message.",
+            "action": "Apply here"
+        },
+        "leaders": {
+            "evntkomLeader": "Evntkom Leader",
+            "tekkomLeader": "TekKom Leader",
+            "bedkomLeader": "Bedkom Leader",
+            "ctfkomLeader": "CTFkom Leader",
+            "satkomLeader": "SATkom Leader",
+            "prLeader": "PR Leader",
+            "barkomLeader": "BarKom Leader"
+        },
+        "photos": [
+            { "image": "1.jpg", "title": "Anders, previous leader of Login", "description": "Anders performing a color test." },
+            { "image": "3.jpg", "title": "Nucleus launch party", "description": "TekKom members at the launch party of the Login app." },
+            { "image": "4.jpg", "title": "CTF", "description": "CTFkom during a CTF." },
+            { "image": "7.jpg", "title": "Cabin trip", "description": "Evntkom hosted a cabin trip." },
+            { "image": "11.jpg", "title": "Login at Bedpres", "description": "Login hosts company presentations throughout the semester." },
+            { "image": "13.jpg", "title": "PR playing table tennis", "description": "Several members of PR playing table tennis." }
+        ],
+        "committees": [
+            {
+                "id": "evnt",
+                "title": "Evntkom",
+                "leaderKey": "evntkomLeader",
+                "intro": "Evntkom is responsible for Login's events.",
+                "body": "With verv in Evntkom you help host events, become visible on campus, and get to try new social activities."
+            },
+            {
+                "id": "tek",
+                "title": "TekKom",
+                "leaderKey": "tekkomLeader",
+                "intro": "TekKom develops Login's infrastructure.",
+                "body": "You can help with existing projects like the website and app, or start something new. TekKom needs both developers and designers."
+            },
+            {
+                "id": "bed",
+                "title": "Bedkom",
+                "leaderKey": "bedkomLeader",
+                "intro": "Bedkom is Login's face towards companies.",
+                "body": "Bedkom handles company presentations, career days, company communication, promotion, and recruitment."
+            },
+            {
+                "id": "ctf",
+                "title": "CTFkom",
+                "leaderKey": "ctfkomLeader",
+                "intro": "CTFkom is Login's hacker committee.",
+                "body": "CTFkom creates and hosts CTF events, company CTFs, and helps students improve through Capture The Flag competitions."
+            },
+            {
+                "id": "sat",
+                "title": "SATkom",
+                "leaderKey": "satkomLeader",
+                "intro": "SATkom guards Login's money bin.",
+                "body": "SATkom works with budgeting, accounting, financial routines, and keeping the Login Lounge stocked and functional."
+            },
+            {
+                "id": "pr",
+                "title": "PR",
+                "leaderKey": "prLeader",
+                "intro": "PR is Login's public face.",
+                "body": "PR manages public media channels, graphic material, merch, photography, and visual content for events and projects."
+            },
+            {
+                "id": "bar",
+                "title": "BarKom",
+                "leaderKey": "barkomLeader",
+                "intro": "BarKom is Login's bar committee.",
+                "body": "BarKom helps create safe and social events through serving, purchasing, planning, logistics, and behind-the-scenes responsibility."
+            }
+        ],
+        "leaderData": {
+            "evntkomLeader": { "name": "Caroline Madelen Lau-Revil", "discord": "carolinemadelen0574", "image": "evntkom.jpg" },
+            "tekkomLeader": { "name": "Adam Dariusz Rytel", "discord": "adamdarek", "image": "tekkom.jpg" },
+            "bedkomLeader": { "name": "Sander Clausen", "discord": "clausen03", "image": "bedkom.jpg" },
+            "ctfkomLeader": { "name": "Maja Melby", "discord": "majam_", "image": "ctfkom.jpg" },
+            "satkomLeader": { "name": "Mohaymen Al-Diaami", "discord": "sygor", "image": "satkom.jpg" },
+            "prLeader": { "name": "Andrea Karense Magnussen Oksendal", "discord": "andreakarense", "image": "pr.jpg" },
+            "barkomLeader": { "name": "Frikk Braendsrod", "discord": "frikk.", "image": "barkom.jpg" }
         }
     },
     "status": {

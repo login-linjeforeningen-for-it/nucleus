@@ -66,6 +66,11 @@
             "id": 13,
             "nav": "FundScreen",
             "title": "Logins Fond"
+        },
+        {
+            "id": 14,
+            "nav": "VervScreen",
+            "title": "Verv"
         }
     ],
     "version": "Versjon ",

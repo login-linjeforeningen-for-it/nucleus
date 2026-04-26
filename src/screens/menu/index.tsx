@@ -53,6 +53,7 @@ export default function MenuScreen({ navigation }: MenuProps<'MenuScreen'>): JSX
         MusicScreen: lang ? 'Live musikkstatistikk fra Login' : 'Live music statistics from Login',
         AlbumsScreen: lang ? 'Bilder fra arrangementer og Login-liv' : 'Photos from events and Login life',
         FundScreen: lang ? 'Fondet, søknader og beholdning' : 'The fund, applications, and holdings',
+        VervScreen: lang ? 'Komiteer, verv og søknad' : 'Committees, roles, and applications',
     }), [lang])
 
     function toggleFeedback() {

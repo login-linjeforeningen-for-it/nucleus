@@ -20,6 +20,7 @@
         "AlbumsScreen": "Albumer",
         "SpecificAlbumScreen": "Album",
         "FundScreen": "Logins Fond",
+        "VervScreen": "Verv",
         "DashboardScreen": "Dashboard",
         "LoadBalancingScreen": "Lastbalansering",
         "DatabaseScreen": "Databaser",
@@ -121,6 +122,95 @@
                 { "title": "Styremedlem", "name": "Jonas Kaarstein", "discord": "kaarstoned", "image": "" },
                 { "title": "Styremedlem", "name": "", "discord": "", "image": "" }
             ]
+        }
+    },
+    "verv": {
+        "title": "Verv",
+        "intro": "Verv er en frivillig stilling for de som brenner for eller ønsker å gjøre en ekstra innsats for Login.",
+        "intro2": "Et verv gir ekstra ansvar og krever mer innsats, men gir også mulighet til å bygge vennskap og delta på interne arrangementer.",
+        "committeeTitle": "Hva gjør man med verv?",
+        "committeeIntro": "Login består av komiteer med ulike arbeidsoppgaver. Her er den raske native oversikten.",
+        "apply": {
+            "title": "Søk verv",
+            "body": "Komiteene tar fortløpende imot søknader. Har du spørsmål, kan du kontakte den relevante komitelederen eller sende Login en melding.",
+            "action": "Søk her"
+        },
+        "leaders": {
+            "evntkomLeader": "Evntkom Leder",
+            "tekkomLeader": "TekKom Leder",
+            "bedkomLeader": "Bedkom Leder",
+            "ctfkomLeader": "CTFkom Leder",
+            "satkomLeader": "SATkom Leder",
+            "prLeader": "PR Leder",
+            "barkomLeader": "BarKom Leder"
+        },
+        "photos": [
+            { "image": "1.jpg", "title": "Anders, tidligere leder av Login", "description": "Anders utfører en fargetest." },
+            { "image": "3.jpg", "title": "Nucleus launch party", "description": "TekKom-medlemmer på launch party for Login-appen." },
+            { "image": "4.jpg", "title": "CTF", "description": "CTFkom under en CTF." },
+            { "image": "7.jpg", "title": "Hyttetur", "description": "EvntKom arrangerte hyttetur." },
+            { "image": "11.jpg", "title": "Login på bedpres", "description": "Login arrangerer bedriftspresentasjoner gjennom semesteret." },
+            { "image": "13.jpg", "title": "PR spiller bordtennis", "description": "Flere medlemmer av PR spiller bordtennis." }
+        ],
+        "committees": [
+            {
+                "id": "evnt",
+                "title": "EvntKom",
+                "leaderKey": "evntkomLeader",
+                "intro": "EvntKom er ansvarlig for Login sine arrangementer.",
+                "body": "Med verv i EvntKom hjelper du til med arrangementer, blir synlig i foreningen og får være med på mye sosialt."
+            },
+            {
+                "id": "tek",
+                "title": "TekKom",
+                "leaderKey": "tekkomLeader",
+                "intro": "TekKom utvikler Login sin infrastruktur.",
+                "body": "Du kan bidra på eksisterende prosjekter som nettsiden og appen, eller starte noe nytt. TekKom trenger både utviklere og designere."
+            },
+            {
+                "id": "bed",
+                "title": "Bedkom",
+                "leaderKey": "bedkomLeader",
+                "intro": "Bedkom er Login sitt ansikt mot bedriftene.",
+                "body": "Bedkom jobber med bedriftspresentasjoner, karrieredager, bedriftskontakt, promotering og rekruttering."
+            },
+            {
+                "id": "ctf",
+                "title": "CTFkom",
+                "leaderKey": "ctfkomLeader",
+                "intro": "CTFkom er Login sin hackerkomite.",
+                "body": "CTFkom lager og arrangerer CTF-er, bedrifts-CTF-er og hjelper studenter å utvikle ferdigheter gjennom Capture The Flag."
+            },
+            {
+                "id": "sat",
+                "title": "SATkom",
+                "leaderKey": "satkomLeader",
+                "intro": "SATkom vokter Login sin pengebinge.",
+                "body": "SATkom jobber med budsjetter, regnskap, økonomirutiner og å holde Login Lounge fylt opp og fungerende."
+            },
+            {
+                "id": "pr",
+                "title": "PR",
+                "leaderKey": "prLeader",
+                "intro": "PR er Login sitt ansikt utad.",
+                "body": "PR drifter offentlige mediekanaler, grafisk materiale, merch, foto og visuelt innhold til arrangementer og prosjekter."
+            },
+            {
+                "id": "bar",
+                "title": "BarKom",
+                "leaderKey": "barkomLeader",
+                "intro": "BarKom er Login sin barkomite.",
+                "body": "BarKom skaper gode og trygge arrangementer gjennom servering, innkjøp, planlegging, logistikk og ansvar bak kulissene."
+            }
+        ],
+        "leaderData": {
+            "evntkomLeader": { "name": "Caroline Madelen Lau-Revil", "discord": "carolinemadelen0574", "image": "evntkom.jpg" },
+            "tekkomLeader": { "name": "Adam Dariusz Rytel", "discord": "adamdarek", "image": "tekkom.jpg" },
+            "bedkomLeader": { "name": "Sander Clausen", "discord": "clausen03", "image": "bedkom.jpg" },
+            "ctfkomLeader": { "name": "Maja Melby", "discord": "majam_", "image": "ctfkom.jpg" },
+            "satkomLeader": { "name": "Mohaymen Al-Diaami", "discord": "sygor", "image": "satkom.jpg" },
+            "prLeader": { "name": "Andrea Karense Magnussen Oksendal", "discord": "andreakarense", "image": "pr.jpg" },
+            "barkomLeader": { "name": "Frikk Braendsrod", "discord": "frikk.", "image": "barkom.jpg" }
         }
     },
     "status": {
