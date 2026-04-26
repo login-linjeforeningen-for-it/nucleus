@@ -1,44 +1,85 @@
-import React, { useEffect, useRef, useState } from 'react'
-import { createRoot } from 'react-dom/client'
+import React, { useEffect, useMemo, useRef, useState } from 'react'
+import { createRoot, Root } from 'react-dom/client'
 import {
   Activity,
   AlertCircle,
-  ArrowLeft,
-  ArrowRight,
-  CheckCircle2,
+  Bell,
   BriefcaseBusiness,
   CalendarDays,
+  CheckCircle2,
   Database,
+  ExternalLink,
+  FileText,
   Globe2,
   Grid2X2,
+  Handshake,
   Image,
   Loader2,
+  Logs,
+  Laptop,
+  KeyRound,
   MapPin,
   Megaphone,
   Monitor,
-  PanelTopOpen,
+  Moon,
+  Music2,
+  Pencil,
+  Plus,
   RefreshCcw,
+  Scale,
   Server,
+  Settings,
+  ShieldAlert,
   ShieldCheck,
   Sparkles,
+  Sun,
+  Trash2,
   UsersRound,
-  X,
 } from 'lucide-react'
 import {
   AlbumItem,
+  AnnouncementItem,
   DashboardData,
   EventItem,
   JobItem,
   NamedItem,
   RecentAddition,
+  RuleItem,
+  QueenbeeService,
   ServiceStatus,
   albumImageUrl,
   eventImageUrl,
+  getQueenbeeToken,
+  hasQueenbeeToken,
   loadDashboardData,
+  queenbeeRequest,
+  setQueenbeeToken,
 } from './lib/api'
 import { AutoUpdateState, DESKTOP_APP_VERSION, fetchAppUpdateManifest, hasNewerDesktopVersion } from './lib/appUpdate'
-import { BrowserTarget, openInAppBrowser } from './lib/inAppBrowser'
+import { openInAppBrowser } from './lib/inAppBrowser'
 import './styles.css'
+
+type PageKey = 'dashboard' | 'events' | 'announcements' | 'albums' | 'jobs' | 'organizations' | 'locations' | 'rules' | 'alerts' | 'honey' | 'partners' | 'music' | 'status' | 'nucleusAdmin' | 'internal' | 'loadbalancing' | 'databases' | 'monitoring' | 'services' | 'traffic' | 'trafficRecords' | 'backups' | 'vulnerabilities' | 'logs' | 'ai' | 'settings'
+type ThemePreference = 'light' | 'dark' | 'system'
+
+type NavItem = { key: PageKey; label: string; icon: React.ComponentType<{ size?: number }> }
+type EditableRow = Record<string, unknown> & { id: number | string }
+type FieldType = 'text' | 'textarea' | 'number' | 'datetime' | 'json' | 'boolean'
+type EditorField = { name: string; label: string; type?: FieldType; required?: boolean; placeholder?: string }
+type EditorConfig<T extends EditableRow> = {
+  title: string
+  statusKey: string
+  service: QueenbeeService
+  createPath: string
+  updatePath: (id: number | string) => string
+  deletePath: (id: number | string) => string
+  deleteBody?: (id: number | string) => Record<string, unknown> | undefined
+  rows: (data: DashboardData) => T[]
+  fields: EditorField[]
+  titleOf: (row: T) => string
+  metaOf: (row: T) => string
+  queenbeePath: string
+}
 
 const links = [
   { label: 'login.no', url: 'https://login.no' },
@@ -47,35 +88,274 @@ const links = [
   { label: 'Status', url: 'https://login.no/status' },
 ]
 
-const menu = [
-  ['Dashboard', Grid2X2],
-  ['Events', CalendarDays],
-  ['Announcements', Megaphone],
-  ['Albums', Image],
-  ['Jobs', BriefcaseBusiness],
-  ['Organizations', UsersRound],
-  ['Locations', MapPin],
-  ['Status', Monitor],
-  ['Internal', ShieldCheck],
-] as const
+const menu: NavItem[] = [
+  { key: 'dashboard', label: 'Dashboard', icon: Grid2X2 },
+  { key: 'events', label: 'Events', icon: CalendarDays },
+  { key: 'announcements', label: 'Announcements', icon: Megaphone },
+  { key: 'albums', label: 'Albums', icon: Image },
+  { key: 'jobs', label: 'Jobs', icon: BriefcaseBusiness },
+  { key: 'organizations', label: 'Organizations', icon: UsersRound },
+  { key: 'locations', label: 'Locations', icon: MapPin },
+  { key: 'rules', label: 'Rules', icon: FileText },
+  { key: 'alerts', label: 'Alerts', icon: AlertCircle },
+  { key: 'honey', label: 'Honey', icon: Sparkles },
+  { key: 'partners', label: 'For Companies', icon: Handshake },
+  { key: 'music', label: 'Music', icon: Music2 },
+  { key: 'status', label: 'Status', icon: Monitor },
+  { key: 'nucleusAdmin', label: 'Nucleus', icon: Bell },
+  { key: 'internal', label: 'Internal', icon: ShieldCheck },
+  { key: 'loadbalancing', label: 'Load Balancing', icon: Scale },
+  { key: 'databases', label: 'Databases', icon: Database },
+  { key: 'monitoring', label: 'Monitoring', icon: Monitor },
+  { key: 'services', label: 'Services', icon: Server },
+  { key: 'traffic', label: 'Traffic', icon: Activity },
+  { key: 'trafficRecords', label: 'Traffic Records', icon: Logs },
+  { key: 'backups', label: 'Backups', icon: Database },
+  { key: 'vulnerabilities', label: 'Vulnerabilities', icon: ShieldAlert },
+  { key: 'logs', label: 'Logs', icon: Logs },
+  { key: 'ai', label: 'AI', icon: Sparkles },
+  { key: 'settings', label: 'Settings', icon: Settings },
+]
+
+const themeOptions: Array<{ key: ThemePreference; label: string; icon: React.ComponentType<{ size?: number }> }> = [
+  { key: 'light', label: 'Light', icon: Sun },
+  { key: 'dark', label: 'Dark', icon: Moon },
+  { key: 'system', label: 'System', icon: Laptop },
+]
+
+const editorConfigs = {
+  events: {
+    title: 'Events',
+    statusKey: 'events',
+    service: 'workerbee',
+    createPath: 'events',
+    updatePath: (id) => `events/${id}`,
+    deletePath: (id) => `events/${id}`,
+    rows: (data) => data.events as EditableRow[],
+    fields: [
+      { name: 'name_no', label: 'Name NO', required: true },
+      { name: 'name_en', label: 'Name EN', required: true },
+      { name: 'description_no', label: 'Description NO', type: 'textarea', required: true },
+      { name: 'description_en', label: 'Description EN', type: 'textarea', required: true },
+      { name: 'time_start', label: 'Start time', type: 'datetime', required: true },
+      { name: 'time_end', label: 'End time', type: 'datetime', required: true },
+      { name: 'time_publish', label: 'Publish time', type: 'datetime' },
+      { name: 'category_id', label: 'Category ID', type: 'number', required: true },
+      { name: 'location_id', label: 'Location ID', type: 'number' },
+      { name: 'organization_id', label: 'Organization ID', type: 'number' },
+      { name: 'rule_id', label: 'Rule ID', type: 'number' },
+      { name: 'capacity', label: 'Capacity', type: 'number' },
+      { name: 'image_small', label: 'Small image' },
+      { name: 'image_banner', label: 'Banner image' },
+      { name: 'link_signup', label: 'Signup URL' },
+      { name: 'visible', label: 'Visible', type: 'boolean' },
+      { name: 'highlight', label: 'Highlight', type: 'boolean' },
+      { name: 'digital', label: 'Digital', type: 'boolean' },
+    ],
+    titleOf: (row) => stringValue(row.name_en) || stringValue(row.name_no) || `Event #${row.id}`,
+    metaOf: (row) => formatDate(stringValue(row.time_start) || stringValue(row.updated_at)),
+    queenbeePath: '/events',
+  },
+  announcements: {
+    title: 'Announcements',
+    statusKey: 'announcements',
+    service: 'bot',
+    createPath: 'announcements',
+    updatePath: () => 'announcements',
+    deletePath: () => 'announcements',
+    deleteBody: (id) => ({ id }),
+    rows: (data) => data.announcements as EditableRow[],
+    fields: [
+      { name: 'title', label: 'Title array or text', type: 'json', required: true, placeholder: '["Norwegian title", "English title"]' },
+      { name: 'description', label: 'Description array or text', type: 'json', required: true },
+      { name: 'channel', label: 'Channel', required: true },
+      { name: 'roles', label: 'Roles', type: 'json', placeholder: '["tekkom"]' },
+      { name: 'color', label: 'Embed color' },
+      { name: 'interval', label: 'Interval' },
+      { name: 'time', label: 'Publish time', type: 'datetime' },
+      { name: 'active', label: 'Active', type: 'boolean' },
+    ],
+    titleOf: (row) => stringValue(row.title) || `Announcement #${row.id}`,
+    metaOf: (row) => stringValue(row.channel) || formatDate(stringValue(row.updated_at)),
+    queenbeePath: '/announcements',
+  },
+  albums: {
+    title: 'Albums',
+    statusKey: 'albums',
+    service: 'workerbee',
+    createPath: 'albums',
+    updatePath: (id) => `albums/${id}`,
+    deletePath: (id) => `albums/${id}`,
+    rows: (data) => data.albums as EditableRow[],
+    fields: [
+      { name: 'name_no', label: 'Name NO', required: true },
+      { name: 'name_en', label: 'Name EN', required: true },
+      { name: 'description_no', label: 'Description NO', type: 'textarea', required: true },
+      { name: 'description_en', label: 'Description EN', type: 'textarea', required: true },
+      { name: 'year', label: 'Year', type: 'number' },
+      { name: 'event_id', label: 'Event ID', type: 'number' },
+    ],
+    titleOf: (row) => displayName(row as NamedItem),
+    metaOf: (row) => formatDate(stringValue(row.updated_at) || stringValue(row.created_at)),
+    queenbeePath: '/albums',
+  },
+  jobs: {
+    title: 'Jobs',
+    statusKey: 'jobs',
+    service: 'workerbee',
+    createPath: 'jobs',
+    updatePath: (id) => `jobs/${id}`,
+    deletePath: (id) => `jobs/${id}`,
+    rows: (data) => data.jobs as EditableRow[],
+    fields: [
+      { name: 'title_no', label: 'Title NO', required: true },
+      { name: 'title_en', label: 'Title EN', required: true },
+      { name: 'position_title_no', label: 'Position title NO', required: true },
+      { name: 'position_title_en', label: 'Position title EN', required: true },
+      { name: 'description_short_no', label: 'Short description NO', type: 'textarea', required: true },
+      { name: 'description_short_en', label: 'Short description EN', type: 'textarea', required: true },
+      { name: 'description_long_no', label: 'Long description NO', type: 'textarea', required: true },
+      { name: 'description_long_en', label: 'Long description EN', type: 'textarea', required: true },
+      { name: 'organization_id', label: 'Organization ID', type: 'number', required: true },
+      { name: 'job_type_id', label: 'Job type ID', type: 'number', required: true },
+      { name: 'time_publish', label: 'Publish time', type: 'datetime', required: true },
+      { name: 'time_expire', label: 'Expire time', type: 'datetime', required: true },
+      { name: 'application_url', label: 'Application URL' },
+      { name: 'banner_image', label: 'Banner image' },
+      { name: 'highlight', label: 'Highlight', type: 'boolean' },
+      { name: 'visible', label: 'Visible', type: 'boolean' },
+    ],
+    titleOf: (row) => jobTitle(row as JobItem),
+    metaOf: (row) => jobMeta(row as JobItem),
+    queenbeePath: '/jobs',
+  },
+  organizations: {
+    title: 'Organizations',
+    statusKey: 'organizations',
+    service: 'workerbee',
+    createPath: 'organizations',
+    updatePath: (id) => `organizations/${id}`,
+    deletePath: (id) => `organizations/${id}`,
+    rows: (data) => data.organizations as EditableRow[],
+    fields: [
+      { name: 'name_no', label: 'Name NO', required: true },
+      { name: 'name_en', label: 'Name EN', required: true },
+      { name: 'description_no', label: 'Description NO', type: 'textarea', required: true },
+      { name: 'description_en', label: 'Description EN', type: 'textarea', required: true },
+      { name: 'logo', label: 'Logo' },
+      { name: 'link_homepage', label: 'Homepage' },
+      { name: 'link_facebook', label: 'Facebook' },
+      { name: 'link_instagram', label: 'Instagram' },
+      { name: 'link_linkedin', label: 'LinkedIn' },
+    ],
+    titleOf: (row) => displayName(row as NamedItem),
+    metaOf: (row) => stringValue(row.link_homepage) || formatDate(stringValue(row.updated_at)),
+    queenbeePath: '/organizations',
+  },
+  locations: {
+    title: 'Locations',
+    statusKey: 'locations',
+    service: 'workerbee',
+    createPath: 'locations',
+    updatePath: (id) => `locations/${id}`,
+    deletePath: (id) => `locations/${id}`,
+    rows: (data) => data.locations as EditableRow[],
+    fields: [
+      { name: 'name_no', label: 'Name NO', required: true },
+      { name: 'name_en', label: 'Name EN', required: true },
+      { name: 'type', label: 'Type', required: true },
+      { name: 'address_street', label: 'Street' },
+      { name: 'address_postcode', label: 'Postcode', type: 'number' },
+      { name: 'city_name', label: 'City' },
+      { name: 'coordinate_lat', label: 'Latitude', type: 'number' },
+      { name: 'coordinate_lon', label: 'Longitude', type: 'number' },
+      { name: 'mazemap_campus_id', label: 'Mazemap campus', type: 'number' },
+      { name: 'mazemap_poi_id', label: 'Mazemap POI', type: 'number' },
+      { name: 'url', label: 'URL' },
+    ],
+    titleOf: (row) => displayName(row as NamedItem),
+    metaOf: (row) => stringValue(row.city) || stringValue(row.address) || formatDate(stringValue(row.updated_at)),
+    queenbeePath: '/locations',
+  },
+  rules: {
+    title: 'Rules',
+    statusKey: 'rules',
+    service: 'workerbee',
+    createPath: 'rules',
+    updatePath: (id) => `rules/${id}`,
+    deletePath: (id) => `rules/${id}`,
+    rows: (data) => data.rules as EditableRow[],
+    fields: [
+      { name: 'name_no', label: 'Name NO', required: true },
+      { name: 'name_en', label: 'Name EN', required: true },
+      { name: 'description_no', label: 'Description NO', type: 'textarea', required: true },
+      { name: 'description_en', label: 'Description EN', type: 'textarea', required: true },
+    ],
+    titleOf: (row) => stringValue(row.name_en) || stringValue(row.name_no) || `Rule #${row.id}`,
+    metaOf: (row) => stripMarkdown(stringValue(row.description_en) || stringValue(row.description_no)).slice(0, 80),
+    queenbeePath: '/rules',
+  },
+  alerts: {
+    title: 'Alerts',
+    statusKey: 'alerts',
+    service: 'workerbee',
+    createPath: 'alerts',
+    updatePath: (id) => `alerts/${id}`,
+    deletePath: (id) => `alerts/${id}`,
+    rows: (data) => data.alerts as EditableRow[],
+    fields: [
+      { name: 'title_no', label: 'Title NO', required: true },
+      { name: 'title_en', label: 'Title EN', required: true },
+      { name: 'description_no', label: 'Description NO', type: 'textarea', required: true },
+      { name: 'description_en', label: 'Description EN', type: 'textarea', required: true },
+      { name: 'service', label: 'Service', required: true },
+      { name: 'page', label: 'Page', required: true },
+    ],
+    titleOf: (row) => stringValue(row.title_en) || stringValue(row.title_no) || `Alert #${row.id}`,
+    metaOf: (row) => `${stringValue(row.service) || 'service'} / ${stringValue(row.page) || 'page'}`,
+    queenbeePath: '/internal/alerts',
+  },
+  honey: {
+    title: 'Honey',
+    statusKey: 'honey',
+    service: 'workerbee',
+    createPath: 'honeys',
+    updatePath: (id) => `honeys/${id}`,
+    deletePath: (id) => `honeys/${id}`,
+    rows: (data) => data.honey as EditableRow[],
+    fields: [
+      { name: 'service', label: 'Service', required: true },
+      { name: 'page', label: 'Page', required: true },
+      { name: 'language', label: 'Language', required: true },
+      { name: 'text', label: 'Text JSON', type: 'json', required: true },
+    ],
+    titleOf: (row) => `${stringValue(row.service) || 'service'} / ${stringValue(row.page) || 'page'}`,
+    metaOf: (row) => stringValue(row.language) || 'language',
+    queenbeePath: '/honey',
+  },
+} satisfies Record<string, EditorConfig<EditableRow>>
+
+function readThemePreference(): ThemePreference {
+  const stored = window.localStorage.getItem('login-desktop.theme')
+  return stored === 'light' || stored === 'dark' || stored === 'system' ? stored : 'system'
+}
+
+function readInitialPage(): PageKey {
+  const page = new URLSearchParams(window.location.search).get('page')
+  return menu.some((item) => item.key === page) ? page as PageKey : 'dashboard'
+}
 
 function App() {
+  const [activePage, setActivePage] = useState<PageKey>(() => readInitialPage())
+  const [themePreference, setThemePreference] = useState<ThemePreference>(() => readThemePreference())
   const [data, setData] = useState<DashboardData | null>(null)
   const [error, setError] = useState<string | null>(null)
-  const [browserTarget, setBrowserTarget] = useState<BrowserTarget | null>(null)
+  const contentRef = useRef<HTMLElement | null>(null)
   const [updateState, setUpdateState] = useState<AutoUpdateState>({
     status: 'checking',
     message: 'Checking app-api for signed desktop updates...',
     manifest: null,
   })
-
-  useEffect(() => {
-    window.loginOpenInAppBrowser = setBrowserTarget
-
-    return () => {
-      delete window.loginOpenInAppBrowser
-    }
-  }, [])
 
   useEffect(() => {
     let active = true
@@ -88,6 +368,14 @@ function App() {
   }, [])
 
   useEffect(() => {
+    window.localStorage.setItem('login-desktop.theme', themePreference)
+  }, [themePreference])
+
+  useEffect(() => {
+    if (contentRef.current) contentRef.current.scrollTop = 0
+  }, [activePage])
+
+  useEffect(() => {
     let active = true
 
     async function runAutoUpdate() {
@@ -95,20 +383,9 @@ function App() {
         const manifest = await fetchAppUpdateManifest()
         if (!active) return
 
-        if (!manifest || !hasNewerDesktopVersion(manifest)) {
-          setUpdateState({
-            status: 'current',
-            message: `Login Desktop ${DESKTOP_APP_VERSION} is current.`,
-            manifest,
-          })
-          return
-        }
-
-        setUpdateState({
-          status: 'available',
-          message: `Version ${manifest.version} is published. The signed native updater will install it and restart the app.`,
-          manifest,
-        })
+        setUpdateState(!manifest || !hasNewerDesktopVersion(manifest)
+          ? { status: 'current', message: `Login Desktop ${DESKTOP_APP_VERSION} is current.`, manifest }
+          : { status: 'available', message: `Version ${manifest.version} is published. The signed native updater will install it and restart the app.`, manifest })
       } catch (err) {
         if (!active) return
         setUpdateState({
@@ -121,23 +398,24 @@ function App() {
 
     runAutoUpdate()
     const timer = window.setInterval(runAutoUpdate, 1000 * 60 * 60 * 6)
-
     return () => {
       active = false
       window.clearInterval(timer)
     }
   }, [])
 
+  const activeLabel = menu.find((item) => item.key === activePage)?.label || 'Dashboard'
+
   return (
-    <main className="app-shell">
+    <main className="app-shell" data-theme={themePreference}>
       <aside className="sidebar">
         <div className="brand-lockup">
           <LoginMark small />
           <span>Login Desktop</span>
         </div>
         <nav className="nav-list" aria-label="Login surfaces">
-          {menu.map(([label, Icon], index) => (
-            <button key={label} className={index === 0 ? 'nav-item active' : 'nav-item'}>
+          {menu.map(({ key, label, icon: Icon }) => (
+            <button key={key} className={activePage === key ? 'nav-item active' : 'nav-item'} onClick={() => setActivePage(key)}>
               <Icon size={22} />
               <span>{label}</span>
             </button>
@@ -145,72 +423,49 @@ function App() {
         </nav>
         <div className="sidebar-footer">
           <span className="version">v{DESKTOP_APP_VERSION}</span>
-          <span className="muted">Cross-platform launcher</span>
+          <span className="muted">{activeLabel}</span>
         </div>
       </aside>
 
-      <section className="content">
-        <Hero data={data} updateState={updateState} />
+      <section className="content" ref={contentRef}>
+        {activePage === 'dashboard' ? <Hero data={data} updateState={updateState} /> : <PageHero page={activePage} data={data} />}
         {error ? <div className="error-card">{error}</div> : null}
-        {!data ? <LoadingState /> : <Dashboard data={data} />}
+        {activePage === 'settings'
+          ? <SettingsPage themePreference={themePreference} onThemePreferenceChange={setThemePreference} updateState={updateState} />
+          : !data ? <LoadingState /> : <PageRouter page={activePage} data={data} updateState={updateState} />}
       </section>
-      <InAppBrowser target={browserTarget} onClose={() => setBrowserTarget(null)} />
     </main>
   )
 }
 
-function InAppBrowser({ target, onClose }: { target: BrowserTarget | null; onClose: () => void }) {
-  const frameRef = useRef<HTMLIFrameElement | null>(null)
-  const [loadKey, setLoadKey] = useState(0)
-  const [loading, setLoading] = useState(false)
-
-  useEffect(() => {
-    if (!target) return
-    setLoadKey((current) => current + 1)
-    setLoading(true)
-  }, [target])
-
-  if (!target) return null
-
-  function navigate(direction: 'back' | 'forward') {
-    try {
-      if (direction === 'back') frameRef.current?.contentWindow?.history.back()
-      else frameRef.current?.contentWindow?.history.forward()
-    } catch {
-      // Cross-origin pages can block direct history access; the browser frame still remains usable.
-    }
+function PageRouter({ page, data, updateState }: { page: PageKey; data: DashboardData; updateState: AutoUpdateState }) {
+  switch (page) {
+    case 'events': return <EventsPage data={data} />
+    case 'announcements': return <AnnouncementsPage data={data} />
+    case 'albums': return <AlbumsPage data={data} />
+    case 'jobs': return <JobsPage data={data} />
+    case 'organizations': return <OrganizationsPage data={data} />
+    case 'locations': return <LocationsPage data={data} />
+    case 'rules': return <RulesPage data={data} />
+    case 'alerts': return <AlertsPage data={data} />
+    case 'honey': return <HoneyPage data={data} />
+    case 'partners': return <PartnersPage data={data} />
+    case 'music': return <MusicPage data={data} />
+    case 'status': return <StatusPage data={data} />
+    case 'nucleusAdmin': return <NucleusAdminPage data={data} />
+    case 'internal': return <InternalPage data={data} />
+    case 'loadbalancing': return <LoadBalancingPage data={data} />
+    case 'databases': return <DatabasesPage data={data} />
+    case 'monitoring': return <MonitoringPage data={data} />
+    case 'services': return <ServicesPage data={data} />
+    case 'traffic': return <TrafficPage data={data} />
+    case 'trafficRecords': return <TrafficRecordsPage data={data} />
+    case 'backups': return <BackupsPage data={data} />
+    case 'vulnerabilities': return <VulnerabilitiesPage data={data} />
+    case 'logs': return <LogsPage data={data} />
+    case 'ai': return <AiPage data={data} />
+    default: return <Dashboard data={data} updateState={updateState} />
   }
-
-  return (
-    <section className="browser-shell" aria-label="Login in-app browser">
-      <div className="browser-toolbar">
-        <div className="browser-controls">
-          <button onClick={() => navigate('back')} aria-label="Go back"><ArrowLeft size={17} /></button>
-          <button onClick={() => navigate('forward')} aria-label="Go forward"><ArrowRight size={17} /></button>
-          <button onClick={() => setLoadKey((current) => current + 1)} aria-label="Reload"><RefreshCcw size={17} /></button>
-        </div>
-        <div className="browser-address">
-          <Globe2 size={16} />
-          <div>
-            <strong>{target.title || 'Login Browser'}</strong>
-            <span>{target.url}</span>
-          </div>
-        </div>
-        <button className="browser-close" onClick={onClose} aria-label="Close browser"><X size={18} /></button>
-      </div>
-      <div className="browser-frame-wrap">
-        {loading ? <div className="browser-loading"><Loader2 className="spin" /><span>Loading inside Login Desktop...</span></div> : null}
-        <iframe
-          key={`${target.url}-${loadKey}`}
-          ref={frameRef}
-          src={target.url}
-          title={target.title || 'Login Browser'}
-          className="browser-frame"
-          onLoad={() => setLoading(false)}
-        />
-      </div>
-    </section>
-  )
 }
 
 function Hero({ data, updateState }: { data: DashboardData | null; updateState: AutoUpdateState }) {
@@ -220,14 +475,11 @@ function Hero({ data, updateState }: { data: DashboardData | null; updateState: 
       <div className="hero-copy">
         <p className="eyebrow">Launcher for Login services</p>
         <h1>Velkommen til <span>login.no</span></h1>
-        <p>
-          Live desktop dashboard for Login content, Queenbee operations, service status,
-          and quick-launch access across the ecosystem.
-        </p>
+        <p>Live desktop dashboard for Login content, Queenbee operations, service status, and quick-launch access across the ecosystem.</p>
         <div className="launcher-row">
           {links.map((link) => (
-            <button key={link.url} className="launcher-button" onClick={() => openInAppBrowser({ url: link.url, title: `Login Browser · ${link.label}` })}>
-              {link.label}<PanelTopOpen size={16} />
+            <button key={link.url} className="launcher-button" onClick={() => openInAppBrowser(link.url)}>
+              {link.label}<ExternalLink size={16} />
             </button>
           ))}
         </div>
@@ -241,28 +493,69 @@ function Hero({ data, updateState }: { data: DashboardData | null; updateState: 
   )
 }
 
+function PageHero({ page, data }: { page: PageKey; data: DashboardData | null }) {
+  const meta = pageMeta(page, data)
+  const Icon = meta.icon
+  return (
+    <header className="page-hero">
+      <div className="page-icon"><Icon size={30} /></div>
+      <div>
+        <p className="eyebrow">{meta.kicker}</p>
+        <h1>{meta.title}</h1>
+        <p>{meta.description}</p>
+      </div>
+      <div className="sync-card compact-sync">
+        <span className="sync-dot" />
+        <span>{data ? `Synced ${formatTime(data.fetchedAt)}` : 'Connecting'}</span>
+      </div>
+    </header>
+  )
+}
+
+function pageMeta(page: PageKey, data: DashboardData | null) {
+  const count = (value: number | null | undefined) => typeof value === 'number' ? value : 'locked'
+  const map = {
+    dashboard: { title: 'Dashboard', kicker: 'Overview', description: 'The complete Login desktop command center.', icon: Grid2X2 },
+    events: { title: 'Events', kicker: `${data?.events.length ?? 0} loaded`, description: `${count(data?.counts.events)} public events from Workerbee.`, icon: CalendarDays },
+    announcements: { title: 'Announcements', kicker: `${data?.announcements.length ?? 0} loaded`, description: `${count(data?.counts.announcements)} Discord announcements from TekKom Bot.`, icon: Megaphone },
+    albums: { title: 'Albums', kicker: `${data?.albums.length ?? 0} loaded`, description: `${count(data?.counts.albums)} albums from Workerbee.`, icon: Image },
+    jobs: { title: 'Jobs', kicker: `${data?.jobs.length ?? 0} loaded`, description: `${count(data?.counts.jobs)} career posts from Workerbee.`, icon: BriefcaseBusiness },
+    organizations: { title: 'Organizations', kicker: `${data?.organizations.length ?? 0} loaded`, description: `${count(data?.counts.organizations)} organizations from Workerbee.`, icon: UsersRound },
+    locations: { title: 'Locations', kicker: `${data?.locations.length ?? 0} loaded`, description: `${count(data?.counts.locations)} locations from Workerbee.`, icon: MapPin },
+    rules: { title: 'Rules', kicker: `${data?.rules.length ?? 0} loaded`, description: `${count(data?.counts.rules)} public event and committee rule sets from Workerbee.`, icon: FileText },
+    alerts: { title: 'Alerts', kicker: `${data?.alerts.length ?? 0} loaded`, description: 'Queenbee alert banners and page-level notices from Workerbee.', icon: AlertCircle },
+    honey: { title: 'Honey', kicker: `${data?.honey.length ?? 0} loaded`, description: 'Structured Login/Queenbee text content from the Workerbee honey store.', icon: Sparkles },
+    partners: { title: 'For Companies', kicker: data?.companiesText ? 'Beehive text' : 'Loading', description: 'Company presentation and sponsor information from login.no.', icon: Handshake },
+    music: { title: 'Music', kicker: data?.music ? `${formatNumber(data.music.stats.total_songs)} plays` : 'TekKom Bot', description: 'Live public listening stats from login.no/music.', icon: Music2 },
+    status: { title: 'Status', kicker: `${data?.statusServices.length ?? 0} monitored`, description: 'Live Beekeeper monitoring data.', icon: Monitor },
+    nucleusAdmin: { title: 'Nucleus', kicker: 'Notifications', description: 'Queenbee notification scheduling, resend, history, and Nucleus documentation shortcuts.', icon: Bell },
+    internal: { title: 'Internal', kicker: 'Queenbee', description: 'Internal Beekeeper dashboard and endpoint health.', icon: ShieldCheck },
+    loadbalancing: { title: 'Load Balancing', kicker: `${data?.queenbee.sites.length ?? 0} sites`, description: 'Queenbee load-balancer site overview from Beekeeper.', icon: Scale },
+    databases: { title: 'Databases', kicker: data?.health.db === 'live' ? 'Live' : 'Protected', description: 'Queenbee database overview and lock status.', icon: Database },
+    monitoring: { title: 'Monitoring', kicker: `${data?.statusServices.length ?? 0} services`, description: 'Queenbee monitoring services and alert routing.', icon: Monitor },
+    services: { title: 'Services', kicker: data?.health.docker === 'live' ? `${data.queenbee.docker?.count || 0} containers` : 'Protected', description: 'Queenbee Docker services, deploy controls, and container status.', icon: Server },
+    traffic: { title: 'Traffic', kicker: data?.health.traffic === 'live' ? `${formatNumber(data.queenbee.traffic?.total_requests)} requests` : 'Protected', description: 'Queenbee traffic metrics from Beekeeper.', icon: Activity },
+    trafficRecords: { title: 'Traffic Records', kicker: 'Protected', description: 'Raw Queenbee traffic records and map analytics.', icon: Logs },
+    backups: { title: 'Backups', kicker: 'Protected', description: 'Queenbee backup overview, file browser, and restore shortcuts.', icon: Database },
+    vulnerabilities: { title: 'Vulnerabilities', kicker: data?.health.vulnerabilities === 'live' ? `${data.queenbee.vulnerabilities?.imageCount || 0} images` : 'Protected', description: 'Queenbee Docker vulnerability scan summary.', icon: ShieldAlert },
+    logs: { title: 'Logs', kicker: data?.health.logs === 'live' ? 'Live' : 'Protected', description: 'Queenbee Docker log stream status.', icon: Logs },
+    ai: { title: 'AI', kicker: 'Queenbee', description: 'Internal AI dashboard shortcut and protected API readiness.', icon: Sparkles },
+    settings: { title: 'Settings', kicker: 'Desktop', description: 'Configure the local Login desktop app.', icon: Settings },
+  }
+  return map[page]
+}
+
 function AutoUpdatePanel({ state }: { state: AutoUpdateState }) {
-  const Icon = state.status === 'available' || state.status === 'current'
-    ? CheckCircle2
-    : state.status === 'error'
-      ? AlertCircle
-      : RefreshCcw
+  const Icon = state.status === 'available' || state.status === 'current' ? CheckCircle2 : state.status === 'error' ? AlertCircle : RefreshCcw
   const manifest = state.manifest
   const firstPlatform = manifest?.platforms ? Object.keys(manifest.platforms)[0] : null
-  const source = firstPlatform && manifest?.platforms?.[firstPlatform]?.url
-    ? new URL(manifest.platforms[firstPlatform].url).pathname
-    : '/api/desktop'
+  const source = firstPlatform && manifest?.platforms?.[firstPlatform]?.url ? new URL(manifest.platforms[firstPlatform].url).pathname : '/api/desktop'
 
   return (
     <section className={`update-panel ${state.status}`} aria-label="Automatic desktop update">
       <div className="update-head">
-        <span className="update-icon">
-          <Icon size={17} className={state.status === 'checking' ? 'spin' : ''} />
-        </span>
-        <div>
-          <p>Auto update</p>
-          <strong>{updateTitle(state.status)}</strong>
-        </div>
+        <span className="update-icon"><Icon size={17} className={state.status === 'checking' ? 'spin' : ''} /></span>
+        <div><p>Auto update</p><strong>{updateTitle(state.status)}</strong></div>
       </div>
       <p className="update-message">{state.message}</p>
       <div className="update-metrics">
@@ -276,36 +569,20 @@ function AutoUpdatePanel({ state }: { state: AutoUpdateState }) {
 }
 
 function updateTitle(status: AutoUpdateState['status']) {
-  switch (status) {
-    case 'checking':
-      return 'Checking'
-    case 'available':
-      return 'Update published'
-    case 'current':
-      return 'Up to date'
-    case 'error':
-      return 'Needs attention'
-  }
+  if (status === 'checking') return 'Checking'
+  if (status === 'available') return 'Update published'
+  if (status === 'current') return 'Up to date'
+  return 'Needs attention'
 }
 
 function LoadingState() {
-  return (
-    <div className="loading-card">
-      <Loader2 className="spin" />
-      <span>Loading live Login dashboard data...</span>
-    </div>
-  )
+  return <div className="loading-card"><Loader2 className="spin" /><span>Loading live Login dashboard data...</span></div>
 }
 
-function Dashboard({ data }: { data: DashboardData }) {
+function Dashboard({ data, updateState }: { data: DashboardData; updateState: AutoUpdateState }) {
   return (
     <div className="dashboard-grid">
-      <section className="source-strip full-span">
-        <EndpointPill label="Workerbee" status={combinedStatus(data.health, ['events', 'jobs', 'organizations', 'locations', 'albums', 'categories', 'recent-additions'])} />
-        <EndpointPill label="Beekeeper" status={combinedStatus(data.health, ['status', 'internal'])} />
-        <EndpointPill label="Bot announcements" status={data.health.announcements || 'error'} />
-      </section>
-
+      <EndpointStrip data={data} />
       <section className="metric-strip full-span">
         <Metric icon={<CalendarDays />} label="Events" value={data.counts.events} status={data.health.events} />
         <Metric icon={<BriefcaseBusiness />} label="Jobs" value={data.counts.jobs} status={data.health.jobs} />
@@ -313,341 +590,908 @@ function Dashboard({ data }: { data: DashboardData }) {
         <Metric icon={<UsersRound />} label="Organizations" value={data.counts.organizations} status={data.health.organizations} />
         <Metric icon={<MapPin />} label="Locations" value={data.counts.locations} status={data.health.locations} />
         <Metric icon={<Image />} label="Albums" value={data.counts.albums} status={data.health.albums} />
+        <Metric icon={<FileText />} label="Rules" value={data.counts.rules} status={data.health.rules} />
+        <Metric icon={<Music2 />} label="Songs" value={formatNumber(data.music?.stats.total_songs)} status={data.health.music} />
+      </section>
+      <section className="panel recent-panel"><PanelTitle title="Recent Additions" subtitle="Live /stats/new-additions" /><RecentList additions={data.additions} status={data.health['recent-additions']} /></section>
+      <section className="panel chart-panel"><PanelTitle title="Event Categories" subtitle="Live /stats/categories" /><CategoryChart data={data.categories} status={data.health.categories} /></section>
+      <section className="panel events-panel"><PanelTitle title="Upcoming Events" subtitle="Live /events" /><EventList events={data.events.slice(0, 6)} status={data.health.events} /></section>
+      <section className="panel status-panel"><PanelTitle title="Service Status" subtitle="Live /monitoring" /><StatusList services={data.statusServices.slice(0, 6)} status={data.health.status} /></section>
+      <section className="panel"><PanelTitle title="For Companies" subtitle="Live /text/beehive/companies" /><CompaniesSummary data={data} /></section>
+      <section className="panel"><PanelTitle title="Login Music" subtitle="Live /activity" /><MusicSummary data={data} /></section>
+      <section className="panel full-span"><PanelTitle title="Queenbee Operations" subtitle="Beekeeper internal surfaces" /><QueenbeeOpsSummary data={data} /></section>
+      <section className="panel full-span"><PanelTitle title="More Login Content" subtitle="Live Workerbee collections" /><ContentCollections data={data} /></section>
+      <section className="panel full-span"><PanelTitle title="Desktop Runtime" subtitle="Native app health" /><AutoUpdatePanel state={updateState} /></section>
+    </div>
+  )
+}
+
+function EndpointStrip({ data }: { data: DashboardData }) {
+  return (
+    <section className="source-strip full-span">
+      <EndpointPill label="Workerbee" status={combinedStatus(data.health, ['events', 'jobs', 'organizations', 'locations', 'albums', 'categories', 'recent-additions'])} />
+      <EndpointPill label="Beekeeper" status={combinedStatus(data.health, ['status', 'internal'])} />
+      <EndpointPill label="Queenbee Ops" status={combinedStatus(data.health, ['sites', 'db', 'traffic', 'vulnerabilities', 'logs'])} />
+      <EndpointPill label="Bot announcements" status={data.health.announcements || 'error'} />
+    </section>
+  )
+}
+
+function EventsPage({ data }: { data: DashboardData }) {
+  return <EditorPage data={data} config={editorConfigs.events} preview={<EventList events={data.events} status={data.health.events} />} />
+}
+
+function AnnouncementsPage({ data }: { data: DashboardData }) {
+  return <EditorPage data={data} config={editorConfigs.announcements} preview={<AnnouncementList announcements={data.announcements} status={data.health.announcements} />} />
+}
+
+function AlbumsPage({ data }: { data: DashboardData }) {
+  return <EditorPage data={data} config={editorConfigs.albums} preview={<TileGrid rows={data.albums} status={data.health.albums} kind="album" />} />
+}
+
+function JobsPage({ data }: { data: DashboardData }) {
+  return <EditorPage data={data} config={editorConfigs.jobs} preview={<JobList jobs={data.jobs} status={data.health.jobs} />} />
+}
+
+function OrganizationsPage({ data }: { data: DashboardData }) {
+  return <EditorPage data={data} config={editorConfigs.organizations} preview={<TileGrid rows={data.organizations} status={data.health.organizations} kind="organization" />} />
+}
+
+function LocationsPage({ data }: { data: DashboardData }) {
+  return <EditorPage data={data} config={editorConfigs.locations} preview={<TileGrid rows={data.locations} status={data.health.locations} kind="location" />} />
+}
+
+function RulesPage({ data }: { data: DashboardData }) {
+  return <EditorPage data={data} config={editorConfigs.rules} preview={<RuleList rules={data.rules} status={data.health.rules} />} />
+}
+
+function AlertsPage({ data }: { data: DashboardData }) {
+  return <EditorPage data={data} config={editorConfigs.alerts} />
+}
+
+function HoneyPage({ data }: { data: DashboardData }) {
+  return <EditorPage data={data} config={editorConfigs.honey} />
+}
+
+function EditorPage<T extends EditableRow>({ data, config, preview }: { data: DashboardData; config: EditorConfig<T>; preview?: React.ReactNode }) {
+  const rows = config.rows(data)
+  const status = data.health[config.statusKey]
+  const [editing, setEditing] = useState<T | null>(rows[0] || null)
+  const [mode, setMode] = useState<'create' | 'update'>(rows[0] ? 'update' : 'create')
+  const [message, setMessage] = useState('Ready. Add a Queenbee token in Settings to push changes.')
+  const [busy, setBusy] = useState(false)
+  const tokenReady = hasQueenbeeToken()
+
+  function startCreate() {
+    setMode('create')
+    setEditing(null)
+    setMessage('Create mode. Fill the fields, then publish when ready.')
+  }
+
+  function startEdit(row: T) {
+    setMode('update')
+    setEditing(row)
+    setMessage(`Editing ${config.titleOf(row)}.`)
+  }
+
+  async function submit(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault()
+    const payload = buildEditorPayload(config.fields, new FormData(event.currentTarget))
+    if (mode === 'update' && editing && config.service === 'bot') payload.id = editing.id
+    const target = mode === 'create' ? config.createPath : editing ? config.updatePath(editing.id) : config.createPath
+    const method = mode === 'create' ? 'POST' : 'PUT'
+    const title = mode === 'create' ? `create a new ${config.title}` : `update ${editing ? config.titleOf(editing) : config.title}`
+    if (!window.confirm(`Push this live Queenbee change now?\n\nAction: ${title}\nEndpoint: ${config.service}/${target}`)) return
+    setBusy(true)
+    try {
+      await queenbeeRequest({ service: config.service, path: target, method, data: payload })
+      setMessage(`${title} succeeded. Refresh the dashboard to reload live data.`)
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : 'Queenbee write failed.')
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  async function remove(row: T) {
+    if (!window.confirm(`Delete ${config.titleOf(row)} from Queenbee?\n\nThis removes live content and cannot be undone here.`)) return
+    setBusy(true)
+    try {
+      await queenbeeRequest({ service: config.service, path: config.deletePath(row.id), method: 'DELETE', data: config.deleteBody?.(row.id) })
+      setMessage(`Deleted ${config.titleOf(row)}. Refresh the dashboard to reload live data.`)
+      if (editing?.id === row.id) startCreate()
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : 'Queenbee delete failed.')
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  return (
+    <div className="editor-layout">
+      <section className="panel full-span editor-console">
+        <PanelTitle title={`${config.title} Editor`} subtitle={`${config.service}/${mode === 'create' ? config.createPath : editing ? config.updatePath(editing.id) : config.createPath}`} />
+        <div className="editor-toolbar">
+          <EndpointPill label={config.service} status={status || 'error'} compact />
+          <span className={tokenReady ? 'editor-token ready' : 'editor-token'}><KeyRound size={14} />{tokenReady ? 'Write token configured' : 'Read-only until token is added'}</span>
+          <button onClick={startCreate}><Plus size={14} />New</button>
+          <button onClick={() => openInAppBrowser(`https://queenbee.login.no${config.queenbeePath}`)}>Open Queenbee <ExternalLink size={14} /></button>
+        </div>
+        <form className="editor-form" onSubmit={submit} key={`${config.title}-${mode}-${editing?.id || 'new'}`}>
+          {config.fields.map((field) => <EditorInput key={field.name} field={field} row={editing} />)}
+          <div className="editor-actions">
+            <button className="primary-action" type="submit" disabled={busy || !tokenReady}><Pencil size={15} />{busy ? 'Pushing...' : mode === 'create' ? 'Create and publish' : 'Save live update'}</button>
+            {mode === 'update' && editing ? <button type="button" className="danger-action" disabled={busy || !tokenReady} onClick={() => remove(editing)}><Trash2 size={15} />Delete</button> : null}
+          </div>
+        </form>
+        <p className="editor-message">{message}</p>
       </section>
 
-      <section className="panel recent-panel">
-        <PanelTitle title="Recent Additions" subtitle="Live /stats/new-additions" />
-        <RecentList additions={data.additions} status={data.health['recent-additions']} />
+      <section className="panel editor-list-panel">
+        <PanelTitle title={`${config.title} Rows`} subtitle={`${rows.length} loaded from Queenbee`} />
+        {status !== 'live' ? <EmptyState icon={<AlertCircle />} label={`${config.title} endpoint is ${status || 'unavailable'}.`} /> : null}
+        <div className="editor-row-list">
+          {rows.map((row) => (
+            <article className={editing?.id === row.id ? 'editor-row-card active' : 'editor-row-card'} key={row.id}>
+              <div>
+                <strong>{config.titleOf(row)}</strong>
+                <span>{config.metaOf(row)}</span>
+              </div>
+              <button onClick={() => startEdit(row)}><Pencil size={13} />Edit</button>
+            </article>
+          ))}
+        </div>
       </section>
 
-      <section className="panel chart-panel">
-        <PanelTitle title="Event Categories" subtitle="Live /stats/categories" />
-        <CategoryChart data={data.categories} status={data.health.categories} />
-      </section>
+      {preview ? <section className="panel editor-preview-panel"><PanelTitle title="Public Preview" subtitle="Read-only current output" />{preview}</section> : null}
+    </div>
+  )
+}
 
-      <section className="panel events-panel">
-        <PanelTitle title="Upcoming Events" subtitle="Live /events" />
-        <EventList events={data.events} status={data.health.events} />
-      </section>
+function EditorInput({ field, row }: { field: EditorField; row: EditableRow | null }) {
+  const value = row ? row[field.name] : undefined
+  const label = <span>{field.label}{field.required ? <b>*</b> : null}</span>
+  if (field.type === 'boolean') {
+    const defaultChecked = value === undefined ? field.name === 'visible' || field.name === 'active' : Boolean(value)
+    return <label className="editor-check">{label}<input name={field.name} type="checkbox" defaultChecked={defaultChecked} /></label>
+  }
+  if (field.type === 'textarea' || field.type === 'json') {
+    return <label className="editor-field">{label}<textarea name={field.name} required={field.required} placeholder={field.placeholder} defaultValue={field.type === 'json' ? jsonEditorValue(value) : stringValue(value)} /></label>
+  }
+  return <label className="editor-field">{label}<input name={field.name} type={field.type === 'number' ? 'number' : field.type === 'datetime' ? 'datetime-local' : 'text'} required={field.required} placeholder={field.placeholder} defaultValue={field.type === 'datetime' ? dateInputValue(value) : stringValue(value)} /></label>
+}
 
-      <section className="panel status-panel">
-        <PanelTitle title="Service Status" subtitle="Live /monitoring" />
-        <StatusList services={data.statusServices} status={data.health.status} />
-      </section>
+function buildEditorPayload(fields: EditorField[], form: FormData) {
+  return fields.reduce<Record<string, unknown>>((payload, field) => {
+    if (field.type === 'boolean') {
+      payload[field.name] = form.get(field.name) === 'on'
+      return payload
+    }
+    const raw = String(form.get(field.name) || '').trim()
+    if (!raw && !field.required) return payload
+    if (field.type === 'number') payload[field.name] = raw ? Number(raw) : null
+    else if (field.type === 'json') payload[field.name] = parseEditorJson(raw)
+    else payload[field.name] = raw
+    return payload
+  }, {})
+}
 
-      <section className="panel full-span">
-        <PanelTitle title="More Login Content" subtitle="Live Workerbee collections" />
-        <ContentCollections data={data} />
-      </section>
+function parseEditorJson(value: string) {
+  if (!value) return null
+  try {
+    return JSON.parse(value)
+  } catch {
+    return value
+  }
+}
 
-      <section className="panel internal-panel full-span">
-        <PanelTitle title="Queenbee Internal Overview" subtitle="Live /dashboard/internal" />
-        <InternalOverview data={data.internal} health={data.health} />
+function jsonEditorValue(value: unknown) {
+  if (value === undefined || value === null || value === '') return ''
+  if (typeof value === 'string') return value
+  return JSON.stringify(value, null, 2)
+}
+
+function dateInputValue(value: unknown) {
+  const raw = stringValue(value)
+  if (!raw) return ''
+  const date = new Date(raw)
+  if (Number.isNaN(date.getTime())) return raw
+  return date.toISOString().slice(0, 16)
+}
+
+function PartnersPage({ data }: { data: DashboardData }) {
+  return <PagePanel title="For Companies" status={data.health['companies-text']}><CompaniesContent data={data} /></PagePanel>
+}
+
+function MusicPage({ data }: { data: DashboardData }) {
+  return <PagePanel title="Login Music" status={data.health.music}><MusicContent data={data} /></PagePanel>
+}
+
+function StatusPage({ data }: { data: DashboardData }) {
+  return <PagePanel title="Service Status" status={data.health.status}><StatusList services={data.statusServices} status={data.health.status} expanded /></PagePanel>
+}
+
+function InternalPage({ data }: { data: DashboardData }) {
+  return (
+    <div className="dashboard-grid">
+      <EndpointStrip data={data} />
+      <section className="panel full-span"><PanelTitle title="Queenbee Internal Overview" subtitle="Live /dashboard/internal" /><InternalOverview data={data.internal} health={data.health} /></section>
+    </div>
+  )
+}
+
+function NucleusAdminPage({ data }: { data: DashboardData }) {
+  const items = [
+    ['Notifications', 'Schedule, resend, and review app notification history.', Bell, 'https://queenbee.login.no/notifications'],
+    ['Events', 'Open Queenbee event editing for content parity checks.', Pencil, 'https://queenbee.login.no/events'],
+    ['App Links', 'Review native app routing and public Login surfaces.', KeyRound, 'https://login.no/app'],
+  ] as const
+
+  return (
+    <PagePanel title="Nucleus Admin" status={combinedStatus(data.health, ['announcements', 'status'])}>
+      <div className="queenbee-grid">
+        {items.map(([title, body, Icon, url]) => (
+          <button className="queenbee-card" key={title} onClick={() => openInAppBrowser(url)}>
+            <Icon size={18} />
+            <h3>{title}</h3>
+            <p>{body}</p>
+            <span>Open surface</span>
+          </button>
+        ))}
+      </div>
+    </PagePanel>
+  )
+}
+
+function LoadBalancingPage({ data }: { data: DashboardData }) {
+  return (
+    <PagePanel title="Load Balancing" status={data.health.sites}>
+      <QueenbeeStatusBanner status={data.health.sites} path="/sites" />
+      {data.health.sites === 'live' && data.queenbee.sites.length ? (
+        <div className="queenbee-grid">
+          {data.queenbee.sites.map((site, index) => (
+            <article className="queenbee-card" key={site.id || site.domain || index}>
+              <Scale size={18} />
+              <h3>{site.name || site.domain || `Site ${index + 1}`}</h3>
+              <p>{site.domain || site.ip || site.status || 'No public hostname returned.'}</p>
+              <span>{site.primary ? 'Primary' : site.enabled === false ? 'Disabled' : 'Available'}</span>
+            </article>
+          ))}
+        </div>
+      ) : data.health.sites === 'live' ? <EmptyState icon={<Scale />} label="No load-balancer sites are currently returned by Beekeeper." /> : null}
+    </PagePanel>
+  )
+}
+
+function DatabasesPage({ data }: { data: DashboardData }) {
+  return (
+    <PagePanel title="Databases" status={data.health.db}>
+      <QueenbeeStatusBanner status={data.health.db} path="/db" />
+      {data.health.db === 'live' ? <JsonPreview value={data.queenbee.databases} /> : <ProtectedQueenbeeGrid />}
+    </PagePanel>
+  )
+}
+
+function MonitoringPage({ data }: { data: DashboardData }) {
+  return <PagePanel title="Monitoring" status={data.health.status}><StatusList services={data.statusServices} status={data.health.status} expanded /></PagePanel>
+}
+
+function ServicesPage({ data }: { data: DashboardData }) {
+  const containers = data.queenbee.docker?.containers || []
+  return (
+    <PagePanel title="Services" status={data.health.docker}>
+      <QueenbeeStatusBanner status={data.health.docker} path="/docker" />
+      {data.health.docker === 'live' && containers.length ? (
+        <div className="queenbee-grid">
+          {containers.map((container) => (
+            <article className="queenbee-card" key={container.id || container.name || container.image}>
+              <Server size={18} />
+              <h3>{container.name || container.image || 'Container'}</h3>
+              <p>{container.image || 'No image returned.'}</p>
+              <span>{container.state || container.status || 'unknown'}</span>
+            </article>
+          ))}
+        </div>
+      ) : data.health.docker === 'live' ? <EmptyState icon={<Server />} label="No Docker containers returned." /> : <ProtectedQueenbeeGrid />}
+    </PagePanel>
+  )
+}
+
+function TrafficPage({ data }: { data: DashboardData }) {
+  const traffic = data.queenbee.traffic
+  return (
+    <PagePanel title="Traffic" status={data.health.traffic}>
+      <QueenbeeStatusBanner status={data.health.traffic} path="/traffic/metrics" />
+      {data.health.traffic === 'live' && traffic ? (
+        <div className="traffic-grid">
+          <article className="music-stat-card"><span>Total requests</span><strong>{formatNumber(traffic.total_requests)}</strong><small>{formatNumber(traffic.error_count)} errors</small></article>
+          <article className="music-stat-card"><span>Error rate</span><strong>{formatPercent(traffic.error_rate)}</strong><small>{Math.round(Number(traffic.avg_response_time || traffic.avg_request_time || 0))} ms avg</small></article>
+          <QueenbeeTopList title="Top domains" rows={traffic.top_domains} />
+          <QueenbeeTopList title="Top paths" rows={traffic.top_paths} />
+          <QueenbeeTopList title="Status codes" rows={traffic.top_status_codes} />
+        </div>
+      ) : data.health.traffic === 'live' ? <EmptyState icon={<Activity />} label="Traffic metrics endpoint returned no metrics." /> : <ProtectedQueenbeeGrid />}
+    </PagePanel>
+  )
+}
+
+function TrafficRecordsPage({ data }: { data: DashboardData }) {
+  const traffic = data.queenbee.traffic
+  return (
+    <PagePanel title="Traffic Records" status={data.health.traffic}>
+      <QueenbeeStatusBanner status={data.health.traffic} path="/traffic" />
+      {data.health.traffic === 'live' && traffic ? (
+        <div className="traffic-grid">
+          <QueenbeeTopList title="Top domains" rows={traffic.top_domains} />
+          <QueenbeeTopList title="Top paths" rows={traffic.top_paths} />
+          <QueenbeeTopList title="Status codes" rows={traffic.top_status_codes} />
+        </div>
+      ) : data.health.traffic === 'live' ? <EmptyState icon={<Logs />} label="No traffic records returned." /> : <ProtectedQueenbeeGrid />}
+    </PagePanel>
+  )
+}
+
+function BackupsPage({ data }: { data: DashboardData }) {
+  return (
+    <PagePanel title="Backups" status={data.health.db}>
+      <QueenbeeStatusBanner status={data.health.db} path="/db" />
+      <div className="queenbee-grid protected">
+        <button className="queenbee-card" onClick={() => openInAppBrowser('https://queenbee.login.no/internal/db')}>
+          <Database size={18} />
+          <h3>Database backups</h3>
+          <p>Open Queenbee for backup files, restore actions, and protected database operations.</p>
+          <span>Protected surface</span>
+        </button>
+        <article className="queenbee-card">
+          <ShieldCheck size={18} />
+          <h3>Desktop boundary</h3>
+          <p>The desktop launcher avoids embedding restore credentials and keeps destructive backup work in Queenbee.</p>
+          <span>Read-only launcher</span>
+        </article>
+      </div>
+    </PagePanel>
+  )
+}
+
+function VulnerabilitiesPage({ data }: { data: DashboardData }) {
+  const report = data.queenbee.vulnerabilities
+  return (
+    <PagePanel title="Vulnerabilities" status={data.health.vulnerabilities}>
+      <QueenbeeStatusBanner status={data.health.vulnerabilities} path="/vulnerabilities" />
+      {data.health.vulnerabilities === 'live' && report ? (
+        <div className="queenbee-grid">
+          <article className="music-stat-card"><span>Images</span><strong>{report.imageCount || report.images?.length || 0}</strong><small>{report.generatedAt ? `Generated ${formatDate(report.generatedAt)}` : 'Scan report'}</small></article>
+          <article className="music-stat-card"><span>Scan</span><strong>{report.scanStatus?.isRunning ? 'Running' : 'Idle'}</strong><small>{report.scanStatus?.lastSuccessAt ? `Last success ${formatDate(report.scanStatus.lastSuccessAt)}` : report.scanStatus?.lastError || 'No scan timestamp'}</small></article>
+          {(report.images || []).slice(0, 8).map((image) => <article className="queenbee-card" key={image.image}><ShieldAlert size={18} /><h3>{image.image}</h3><p>{image.totalVulnerabilities} vulnerabilities</p><span>{Object.entries(image.severity || {}).filter(([, count]) => count).map(([key, count]) => `${key}: ${count}`).join(' · ') || image.scanError || 'No findings'}</span></article>)}
+        </div>
+      ) : data.health.vulnerabilities === 'live' ? <EmptyState icon={<ShieldAlert />} label="No vulnerability report returned." /> : <ProtectedQueenbeeGrid />}
+    </PagePanel>
+  )
+}
+
+function AiPage({ data }: { data: DashboardData }) {
+  return (
+    <PagePanel title="AI" status={combinedStatus(data.health, ['internal', 'status'])}>
+      <div className="queenbee-grid">
+        <button className="queenbee-card" onClick={() => openInAppBrowser('https://login.no/app')}>
+          <Sparkles size={18} />
+          <h3>Login AI</h3>
+          <p>Open the Nucleus/Login AI surface for authenticated or anonymous assistant flows.</p>
+          <span>Open Login app</span>
+        </button>
+        <button className="queenbee-card" onClick={() => openInAppBrowser('https://queenbee.login.no/internal/ai')}>
+          <KeyRound size={18} />
+          <h3>Queenbee AI</h3>
+          <p>Open the protected Queenbee AI/admin area when a Queenbee role session is available.</p>
+          <span>Protected surface</span>
+        </button>
+      </div>
+    </PagePanel>
+  )
+}
+
+function LogsPage({ data }: { data: DashboardData }) {
+  const entries = data.queenbee.logs?.logs || data.queenbee.logs?.entries || []
+  return (
+    <PagePanel title="Logs" status={data.health.logs}>
+      <QueenbeeStatusBanner status={data.health.logs} path="/docker/logs" />
+      {data.health.logs === 'live' && entries.length ? (
+        <div className="log-list">
+          {entries.slice(0, 16).map((entry, index) => <article className="log-row" key={`${entry.timestamp}-${index}`}><span>{entry.level || entry.container || entry.service || 'log'}</span><p>{entry.message || JSON.stringify(entry)}</p><time>{entry.timestamp ? formatDate(entry.timestamp) : ''}</time></article>)}
+        </div>
+      ) : data.health.logs === 'live' ? <EmptyState icon={<Logs />} label="No logs returned from Beekeeper." /> : <ProtectedQueenbeeGrid />}
+    </PagePanel>
+  )
+}
+
+function SettingsPage({
+  themePreference,
+  onThemePreferenceChange,
+  updateState,
+}: {
+  themePreference: ThemePreference
+  onThemePreferenceChange: (theme: ThemePreference) => void
+  updateState: AutoUpdateState
+}) {
+  const [tokenDraft, setTokenDraft] = useState(() => getQueenbeeToken())
+  const [tokenSaved, setTokenSaved] = useState(() => hasQueenbeeToken())
+
+  function saveToken() {
+    setQueenbeeToken(tokenDraft)
+    setTokenSaved(Boolean(tokenDraft.trim()))
+  }
+
+  return (
+    <div className="settings-grid">
+      <section className="settings-card full-span">
+        <div className="settings-card-head">
+          <div>
+            <h2>Appearance</h2>
+            <p>Use light, dark, or follow the system theme.</p>
+          </div>
+          <div className="theme-segment" role="radiogroup" aria-label="Theme">
+            {themeOptions.map(({ key, label, icon: Icon }) => (
+              <button key={key} className={themePreference === key ? 'active' : ''} onClick={() => onThemePreferenceChange(key)} role="radio" aria-checked={themePreference === key}>
+                <Icon size={17} />
+                <span>{label}</span>
+              </button>
+            ))}
+          </div>
+        </div>
+        <ThemePreview />
+      </section>
+      <section className="settings-card">
+        <PanelTitle title="Automatic Updates" subtitle="app-api /api/desktop" />
+        <AutoUpdatePanel state={updateState} />
+      </section>
+      <section className="settings-card">
+        <PanelTitle title="Queenbee Write Access" subtitle="Local bearer token for protected create/update/delete calls" />
+        <div className="token-box">
+          <label>
+            <span>Access token</span>
+            <input type="password" value={tokenDraft} onChange={(event) => setTokenDraft(event.target.value)} placeholder="Paste a Queenbee access token" />
+          </label>
+          <button onClick={saveToken}><KeyRound size={15} />{tokenSaved ? 'Update token' : 'Save token'}</button>
+          <p>{tokenSaved ? 'Write actions are enabled locally and still ask for confirmation before pushing.' : 'Without a token, editor pages stay safely read-only.'}</p>
+        </div>
+      </section>
+      <section className="settings-card">
+        <PanelTitle title="Runtime" subtitle="Local desktop preferences" />
+        <div className="settings-list">
+          <span><b>Theme</b>{themePreference}</span>
+          <span><b>Version</b>{DESKTOP_APP_VERSION}</span>
+          <span><b>Update endpoint</b>/api/desktop</span>
+        </div>
       </section>
     </div>
+  )
+}
+
+function ThemePreview() {
+  const rows = [
+    ['1', 'const desktopTheme = {', false],
+    ['2', '  surface: "sidebar",', true],
+    ['3', '  accent: "#f58b45",', true],
+    ['4', '  updateSource: "/api/desktop",', false],
+    ['5', '};', false],
+  ] as const
+
+  return (
+    <div className="theme-preview" aria-label="Theme preview">
+      <div className="theme-preview-pane before">
+        {rows.map(([line, code, hot]) => <span key={`before-${line}`} className={hot ? 'hot' : ''}><b>{line}</b>{code}</span>)}
+      </div>
+      <div className="theme-preview-divider" />
+      <div className="theme-preview-pane after">
+        {rows.map(([line, code, hot]) => <span key={`after-${line}`} className={hot ? 'hot' : ''}><b>{line}</b>{code}</span>)}
+      </div>
+    </div>
+  )
+}
+
+function PagePanel({ title, status, children }: { title: string; status?: ServiceStatus; children: React.ReactNode }) {
+  return <section className="panel full-span page-panel"><PanelTitle title={title} subtitle={`Endpoint status: ${status || 'unknown'}`} />{children}</section>
+}
+
+function EditorPageDraft<T extends EditableRow>({
+  data,
+  config,
+  preview,
+}: {
+  data: DashboardData
+  config: EditorConfig<T>
+  preview?: React.ReactNode
+}) {
+  const rows = config.rows(data)
+  const status = data.health[config.statusKey]
+  const [tokenDraft, setTokenDraft] = useState(() => hasQueenbeeToken() ? 'configured' : '')
+  const [selectedId, setSelectedId] = useState<number | string | null>(() => rows[0]?.id ?? null)
+  const [mode, setMode] = useState<'edit' | 'create'>('edit')
+  const [form, setForm] = useState<Record<string, unknown>>({})
+  const [busy, setBusy] = useState(false)
+  const [message, setMessage] = useState<string | null>(null)
+
+  const selectedRow = useMemo(() => rows.find((row) => String(row.id) === String(selectedId)) || rows[0] || null, [rows, selectedId])
+
+  useEffect(() => {
+    if (mode === 'create') {
+      setForm(defaultForm(config.fields))
+      return
+    }
+    setForm(rowToForm(selectedRow, config.fields))
+  }, [config, mode, selectedRow])
+
+  async function save() {
+    setBusy(true)
+    setMessage(null)
+    try {
+      const payload = formToPayload(form, config.fields)
+      if (mode === 'create') {
+        await queenbeeRequest({ service: config.service, path: config.createPath, method: 'POST', data: payload })
+        setMessage(`${config.title} item created. Refresh to load the new row.`)
+      } else if (selectedRow) {
+        await queenbeeRequest({ service: config.service, path: config.updatePath(selectedRow.id), method: 'PUT', data: payload })
+        setMessage(`${config.title} item #${selectedRow.id} updated.`)
+      }
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : 'Save failed.')
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  async function remove() {
+    if (!selectedRow) return
+    setBusy(true)
+    setMessage(null)
+    try {
+      await queenbeeRequest({
+        service: config.service,
+        path: config.deletePath(selectedRow.id),
+        method: 'DELETE',
+        data: config.deleteBody?.(selectedRow.id),
+      })
+      setMessage(`${config.title} item #${selectedRow.id} deleted. Refresh to update the list.`)
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : 'Delete failed.')
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  function storeToken() {
+    if (tokenDraft && tokenDraft !== 'configured') {
+      setQueenbeeToken(tokenDraft)
+      setTokenDraft('configured')
+      setMessage('Queenbee token stored locally for this desktop app.')
+    }
+  }
+
+  return (
+    <PagePanel title={config.title} status={status}>
+      <div className="settings-grid">
+        <section className="settings-card">
+          <div className="settings-card-head">
+            <div>
+              <h2>{mode === 'create' ? `Create ${config.title}` : `Edit ${config.title}`}</h2>
+              <p>{hasQueenbeeToken() ? 'Queenbee token configured locally.' : 'Paste a Queenbee token to enable write actions.'}</p>
+            </div>
+            <div className="theme-segment">
+              <button className={mode === 'edit' ? 'active' : ''} onClick={() => setMode('edit')}><Pencil size={15} />Edit</button>
+              <button className={mode === 'create' ? 'active' : ''} onClick={() => setMode('create')}><Plus size={15} />Create</button>
+            </div>
+          </div>
+          <div className="settings-list">
+            <span><b>Token</b><input value={tokenDraft} placeholder="Queenbee bearer token" onChange={(event) => setTokenDraft(event.target.value)} onBlur={storeToken} /></span>
+          </div>
+          <div className="editor-form">
+            {config.fields.map((field) => (
+              <label key={field.name}>
+                <span>{field.label}{field.required ? ' *' : ''}</span>
+                {field.type === 'textarea' || field.type === 'json' ? (
+                  <textarea value={fieldValue(form[field.name])} placeholder={field.placeholder} onChange={(event) => setForm((current) => ({ ...current, [field.name]: event.target.value }))} />
+                ) : field.type === 'boolean' ? (
+                  <input type="checkbox" checked={Boolean(form[field.name])} onChange={(event) => setForm((current) => ({ ...current, [field.name]: event.target.checked }))} />
+                ) : (
+                  <input type={field.type === 'number' ? 'number' : field.type === 'datetime' ? 'datetime-local' : 'text'} value={fieldValue(form[field.name])} placeholder={field.placeholder} onChange={(event) => setForm((current) => ({ ...current, [field.name]: event.target.value }))} />
+                )}
+              </label>
+            ))}
+          </div>
+          <div className="launcher-row">
+            <button className="launcher-button" disabled={busy} onClick={save}>{busy ? 'Working...' : mode === 'create' ? 'Create' : 'Save'}</button>
+            {mode === 'edit' ? <button className="launcher-button" disabled={busy || !selectedRow} onClick={remove}><Trash2 size={15} />Delete</button> : null}
+            <button className="launcher-button" onClick={() => openInAppBrowser(`https://queenbee.login.no${config.queenbeePath}`)}>Open Queenbee <ExternalLink size={15} /></button>
+          </div>
+          {message ? <p className="update-message">{message}</p> : null}
+        </section>
+        <section className="settings-card">
+          <PanelTitle title="Rows" subtitle={`${rows.length} loaded`} />
+          <div className="table-list">
+            {rows.slice(0, 18).map((row) => (
+              <button key={row.id} className="table-row" onClick={() => { setMode('edit'); setSelectedId(row.id) }}>
+                <span className="row-action">{String(row.id).slice(0, 2)}</span>
+                <div><strong>{config.titleOf(row)}</strong><small>{config.metaOf(row)}</small></div>
+                <Pencil size={15} />
+              </button>
+            ))}
+            {!rows.length ? <EmptyState icon={<AlertCircle />} label={`${config.title} returned no rows.`} /> : null}
+          </div>
+        </section>
+        {preview ? <section className="settings-card full-span">{preview}</section> : null}
+      </div>
+    </PagePanel>
   )
 }
 
 function Metric({ icon, label, value, status = 'error' }: { icon: React.ReactNode; label: string; value: number | string; status?: ServiceStatus }) {
-  return (
-    <article className={`metric-card ${status}`}>
-      <div className="metric-icon">{icon}</div>
-      <span>{label}</span>
-      <strong>{value}</strong>
-      <small>{status}</small>
-    </article>
-  )
+  return <article className={`metric-card ${status}`}><div className="metric-icon">{icon}</div><span>{label}</span><strong>{value}</strong><small>{status}</small></article>
 }
 
 function PanelTitle({ title, subtitle }: { title: string; subtitle: string }) {
-  return (
-    <div className="panel-title">
-      <div>
-        <h2>{title}</h2>
-        <p>{subtitle}</p>
-      </div>
-      <Sparkles size={18} />
-    </div>
-  )
+  return <div className="panel-title"><div><h2>{title}</h2><p>{subtitle}</p></div><Sparkles size={18} /></div>
 }
 
 function RecentList({ additions, status }: { additions: RecentAddition[]; status?: ServiceStatus }) {
   if (status !== 'live') return <EmptyState icon={<AlertCircle />} label={`Recent additions endpoint is ${status || 'unavailable'}.`} />
   if (!additions.length) return <EmptyState icon={<AlertCircle />} label="No recent additions returned from Workerbee." />
-
-  return (
-    <div className="recent-list">
-      {additions.map((item) => (
-        <button className="recent-row" key={`${item.source}-${item.id}-${item.updated_at}`} onClick={() => openSource(item)}>
-          <span className={item.action === 'updated' ? 'row-action updated' : 'row-action'}>{item.action === 'updated' ? '↻' : '+'}</span>
-          <div>
-            <strong>{item.name_en || item.name_no || 'Untitled'}</strong>
-            <span>{item.source || 'content'} · {item.action || 'created'}</span>
-          </div>
-          <time>{formatDate(item.updated_at || item.created_at)}</time>
-        </button>
-      ))}
-    </div>
-  )
+  return <div className="recent-list">{additions.map((item) => <button className="recent-row" key={`${item.source}-${item.id}-${item.updated_at}`} onClick={() => openSource(item)}><span className={item.action === 'updated' ? 'row-action updated' : 'row-action'}>{item.action === 'updated' ? '↻' : '+'}</span><div><strong>{item.name_en || item.name_no || 'Untitled'}</strong><span>{item.source || 'content'} · {item.action || 'created'}</span></div><time>{formatDate(item.updated_at || item.created_at)}</time></button>)}</div>
 }
 
 function CategoryChart({ data, status }: { data: DashboardData['categories']; status?: ServiceStatus }) {
   if (status !== 'live') return <EmptyState icon={<AlertCircle />} label={`Category stats endpoint is ${status || 'unavailable'}.`} />
   if (!data.length) return <EmptyState icon={<AlertCircle />} label="No event categories returned from Workerbee." />
-
   const total = data.reduce((sum, item) => sum + Number(item.event_count || 0), 0) || 1
   let cursor = 0
-  const gradient = data.map((item) => {
-    const start = cursor
-    cursor += (Number(item.event_count || 0) / total) * 360
-    return `${item.color || '#f58b45'} ${start}deg ${cursor}deg`
-  }).join(', ')
-
-  return (
-    <div className="category-wrap">
-      <div className="pie" style={{ background: `conic-gradient(${gradient})` }} />
-      <div className="legend">
-        {data.map((item) => (
-          <span key={item.name_en || item.id}>
-            <i style={{ background: item.color || '#f58b45' }} />
-            {item.name_en || item.name_no || 'Other'} ({item.event_count || 0})
-          </span>
-        ))}
-      </div>
-    </div>
-  )
+  const gradient = data.map((item) => { const start = cursor; cursor += (Number(item.event_count || 0) / total) * 360; return `${item.color || '#f58b45'} ${start}deg ${cursor}deg` }).join(', ')
+  return <div className="category-wrap"><div className="pie" style={{ background: `conic-gradient(${gradient})` }} /><div className="legend">{data.map((item) => <span key={item.name_en || item.id}><i style={{ background: item.color || '#f58b45' }} />{item.name_en || item.name_no || 'Other'} ({item.event_count || 0})</span>)}</div></div>
 }
 
 function EventList({ events, status }: { events: EventItem[]; status?: ServiceStatus }) {
   if (status !== 'live') return <EmptyState icon={<CalendarDays />} label={`Events endpoint is ${status || 'unavailable'}.`} />
   if (!events.length) return <EmptyState icon={<CalendarDays />} label="No upcoming events returned from Workerbee." />
+  return <div className="event-list expanded-list">{events.map((event) => <button className="event-row" key={event.id} onClick={() => openInAppBrowser(`https://login.no/events/${event.id}`)}><DateBadge date={event.time_start} color={event.category?.color} /><div><strong>{event.name_en || event.name_no || 'Untitled event'}</strong><span>{formatEventMeta(event)}</span></div>{event.image_small || event.image_banner ? <img src={eventImageUrl(event.image_small || event.image_banner)} alt="" /> : <span className="category-thumb" style={{ background: event.category?.color || '#f58b45' }}>{event.category?.name_en || 'Login'}</span>}</button>)}</div>
+}
 
+function AnnouncementList({ announcements, status }: { announcements: AnnouncementItem[]; status?: ServiceStatus }) {
+  if (status !== 'live') return <EmptyState icon={<Megaphone />} label={`Announcements endpoint is ${status || 'unavailable'}. Public GET is being deployed.`} />
+  if (!announcements.length) return <EmptyState icon={<Megaphone />} label="No announcements returned from TekKom Bot." />
+  return <div className="table-list">{announcements.map((item) => <article className="table-row" key={item.id}><span className="row-action">#</span><div><strong>{stringValue(item.title) || `Announcement #${item.id}`}</strong><small>{stringValue(item.description) || 'No description'}</small></div><time>{item.sent ? 'Sent' : item.interval || item.time || 'Draft'}</time></article>)}</div>
+}
+
+function JobList({ jobs, status }: { jobs: JobItem[]; status?: ServiceStatus }) {
+  if (status !== 'live') return <EmptyState icon={<BriefcaseBusiness />} label={`Jobs endpoint is ${status || 'unavailable'}.`} />
+  if (!jobs.length) return <EmptyState icon={<BriefcaseBusiness />} label="No jobs returned from Workerbee." />
+  return <div className="table-list">{jobs.map((job) => <button className="table-row" key={job.id} onClick={() => openInAppBrowser(`https://login.no/career/${job.id}`)}><span className="row-action">+</span><div><strong>{jobTitle(job)}</strong><small>{jobMeta(job)}</small></div><ExternalLink size={16} /></button>)}</div>
+}
+
+function RuleList({ rules, status }: { rules: RuleItem[]; status?: ServiceStatus }) {
+  if (status !== 'live') return <EmptyState icon={<FileText />} label={`Rules endpoint is ${status || 'unavailable'}.`} />
+  if (!rules.length) return <EmptyState icon={<FileText />} label="No rules returned from Workerbee." />
   return (
-    <div className="event-list">
-      {events.slice(0, 6).map((event) => (
-        <button className="event-row" key={event.id} onClick={() => openInAppBrowser(`https://login.no/events/${event.id}`)}>
-          <DateBadge date={event.time_start} color={event.category?.color} />
-          <div>
-            <strong>{event.name_en || event.name_no || 'Untitled event'}</strong>
-            <span>{formatEventMeta(event)}</span>
-          </div>
-          {event.image_small || event.image_banner
-            ? <img src={eventImageUrl(event.image_small || event.image_banner)} alt="" />
-            : <span className="category-thumb" style={{ background: event.category?.color || '#f58b45' }}>{event.category?.name_en || 'Login'}</span>}
+    <div className="rule-grid">
+      {rules.map((rule) => (
+        <article className="rule-card" key={rule.id}>
+          <span className="rule-kicker">Rule set #{rule.id}</span>
+          <h3>{rule.name_en || rule.name_no || `Rules #${rule.id}`}</h3>
+          <p>{stripMarkdown(rule.description_en || rule.description_no || '').slice(0, 420)}</p>
+          <button className="inline-link" onClick={() => openInAppBrowser(`https://login.no/events`)}>
+            See related events <ExternalLink size={14} />
+          </button>
+        </article>
+      ))}
+    </div>
+  )
+}
+
+function CompaniesSummary({ data }: { data: DashboardData }) {
+  if (data.health['companies-text'] !== 'live') return <EmptyState icon={<Handshake />} label={`Companies text endpoint is ${data.health['companies-text'] || 'unavailable'}.`} />
+  const sections = companySections(data)
+  if (!sections.length) return <EmptyState icon={<Handshake />} label="No companies text returned from Workerbee." />
+  return (
+    <div className="compact-feature-list">
+      {sections.slice(0, 3).map((section) => (
+        <button className="feature-row" key={section.key} onClick={() => openInAppBrowser('https://login.no/companies')}>
+          <Handshake size={18} />
+          <div><strong>{section.title}</strong><span>{stripHtml(section.body).slice(0, 110)}</span></div>
         </button>
       ))}
     </div>
   )
 }
 
-function StatusList({ services, status }: { services: DashboardData['statusServices']; status?: ServiceStatus }) {
-  if (status !== 'live') return <EmptyState icon={<Monitor />} label={`Status endpoint is ${status || 'unavailable'}.`} />
-  const shown = services.slice(0, 6)
-  if (!shown.length) return <EmptyState icon={<AlertCircle />} label="Status endpoint returned no services." />
-
+function CompaniesContent({ data }: { data: DashboardData }) {
+  if (data.health['companies-text'] !== 'live') return <EmptyState icon={<Handshake />} label={`Companies text endpoint is ${data.health['companies-text'] || 'unavailable'}.`} />
+  const sections = companySections(data)
+  if (!sections.length) return <EmptyState icon={<Handshake />} label="No companies text returned from Workerbee." />
   return (
-    <div className="status-list">
-      {shown.map((service) => {
-        const latest = service.bars?.[0]
-        const up = latest?.status === true || latest?.status === 1
-        return (
-          <div className="status-row" key={service.id}>
-            <span className={up ? 'status-light up' : 'status-light'} />
-            <div>
-              <strong>{service.name}</strong>
-              <span>{service.url || 'Login service'} · {latest?.delay ? `${Math.round(latest.delay)} ms` : 'waiting'}</span>
-            </div>
-            <b>{up ? 'UP' : 'CHECK'}</b>
-          </div>
-        )
-      })}
+    <div className="article-grid">
+      {sections.map((section) => (
+        <article className="article-card" key={section.key}>
+          <span>{section.key}</span>
+          <h3>{section.title}</h3>
+          <p>{stripHtml(section.body)}</p>
+        </article>
+      ))}
+      <button className="article-cta" onClick={() => openInAppBrowser('https://login.no/companies')}>
+        Open company page on login.no <ExternalLink size={16} />
+      </button>
     </div>
   )
 }
 
-function ContentCollections({ data }: { data: DashboardData }) {
+function MusicSummary({ data }: { data: DashboardData }) {
+  if (data.health.music !== 'live' || !data.music) return <EmptyState icon={<Music2 />} label={`Music endpoint is ${data.health.music || 'unavailable'}.`} />
+  const top = data.music.mostPlayedAlbums?.[0]
   return (
-    <div className="content-collections">
-      <ContentCard title="Jobs" status={data.health.jobs} rows={data.jobs} getTitle={jobTitle} getMeta={jobMeta} getUrl={(job) => `https://login.no/career/${job.id}`} />
-      <ContentCard title="Organizations" status={data.health.organizations} rows={data.organizations} getTitle={displayName} getMeta={(item) => item.city || item.address || formatDate(item.updated_at || item.created_at)} getUrl={(item) => `https://login.no/companies/${item.id}`} />
-      <ContentCard title="Locations" status={data.health.locations} rows={data.locations} getTitle={displayName} getMeta={(item) => item.address || item.city || formatDate(item.updated_at || item.created_at)} getUrl={() => 'https://login.no/events'} />
-      <ContentCard title="Albums" status={data.health.albums} rows={data.albums} getTitle={displayName} getMeta={(item) => formatDate(item.updated_at || item.created_at)} getUrl={(item) => `https://login.no/albums/${item.id}`} getImage={(item) => albumImageUrl(item.id, item.cover || item.cover_image || item.image_small)} />
+    <div className="music-summary">
+      <div><span>Total songs</span><strong>{formatNumber(data.music.stats.total_songs)}</strong></div>
+      <div><span>Minutes this year</span><strong>{formatNumber(data.music.stats.total_minutes_this_year)}</strong></div>
+      <button onClick={() => openInAppBrowser('https://login.no/music')}>
+        <Music2 size={17} />
+        <span>{top?.album || 'Open music'} <small>{top?.artist || 'login.no/music'}</small></span>
+      </button>
     </div>
   )
 }
 
-function ContentCard<T extends { id: number | string }>({
-  title,
-  status,
-  rows,
-  getTitle,
-  getMeta,
-  getUrl,
-  getImage,
-}: {
-  title: string
-  status?: ServiceStatus
-  rows: T[]
-  getTitle: (row: T) => string
-  getMeta: (row: T) => string
-  getUrl: (row: T) => string
-  getImage?: (row: T) => string
-}) {
+function MusicContent({ data }: { data: DashboardData }) {
+  if (data.health.music !== 'live' || !data.music) return <EmptyState icon={<Music2 />} label={`Music endpoint is ${data.health.music || 'unavailable'}.`} />
+  const albumRows = data.music.mostPlayedAlbums || []
+  const todayRows = data.music.topFiveToday || []
   return (
-    <article className="content-card">
-      <h3>{title} <EndpointPill label={status || 'error'} status={status || 'error'} compact /></h3>
-      {status !== 'live' ? <EmptyState icon={<AlertCircle />} label={`${title} endpoint is ${status || 'unavailable'}.`} /> : null}
-      {status === 'live' && !rows.length ? <EmptyState icon={<AlertCircle />} label={`No ${title.toLowerCase()} returned.`} /> : null}
-      {status === 'live' && rows.length ? rows.slice(0, 5).map((row) => {
-        const image = getImage?.(row)
-        return (
-          <button className="content-row" key={row.id} onClick={() => openInAppBrowser(getUrl(row))}>
-            {image ? <img src={image} alt="" /> : <span>{getTitle(row).slice(0, 1)}</span>}
-            <div>
-              <strong>{getTitle(row)}</strong>
-              <small>{getMeta(row)}</small>
-            </div>
-          </button>
-        )
-      }) : null}
+    <div className="music-grid">
+      <article className="music-stat-card"><span>Total songs</span><strong>{formatNumber(data.music.stats.total_songs)}</strong><small>{formatNumber(data.music.stats.total_minutes)} total minutes</small></article>
+      <article className="music-stat-card"><span>Average length</span><strong>{data.music.stats.avg_seconds ? `${Math.round(data.music.stats.avg_seconds / 60)} min` : 'N/A'}</strong><small>Per play</small></article>
+      <section className="music-list-card">
+        <h3>Most played albums</h3>
+        {albumRows.slice(0, 8).map((album) => <MusicRow key={`${album.album}-${album.artist}`} title={album.album || 'Unknown album'} meta={`${album.artist || 'Unknown artist'} · ${formatNumber(album.total_listens)} listens`} image={spotifyImage(album.top_song_image)} />)}
+      </section>
+      <section className="music-list-card">
+        <h3>Top today</h3>
+        {todayRows.slice(0, 8).map((song, index) => <MusicRow key={`${song.title || song.name}-${index}`} title={song.title || song.name || 'Unknown song'} meta={`${song.artist || song.album || 'Login listener'} · ${formatNumber(song.listens)} plays`} image={spotifyImage(song.image || song.song_image)} />)}
+      </section>
+    </div>
+  )
+}
+
+function MusicRow({ title, meta, image }: { title: string; meta: string; image?: string }) {
+  return <button className="music-row" onClick={() => openInAppBrowser('https://login.no/music')}>{image ? <img src={image} alt="" /> : <span><Music2 size={16} /></span>}<div><strong>{title}</strong><small>{meta}</small></div></button>
+}
+
+function QueenbeeStatusBanner({ status, path }: { status?: ServiceStatus; path: string }) {
+  return (
+    <div className={`queenbee-banner ${status || 'error'}`}>
+      <span>{status === 'live' ? 'Live Queenbee data' : status === 'locked' ? 'Protected by Queenbee role' : 'Queenbee endpoint unavailable'}</span>
+      <p>{status === 'live' ? `Beekeeper ${path} responded successfully.` : status === 'locked' ? `Beekeeper ${path} requires a Queenbee-authenticated token, so the desktop app shows the protected surface without leaking credentials.` : `Beekeeper ${path} could not be reached from the desktop app.`}</p>
+      <button onClick={() => openInAppBrowser(`https://queenbee.login.no/internal${path.startsWith('/traffic') ? '/traffic' : path === '/db' ? '/db' : path === '/docker/logs' ? '/logs' : path === '/vulnerabilities' ? '/vulnerabilities' : '/loadbalancing'}`)}>
+        Open in Queenbee <ExternalLink size={14} />
+      </button>
+    </div>
+  )
+}
+
+function ProtectedQueenbeeGrid() {
+  const cards = [
+    ['Queenbee role', 'Use the web app session for write-capable and sensitive operational data.'],
+    ['Desktop safety', 'The launcher does not bundle server tokens into browser JavaScript.'],
+    ['Readiness', 'This page will hydrate automatically if a safe desktop Beekeeper token is configured.'],
+  ]
+  return <div className="queenbee-grid protected">{cards.map(([title, body]) => <article className="queenbee-card" key={title}><ShieldCheck size={18} /><h3>{title}</h3><p>{body}</p></article>)}</div>
+}
+
+function QueenbeeTopList({ title, rows }: { title: string; rows?: Array<{ key: string; count?: number; avg_time?: number }> }) {
+  return (
+    <article className="music-list-card">
+      <h3>{title}</h3>
+      {rows?.length ? rows.slice(0, 8).map((row) => <div className="queenbee-mini-row" key={row.key}><strong>{row.key}</strong><span>{formatNumber(row.count)} hits{row.avg_time ? ` · ${Math.round(row.avg_time)} ms` : ''}</span></div>) : <p className="muted">No rows returned.</p>}
     </article>
   )
 }
 
+function JsonPreview({ value }: { value: unknown }) {
+  return <pre className="json-preview">{JSON.stringify(value, null, 2)}</pre>
+}
+
+function StatusList({ services, status, expanded = false }: { services: DashboardData['statusServices']; status?: ServiceStatus; expanded?: boolean }) {
+  if (status !== 'live') return <EmptyState icon={<Monitor />} label={`Status endpoint is ${status || 'unavailable'}.`} />
+  const shown = expanded ? services : services.slice(0, 6)
+  if (!shown.length) return <EmptyState icon={<AlertCircle />} label="Status endpoint returned no services." />
+  return <div className={expanded ? 'status-list status-grid' : 'status-list'}>{shown.map((service) => { const latest = service.bars?.[0]; const up = latest?.status === true || latest?.status === 1; return <div className="status-row" key={service.id}><span className={up ? 'status-light up' : 'status-light'} /><div><strong>{service.name}</strong><span>{service.url || 'Login service'} · {latest?.delay ? `${Math.round(latest.delay)} ms` : 'waiting'}</span></div><b>{up ? 'UP' : 'CHECK'}</b></div> })}</div>
+}
+
+function QueenbeeOpsSummary({ data }: { data: DashboardData }) {
+  const items = [
+    { title: 'Load Balancing', icon: Scale, status: data.health.sites, value: data.queenbee.sites.length ? `${data.queenbee.sites.length} sites` : 'No sites', path: '/loadbalancing' },
+    { title: 'Databases', icon: Database, status: data.health.db, value: data.health.db === 'live' ? 'Live overview' : 'Protected', path: '/db' },
+    { title: 'Traffic', icon: Activity, status: data.health.traffic, value: data.queenbee.traffic?.total_requests ? `${formatNumber(data.queenbee.traffic.total_requests)} requests` : 'Metrics', path: '/traffic' },
+    { title: 'Vulnerabilities', icon: ShieldAlert, status: data.health.vulnerabilities, value: data.queenbee.vulnerabilities?.imageCount ? `${data.queenbee.vulnerabilities.imageCount} images` : 'Scan report', path: '/vulnerabilities' },
+    { title: 'Logs', icon: Logs, status: data.health.logs, value: data.health.logs === 'live' ? 'Live stream' : 'Protected', path: '/logs' },
+  ]
+  return (
+    <div className="queenbee-ops-grid">
+      {items.map(({ title, icon: Icon, status, value, path }) => (
+        <button className="queenbee-op-card" key={title} onClick={() => openInAppBrowser(`https://queenbee.login.no/internal${path}`)}>
+          <Icon size={18} />
+          <div>
+            <strong>{title}</strong>
+            <span>{value}</span>
+          </div>
+          <EndpointPill label={status || 'error'} status={status || 'error'} compact />
+        </button>
+      ))}
+    </div>
+  )
+}
+
+function TileGrid<T extends NamedItem | AlbumItem>({ rows, status, kind }: { rows: T[]; status?: ServiceStatus; kind: 'album' | 'organization' | 'location' }) {
+  if (status !== 'live') return <EmptyState icon={<Image />} label={`${kind} endpoint is ${status || 'unavailable'}.`} />
+  if (!rows.length) return <EmptyState icon={<Image />} label={`No ${kind}s returned.`} />
+  return <div className="tile-grid">{rows.map((row) => { const title = displayName(row); const image = kind === 'album' ? albumImageUrl(row.id, (row as AlbumItem).cover || (row as AlbumItem).cover_image || (row as AlbumItem).image_small) : ''; return <button className="tile-card" key={row.id} onClick={() => openInAppBrowser(kind === 'album' ? `https://login.no/albums/${row.id}` : kind === 'organization' ? `https://login.no/companies/${row.id}` : 'https://login.no/events')}><span className="tile-media">{image ? <img src={image} alt="" /> : title.slice(0, 1)}</span><strong>{title}</strong><small>{row.address || row.city || formatDate(row.updated_at || row.created_at)}</small></button> })}</div>
+}
+
+function ContentCollections({ data }: { data: DashboardData }) {
+  return <div className="content-collections"><ContentCard title="Jobs" status={data.health.jobs} rows={data.jobs} getTitle={jobTitle} getMeta={jobMeta} getUrl={(job) => `https://login.no/career/${job.id}`} /><ContentCard title="Announcements" status={data.health.announcements} rows={data.announcements} getTitle={(item) => stringValue(item.title) || `Announcement #${item.id}`} getMeta={(item) => stringValue(item.description) || 'No description'} getUrl={() => 'https://queenbee.login.no/announcements'} /><ContentCard title="Rules" status={data.health.rules} rows={data.rules} getTitle={(item) => item.name_en || item.name_no || `Rules #${item.id}`} getMeta={(item) => stripMarkdown(item.description_en || item.description_no || '').slice(0, 80)} getUrl={() => 'https://login.no/events'} /><ContentCard title="Organizations" status={data.health.organizations} rows={data.organizations} getTitle={displayName} getMeta={(item) => item.city || item.address || formatDate(item.updated_at || item.created_at)} getUrl={(item) => `https://login.no/companies/${item.id}`} /><ContentCard title="Albums" status={data.health.albums} rows={data.albums} getTitle={displayName} getMeta={(item) => formatDate(item.updated_at || item.created_at)} getUrl={(item) => `https://login.no/albums/${item.id}`} getImage={(item) => albumImageUrl(item.id, item.cover || item.cover_image || item.image_small)} /></div>
+}
+
+function ContentCard<T extends { id: number | string }>({ title, status, rows, getTitle, getMeta, getUrl, getImage }: { title: string; status?: ServiceStatus; rows: T[]; getTitle: (row: T) => string; getMeta: (row: T) => string; getUrl: (row: T) => string; getImage?: (row: T) => string }) {
+  return <article className="content-card"><h3>{title} <EndpointPill label={status || 'error'} status={status || 'error'} compact /></h3>{status !== 'live' ? <EmptyState icon={<AlertCircle />} label={`${title} endpoint is ${status || 'unavailable'}.`} /> : null}{status === 'live' && !rows.length ? <EmptyState icon={<AlertCircle />} label={`No ${title.toLowerCase()} returned.`} /> : null}{status === 'live' && rows.length ? rows.slice(0, 5).map((row) => { const image = getImage?.(row); return <button className="content-row" key={row.id} onClick={() => openInAppBrowser(getUrl(row))}>{image ? <img src={image} alt="" /> : <span>{getTitle(row).slice(0, 1)}</span>}<div><strong>{getTitle(row)}</strong><small>{getMeta(row)}</small></div></button> }) : null}</article>
+}
+
 function InternalOverview({ data, health }: { data: DashboardData['internal']; health: Record<string, ServiceStatus> }) {
   const overview = data
-  if (health.internal !== 'live' || !overview) {
-    return <EmptyState icon={<Server />} label={`Internal dashboard endpoint is ${health.internal || 'unavailable'}.`} />
-  }
-
+  if (health.internal !== 'live' || !overview) return <EmptyState icon={<Server />} label={`Internal dashboard endpoint is ${health.internal || 'unavailable'}.`} />
   const system = overview.runtime.metrics.system
-  const topStats = [
-    ['Alerts', overview.statistics.alerts, AlertCircle],
-    ['Databases', overview.statistics.databases, Database],
-    ['Sites', overview.statistics.sites, Globe2],
-    ['Monitored Sites', overview.statistics.monitored, Activity],
-    ['Requests Today', overview.statistics.requestsToday, Monitor],
-  ] as const
-
-  return (
-    <div className="internal-grid">
-      {topStats.map(([label, value, Icon]) => (
-        <article className="internal-stat" key={label}>
-          <Icon size={22} />
-          <span>{label}</span>
-          <strong>{value}</strong>
-        </article>
-      ))}
-      <article className="resource-card">
-        <h3>Primary Site</h3>
-        <p>{overview.information.primarySite.name}</p>
-        <code>{overview.information.primarySite.ip}</code>
-      </article>
-      <article className="resource-card">
-        <h3>Operating System</h3>
-        <p>{system.os}</p>
-      </article>
-      <article className="resource-card">
-        <h3>Memory Usage</h3>
-        <div className="progress"><span style={{ width: `${Number(system.memory.percent) || 0}%` }} /></div>
-        <p>{system.memory.percent || 0}%</p>
-      </article>
-      <article className="resource-card health-card">
-        <h3>Endpoint Health</h3>
-        <div className="health-tags">
-          {Object.entries(health).map(([key, status]) => <HealthTag key={key} label={key} status={status} />)}
-        </div>
-      </article>
-    </div>
-  )
+  const topStats = [['Alerts', overview.statistics.alerts, AlertCircle], ['Databases', overview.statistics.databases, Database], ['Sites', overview.statistics.sites, Globe2], ['Monitored Sites', overview.statistics.monitored, Activity], ['Requests Today', overview.statistics.requestsToday, Monitor]] as const
+  return <div className="internal-grid">{topStats.map(([label, value, Icon]) => <article className="internal-stat" key={label}><Icon size={22} /><span>{label}</span><strong>{value}</strong></article>)}<article className="resource-card"><h3>Primary Site</h3><p>{overview.information.primarySite.name}</p><code>{overview.information.primarySite.ip}</code></article><article className="resource-card"><h3>Operating System</h3><p>{system.os}</p></article><article className="resource-card"><h3>Memory Usage</h3><div className="progress"><span style={{ width: `${Number(system.memory.percent) || 0}%` }} /></div><p>{system.memory.percent || 0}%</p></article><article className="resource-card health-card"><h3>Endpoint Health</h3><div className="health-tags">{Object.entries(health).map(([key, status]) => <HealthTag key={key} label={key} status={status} />)}</div></article></div>
 }
 
-function EndpointPill({ label, status, compact = false }: { label: string; status: ServiceStatus; compact?: boolean }) {
-  return <span className={`endpoint-pill ${status} ${compact ? 'compact' : ''}`}><i />{label}: {status}</span>
+function EndpointPill({ label, status, compact = false }: { label: string; status: ServiceStatus; compact?: boolean }) { return <span className={`endpoint-pill ${status} ${compact ? 'compact' : ''}`}><i />{label}: {status}</span> }
+function HealthTag({ label, status }: { label: string; status: ServiceStatus }) { return <span className={`health-tag ${status}`}>{label}: {status}</span> }
+function EmptyState({ icon, label }: { icon: React.ReactNode; label: string }) { return <div className="empty-state">{icon}<span>{label}</span></div> }
+function DateBadge({ date, color }: { date?: string; color?: string }) { const parsed = date ? new Date(date) : null; const day = parsed && !Number.isNaN(parsed.getTime()) ? parsed.getDate() : '--'; const month = parsed && !Number.isNaN(parsed.getTime()) ? parsed.toLocaleDateString('no-NO', { month: 'short' }).replace('.', '') : 'TBA'; return <span className="date-badge" style={{ background: color || '#f58b45' }}><b>{day}</b><small>{month}</small></span> }
+function LoginMark({ small = false }: { small?: boolean }) { return <img className={small ? 'login-mark small' : 'login-mark'} src="/assets/logo/icon.png" alt="Login logo" /> }
+function combinedStatus(health: Record<string, ServiceStatus>, keys: string[]): ServiceStatus { const statuses = keys.map((key) => health[key]).filter(Boolean); if (statuses.length && statuses.every((status) => status === 'live')) return 'live'; if (statuses.some((status) => status === 'locked')) return 'locked'; return 'error' }
+function openSource(item: RecentAddition) { const source = item.source || ''; if (source === 'events') return openInAppBrowser(`https://login.no/events/${item.id}`); if (source === 'jobs') return openInAppBrowser(`https://login.no/career/${item.id}`); if (source === 'albums') return openInAppBrowser(`https://login.no/albums/${item.id}`); if (source === 'organizations') return openInAppBrowser(`https://login.no/companies/${item.id}`); return openInAppBrowser('https://queenbee.login.no') }
+function displayName(item: Partial<NamedItem | AlbumItem>) { return item.name_en || item.name_no || item.name || `#${item.id}` }
+function stringValue(value: unknown) { return Array.isArray(value) ? value.filter(Boolean).join(' / ') : typeof value === 'string' ? value : '' }
+function fieldValue(value: unknown) { return typeof value === 'string' || typeof value === 'number' ? String(value) : value == null ? '' : JSON.stringify(value, null, 2) }
+function defaultForm(fields: EditorField[]) { return Object.fromEntries(fields.map((field) => [field.name, field.type === 'boolean' ? false : ''])) }
+function rowToForm(row: EditableRow | null, fields: EditorField[]) { return Object.fromEntries(fields.map((field) => [field.name, row ? row[field.name] ?? '' : field.type === 'boolean' ? false : ''])) }
+function formToPayload(form: Record<string, unknown>, fields: EditorField[]) {
+  return Object.fromEntries(fields.map((field) => {
+    const value = form[field.name]
+    if (field.type === 'number') return [field.name, value === '' || value == null ? null : Number(value)]
+    if (field.type === 'boolean') return [field.name, Boolean(value)]
+    if (field.type === 'json') {
+      if (typeof value !== 'string') return [field.name, value]
+      try {
+        return [field.name, JSON.parse(value)]
+      } catch {
+        return [field.name, value]
+      }
+    }
+    return [field.name, value === '' ? null : value]
+  }))
+}
+function formatNumber(value?: number | string) { const number = typeof value === 'string' ? Number(value) : value; return typeof number === 'number' && Number.isFinite(number) ? Intl.NumberFormat('en-US', { notation: number > 99999 ? 'compact' : 'standard' }).format(number) : '0' }
+function formatPercent(value?: number) { return typeof value === 'number' && Number.isFinite(value) ? `${Math.round(value * (value <= 1 ? 100 : 1))}%` : '0%' }
+function jobTitle(job: JobItem) { return job.title_en || job.title_no || job.title || job.name_en || job.name_no || `Job #${job.id}` }
+function jobMeta(job: JobItem) { const organization = job.organization ? displayName(job.organization as NamedItem) : job.organizations?.map((item) => displayName(item as NamedItem)).filter(Boolean).join(', '); const deadline = job.deadline ? `Deadline ${formatDate(job.deadline)}` : formatDate(job.updated_at || job.created_at); return organization ? `${organization} · ${deadline}` : deadline }
+function formatDate(value?: string) { if (!value) return 'No date'; const date = new Date(value); if (Number.isNaN(date.getTime())) return 'No date'; return date.toLocaleDateString('en-US', { month: 'numeric', day: 'numeric', year: 'numeric' }) }
+function formatTime(value: string) { const date = new Date(value); return date.toLocaleTimeString('no-NO', { hour: '2-digit', minute: '2-digit' }) }
+function formatEventMeta(event: EventItem) { const date = event.time_start ? new Date(event.time_start) : null; const time = date && !Number.isNaN(date.getTime()) ? date.toLocaleDateString('no-NO', { weekday: 'short', hour: '2-digit', minute: '2-digit' }) : 'Time TBA'; const location = event.location?.name || event.location?.name_en || event.location?.name_no; return location ? `${time} · ${location}` : time }
+function stripHtml(value: string) { return value.replace(/<[^>]*>/g, '').replace(/\s+/g, ' ').trim() }
+function stripMarkdown(value: string) { return stripHtml(value).replace(/[*_`#>-]/g, '').replace(/\s+/g, ' ').trim() }
+function companySections(data: DashboardData) { const text = data.companiesText?.text?.en || {}; return Object.entries(text).map(([key, section]) => ({ key, title: section.title || key, body: section.body || section.subtitle || '' })).filter((section) => section.title || section.body) }
+function spotifyImage(id?: string) { if (!id) return ''; return id.startsWith('http') ? id : `https://i.scdn.co/image/${id}` }
+
+declare global {
+  interface Window {
+    __loginDesktopRoot?: Root
+  }
 }
 
-function HealthTag({ label, status }: { label: string; status: ServiceStatus }) {
-  return <span className={`health-tag ${status}`}>{label}: {status}</span>
-}
-
-function EmptyState({ icon, label }: { icon: React.ReactNode; label: string }) {
-  return <div className="empty-state">{icon}<span>{label}</span></div>
-}
-
-function DateBadge({ date, color }: { date?: string; color?: string }) {
-  const parsed = date ? new Date(date) : null
-  const day = parsed && !Number.isNaN(parsed.getTime()) ? parsed.getDate() : '--'
-  const month = parsed && !Number.isNaN(parsed.getTime()) ? parsed.toLocaleDateString('no-NO', { month: 'short' }).replace('.', '') : 'TBA'
-
-  return (
-    <span className="date-badge" style={{ background: color || '#f58b45' }}>
-      <b>{day}</b>
-      <small>{month}</small>
-    </span>
-  )
-}
-
-function LoginMark({ small = false }: { small?: boolean }) {
-  return (
-    <div className={small ? 'login-mark small' : 'login-mark'} aria-label="Login logo mark">
-      <span className="corner tl" />
-      <span className="corner tr" />
-      <span className="letter">L</span>
-      <span className="corner bl" />
-      <span className="corner br" />
-    </div>
-  )
-}
-
-function combinedStatus(health: Record<string, ServiceStatus>, keys: string[]): ServiceStatus {
-  const statuses = keys.map((key) => health[key]).filter(Boolean)
-  if (statuses.length && statuses.every((status) => status === 'live')) return 'live'
-  if (statuses.some((status) => status === 'locked')) return 'locked'
-  return 'error'
-}
-
-function openSource(item: RecentAddition) {
-  const source = item.source || ''
-  if (source === 'events') return openInAppBrowser(`https://login.no/events/${item.id}`)
-  if (source === 'jobs') return openInAppBrowser(`https://login.no/career/${item.id}`)
-  if (source === 'albums') return openInAppBrowser(`https://login.no/albums/${item.id}`)
-  if (source === 'organizations') return openInAppBrowser(`https://login.no/companies/${item.id}`)
-  return openInAppBrowser('https://queenbee.login.no')
-}
-
-function displayName(item: NamedItem | AlbumItem) {
-  return item.name_en || item.name_no || item.name || `#${item.id}`
-}
-
-function jobTitle(job: JobItem) {
-  return job.title_en || job.title_no || job.title || job.name_en || job.name_no || `Job #${job.id}`
-}
-
-function jobMeta(job: JobItem) {
-  const organization = job.organization
-    ? displayName(job.organization as NamedItem)
-    : job.organizations?.map((item) => displayName(item as NamedItem)).filter(Boolean).join(', ')
-  const deadline = job.deadline ? `Deadline ${formatDate(job.deadline)}` : formatDate(job.updated_at || job.created_at)
-  return organization ? `${organization} · ${deadline}` : deadline
-}
-
-function formatDate(value?: string) {
-  if (!value) return 'No date'
-  const date = new Date(value)
-  if (Number.isNaN(date.getTime())) return 'No date'
-  return date.toLocaleDateString('en-US', { month: 'numeric', day: 'numeric', year: 'numeric' })
-}
-
-function formatTime(value: string) {
-  const date = new Date(value)
-  return date.toLocaleTimeString('no-NO', { hour: '2-digit', minute: '2-digit' })
-}
-
-function formatEventMeta(event: EventItem) {
-  const date = event.time_start ? new Date(event.time_start) : null
-  const time = date && !Number.isNaN(date.getTime()) ? date.toLocaleDateString('no-NO', { weekday: 'short', hour: '2-digit', minute: '2-digit' }) : 'Time TBA'
-  const location = event.location?.name || event.location?.name_en || event.location?.name_no
-  return location ? `${time} · ${location}` : time
-}
-
-createRoot(document.getElementById('root')!).render(<App />)
+const rootElement = document.getElementById('root')!
+window.__loginDesktopRoot ||= createRoot(rootElement)
+window.__loginDesktopRoot.render(<App />)

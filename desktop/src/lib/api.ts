@@ -7,6 +7,7 @@ export type DashboardCounts = {
   organizations: number
   locations: number
   albums: number
+  rules: number
 }
 
 export type CategoryStat = {
@@ -93,6 +94,86 @@ export type AnnouncementItem = {
   created_at?: string
 }
 
+export type RuleItem = {
+  id: number | string
+  name_no?: string
+  name_en?: string
+  description_no?: string
+  description_en?: string
+  created_at?: string
+  updated_at?: string
+}
+
+export type AlertItem = {
+  id: number | string
+  title_no?: string
+  title_en?: string
+  description_no?: string
+  description_en?: string
+  service?: string
+  page?: string
+  created_at?: string
+  updated_at?: string
+}
+
+export type HoneyItem = {
+  id: number | string
+  service?: string
+  page?: string
+  language?: string
+  text?: string | Record<string, unknown>
+  created_at?: string
+  updated_at?: string
+}
+
+export type CompaniesText = {
+  service?: string
+  page?: string
+  language?: string
+  text?: Record<string, Record<string, {
+    title?: string
+    body?: string
+    subtitle?: string
+  }>>
+}
+
+export type MusicActivity = {
+  stats: {
+    avg_seconds?: number
+    total_minutes?: number
+    total_minutes_this_year?: number
+    total_songs?: number
+  }
+  currentlyListening?: Array<{
+    title?: string
+    name?: string
+    artist?: string
+    album?: string
+    image?: string
+    song_image?: string
+  }>
+  mostPlayedAlbums?: Array<{
+    album?: string
+    artist?: string
+    total_listens?: string | number
+    top_song?: string
+    top_song_image?: string
+  }>
+  mostPlayedArtists?: Array<{
+    artist?: string
+    total_listens?: string | number
+  }>
+  topFiveToday?: Array<{
+    title?: string
+    name?: string
+    artist?: string
+    album?: string
+    listens?: string | number
+    image?: string
+    song_image?: string
+  }>
+}
+
 export type StatusService = {
   id: number | string
   name: string
@@ -149,6 +230,77 @@ export type InternalOverview = {
   }
 }
 
+export type QueenbeeSite = {
+  id?: number | string
+  name?: string
+  domain?: string
+  ip?: string
+  primary?: boolean
+  enabled?: boolean
+  status?: string
+}
+
+export type TrafficMetrics = {
+  total_requests?: number
+  error_count?: number
+  avg_response_time?: number
+  avg_request_time?: number
+  error_rate?: number
+  top_domains?: Array<{ key: string; count?: number; avg_time?: number }>
+  top_paths?: Array<{ key: string; count?: number; avg_time?: number }>
+  top_status_codes?: Array<{ key: string; count?: number; avg_time?: number }>
+}
+
+export type VulnerabilityReport = {
+  generatedAt?: string | null
+  imageCount?: number
+  images?: Array<{
+    image: string
+    totalVulnerabilities: number
+    severity?: Record<string, number>
+    scanError?: string | null
+  }>
+  scanStatus?: {
+    isRunning?: boolean
+    lastSuccessAt?: string | null
+    lastError?: string | null
+    totalImages?: number | null
+    completedImages?: number
+    currentImage?: string | null
+  }
+}
+
+export type DockerOverview = {
+  status?: string
+  count?: number
+  containers?: Array<{
+    id?: string
+    name?: string
+    image?: string
+    status?: string
+    state?: string
+  }>
+  error?: string
+}
+
+export type DockerLogs = {
+  containers?: string[]
+  logs?: Array<{
+    container?: string
+    service?: string
+    timestamp?: string
+    message?: string
+    level?: string
+  }>
+  entries?: Array<{
+    container?: string
+    service?: string
+    timestamp?: string
+    message?: string
+    level?: string
+  }>
+}
+
 export type DashboardData = {
   counts: DashboardCounts
   categories: CategoryStat[]
@@ -159,9 +311,22 @@ export type DashboardData = {
   organizations: NamedItem[]
   locations: NamedItem[]
   albums: AlbumItem[]
+  rules: RuleItem[]
+  alerts: AlertItem[]
+  honey: HoneyItem[]
+  companiesText: CompaniesText | null
+  music: MusicActivity | null
   announcements: AnnouncementItem[]
   statusServices: StatusService[]
   internal: InternalOverview | null
+  queenbee: {
+    sites: QueenbeeSite[]
+    databases: unknown | null
+    traffic: TrafficMetrics | null
+    vulnerabilities: VulnerabilityReport | null
+    docker: DockerOverview | null
+    logs: DockerLogs | null
+  }
   health: Record<string, ServiceStatus>
   fetchedAt: string
 }
@@ -173,6 +338,30 @@ type WorkerbeeResponse<T, K extends string> = {
 const WORKERBEE = import.meta.env.VITE_WORKERBEE_API ?? 'https://workerbee.login.no/api/v2'
 const BEEKEEPER = import.meta.env.VITE_BEEKEEPER_API ?? 'https://beekeeper.login.no/api'
 const BOT = import.meta.env.VITE_BOT_API ?? 'https://bot.login.no/api'
+const BEEKEEPER_TOKEN = import.meta.env.VITE_BEEKEEPER_TOKEN
+const QUEENBEE_TOKEN_KEY = 'login-desktop.queenbee-token'
+
+export type QueenbeeService = 'workerbee' | 'bot' | 'beekeeper'
+
+export function getQueenbeeToken() {
+  return window.localStorage.getItem(QUEENBEE_TOKEN_KEY) || ''
+}
+
+export function setQueenbeeToken(token: string) {
+  const trimmed = token.trim()
+  if (trimmed) window.localStorage.setItem(QUEENBEE_TOKEN_KEY, trimmed)
+  else window.localStorage.removeItem(QUEENBEE_TOKEN_KEY)
+}
+
+export function hasQueenbeeToken() {
+  return Boolean(getQueenbeeToken())
+}
+
+function serviceBase(service: QueenbeeService) {
+  if (service === 'bot') return BOT
+  if (service === 'beekeeper') return BEEKEEPER
+  return WORKERBEE
+}
 
 async function requestJson<T>(url: string, timeoutMs = 5500): Promise<T> {
   const controller = new AbortController()
@@ -180,7 +369,10 @@ async function requestJson<T>(url: string, timeoutMs = 5500): Promise<T> {
 
   try {
     const response = await fetch(url, {
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        ...(BEEKEEPER_TOKEN && url.startsWith(BEEKEEPER) ? { Authorization: `Bearer ${BEEKEEPER_TOKEN}` } : {}),
+      },
       signal: controller.signal,
     })
     const text = await response.text()
@@ -197,6 +389,49 @@ async function requestJson<T>(url: string, timeoutMs = 5500): Promise<T> {
   }
 }
 
+export async function queenbeeRequest<T>({
+  service,
+  path,
+  method = 'GET',
+  data,
+  timeoutMs = 9000,
+}: {
+  service: QueenbeeService
+  path: string
+  method?: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE'
+  data?: unknown
+  timeoutMs?: number
+}): Promise<T> {
+  const token = getQueenbeeToken()
+  if (!token) throw new Error('Missing Queenbee access token in Settings.')
+
+  const controller = new AbortController()
+  const timeout = window.setTimeout(() => controller.abort(), timeoutMs)
+  const url = `${serviceBase(service)}/${path.replace(/^\/+/, '')}`
+
+  try {
+    const response = await fetch(url, {
+      method,
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+        ...(service === 'bot' ? { btg: 'tekkom-bot' } : {}),
+      },
+      body: data === undefined ? undefined : JSON.stringify(data),
+      signal: controller.signal,
+    })
+    const text = await response.text()
+    const body = text ? JSON.parse(text) : null
+    if (!response.ok) {
+      const message = typeof body?.message === 'string' ? body.message : typeof body?.error === 'string' ? body.error : response.statusText
+      throw new Error(message || `Queenbee ${method} failed`)
+    }
+    return body as T
+  } finally {
+    window.clearTimeout(timeout)
+  }
+}
+
 async function safe<T>(key: string, task: () => Promise<T>, health: Record<string, ServiceStatus>): Promise<T | null> {
   try {
     const value = await task()
@@ -204,7 +439,7 @@ async function safe<T>(key: string, task: () => Promise<T>, health: Record<strin
     return value
   } catch (error) {
     const message = error instanceof Error ? error.message.toLowerCase() : ''
-    health[key] = message.includes('unauthorized') || message.includes('401') ? 'locked' : 'error'
+    health[key] = message.includes('unauthorized') || message.includes('authorization') || message.includes('401') ? 'locked' : 'error'
     return null
   }
 }
@@ -232,6 +467,17 @@ export async function loadDashboardData(): Promise<DashboardData> {
     statusServices,
     internal,
     announcementsPayload,
+    rulesPayload,
+    alertsPayload,
+    honeyPayload,
+    companiesText,
+    music,
+    sites,
+    databases,
+    traffic,
+    vulnerabilities,
+    docker,
+    logs,
   ] = await Promise.all([
     safe('events', () => requestJson<WorkerbeeResponse<EventItem, 'events'>>(`${WORKERBEE}/events?limit=24&order_by=time_start&sort=asc`), health),
     safe('jobs', () => requestJson<WorkerbeeResponse<JobItem, 'jobs'>>(`${WORKERBEE}/jobs?limit=24&offset=0`), health),
@@ -244,6 +490,17 @@ export async function loadDashboardData(): Promise<DashboardData> {
     safe('status', () => requestJson<StatusService[]>(`${BEEKEEPER}/monitoring`), health),
     safe('internal', () => requestJson<InternalOverview>(`${BEEKEEPER}/dashboard/internal`), health),
     safe('announcements', () => requestJson<WorkerbeeResponse<AnnouncementItem, 'announcements'>>(`${BOT}/announcements?limit=24&includePlaceholders=true`), health),
+    safe('rules', () => requestJson<WorkerbeeResponse<RuleItem, 'rules'>>(`${WORKERBEE}/rules?limit=24&offset=0`), health),
+    safe('alerts', () => requestJson<WorkerbeeResponse<AlertItem, 'alerts'>>(`${WORKERBEE}/alerts?limit=24&offset=0`), health),
+    safe('honey', () => requestJson<WorkerbeeResponse<HoneyItem, 'honeys'>>(`${WORKERBEE}/text/beehive?limit=24&offset=0`), health),
+    safe('companies-text', () => requestJson<CompaniesText>(`${WORKERBEE}/text/beehive/companies/en`), health),
+    safe('music', () => requestJson<MusicActivity>(`${BOT}/activity`, 7500), health),
+    safe('sites', () => requestJson<QueenbeeSite[]>(`${BEEKEEPER}/sites`), health),
+    safe('db', () => requestJson<unknown>(`${BEEKEEPER}/db`, 7000), health),
+    safe('traffic', () => requestJson<TrafficMetrics>(`${BEEKEEPER}/traffic/metrics`, 7000), health),
+    safe('vulnerabilities', () => requestJson<VulnerabilityReport>(`${BEEKEEPER}/vulnerabilities`, 7000), health),
+    safe('docker', () => requestJson<DockerOverview>(`${BEEKEEPER}/docker`, 7000), health),
+    safe('logs', () => requestJson<DockerLogs>(`${BEEKEEPER}/docker/logs?limit=12`, 7000), health),
   ])
 
   return {
@@ -253,6 +510,7 @@ export async function loadDashboardData(): Promise<DashboardData> {
       organizations: readTotal(organizationsPayload),
       locations: readTotal(locationsPayload),
       albums: readTotal(albumsPayload),
+      rules: readTotal(rulesPayload),
       announcements: readTotal(announcementsPayload) || readRows(announcementsPayload, 'announcements').length,
     },
     categories: Array.isArray(categories) ? categories : [],
@@ -263,9 +521,22 @@ export async function loadDashboardData(): Promise<DashboardData> {
     organizations: readRows(organizationsPayload, 'organizations'),
     locations: readRows(locationsPayload, 'locations'),
     albums: readRows(albumsPayload, 'albums'),
+    rules: readRows(rulesPayload, 'rules'),
+    alerts: readRows(alertsPayload, 'alerts'),
+    honey: readRows(honeyPayload, 'honeys'),
+    companiesText,
+    music,
     announcements: readRows(announcementsPayload, 'announcements'),
     statusServices: Array.isArray(statusServices) ? statusServices : [],
     internal,
+    queenbee: {
+      sites: Array.isArray(sites) ? sites : [],
+      databases,
+      traffic,
+      vulnerabilities,
+      docker,
+      logs,
+    },
     health,
     fetchedAt: new Date().toISOString(),
   }
