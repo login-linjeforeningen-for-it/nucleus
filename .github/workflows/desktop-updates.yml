@@ -46,6 +46,28 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Normalize updater signing key
+        if: ${{ env.TAURI_SIGNING_PRIVATE_KEY != '' }}
+        run: |
+          if printf '%s' "$TAURI_SIGNING_PRIVATE_KEY" | grep -q 'untrusted comment:'; then
+            echo "Updater signing key is already in minisign format."
+            exit 0
+          fi
+
+          DECODED_KEY="$(printf '%s' "$TAURI_SIGNING_PRIVATE_KEY" | base64 --decode 2>/dev/null || true)"
+          if printf '%s' "$DECODED_KEY" | grep -q 'untrusted comment:'; then
+            {
+              echo 'TAURI_SIGNING_PRIVATE_KEY<<EOF'
+              printf '%s\n' "$DECODED_KEY"
+              echo 'EOF'
+            } >> "$GITHUB_ENV"
+            echo "Decoded base64 updater signing key for Tauri."
+            exit 0
+          fi
+
+          echo "Updater signing key is neither raw minisign text nor base64-encoded minisign text."
+          exit 1
+
       - name: Build signed desktop update
         run: npm run desktop:build
 
