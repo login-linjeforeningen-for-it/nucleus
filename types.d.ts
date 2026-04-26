@@ -685,6 +685,7 @@ type MenuStackParamList = {
     VervScreen: undefined
     PolicyScreen: undefined
     PwnedScreen: undefined
+    SpecificAdScreen: { adID: number }
     DashboardScreen: undefined
     LoadBalancingScreen: undefined
     TrafficScreen: undefined

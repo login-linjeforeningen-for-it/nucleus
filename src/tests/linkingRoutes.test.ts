@@ -8,6 +8,7 @@ import linking from '@utils/linking'
 const expectedRoutes = [
     ['events/42', 'SpecificEventScreen'],
     ['career/3', 'SpecificAdScreen'],
+    ['jobs/3', 'SpecificAdScreen'],
     ['profile', 'ProfileScreen'],
     ['ai', 'AiScreen'],
     ['internal/ai', 'AiScreen'],
@@ -23,6 +24,9 @@ const expectedRoutes = [
     ['internal/traffic/records', 'TrafficRecordsScreen'],
     ['internal/traffic/map', 'TrafficMapScreen'],
     ['internal/content', 'ContentScreen'],
+    ['rules', 'ContentScreen'],
+    ['locations', 'ContentScreen'],
+    ['organizations', 'ContentScreen'],
     ['announcements', 'AnnouncementsScreen'],
     ['internal/announcements', 'AnnouncementsScreen'],
     ['internal/nucleus/documentation', 'NucleusDocumentationScreen'],

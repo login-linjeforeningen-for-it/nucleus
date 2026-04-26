@@ -122,6 +122,10 @@ function Ads() {
     )
 }
 
+function MenuSpecificAdScreen(props: MenuProps<'SpecificAdScreen'>) {
+    return <SpecificAdScreen {...props as unknown as AdScreenProps<'SpecificAdScreen'>} />
+}
+
 // Defines the components in the menuStack
 function Menu() {
     return (
@@ -149,6 +153,7 @@ function Menu() {
             <MenuStack.Screen name='VervScreen' component={VervScreen} />
             <MenuStack.Screen name='PolicyScreen' component={PolicyScreen} />
             <MenuStack.Screen name='PwnedScreen' component={PwnedScreen} />
+            <MenuStack.Screen name='SpecificAdScreen' component={MenuSpecificAdScreen} />
             <MenuStack.Screen name='DashboardScreen' component={DashboardScreen} />
             <MenuStack.Screen name='LoadBalancingScreen' component={LoadBalancingScreen} />
             <MenuStack.Screen name='TrafficScreen' component={TrafficScreen} />

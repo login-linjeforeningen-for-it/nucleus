@@ -55,6 +55,12 @@ const linking: LinkingOptions<RootStackParamList> = {
                             VervScreen: 'verv',
                             PolicyScreen: 'policy',
                             PwnedScreen: 'pwned',
+                            SpecificAdScreen: {
+                                path: 'jobs/:adID',
+                                parse: {
+                                    adID: Number
+                                }
+                            },
                             SpecificAlbumScreen: {
                                 path: 'albums/:albumID',
                                 parse: {
@@ -66,7 +72,10 @@ const linking: LinkingOptions<RootStackParamList> = {
                             TrafficScreen: 'internal/traffic',
                             TrafficRecordsScreen: 'internal/traffic/records',
                             TrafficMapScreen: 'internal/traffic/map',
-                            ContentScreen: 'internal/content',
+                            ContentScreen: {
+                                path: 'internal/content',
+                                alias: ['rules', 'locations', 'organizations'],
+                            },
                             AnnouncementsScreen: {
                                 path: 'announcements',
                                 alias: ['internal/announcements'],

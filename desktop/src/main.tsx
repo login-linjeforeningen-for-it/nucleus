@@ -1154,7 +1154,75 @@ function LocationsPage({ data }: { data: DashboardData }) {
 }
 
 function RulesPage({ data }: { data: DashboardData }) {
-  return <EditorPage data={data} config={editorConfigs.rules} preview={<RuleList rules={data.rules} status={data.health.rules} />} />
+  const [query, setQuery] = useState('')
+  const [orderBy, setOrderBy] = useState('id')
+  const [sort, setSort] = useState<'asc' | 'desc'>('asc')
+  const [page, setPage] = useState(1)
+  const [rows, setRows] = useState<RuleItem[] | null>(null)
+  const [total, setTotal] = useState(data.counts.rules)
+  const [message, setMessage] = useState('Public rules loaded. Use the browser controls for Queenbee-style search, sort, and pagination.')
+  const [loading, setLoading] = useState(false)
+  const pageSize = 14
+  const ruleRows = rows || data.rules
+  const ruleData = { ...data, rules: ruleRows, counts: { ...data.counts, rules: total || ruleRows.length } }
+
+  async function loadRules(event?: React.FormEvent) {
+    event?.preventDefault()
+    setLoading(true)
+    const offset = Math.max(0, page - 1) * pageSize
+    const params = new URLSearchParams({
+      limit: String(pageSize),
+      offset: String(offset),
+      order_by: orderBy,
+      sort,
+    })
+    if (query) params.set('search', query)
+    try {
+      const result = await fetch(`https://workerbee.login.no/api/v2/rules?${params.toString()}`)
+      const payload = await result.json()
+      if (!result.ok) throw new Error(payload?.error || payload?.message || 'Unable to load rules')
+      const nextRows = Array.isArray(payload.rules) ? payload.rules : []
+      setRows(nextRows)
+      setTotal(typeof payload.total_count === 'number' ? payload.total_count : nextRows.length)
+      setMessage(`Loaded ${nextRows.length} rules from Workerbee offset ${offset}.`)
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : 'Unable to load rules.')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  function applyExample() {
+    window.dispatchEvent(new CustomEvent('login-desktop-editor-example', {
+      detail: {
+        title: 'Rules',
+        values: {
+          name_no: 'Deltakerretningslinjer',
+          name_en: 'Participant Guidelines',
+          description_no: 'Vennligst følg disse retningslinjene under arrangementet:\\n- Mot opp til avtalt tid\\n- Respekter andre deltakere og arrangorer\\n- Folg sikkerhetsinstruksjoner\\n- Hold omradet ryddig\\n- Still sporsmal ved behov',
+          description_en: 'Please follow these guidelines during the event:\\n- Arrive on time\\n- Respect other participants and organizers\\n- Follow safety instructions\\n- Keep the area tidy\\n- Ask questions when needed',
+        },
+      },
+    }))
+  }
+
+  return (
+    <div className="stacked-page">
+      <section className="panel compact-panel">
+        <PanelTitle title="Rules Browser" subtitle="Matches Queenbee search, sort, and page controls" />
+        <form className="event-browser-controls" onSubmit={loadRules}>
+          <label className="editor-field"><span>Search</span><input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search rules" /></label>
+          <label className="editor-field"><span>Order by</span><select value={orderBy} onChange={(event) => setOrderBy(event.target.value)}><option value="id">id</option><option value="name_no">name_no</option><option value="name_en">name_en</option><option value="updated_at">updated_at</option></select></label>
+          <label className="editor-field"><span>Sort</span><select value={sort} onChange={(event) => setSort(event.target.value as 'asc' | 'desc')}><option value="asc">asc</option><option value="desc">desc</option></select></label>
+          <label className="editor-field"><span>Page</span><input type="number" min="1" value={page} onChange={(event) => setPage(Math.max(1, Number(event.target.value) || 1))} /></label>
+          <button type="submit" disabled={loading}>{loading ? 'Loading...' : 'Load rules'}</button>
+          <button type="button" onClick={applyExample}>Example</button>
+        </form>
+        <p className="editor-message">{message}</p>
+      </section>
+      <EditorPage data={ruleData} config={editorConfigs.rules} preview={<RuleList rules={ruleRows} status={data.health.rules} />} />
+    </div>
+  )
 }
 
 function AlertsPage({ data }: { data: DashboardData }) {
@@ -1174,6 +1242,7 @@ function EditorPage<T extends EditableRow>({ data, config, preview }: { data: Da
   const [query, setQuery] = useState('')
   const [busy, setBusy] = useState(false)
   const [mediaMessage, setMediaMessage] = useState('')
+  const [exampleDefaults, setExampleDefaults] = useState<EditableRow | null>(null)
   const tokenReady = hasQueenbeeToken()
   const filteredRows = rows.filter((row) => `${config.titleOf(row)} ${config.metaOf(row)} ${row.id}`.toLowerCase().includes(query.toLowerCase()))
   const imageUploadPath = imagePathForEditor(config.title)
@@ -1181,14 +1250,29 @@ function EditorPage<T extends EditableRow>({ data, config, preview }: { data: Da
   function startCreate() {
     setMode('create')
     setEditing(null)
+    setExampleDefaults(null)
     setMessage('Create mode. Fill the fields, then publish when ready.')
   }
 
   function startEdit(row: T) {
     setMode('update')
     setEditing(row)
+    setExampleDefaults(null)
     setMessage(`Editing ${config.titleOf(row)}.`)
   }
+
+  useEffect(() => {
+    function onExample(event: Event) {
+      const detail = (event as CustomEvent<{ title?: string; values?: Record<string, unknown> }>).detail
+      if (detail?.title !== config.title || !detail.values) return
+      setMode('create')
+      setEditing(null)
+      setExampleDefaults({ id: 'example', ...detail.values })
+      setMessage(`Example ${config.title.toLowerCase()} loaded. Review before publishing.`)
+    }
+    window.addEventListener('login-desktop-editor-example', onExample)
+    return () => window.removeEventListener('login-desktop-editor-example', onExample)
+  }, [config.title])
 
   async function submit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault()
@@ -1245,8 +1329,8 @@ function EditorPage<T extends EditableRow>({ data, config, preview }: { data: Da
           <button onClick={startCreate}><Plus size={14} />New</button>
           <button onClick={() => openInAppBrowser(`https://queenbee.login.no${config.queenbeePath}`)}>Open Queenbee <ExternalLink size={14} /></button>
         </div>
-        <form className="editor-form" onSubmit={submit} key={`${config.title}-${mode}-${editing?.id || 'new'}`}>
-          {config.fields.map((field) => <EditorInput key={field.name} field={field} row={editing} />)}
+        <form className="editor-form" onSubmit={submit} key={`${config.title}-${mode}-${editing?.id || exampleDefaults?.id || 'new'}`}>
+          {config.fields.map((field) => <EditorInput key={field.name} field={field} row={editing || exampleDefaults} />)}
           <div className="editor-actions">
             <button className="primary-action" type="submit" disabled={busy || !tokenReady}><Pencil size={15} />{busy ? 'Pushing...' : mode === 'create' ? 'Create and publish' : 'Save live update'}</button>
             {mode === 'update' && editing ? <button type="button" className="danger-action" disabled={busy || !tokenReady} onClick={() => remove(editing)}><Trash2 size={15} />Delete</button> : null}
