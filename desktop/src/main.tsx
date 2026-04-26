@@ -855,6 +855,7 @@ function LoadBalancingPage({ data }: { data: DashboardData }) {
               <h3>{site.name || site.domain || `Site ${index + 1}`}</h3>
               <p>{site.domain || site.ip || site.status || 'No public hostname returned.'}</p>
               <span>{site.primary ? 'Primary' : site.enabled === false ? 'Disabled' : 'Available'}</span>
+              {site.id ? <InternalActionButton label="Make primary" path={`site/primary/${site.id}`} method="GET" confirm={`Switch primary load-balancer site to ${site.name || site.domain || site.id}?`} /> : null}
             </article>
           ))}
         </div>
@@ -867,13 +868,74 @@ function DatabasesPage({ data }: { data: DashboardData }) {
   return (
     <PagePanel title="Databases" status={data.health.db}>
       <QueenbeeStatusBanner status={data.health.db} path="/db" />
-      {data.health.db === 'live' ? <JsonPreview value={data.queenbee.databases} /> : <ProtectedQueenbeeGrid />}
+      <div className="editor-toolbar">
+        <InternalActionButton label="Run backups" path="backup" confirm="Trigger all configured database backups?" />
+        <button onClick={() => openInAppBrowser('https://queenbee.login.no/internal/db/restore')}>Restore browser <ExternalLink size={14} /></button>
+      </div>
+      {data.health.db === 'live' ? <DatabaseOverview value={data.queenbee.databases} /> : <ProtectedQueenbeeGrid />}
     </PagePanel>
   )
 }
 
+function DatabaseOverview({ value }: { value: unknown }) {
+  const overview = value && typeof value === 'object' ? value as Record<string, unknown> : null
+  const clusters = Array.isArray(overview?.clusters) ? overview.clusters as Array<Record<string, unknown>> : []
+  if (!overview) return <EmptyState icon={<Database />} label="No database overview returned." />
+  return (
+    <div className="traffic-grid">
+      <article className="music-stat-card"><span>Clusters</span><strong>{formatNumber(overview.clusterCount as number | string)}</strong><small>Database clusters</small></article>
+      <article className="music-stat-card"><span>Databases</span><strong>{formatNumber(overview.databaseCount as number | string)}</strong><small>Total discovered</small></article>
+      <article className="music-stat-card"><span>Active queries</span><strong>{formatNumber(overview.activeQueries as number | string)}</strong><small>Current load</small></article>
+      {clusters.map((cluster, index) => <article className="queenbee-card" key={String(cluster.id || index)}><Database size={18} /><h3>{String(cluster.name || cluster.id || `Cluster ${index + 1}`)}</h3><p>{formatNumber(cluster.databaseCount as number | string)} databases</p><span>{cluster.error ? String(cluster.error) : 'Operational'}</span></article>)}
+      {!clusters.length ? <JsonPreview value={value} /> : null}
+    </div>
+  )
+}
+
 function MonitoringPage({ data }: { data: DashboardData }) {
-  return <PagePanel title="Monitoring" status={data.health.status}><StatusList services={data.statusServices} status={data.health.status} expanded /></PagePanel>
+  return (
+    <PagePanel title="Monitoring" status={data.health.status}>
+      <div className="traffic-grid">
+        <InternalMiniForm
+          title="Create service"
+          path="monitoring"
+          confirm="Create a new monitored service?"
+          fields={[
+            { name: 'name', label: 'Name', required: true },
+            { name: 'url', label: 'URL', required: true },
+            { name: 'interval', label: 'Interval seconds', type: 'number' },
+            { name: 'timeout', label: 'Timeout seconds', type: 'number' },
+            { name: 'notification', label: 'Notification ID', type: 'number' },
+            { name: 'enabled', label: 'Enabled', type: 'boolean' },
+          ]}
+        />
+        <InternalMiniForm
+          title="Create notification"
+          path="monitoring/notification"
+          confirm="Create a new monitoring notification webhook?"
+          fields={[
+            { name: 'name', label: 'Name', required: true },
+            { name: 'message', label: 'Message', type: 'textarea', required: true },
+            { name: 'webhook', label: 'Webhook URL', required: true },
+          ]}
+        />
+        <InternalMiniForm
+          title="Create tag"
+          path="monitoring/tag"
+          confirm="Create a new monitoring tag?"
+          fields={[
+            { name: 'name', label: 'Name', required: true },
+            { name: 'color', label: 'Color', required: true, placeholder: '#f58b45' },
+          ]}
+        />
+      </div>
+      <div className="queenbee-grid">
+        <article className="queenbee-card"><Bell size={18} /><h3>Notifications</h3><p>{data.queenbee.monitoringNotifications.length} routes configured</p><span>{data.health['monitoring-notifications'] || 'unknown'}</span></article>
+        <article className="queenbee-card"><FileText size={18} /><h3>Tags</h3><p>{data.queenbee.monitoringTags.map((tag) => tag.name).filter(Boolean).join(', ') || 'No tags loaded'}</p><span>{data.health['monitoring-tags'] || 'unknown'}</span></article>
+      </div>
+      <StatusList services={data.statusServices} status={data.health.status} expanded />
+    </PagePanel>
+  )
 }
 
 function ServicesPage({ data }: { data: DashboardData }) {
@@ -889,6 +951,13 @@ function ServicesPage({ data }: { data: DashboardData }) {
               <h3>{container.name || container.image || 'Container'}</h3>
               <p>{container.image || 'No image returned.'}</p>
               <span>{container.state || container.status || 'unknown'}</span>
+              {container.id ? (
+                <div className="editor-actions">
+                  <InternalActionButton label="Deploy update" path={`deployments/${container.id}/run`} confirm={`Run deployment for ${container.name || container.id}?`} />
+                  <InternalActionButton label="Enable auto" path={`deployments/${container.id}/auto`} method="PUT" data={{ enabled: true }} confirm={`Enable auto deploy for ${container.name || container.id}?`} />
+                  <InternalActionButton label="Delete" path={`docker/${container.id}`} method="DELETE" dangerous confirm={`Delete container ${container.name || container.id}?`} />
+                </div>
+              ) : null}
             </article>
           ))}
         </div>
@@ -909,6 +978,7 @@ function TrafficPage({ data }: { data: DashboardData }) {
           <QueenbeeTopList title="Top domains" rows={traffic.top_domains} />
           <QueenbeeTopList title="Top paths" rows={traffic.top_paths} />
           <QueenbeeTopList title="Status codes" rows={traffic.top_status_codes} />
+          <QueenbeeTopList title="Available domains" rows={data.queenbee.trafficDomains.map((domain) => ({ key: domain, count: 0 }))} />
         </div>
       ) : data.health.traffic === 'live' ? <EmptyState icon={<Activity />} label="Traffic metrics endpoint returned no metrics." /> : <ProtectedQueenbeeGrid />}
     </PagePanel>
@@ -917,37 +987,47 @@ function TrafficPage({ data }: { data: DashboardData }) {
 
 function TrafficRecordsPage({ data }: { data: DashboardData }) {
   const traffic = data.queenbee.traffic
+  const records = data.queenbee.trafficRecords?.result || []
   return (
-    <PagePanel title="Traffic Records" status={data.health.traffic}>
-      <QueenbeeStatusBanner status={data.health.traffic} path="/traffic" />
-      {data.health.traffic === 'live' && traffic ? (
-        <div className="traffic-grid">
-          <QueenbeeTopList title="Top domains" rows={traffic.top_domains} />
-          <QueenbeeTopList title="Top paths" rows={traffic.top_paths} />
-          <QueenbeeTopList title="Status codes" rows={traffic.top_status_codes} />
+    <PagePanel title="Traffic Records" status={data.health['traffic-records'] || data.health.traffic}>
+      <QueenbeeStatusBanner status={data.health['traffic-records'] || data.health.traffic} path="/traffic/records" />
+      {records.length ? (
+        <div className="log-list">
+          {records.map((record, index) => <article className="log-row" key={record.id || index}><span>{record.status || record.method || 'request'}</span><p>{record.domain}{record.path ? ` ${record.path}` : ''}</p><time>{record.timestamp ? formatDate(record.timestamp) : record.request_time ? `${record.request_time} ms` : ''}</time></article>)}
         </div>
-      ) : data.health.traffic === 'live' ? <EmptyState icon={<Logs />} label="No traffic records returned." /> : <ProtectedQueenbeeGrid />}
+      ) : data.health['traffic-records'] === 'live' ? <EmptyState icon={<Logs />} label="No traffic records returned." /> : <ProtectedQueenbeeGrid />}
+      {traffic ? <div className="traffic-grid"><QueenbeeTopList title="Top domains" rows={traffic.top_domains} /><QueenbeeTopList title="Top paths" rows={traffic.top_paths} /></div> : null}
     </PagePanel>
   )
 }
 
 function BackupsPage({ data }: { data: DashboardData }) {
   return (
-    <PagePanel title="Backups" status={data.health.db}>
-      <QueenbeeStatusBanner status={data.health.db} path="/db" />
-      <div className="queenbee-grid protected">
-        <button className="queenbee-card" onClick={() => openInAppBrowser('https://queenbee.login.no/internal/db')}>
-          <Database size={18} />
-          <h3>Database backups</h3>
-          <p>Open Queenbee for backup files, restore actions, and protected database operations.</p>
-          <span>Protected surface</span>
-        </button>
-        <article className="queenbee-card">
-          <ShieldCheck size={18} />
-          <h3>Desktop boundary</h3>
-          <p>The desktop launcher avoids embedding restore credentials and keeps destructive backup work in Queenbee.</p>
-          <span>Read-only launcher</span>
-        </article>
+    <PagePanel title="Backups" status={data.health.backups}>
+      <QueenbeeStatusBanner status={data.health.backups} path="/backup" />
+      <div className="editor-toolbar">
+        <InternalActionButton label="Run all backups" path="backup" confirm="Trigger backups for all configured database services?" />
+        <button onClick={() => openInAppBrowser('https://queenbee.login.no/internal/db/restore')}>Open restore browser <ExternalLink size={14} /></button>
+      </div>
+      <InternalMiniForm
+        title="Restore backup file"
+        path="backup/restore"
+        confirm="Restore this database backup? This is a destructive operational action."
+        fields={[
+          { name: 'service', label: 'Service', required: true },
+          { name: 'file', label: 'Backup file', required: true },
+        ]}
+      />
+      <div className="queenbee-grid">
+        {data.queenbee.backups.map((backup, index) => (
+          <article className="queenbee-card" key={backup.id || backup.name || index}>
+            <Database size={18} />
+            <h3>{backup.name || backup.id || `Backup ${index + 1}`}</h3>
+            <p>{backup.status || backup.error || 'Backup service'}</p>
+            <span>{backup.lastBackup ? `Last ${formatDate(backup.lastBackup)}` : backup.nextBackup ? `Next ${formatDate(backup.nextBackup)}` : backup.dbSize || 'No schedule returned'}</span>
+          </article>
+        ))}
+        {data.health.backups === 'live' && !data.queenbee.backups.length ? <EmptyState icon={<Database />} label="No backup services returned." /> : null}
       </div>
     </PagePanel>
   )
@@ -958,6 +1038,9 @@ function VulnerabilitiesPage({ data }: { data: DashboardData }) {
   return (
     <PagePanel title="Vulnerabilities" status={data.health.vulnerabilities}>
       <QueenbeeStatusBanner status={data.health.vulnerabilities} path="/vulnerabilities" />
+      <div className="editor-toolbar">
+        <InternalActionButton label="Run vulnerability scan" path="vulnerabilities/scan" confirm="Start a Docker Scout vulnerability scan now?" />
+      </div>
       {data.health.vulnerabilities === 'live' && report ? (
         <div className="queenbee-grid">
           <article className="music-stat-card"><span>Images</span><strong>{report.imageCount || report.images?.length || 0}</strong><small>{report.generatedAt ? `Generated ${formatDate(report.generatedAt)}` : 'Scan report'}</small></article>
@@ -991,10 +1074,40 @@ function AiPage({ data }: { data: DashboardData }) {
 }
 
 function LogsPage({ data }: { data: DashboardData }) {
-  const entries = data.queenbee.logs?.logs || data.queenbee.logs?.entries || []
+  const initialEntries = data.queenbee.logs?.logs || data.queenbee.logs?.entries || []
+  const [entries, setEntries] = useState(initialEntries)
+  const [message, setMessage] = useState('Showing latest loaded logs.')
+
+  async function filterLogs(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault()
+    const form = new FormData(event.currentTarget)
+    const params = new URLSearchParams()
+    for (const key of ['container', 'service', 'level', 'limit']) {
+      const value = String(form.get(key) || '').trim()
+      if (value) params.set(key, value)
+    }
+    setMessage('Loading logs...')
+    try {
+      const result = await queenbeeRequest<typeof data.queenbee.logs>({ service: 'beekeeper', path: `docker/logs?${params.toString()}`, method: 'GET', timeoutMs: 30000 })
+      setEntries(result?.logs || result?.entries || [])
+      setMessage('Logs updated.')
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : 'Unable to load logs.')
+    }
+  }
+
   return (
     <PagePanel title="Logs" status={data.health.logs}>
       <QueenbeeStatusBanner status={data.health.logs} path="/docker/logs" />
+      <form className="mini-admin-form inline" onSubmit={filterLogs}>
+        <h3>Filter logs</h3>
+        <label className="editor-field"><span>Container</span><input name="container" /></label>
+        <label className="editor-field"><span>Service</span><input name="service" /></label>
+        <label className="editor-field"><span>Level</span><input name="level" /></label>
+        <label className="editor-field"><span>Limit</span><input name="limit" type="number" defaultValue={50} /></label>
+        <button type="submit" disabled={!hasQueenbeeToken()}><RefreshCcw size={14} />Apply</button>
+      </form>
+      <p className="editor-message">{message}</p>
       {data.health.logs === 'live' && entries.length ? (
         <div className="log-list">
           {entries.slice(0, 16).map((entry, index) => <article className="log-row" key={`${entry.timestamp}-${index}`}><span>{entry.level || entry.container || entry.service || 'log'}</span><p>{entry.message || JSON.stringify(entry)}</p><time>{entry.timestamp ? formatDate(entry.timestamp) : ''}</time></article>)}
@@ -1091,137 +1204,6 @@ function ThemePreview() {
 
 function PagePanel({ title, status, children }: { title: string; status?: ServiceStatus; children: React.ReactNode }) {
   return <section className="panel full-span page-panel"><PanelTitle title={title} subtitle={`Endpoint status: ${status || 'unknown'}`} />{children}</section>
-}
-
-function EditorPageDraft<T extends EditableRow>({
-  data,
-  config,
-  preview,
-}: {
-  data: DashboardData
-  config: EditorConfig<T>
-  preview?: React.ReactNode
-}) {
-  const rows = config.rows(data)
-  const status = data.health[config.statusKey]
-  const [tokenDraft, setTokenDraft] = useState(() => hasQueenbeeToken() ? 'configured' : '')
-  const [selectedId, setSelectedId] = useState<number | string | null>(() => rows[0]?.id ?? null)
-  const [mode, setMode] = useState<'edit' | 'create'>('edit')
-  const [form, setForm] = useState<Record<string, unknown>>({})
-  const [busy, setBusy] = useState(false)
-  const [message, setMessage] = useState<string | null>(null)
-
-  const selectedRow = useMemo(() => rows.find((row) => String(row.id) === String(selectedId)) || rows[0] || null, [rows, selectedId])
-
-  useEffect(() => {
-    if (mode === 'create') {
-      setForm(defaultForm(config.fields))
-      return
-    }
-    setForm(rowToForm(selectedRow, config.fields))
-  }, [config, mode, selectedRow])
-
-  async function save() {
-    setBusy(true)
-    setMessage(null)
-    try {
-      const payload = formToPayload(form, config.fields)
-      if (mode === 'create') {
-        await queenbeeRequest({ service: config.service, path: config.createPath, method: 'POST', data: payload })
-        setMessage(`${config.title} item created. Refresh to load the new row.`)
-      } else if (selectedRow) {
-        await queenbeeRequest({ service: config.service, path: config.updatePath(selectedRow.id), method: 'PUT', data: payload })
-        setMessage(`${config.title} item #${selectedRow.id} updated.`)
-      }
-    } catch (error) {
-      setMessage(error instanceof Error ? error.message : 'Save failed.')
-    } finally {
-      setBusy(false)
-    }
-  }
-
-  async function remove() {
-    if (!selectedRow) return
-    setBusy(true)
-    setMessage(null)
-    try {
-      await queenbeeRequest({
-        service: config.service,
-        path: config.deletePath(selectedRow.id),
-        method: 'DELETE',
-        data: config.deleteBody?.(selectedRow.id),
-      })
-      setMessage(`${config.title} item #${selectedRow.id} deleted. Refresh to update the list.`)
-    } catch (error) {
-      setMessage(error instanceof Error ? error.message : 'Delete failed.')
-    } finally {
-      setBusy(false)
-    }
-  }
-
-  function storeToken() {
-    if (tokenDraft && tokenDraft !== 'configured') {
-      setQueenbeeToken(tokenDraft)
-      setTokenDraft('configured')
-      setMessage('Queenbee token stored locally for this desktop app.')
-    }
-  }
-
-  return (
-    <PagePanel title={config.title} status={status}>
-      <div className="settings-grid">
-        <section className="settings-card">
-          <div className="settings-card-head">
-            <div>
-              <h2>{mode === 'create' ? `Create ${config.title}` : `Edit ${config.title}`}</h2>
-              <p>{hasQueenbeeToken() ? 'Queenbee token configured locally.' : 'Paste a Queenbee token to enable write actions.'}</p>
-            </div>
-            <div className="theme-segment">
-              <button className={mode === 'edit' ? 'active' : ''} onClick={() => setMode('edit')}><Pencil size={15} />Edit</button>
-              <button className={mode === 'create' ? 'active' : ''} onClick={() => setMode('create')}><Plus size={15} />Create</button>
-            </div>
-          </div>
-          <div className="settings-list">
-            <span><b>Token</b><input value={tokenDraft} placeholder="Queenbee bearer token" onChange={(event) => setTokenDraft(event.target.value)} onBlur={storeToken} /></span>
-          </div>
-          <div className="editor-form">
-            {config.fields.map((field) => (
-              <label key={field.name}>
-                <span>{field.label}{field.required ? ' *' : ''}</span>
-                {field.type === 'textarea' || field.type === 'json' ? (
-                  <textarea value={fieldValue(form[field.name])} placeholder={field.placeholder} onChange={(event) => setForm((current) => ({ ...current, [field.name]: event.target.value }))} />
-                ) : field.type === 'boolean' ? (
-                  <input type="checkbox" checked={Boolean(form[field.name])} onChange={(event) => setForm((current) => ({ ...current, [field.name]: event.target.checked }))} />
-                ) : (
-                  <input type={field.type === 'number' ? 'number' : field.type === 'datetime' ? 'datetime-local' : 'text'} value={fieldValue(form[field.name])} placeholder={field.placeholder} onChange={(event) => setForm((current) => ({ ...current, [field.name]: event.target.value }))} />
-                )}
-              </label>
-            ))}
-          </div>
-          <div className="launcher-row">
-            <button className="launcher-button" disabled={busy} onClick={save}>{busy ? 'Working...' : mode === 'create' ? 'Create' : 'Save'}</button>
-            {mode === 'edit' ? <button className="launcher-button" disabled={busy || !selectedRow} onClick={remove}><Trash2 size={15} />Delete</button> : null}
-            <button className="launcher-button" onClick={() => openInAppBrowser(`https://queenbee.login.no${config.queenbeePath}`)}>Open Queenbee <ExternalLink size={15} /></button>
-          </div>
-          {message ? <p className="update-message">{message}</p> : null}
-        </section>
-        <section className="settings-card">
-          <PanelTitle title="Rows" subtitle={`${rows.length} loaded`} />
-          <div className="table-list">
-            {rows.slice(0, 18).map((row) => (
-              <button key={row.id} className="table-row" onClick={() => { setMode('edit'); setSelectedId(row.id) }}>
-                <span className="row-action">{String(row.id).slice(0, 2)}</span>
-                <div><strong>{config.titleOf(row)}</strong><small>{config.metaOf(row)}</small></div>
-                <Pencil size={15} />
-              </button>
-            ))}
-            {!rows.length ? <EmptyState icon={<AlertCircle />} label={`${config.title} returned no rows.`} /> : null}
-          </div>
-        </section>
-        {preview ? <section className="settings-card full-span">{preview}</section> : null}
-      </div>
-    </PagePanel>
-  )
 }
 
 function Metric({ icon, label, value, status = 'error' }: { icon: React.ReactNode; label: string; value: number | string; status?: ServiceStatus }) {
@@ -1359,6 +1341,84 @@ function MusicRow({ title, meta, image }: { title: string; meta: string; image?:
   return <button className="music-row" onClick={() => openInAppBrowser('https://login.no/music')}>{image ? <img src={image} alt="" /> : <span><Music2 size={16} /></span>}<div><strong>{title}</strong><small>{meta}</small></div></button>
 }
 
+function InternalActionButton({
+  label,
+  path,
+  method = 'POST',
+  data,
+  confirm,
+  dangerous = false,
+}: {
+  label: string
+  path: string
+  method?: 'GET' | 'POST' | 'PUT' | 'DELETE'
+  data?: unknown
+  confirm: string
+  dangerous?: boolean
+}) {
+  const [state, setState] = useState<'idle' | 'busy' | 'done' | 'error'>('idle')
+  const tokenReady = hasQueenbeeToken()
+
+  async function run() {
+    if (!window.confirm(`${confirm}\n\nEndpoint: beekeeper/${path}`)) return
+    setState('busy')
+    try {
+      await queenbeeRequest({ service: 'beekeeper', path, method, data, timeoutMs: 20000 })
+      setState('done')
+    } catch {
+      setState('error')
+    }
+  }
+
+  return (
+    <button className={dangerous ? 'danger-action' : ''} disabled={!tokenReady || state === 'busy'} onClick={run}>
+      {state === 'busy' ? <Loader2 size={14} className="spin" /> : state === 'done' ? <CheckCircle2 size={14} /> : state === 'error' ? <AlertCircle size={14} /> : <Pencil size={14} />}
+      {state === 'busy' ? 'Running...' : state === 'done' ? 'Done' : state === 'error' ? 'Failed' : label}
+    </button>
+  )
+}
+
+function InternalMiniForm({
+  title,
+  path,
+  method = 'POST',
+  fields,
+  confirm,
+}: {
+  title: string
+  path: string
+  method?: 'POST' | 'PUT'
+  fields: EditorField[]
+  confirm: string
+}) {
+  const [state, setState] = useState<'idle' | 'busy' | 'done' | 'error'>('idle')
+  const tokenReady = hasQueenbeeToken()
+
+  async function submit(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault()
+    const payload = buildEditorPayload(fields, new FormData(event.currentTarget))
+    if (!window.confirm(`${confirm}\n\nEndpoint: beekeeper/${path}`)) return
+    setState('busy')
+    try {
+      await queenbeeRequest({ service: 'beekeeper', path, method, data: payload, timeoutMs: 20000 })
+      setState('done')
+    } catch {
+      setState('error')
+    }
+  }
+
+  return (
+    <form className="mini-admin-form" onSubmit={submit}>
+      <h3>{title}</h3>
+      {fields.map((field) => <EditorInput key={field.name} field={field} row={null} />)}
+      <button type="submit" disabled={!tokenReady || state === 'busy'}>
+        {state === 'busy' ? <Loader2 size={14} className="spin" /> : state === 'done' ? <CheckCircle2 size={14} /> : state === 'error' ? <AlertCircle size={14} /> : <Plus size={14} />}
+        {state === 'done' ? 'Done' : state === 'error' ? 'Failed' : 'Submit'}
+      </button>
+    </form>
+  )
+}
+
 function QueenbeeStatusBanner({ status, path }: { status?: ServiceStatus; path: string }) {
   return (
     <div className={`queenbee-banner ${status || 'error'}`}>
@@ -1455,25 +1515,6 @@ function combinedStatus(health: Record<string, ServiceStatus>, keys: string[]): 
 function openSource(item: RecentAddition) { const source = item.source || ''; if (source === 'events') return openInAppBrowser(`https://login.no/events/${item.id}`); if (source === 'jobs') return openInAppBrowser(`https://login.no/career/${item.id}`); if (source === 'albums') return openInAppBrowser(`https://login.no/albums/${item.id}`); if (source === 'organizations') return openInAppBrowser(`https://login.no/companies/${item.id}`); return openInAppBrowser('https://queenbee.login.no') }
 function displayName(item: Partial<NamedItem | AlbumItem>) { return item.name_en || item.name_no || item.name || `#${item.id}` }
 function stringValue(value: unknown) { return Array.isArray(value) ? value.filter(Boolean).join(' / ') : typeof value === 'string' ? value : '' }
-function fieldValue(value: unknown) { return typeof value === 'string' || typeof value === 'number' ? String(value) : value == null ? '' : JSON.stringify(value, null, 2) }
-function defaultForm(fields: EditorField[]) { return Object.fromEntries(fields.map((field) => [field.name, field.type === 'boolean' ? false : ''])) }
-function rowToForm(row: EditableRow | null, fields: EditorField[]) { return Object.fromEntries(fields.map((field) => [field.name, row ? row[field.name] ?? '' : field.type === 'boolean' ? false : ''])) }
-function formToPayload(form: Record<string, unknown>, fields: EditorField[]) {
-  return Object.fromEntries(fields.map((field) => {
-    const value = form[field.name]
-    if (field.type === 'number') return [field.name, value === '' || value == null ? null : Number(value)]
-    if (field.type === 'boolean') return [field.name, Boolean(value)]
-    if (field.type === 'json') {
-      if (typeof value !== 'string') return [field.name, value]
-      try {
-        return [field.name, JSON.parse(value)]
-      } catch {
-        return [field.name, value]
-      }
-    }
-    return [field.name, value === '' ? null : value]
-  }))
-}
 function formatNumber(value?: number | string) { const number = typeof value === 'string' ? Number(value) : value; return typeof number === 'number' && Number.isFinite(number) ? Intl.NumberFormat('en-US', { notation: number > 99999 ? 'compact' : 'standard' }).format(number) : '0' }
 function formatPercent(value?: number) { return typeof value === 'number' && Number.isFinite(value) ? `${Math.round(value * (value <= 1 ? 100 : 1))}%` : '0%' }
 function jobTitle(job: JobItem) { return job.title_en || job.title_no || job.title || job.name_en || job.name_no || `Job #${job.id}` }

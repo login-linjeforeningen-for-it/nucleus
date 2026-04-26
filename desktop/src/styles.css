@@ -1255,6 +1255,50 @@ button { font: inherit; }
   line-height: 1.4;
 }
 
+.mini-admin-form {
+  min-width: 0;
+  border: 1px solid var(--line);
+  border-radius: 13px;
+  background: var(--panel-strong);
+  padding: 12px;
+  display: grid;
+  gap: 9px;
+  margin-bottom: 12px;
+}
+
+.mini-admin-form.inline {
+  grid-template-columns: repeat(5, minmax(0, 1fr)) auto;
+  align-items: end;
+}
+
+.mini-admin-form h3 {
+  margin: 0;
+  font-size: 14px;
+  letter-spacing: -0.02em;
+}
+
+.mini-admin-form.inline h3 {
+  grid-column: 1 / -1;
+}
+
+.mini-admin-form button {
+  border: 1px solid rgba(245,139,69,0.24);
+  border-radius: 9px;
+  background: rgba(245,139,69,0.10);
+  color: var(--text);
+  padding: 9px 10px;
+  font-size: 12px;
+  font-weight: 800;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+}
+
+.mini-admin-form button:disabled {
+  opacity: 0.45;
+}
+
 .log-list {
   display: grid;
   gap: 8px;
@@ -2208,6 +2252,10 @@ button { font: inherit; }
   }
 
   .editor-form {
+    grid-template-columns: 1fr;
+  }
+
+  .mini-admin-form.inline {
     grid-template-columns: 1fr;
   }
 

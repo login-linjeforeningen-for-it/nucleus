@@ -251,6 +251,24 @@ export type TrafficMetrics = {
   top_status_codes?: Array<{ key: string; count?: number; avg_time?: number }>
 }
 
+export type TrafficRecord = {
+  id?: number | string
+  timestamp?: string
+  method?: string
+  path?: string
+  domain?: string
+  country_iso?: string
+  status?: number
+  request_time?: number
+  user_agent?: string
+  referer?: string
+}
+
+export type TrafficRecords = {
+  result?: TrafficRecord[]
+  total?: number
+}
+
 export type VulnerabilityReport = {
   generatedAt?: string | null
   imageCount?: number
@@ -301,6 +319,30 @@ export type DockerLogs = {
   }>
 }
 
+export type MonitoringNotification = {
+  id: number | string
+  name?: string
+  message?: string
+  webhook?: string
+}
+
+export type MonitoringTag = {
+  id: number | string
+  name?: string
+  color?: string
+}
+
+export type BackupItem = {
+  id?: string
+  name?: string
+  status?: string
+  lastBackup?: string | null
+  nextBackup?: string | null
+  dbSize?: string
+  totalStorage?: string
+  error?: string
+}
+
 export type DashboardData = {
   counts: DashboardCounts
   categories: CategoryStat[]
@@ -326,6 +368,11 @@ export type DashboardData = {
     vulnerabilities: VulnerabilityReport | null
     docker: DockerOverview | null
     logs: DockerLogs | null
+    trafficDomains: string[]
+    trafficRecords: TrafficRecords | null
+    monitoringNotifications: MonitoringNotification[]
+    monitoringTags: MonitoringTag[]
+    backups: BackupItem[]
   }
   health: Record<string, ServiceStatus>
   fetchedAt: string
@@ -478,6 +525,11 @@ export async function loadDashboardData(): Promise<DashboardData> {
     vulnerabilities,
     docker,
     logs,
+    trafficDomains,
+    trafficRecords,
+    monitoringNotifications,
+    monitoringTags,
+    backups,
   ] = await Promise.all([
     safe('events', () => requestJson<WorkerbeeResponse<EventItem, 'events'>>(`${WORKERBEE}/events?limit=24&order_by=time_start&sort=asc`), health),
     safe('jobs', () => requestJson<WorkerbeeResponse<JobItem, 'jobs'>>(`${WORKERBEE}/jobs?limit=24&offset=0`), health),
@@ -501,6 +553,11 @@ export async function loadDashboardData(): Promise<DashboardData> {
     safe('vulnerabilities', () => requestJson<VulnerabilityReport>(`${BEEKEEPER}/vulnerabilities`, 7000), health),
     safe('docker', () => requestJson<DockerOverview>(`${BEEKEEPER}/docker`, 7000), health),
     safe('logs', () => requestJson<DockerLogs>(`${BEEKEEPER}/docker/logs?limit=12`, 7000), health),
+    safe('traffic-domains', () => requestJson<{ domains?: string[] }>(`${BEEKEEPER}/traffic/domains`, 7000), health),
+    safe('traffic-records', () => requestJson<TrafficRecords>(`${BEEKEEPER}/traffic/records?limit=13&page=1`, 7000), health),
+    safe('monitoring-notifications', () => requestJson<MonitoringNotification[]>(`${BEEKEEPER}/monitoring/notifications`, 7000), health),
+    safe('monitoring-tags', () => requestJson<MonitoringTag[]>(`${BEEKEEPER}/monitoring/tags`, 7000), health),
+    safe('backups', () => requestJson<BackupItem[]>(`${BEEKEEPER}/backup`, 9000), health),
   ])
 
   return {
@@ -536,6 +593,11 @@ export async function loadDashboardData(): Promise<DashboardData> {
       vulnerabilities,
       docker,
       logs,
+      trafficDomains: Array.isArray(trafficDomains?.domains) ? trafficDomains.domains : [],
+      trafficRecords,
+      monitoringNotifications: Array.isArray(monitoringNotifications) ? monitoringNotifications : [],
+      monitoringTags: Array.isArray(monitoringTags) ? monitoringTags : [],
+      backups: Array.isArray(backups) ? backups : [],
     },
     health,
     fetchedAt: new Date().toISOString(),
