@@ -25,7 +25,7 @@ jobs:
       DEPLOY_PATH: ${{ secrets.APP_API_DESKTOP_DEPLOY_PATH }}
       TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
       TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
-      DESKTOP_UPDATE_PUBLIC_BASE_URL: https://hanasand.com/api/app
+      DESKTOP_UPDATE_PUBLIC_BASE_URL: https://app.login.no/api/desktop
     defaults:
       run:
         working-directory: desktop

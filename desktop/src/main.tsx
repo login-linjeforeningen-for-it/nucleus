@@ -679,7 +679,7 @@ function AutoUpdatePanel({ state }: { state: AutoUpdateState }) {
   const Icon = state.status === 'available' || state.status === 'current' ? CheckCircle2 : state.status === 'error' ? AlertCircle : RefreshCcw
   const manifest = state.manifest
   const firstPlatform = manifest?.platforms ? Object.keys(manifest.platforms)[0] : null
-  const source = firstPlatform && manifest?.platforms?.[firstPlatform]?.url ? new URL(manifest.platforms[firstPlatform].url).pathname : '/api/app'
+  const source = firstPlatform && manifest?.platforms?.[firstPlatform]?.url ? new URL(manifest.platforms[firstPlatform].url).pathname : '/api/desktop'
 
   return (
     <section className={`update-panel ${state.status}`} aria-label="Automatic desktop update">
@@ -1391,7 +1391,7 @@ function SettingsPage({
         <ThemePreview />
       </section>
       <section className="settings-card">
-        <PanelTitle title="Automatic Updates" subtitle="Hanasand API /api/app" />
+        <PanelTitle title="Automatic Updates" subtitle="app-api /api/desktop" />
         <AutoUpdatePanel state={updateState} />
       </section>
       <section className="settings-card">
@@ -1410,7 +1410,7 @@ function SettingsPage({
         <div className="settings-list">
           <span><b>Theme</b>{themePreference}</span>
           <span><b>Version</b>{DESKTOP_APP_VERSION}</span>
-          <span><b>Update endpoint</b>/api/app</span>
+          <span><b>Update endpoint</b>/api/desktop</span>
         </div>
       </section>
     </div>
@@ -1422,7 +1422,7 @@ function ThemePreview() {
     ['1', 'const desktopTheme = {', false],
     ['2', '  surface: "sidebar",', true],
     ['3', '  accent: "#f58b45",', true],
-    ['4', '  updateSource: "/api/app",', false],
+    ['4', '  updateSource: "/api/desktop",', false],
     ['5', '};', false],
   ] as const
 

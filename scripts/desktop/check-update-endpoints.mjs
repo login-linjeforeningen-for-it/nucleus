@@ -3,10 +3,10 @@ import { fileURLToPath } from 'node:url'
 import path from 'node:path'
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..')
-const expectedBase = 'https://hanasand.com/api/app'
+const expectedBase = 'https://app.login.no/api/desktop'
 const stalePatterns = [
-  'https://app.login.no/api/desktop',
-  '/api/desktop',
+  'https://hanasand.com/api/app',
+  '/api/app',
 ]
 
 const files = [
