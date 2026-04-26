@@ -6,7 +6,7 @@ const desktopRoot = path.resolve('desktop')
 const tauriConfigPath = path.join(desktopRoot, 'src-tauri', 'tauri.conf.json')
 const bundleRoot = path.join(desktopRoot, 'src-tauri', 'target', 'release', 'bundle')
 const outputDir = path.resolve(process.env.DESKTOP_UPDATE_OUTPUT_DIR ?? 'desktop-update')
-const publicBaseUrl = (process.env.DESKTOP_UPDATE_PUBLIC_BASE_URL ?? 'https://app.login.no/api/desktop').replace(/\/$/, '')
+const publicBaseUrl = (process.env.DESKTOP_UPDATE_PUBLIC_BASE_URL ?? 'https://hanasand.com/api/app').replace(/\/$/, '')
 const platform = process.env.TAURI_UPDATE_PLATFORM ?? detectPlatform()
 
 const config = JSON.parse(await readFile(tauriConfigPath, 'utf8'))

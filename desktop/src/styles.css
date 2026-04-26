@@ -381,7 +381,75 @@ button { font: inherit; }
   white-space: nowrap;
   font-size: 13px;
 }
+.sync-card button {
+  width: 25px;
+  height: 25px;
+  display: grid;
+  place-items: center;
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 999px;
+  color: var(--text);
+  background: rgba(255,255,255,0.055);
+}
+.sync-card button:hover {
+  border-color: rgba(245,139,69,0.36);
+  background: rgba(245,139,69,0.14);
+}
+.sync-card button:disabled {
+  color: var(--dim);
+  cursor: progress;
+}
 .sync-dot { width: 9px; height: 9px; border-radius: 99px; background: var(--green); box-shadow: 0 0 16px var(--green); }
+
+.editor-search {
+  margin: 0 0 12px;
+}
+
+.service-admin-list {
+  display: grid;
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.service-admin-card {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  gap: 14px;
+  align-items: center;
+  border: 1px solid rgba(255,255,255,0.07);
+  border-radius: 16px;
+  padding: 14px;
+  background: var(--panel-strong);
+}
+
+.service-admin-card > div:first-child {
+  min-width: 0;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 4px 10px;
+  align-items: center;
+}
+
+.service-admin-card strong,
+.service-admin-card small {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.service-admin-card small {
+  grid-column: 2;
+  color: var(--muted);
+}
+
+.service-admin-meta {
+  display: inline-flex;
+  gap: 8px;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 800;
+}
 
 .update-panel {
   position: absolute;
@@ -1227,6 +1295,59 @@ button { font: inherit; }
   display: inline-flex;
   align-items: center;
   gap: 6px;
+  font-size: 12px;
+}
+
+.editor-search {
+  margin-bottom: 10px;
+}
+
+.editor-search.full-span {
+  grid-column: 1 / -1;
+}
+
+.service-admin-list {
+  display: grid;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.service-admin-card {
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--panel-strong);
+  padding: 12px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  gap: 12px;
+  align-items: center;
+}
+
+.service-admin-card > div:first-child {
+  min-width: 0;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 4px 8px;
+  align-items: center;
+}
+
+.service-admin-card strong,
+.service-admin-card small {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.service-admin-card small {
+  grid-column: 2;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.service-admin-meta {
+  display: flex;
+  gap: 6px;
+  color: var(--muted);
   font-size: 12px;
 }
 
@@ -2256,6 +2377,10 @@ button { font: inherit; }
   }
 
   .mini-admin-form.inline {
+    grid-template-columns: 1fr;
+  }
+
+  .service-admin-card {
     grid-template-columns: 1fr;
   }
 

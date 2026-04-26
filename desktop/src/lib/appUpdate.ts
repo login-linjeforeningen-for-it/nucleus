@@ -16,7 +16,7 @@ export type AutoUpdateState =
 
 export const DESKTOP_APP_VERSION = '0.1.1'
 
-const APP_UPDATE_API = import.meta.env.VITE_LOGIN_DESKTOP_UPDATE_API ?? `https://app.login.no/api/desktop/darwin-aarch64/${DESKTOP_APP_VERSION}`
+const APP_UPDATE_API = import.meta.env.VITE_LOGIN_DESKTOP_UPDATE_API ?? `https://hanasand.com/api/app/darwin-aarch64/${DESKTOP_APP_VERSION}`
 
 export async function fetchAppUpdateManifest() {
   const response = await fetch(APP_UPDATE_API, {

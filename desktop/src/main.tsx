@@ -3,6 +3,8 @@ import { createRoot, Root } from 'react-dom/client'
 import {
   Activity,
   AlertCircle,
+  ArrowLeft,
+  ArrowRight,
   Bell,
   BriefcaseBusiness,
   CalendarDays,
@@ -35,6 +37,7 @@ import {
   Sun,
   Trash2,
   UsersRound,
+  X,
 } from 'lucide-react'
 import {
   AlbumItem,
@@ -56,6 +59,7 @@ import {
   setQueenbeeToken,
 } from './lib/api'
 import { AutoUpdateState, DESKTOP_APP_VERSION, fetchAppUpdateManifest, hasNewerDesktopVersion } from './lib/appUpdate'
+import type { BrowserTarget } from './lib/inAppBrowser'
 import { openInAppBrowser } from './lib/inAppBrowser'
 import './styles.css'
 
@@ -87,6 +91,9 @@ const links = [
   { label: 'Nucleus', url: 'https://login.no/app' },
   { label: 'Status', url: 'https://login.no/status' },
 ]
+
+const DASHBOARD_CACHE_KEY = 'login-desktop.dashboard-cache'
+const DASHBOARD_REFRESH_MS = 1000 * 60
 
 const menu: NavItem[] = [
   { key: 'dashboard', label: 'Dashboard', icon: Grid2X2 },
@@ -345,11 +352,30 @@ function readInitialPage(): PageKey {
   return menu.some((item) => item.key === page) ? page as PageKey : 'dashboard'
 }
 
+function readCachedDashboard() {
+  try {
+    const raw = window.localStorage.getItem(DASHBOARD_CACHE_KEY)
+    return raw ? JSON.parse(raw) as DashboardData : null
+  } catch {
+    return null
+  }
+}
+
+function cacheDashboard(data: DashboardData) {
+  try {
+    window.localStorage.setItem(DASHBOARD_CACHE_KEY, JSON.stringify(data))
+  } catch {
+    // Local cache is an enhancement; failures should never block live data.
+  }
+}
+
 function App() {
   const [activePage, setActivePage] = useState<PageKey>(() => readInitialPage())
   const [themePreference, setThemePreference] = useState<ThemePreference>(() => readThemePreference())
-  const [data, setData] = useState<DashboardData | null>(null)
+  const [data, setData] = useState<DashboardData | null>(() => readCachedDashboard())
   const [error, setError] = useState<string | null>(null)
+  const [refreshing, setRefreshing] = useState(false)
+  const [browserTarget, setBrowserTarget] = useState<BrowserTarget | null>(null)
   const contentRef = useRef<HTMLElement | null>(null)
   const [updateState, setUpdateState] = useState<AutoUpdateState>({
     status: 'checking',
@@ -357,14 +383,31 @@ function App() {
     manifest: null,
   })
 
-  useEffect(() => {
-    let active = true
-    loadDashboardData()
-      .then((next) => active && setData(next))
-      .catch((err) => active && setError(err instanceof Error ? err.message : 'Unable to load Login data'))
-    return () => {
-      active = false
+  async function refreshDashboard() {
+    setRefreshing(true)
+    try {
+      const next = await loadDashboardData()
+      setData(next)
+      cacheDashboard(next)
+      setError(null)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Unable to load Login data')
+    } finally {
+      setRefreshing(false)
     }
+  }
+
+  useEffect(() => {
+    window.loginOpenInAppBrowser = setBrowserTarget
+    return () => {
+      delete window.loginOpenInAppBrowser
+    }
+  }, [])
+
+  useEffect(() => {
+    void refreshDashboard()
+    const timer = window.setInterval(() => void refreshDashboard(), DASHBOARD_REFRESH_MS)
+    return () => window.clearInterval(timer)
   }, [])
 
   useEffect(() => {
@@ -373,6 +416,10 @@ function App() {
 
   useEffect(() => {
     if (contentRef.current) contentRef.current.scrollTop = 0
+    const url = new URL(window.location.href)
+    if (activePage === 'dashboard') url.searchParams.delete('page')
+    else url.searchParams.set('page', activePage)
+    window.history.replaceState(null, '', url)
   }, [activePage])
 
   useEffect(() => {
@@ -428,13 +475,70 @@ function App() {
       </aside>
 
       <section className="content" ref={contentRef}>
-        {activePage === 'dashboard' ? <Hero data={data} updateState={updateState} /> : <PageHero page={activePage} data={data} />}
+        {activePage === 'dashboard'
+          ? <Hero data={data} updateState={updateState} refreshing={refreshing} onRefresh={refreshDashboard} />
+          : <PageHero page={activePage} data={data} refreshing={refreshing} onRefresh={refreshDashboard} />}
         {error ? <div className="error-card">{error}</div> : null}
         {activePage === 'settings'
           ? <SettingsPage themePreference={themePreference} onThemePreferenceChange={setThemePreference} updateState={updateState} />
           : !data ? <LoadingState /> : <PageRouter page={activePage} data={data} updateState={updateState} />}
       </section>
+      <InAppBrowser target={browserTarget} onClose={() => setBrowserTarget(null)} />
     </main>
+  )
+}
+
+function InAppBrowser({ target, onClose }: { target: BrowserTarget | null; onClose: () => void }) {
+  const frameRef = useRef<HTMLIFrameElement | null>(null)
+  const [loadKey, setLoadKey] = useState(0)
+  const [loading, setLoading] = useState(false)
+
+  useEffect(() => {
+    if (!target) return
+    setLoading(true)
+    setLoadKey((current) => current + 1)
+  }, [target])
+
+  if (!target) return null
+
+  function navigate(direction: 'back' | 'forward') {
+    try {
+      if (direction === 'back') frameRef.current?.contentWindow?.history.back()
+      else frameRef.current?.contentWindow?.history.forward()
+    } catch {
+      // Cross-origin history can be blocked; the embedded browser remains usable.
+    }
+  }
+
+  return (
+    <section className="browser-shell" aria-label="Login in-app browser">
+      <div className="browser-toolbar">
+        <div className="browser-controls">
+          <button onClick={() => navigate('back')} aria-label="Go back"><ArrowLeft size={17} /></button>
+          <button onClick={() => navigate('forward')} aria-label="Go forward"><ArrowRight size={17} /></button>
+          <button onClick={() => setLoadKey((current) => current + 1)} aria-label="Reload"><RefreshCcw size={17} /></button>
+        </div>
+        <div className="browser-address">
+          <Globe2 size={16} />
+          <div>
+            <strong>{target.title || 'Login Browser'}</strong>
+            <span>{target.url}</span>
+          </div>
+        </div>
+        <button className="browser-close" onClick={onClose} aria-label="Close browser"><X size={18} /></button>
+      </div>
+      <div className="browser-frame-wrap">
+        {loading ? <div className="browser-loading"><Loader2 className="spin" /><span>Loading inside Login Desktop...</span></div> : null}
+        <iframe
+          key={`${target.url}-${loadKey}`}
+          ref={frameRef}
+          src={target.url}
+          title={target.title || 'Login Browser'}
+          className="browser-frame"
+          onLoad={() => setLoading(false)}
+        />
+      </div>
+    </section>
   )
 }
 
@@ -468,7 +572,17 @@ function PageRouter({ page, data, updateState }: { page: PageKey; data: Dashboar
   }
 }
 
-function Hero({ data, updateState }: { data: DashboardData | null; updateState: AutoUpdateState }) {
+function Hero({
+  data,
+  updateState,
+  refreshing,
+  onRefresh,
+}: {
+  data: DashboardData | null
+  updateState: AutoUpdateState
+  refreshing: boolean
+  onRefresh: () => void
+}) {
   return (
     <header className="hero-card">
       <div className="hero-mark"><LoginMark /></div>
@@ -487,13 +601,26 @@ function Hero({ data, updateState }: { data: DashboardData | null; updateState: 
       <div className="sync-card">
         <span className="sync-dot" />
         <span>{data ? `Synced ${formatTime(data.fetchedAt)}` : 'Connecting to Login APIs'}</span>
+        <button onClick={onRefresh} disabled={refreshing} aria-label="Refresh dashboard">
+          <RefreshCcw size={13} className={refreshing ? 'spin' : ''} />
+        </button>
       </div>
       <AutoUpdatePanel state={updateState} />
     </header>
   )
 }
 
-function PageHero({ page, data }: { page: PageKey; data: DashboardData | null }) {
+function PageHero({
+  page,
+  data,
+  refreshing,
+  onRefresh,
+}: {
+  page: PageKey
+  data: DashboardData | null
+  refreshing: boolean
+  onRefresh: () => void
+}) {
   const meta = pageMeta(page, data)
   const Icon = meta.icon
   return (
@@ -507,6 +634,9 @@ function PageHero({ page, data }: { page: PageKey; data: DashboardData | null })
       <div className="sync-card compact-sync">
         <span className="sync-dot" />
         <span>{data ? `Synced ${formatTime(data.fetchedAt)}` : 'Connecting'}</span>
+        <button onClick={onRefresh} disabled={refreshing} aria-label="Refresh dashboard">
+          <RefreshCcw size={13} className={refreshing ? 'spin' : ''} />
+        </button>
       </div>
     </header>
   )
@@ -549,7 +679,7 @@ function AutoUpdatePanel({ state }: { state: AutoUpdateState }) {
   const Icon = state.status === 'available' || state.status === 'current' ? CheckCircle2 : state.status === 'error' ? AlertCircle : RefreshCcw
   const manifest = state.manifest
   const firstPlatform = manifest?.platforms ? Object.keys(manifest.platforms)[0] : null
-  const source = firstPlatform && manifest?.platforms?.[firstPlatform]?.url ? new URL(manifest.platforms[firstPlatform].url).pathname : '/api/desktop'
+  const source = firstPlatform && manifest?.platforms?.[firstPlatform]?.url ? new URL(manifest.platforms[firstPlatform].url).pathname : '/api/app'
 
   return (
     <section className={`update-panel ${state.status}`} aria-label="Automatic desktop update">
@@ -659,8 +789,10 @@ function EditorPage<T extends EditableRow>({ data, config, preview }: { data: Da
   const [editing, setEditing] = useState<T | null>(rows[0] || null)
   const [mode, setMode] = useState<'create' | 'update'>(rows[0] ? 'update' : 'create')
   const [message, setMessage] = useState('Ready. Add a Queenbee token in Settings to push changes.')
+  const [query, setQuery] = useState('')
   const [busy, setBusy] = useState(false)
   const tokenReady = hasQueenbeeToken()
+  const filteredRows = rows.filter((row) => `${config.titleOf(row)} ${config.metaOf(row)} ${row.id}`.toLowerCase().includes(query.toLowerCase()))
 
   function startCreate() {
     setMode('create')
@@ -728,10 +860,11 @@ function EditorPage<T extends EditableRow>({ data, config, preview }: { data: Da
       </section>
 
       <section className="panel editor-list-panel">
-        <PanelTitle title={`${config.title} Rows`} subtitle={`${rows.length} loaded from Queenbee`} />
+        <PanelTitle title={`${config.title} Rows`} subtitle={`${filteredRows.length} of ${rows.length} loaded from Queenbee`} />
+        <label className="editor-field editor-search"><span>Search</span><input value={query} onChange={(event) => setQuery(event.target.value)} placeholder={`Search ${config.title.toLowerCase()}`} /></label>
         {status !== 'live' ? <EmptyState icon={<AlertCircle />} label={`${config.title} endpoint is ${status || 'unavailable'}.`} /> : null}
         <div className="editor-row-list">
-          {rows.map((row) => (
+          {filteredRows.map((row) => (
             <article className={editing?.id === row.id ? 'editor-row-card active' : 'editor-row-card'} key={row.id}>
               <div>
                 <strong>{config.titleOf(row)}</strong>
@@ -893,6 +1026,8 @@ function DatabaseOverview({ value }: { value: unknown }) {
 }
 
 function MonitoringPage({ data }: { data: DashboardData }) {
+  const [serviceQuery, setServiceQuery] = useState('')
+  const filteredServices = data.statusServices.filter((service) => `${service.name} ${service.url || ''} ${service.id}`.toLowerCase().includes(serviceQuery.toLowerCase()))
   return (
     <PagePanel title="Monitoring" status={data.health.status}>
       <div className="traffic-grid">
@@ -933,44 +1068,104 @@ function MonitoringPage({ data }: { data: DashboardData }) {
         <article className="queenbee-card"><Bell size={18} /><h3>Notifications</h3><p>{data.queenbee.monitoringNotifications.length} routes configured</p><span>{data.health['monitoring-notifications'] || 'unknown'}</span></article>
         <article className="queenbee-card"><FileText size={18} /><h3>Tags</h3><p>{data.queenbee.monitoringTags.map((tag) => tag.name).filter(Boolean).join(', ') || 'No tags loaded'}</p><span>{data.health['monitoring-tags'] || 'unknown'}</span></article>
       </div>
-      <StatusList services={data.statusServices} status={data.health.status} expanded />
+      <label className="editor-field editor-search"><span>Search services</span><input value={serviceQuery} onChange={(event) => setServiceQuery(event.target.value)} placeholder="Filter monitoring services" /></label>
+      <div className="service-admin-list">
+        {filteredServices.map((service) => <MonitoringServiceCard key={service.id} service={service} />)}
+      </div>
     </PagePanel>
+  )
+}
+
+function MonitoringServiceCard({ service }: { service: DashboardData['statusServices'][number] }) {
+  const latest = service.bars?.[0]
+  const up = latest?.status === true || latest?.status === 1
+  return (
+    <article className="service-admin-card">
+      <div>
+        <span className={up ? 'status-light up' : 'status-light'} />
+        <strong>{service.name}</strong>
+        <small>{service.url || `Service #${service.id}`}</small>
+      </div>
+      <div className="service-admin-meta">
+        <span>{latest?.delay ? `${Math.round(latest.delay)} ms` : 'waiting'}</span>
+        <span>{up ? 'UP' : 'CHECK'}</span>
+      </div>
+      <div className="editor-actions">
+        <InternalActionButton label="Delete service" path={`monitoring/${service.id}`} method="DELETE" dangerous confirm={`Delete monitoring service ${service.name}?`} />
+        <button onClick={() => openInAppBrowser(`https://queenbee.login.no/internal/monitoring?service=${service.id}`)}>Queenbee <ExternalLink size={14} /></button>
+      </div>
+    </article>
   )
 }
 
 function ServicesPage({ data }: { data: DashboardData }) {
   const containers = data.queenbee.docker?.containers || []
+  const [query, setQuery] = useState('')
+  const filteredContainers = containers.filter((container) => `${container.name || ''} ${container.image || ''} ${container.status || ''} ${container.state || ''}`.toLowerCase().includes(query.toLowerCase()))
   return (
     <PagePanel title="Services" status={data.health.docker}>
       <QueenbeeStatusBanner status={data.health.docker} path="/docker" />
-      {data.health.docker === 'live' && containers.length ? (
+      <label className="editor-field editor-search"><span>Search containers</span><input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Filter services and containers" /></label>
+      {data.health.docker === 'live' && filteredContainers.length ? (
         <div className="queenbee-grid">
-          {containers.map((container) => (
+          {filteredContainers.map((container) => {
+            const deployment = (container as Record<string, unknown>).deployment as Record<string, unknown> | undefined
+            return (
             <article className="queenbee-card" key={container.id || container.name || container.image}>
               <Server size={18} />
               <h3>{container.name || container.image || 'Container'}</h3>
               <p>{container.image || 'No image returned.'}</p>
-              <span>{container.state || container.status || 'unknown'}</span>
+              <span>{container.state || container.status || 'unknown'}{deployment?.updateAvailable ? ' · update available' : ''}</span>
               {container.id ? (
                 <div className="editor-actions">
                   <InternalActionButton label="Deploy update" path={`deployments/${container.id}/run`} confirm={`Run deployment for ${container.name || container.id}?`} />
                   <InternalActionButton label="Enable auto" path={`deployments/${container.id}/auto`} method="PUT" data={{ enabled: true }} confirm={`Enable auto deploy for ${container.name || container.id}?`} />
                   <InternalActionButton label="Delete" path={`docker/${container.id}`} method="DELETE" dangerous confirm={`Delete container ${container.name || container.id}?`} />
+                  <button onClick={() => openInAppBrowser(`https://queenbee.login.no/internal/services/${container.id}`)}>Details <ExternalLink size={14} /></button>
                 </div>
               ) : null}
             </article>
-          ))}
+          )})}
         </div>
-      ) : data.health.docker === 'live' ? <EmptyState icon={<Server />} label="No Docker containers returned." /> : <ProtectedQueenbeeGrid />}
+      ) : data.health.docker === 'live' ? <EmptyState icon={<Server />} label="No Docker containers matched." /> : <ProtectedQueenbeeGrid />}
     </PagePanel>
   )
 }
 
 function TrafficPage({ data }: { data: DashboardData }) {
-  const traffic = data.queenbee.traffic
+  const [traffic, setTraffic] = useState(data.queenbee.traffic)
+  const [trafficMessage, setTrafficMessage] = useState('Showing latest loaded traffic metrics.')
+
+  async function filterTraffic(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault()
+    const form = new FormData(event.currentTarget)
+    const params = new URLSearchParams()
+    for (const key of ['domain', 'time_start', 'time_end']) {
+      const value = String(form.get(key) || '').trim()
+      if (value) params.set(key, value)
+    }
+    setTrafficMessage('Loading traffic metrics...')
+    try {
+      const next = await queenbeeRequest<typeof data.queenbee.traffic>({ service: 'beekeeper', path: `traffic/metrics?${params.toString()}`, method: 'GET' })
+      setTraffic(next)
+      setTrafficMessage('Traffic metrics updated.')
+    } catch (error) {
+      setTrafficMessage(error instanceof Error ? error.message : 'Unable to load traffic metrics.')
+    }
+  }
+
   return (
     <PagePanel title="Traffic" status={data.health.traffic}>
       <QueenbeeStatusBanner status={data.health.traffic} path="/traffic/metrics" />
+      <form className="mini-admin-form inline traffic-filter-form" onSubmit={filterTraffic}>
+        <h3>Filter metrics</h3>
+        <label className="editor-field"><span>Domain</span><input name="domain" list="traffic-domains" /></label>
+        <datalist id="traffic-domains">{data.queenbee.trafficDomains.map((domain) => <option key={domain} value={domain} />)}</datalist>
+        <label className="editor-field"><span>Start</span><input name="time_start" type="datetime-local" /></label>
+        <label className="editor-field"><span>End</span><input name="time_end" type="datetime-local" /></label>
+        <button type="submit" disabled={!hasQueenbeeToken()}><RefreshCcw size={14} />Apply</button>
+      </form>
+      <p className="editor-message">{trafficMessage}</p>
       {data.health.traffic === 'live' && traffic ? (
         <div className="traffic-grid">
           <article className="music-stat-card"><span>Total requests</span><strong>{formatNumber(traffic.total_requests)}</strong><small>{formatNumber(traffic.error_count)} errors</small></article>
@@ -987,10 +1182,41 @@ function TrafficPage({ data }: { data: DashboardData }) {
 
 function TrafficRecordsPage({ data }: { data: DashboardData }) {
   const traffic = data.queenbee.traffic
-  const records = data.queenbee.trafficRecords?.result || []
+  const [records, setRecords] = useState(data.queenbee.trafficRecords?.result || [])
+  const [total, setTotal] = useState(data.queenbee.trafficRecords?.total || records.length)
+  const [message, setMessage] = useState('Showing latest traffic records.')
+
+  async function filterRecords(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault()
+    const form = new FormData(event.currentTarget)
+    const params = new URLSearchParams()
+    for (const key of ['domain', 'limit', 'page', 'start', 'end']) {
+      const value = String(form.get(key) || '').trim()
+      if (value) params.set(key, value)
+    }
+    setMessage('Loading traffic records...')
+    try {
+      const next = await queenbeeRequest<typeof data.queenbee.trafficRecords>({ service: 'beekeeper', path: `traffic/records?${params.toString()}`, method: 'GET' })
+      setRecords(next?.result || [])
+      setTotal(next?.total || 0)
+      setMessage('Traffic records updated.')
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : 'Unable to load traffic records.')
+    }
+  }
+
   return (
     <PagePanel title="Traffic Records" status={data.health['traffic-records'] || data.health.traffic}>
       <QueenbeeStatusBanner status={data.health['traffic-records'] || data.health.traffic} path="/traffic/records" />
+      <form className="mini-admin-form inline traffic-filter-form" onSubmit={filterRecords}>
+        <h3>Filter records ({formatNumber(total)} total)</h3>
+        <label className="editor-field"><span>Domain</span><input name="domain" list="traffic-record-domains" /></label>
+        <datalist id="traffic-record-domains">{data.queenbee.trafficDomains.map((domain) => <option key={domain} value={domain} />)}</datalist>
+        <label className="editor-field"><span>Limit</span><input name="limit" type="number" defaultValue={13} /></label>
+        <label className="editor-field"><span>Page</span><input name="page" type="number" defaultValue={1} /></label>
+        <button type="submit" disabled={!hasQueenbeeToken()}><RefreshCcw size={14} />Apply</button>
+      </form>
+      <p className="editor-message">{message}</p>
       {records.length ? (
         <div className="log-list">
           {records.map((record, index) => <article className="log-row" key={record.id || index}><span>{record.status || record.method || 'request'}</span><p>{record.domain}{record.path ? ` ${record.path}` : ''}</p><time>{record.timestamp ? formatDate(record.timestamp) : record.request_time ? `${record.request_time} ms` : ''}</time></article>)}
@@ -1002,6 +1228,8 @@ function TrafficRecordsPage({ data }: { data: DashboardData }) {
 }
 
 function BackupsPage({ data }: { data: DashboardData }) {
+  const [query, setQuery] = useState('')
+  const backups = data.queenbee.backups.filter((backup) => `${backup.name || ''} ${backup.id || ''} ${backup.status || ''}`.toLowerCase().includes(query.toLowerCase()))
   return (
     <PagePanel title="Backups" status={data.health.backups}>
       <QueenbeeStatusBanner status={data.health.backups} path="/backup" />
@@ -1018,8 +1246,9 @@ function BackupsPage({ data }: { data: DashboardData }) {
           { name: 'file', label: 'Backup file', required: true },
         ]}
       />
+      <label className="editor-field editor-search"><span>Search backups</span><input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Filter backup services" /></label>
       <div className="queenbee-grid">
-        {data.queenbee.backups.map((backup, index) => (
+        {backups.map((backup, index) => (
           <article className="queenbee-card" key={backup.id || backup.name || index}>
             <Database size={18} />
             <h3>{backup.name || backup.id || `Backup ${index + 1}`}</h3>
@@ -1027,7 +1256,7 @@ function BackupsPage({ data }: { data: DashboardData }) {
             <span>{backup.lastBackup ? `Last ${formatDate(backup.lastBackup)}` : backup.nextBackup ? `Next ${formatDate(backup.nextBackup)}` : backup.dbSize || 'No schedule returned'}</span>
           </article>
         ))}
-        {data.health.backups === 'live' && !data.queenbee.backups.length ? <EmptyState icon={<Database />} label="No backup services returned." /> : null}
+        {data.health.backups === 'live' && !backups.length ? <EmptyState icon={<Database />} label="No backup services matched." /> : null}
       </div>
     </PagePanel>
   )
@@ -1035,6 +1264,12 @@ function BackupsPage({ data }: { data: DashboardData }) {
 
 function VulnerabilitiesPage({ data }: { data: DashboardData }) {
   const report = data.queenbee.vulnerabilities
+  const [query, setQuery] = useState('')
+  const images = (report?.images || []).filter((image) => image.image.toLowerCase().includes(query.toLowerCase()))
+  const severityTotals = images.reduce<Record<string, number>>((totals, image) => {
+    for (const [level, count] of Object.entries(image.severity || {})) totals[level] = (totals[level] || 0) + Number(count || 0)
+    return totals
+  }, {})
   return (
     <PagePanel title="Vulnerabilities" status={data.health.vulnerabilities}>
       <QueenbeeStatusBanner status={data.health.vulnerabilities} path="/vulnerabilities" />
@@ -1045,7 +1280,9 @@ function VulnerabilitiesPage({ data }: { data: DashboardData }) {
         <div className="queenbee-grid">
           <article className="music-stat-card"><span>Images</span><strong>{report.imageCount || report.images?.length || 0}</strong><small>{report.generatedAt ? `Generated ${formatDate(report.generatedAt)}` : 'Scan report'}</small></article>
           <article className="music-stat-card"><span>Scan</span><strong>{report.scanStatus?.isRunning ? 'Running' : 'Idle'}</strong><small>{report.scanStatus?.lastSuccessAt ? `Last success ${formatDate(report.scanStatus.lastSuccessAt)}` : report.scanStatus?.lastError || 'No scan timestamp'}</small></article>
-          {(report.images || []).slice(0, 8).map((image) => <article className="queenbee-card" key={image.image}><ShieldAlert size={18} /><h3>{image.image}</h3><p>{image.totalVulnerabilities} vulnerabilities</p><span>{Object.entries(image.severity || {}).filter(([, count]) => count).map(([key, count]) => `${key}: ${count}`).join(' · ') || image.scanError || 'No findings'}</span></article>)}
+          <article className="queenbee-card"><ShieldAlert size={18} /><h3>Severity totals</h3><p>{Object.entries(severityTotals).filter(([, count]) => count).map(([level, count]) => `${level}: ${count}`).join(' · ') || 'No findings'}</p><span>{images.length} matching images</span></article>
+          <label className="editor-field editor-search full-span"><span>Search images</span><input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Filter image reports" /></label>
+          {images.slice(0, 16).map((image) => <article className="queenbee-card" key={image.image}><ShieldAlert size={18} /><h3>{image.image}</h3><p>{image.totalVulnerabilities} vulnerabilities</p><span>{Object.entries(image.severity || {}).filter(([, count]) => count).map(([key, count]) => `${key}: ${count}`).join(' · ') || image.scanError || 'No findings'}</span></article>)}
         </div>
       ) : data.health.vulnerabilities === 'live' ? <EmptyState icon={<ShieldAlert />} label="No vulnerability report returned." /> : <ProtectedQueenbeeGrid />}
     </PagePanel>
@@ -1154,7 +1391,7 @@ function SettingsPage({
         <ThemePreview />
       </section>
       <section className="settings-card">
-        <PanelTitle title="Automatic Updates" subtitle="app-api /api/desktop" />
+        <PanelTitle title="Automatic Updates" subtitle="Hanasand API /api/app" />
         <AutoUpdatePanel state={updateState} />
       </section>
       <section className="settings-card">
@@ -1173,7 +1410,7 @@ function SettingsPage({
         <div className="settings-list">
           <span><b>Theme</b>{themePreference}</span>
           <span><b>Version</b>{DESKTOP_APP_VERSION}</span>
-          <span><b>Update endpoint</b>/api/desktop</span>
+          <span><b>Update endpoint</b>/api/app</span>
         </div>
       </section>
     </div>
@@ -1185,7 +1422,7 @@ function ThemePreview() {
     ['1', 'const desktopTheme = {', false],
     ['2', '  surface: "sidebar",', true],
     ['3', '  accent: "#f58b45",', true],
-    ['4', '  updateSource: "/api/desktop",', false],
+    ['4', '  updateSource: "/api/app",', false],
     ['5', '};', false],
   ] as const
 
