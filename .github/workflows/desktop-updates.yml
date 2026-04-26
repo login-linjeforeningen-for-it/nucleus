@@ -53,16 +53,24 @@ jobs:
             exit 0
           fi
 
-          if printf '%s' "$TAURI_SIGNING_PRIVATE_KEY" | grep -q 'untrusted comment:'; then
+          NORMALIZED_KEY="${TAURI_SIGNING_PRIVATE_KEY//\\n/$'\n'}"
+
+          if printf '%s' "$NORMALIZED_KEY" | grep -q 'untrusted comment:'; then
+            {
+              echo 'TAURI_SIGNING_PRIVATE_KEY<<EOF'
+              printf '%s\n' "$NORMALIZED_KEY"
+              echo 'EOF'
+            } >> "$GITHUB_ENV"
             echo "Updater signing key is already in minisign format."
             exit 0
           fi
 
           DECODED_KEY="$(
-            printf '%s' "$TAURI_SIGNING_PRIVATE_KEY" | base64 --decode 2>/dev/null \
-            || printf '%s' "$TAURI_SIGNING_PRIVATE_KEY" | base64 -D 2>/dev/null \
+            printf '%s' "$NORMALIZED_KEY" | base64 --decode 2>/dev/null \
+            || printf '%s' "$NORMALIZED_KEY" | base64 -D 2>/dev/null \
             || true
           )"
+          DECODED_KEY="${DECODED_KEY//\\n/$'\n'}"
           if printf '%s' "$DECODED_KEY" | grep -q 'untrusted comment:'; then
             {
               echo 'TAURI_SIGNING_PRIVATE_KEY<<EOF'
