@@ -30,6 +30,7 @@ import {
   Plus,
   RefreshCcw,
   Scale,
+  Search,
   Server,
   Settings,
   ShieldAlert,
@@ -68,6 +69,13 @@ type PageKey = 'dashboard' | 'events' | 'announcements' | 'albums' | 'albumImage
 type ThemePreference = 'light' | 'dark' | 'system'
 
 type NavItem = { key: PageKey; label: string; icon: React.ComponentType<{ size?: number }> }
+type CommandAction = {
+  id: string
+  label: string
+  detail: string
+  icon: React.ComponentType<{ size?: number }>
+  run: () => void
+}
 type EditableRow = Record<string, unknown> & { id: number | string }
 type FieldType = 'text' | 'textarea' | 'number' | 'datetime' | 'json' | 'boolean'
 type EditorField = { name: string; label: string; type?: FieldType; required?: boolean; placeholder?: string }
@@ -381,8 +389,12 @@ function App() {
   const [data, setData] = useState<DashboardData | null>(() => readCachedDashboard())
   const [error, setError] = useState<string | null>(null)
   const [refreshing, setRefreshing] = useState(false)
+  const [navQuery, setNavQuery] = useState('')
+  const [commandOpen, setCommandOpen] = useState(false)
+  const [commandQuery, setCommandQuery] = useState('')
   const [browserTarget, setBrowserTarget] = useState<BrowserTarget | null>(null)
   const contentRef = useRef<HTMLElement | null>(null)
+  const navSearchRef = useRef<HTMLInputElement | null>(null)
   const [updateState, setUpdateState] = useState<AutoUpdateState>({
     status: 'checking',
     message: 'Checking app-api for signed desktop updates...',
@@ -458,6 +470,73 @@ function App() {
   }, [])
 
   const activeLabel = menu.find((item) => item.key === activePage)?.label || 'Dashboard'
+  const normalizedNavQuery = navQuery.trim().toLowerCase()
+  const filteredMenu = normalizedNavQuery
+    ? menu.filter((item) => `${item.label} ${item.key}`.toLowerCase().includes(normalizedNavQuery))
+    : menu
+  const commands = useMemo<CommandAction[]>(() => [
+    ...menu.map((item) => ({
+      id: `page-${item.key}`,
+      label: `Open ${item.label}`,
+      detail: pageMeta(item.key, data).description,
+      icon: item.icon,
+      run: () => setActivePage(item.key),
+    })),
+    {
+      id: 'refresh',
+      label: refreshing ? 'Refreshing Login data' : 'Refresh Login data',
+      detail: 'Reload Workerbee, Beekeeper, Queenbee, and Bot dashboard data.',
+      icon: RefreshCcw,
+      run: () => void refreshDashboard(),
+    },
+    ...links.map((link) => ({
+      id: `link-${link.url}`,
+      label: `Open ${link.label}`,
+      detail: link.url,
+      icon: ExternalLink,
+      run: () => void openInAppBrowser({ url: link.url, title: link.label }),
+    })),
+  ], [data, refreshing])
+
+  useEffect(() => {
+    function onKeyDown(event: KeyboardEvent) {
+      const target = event.target as HTMLElement | null
+      const isTyping = target ? ['INPUT', 'TEXTAREA', 'SELECT'].includes(target.tagName) || target.isContentEditable : false
+      const key = event.key.toLowerCase()
+
+      if ((event.metaKey || event.ctrlKey) && key === 'k') {
+        event.preventDefault()
+        setCommandOpen(true)
+        setCommandQuery('')
+        return
+      }
+
+      if ((event.metaKey || event.ctrlKey) && key === 'r') {
+        event.preventDefault()
+        void refreshDashboard()
+        return
+      }
+
+      if (!isTyping && event.key === '/') {
+        event.preventDefault()
+        navSearchRef.current?.focus()
+        return
+      }
+
+      if (event.key === 'Escape') {
+        if (commandOpen) {
+          setCommandOpen(false)
+          return
+        }
+        if (browserTarget) {
+          setBrowserTarget(null)
+        }
+      }
+    }
+
+    window.addEventListener('keydown', onKeyDown)
+    return () => window.removeEventListener('keydown', onKeyDown)
+  }, [browserTarget, commandOpen])
 
   return (
     <main className="app-shell" data-theme={themePreference}>
@@ -466,13 +545,30 @@ function App() {
           <LoginMark small />
           <span>Login Desktop</span>
         </div>
+        <label className="nav-search">
+          <Search size={15} />
+          <input
+            ref={navSearchRef}
+            value={navQuery}
+            onChange={(event) => setNavQuery(event.target.value)}
+            placeholder="Filter surfaces"
+            aria-label="Filter Login surfaces"
+          />
+          <kbd>/</kbd>
+        </label>
+        <button className="command-trigger" type="button" onClick={() => setCommandOpen(true)}>
+          <Search size={15} />
+          <span>Command center</span>
+          <kbd>Cmd K</kbd>
+        </button>
         <nav className="nav-list" aria-label="Login surfaces">
-          {menu.map(({ key, label, icon: Icon }) => (
-            <button key={key} className={activePage === key ? 'nav-item active' : 'nav-item'} onClick={() => setActivePage(key)}>
+          {filteredMenu.map(({ key, label, icon: Icon }) => (
+            <button key={key} type="button" className={activePage === key ? 'nav-item active' : 'nav-item'} onClick={() => setActivePage(key)}>
               <Icon size={22} />
               <span>{label}</span>
             </button>
           ))}
+          {!filteredMenu.length ? <p className="nav-empty">No Login surface matches "{navQuery}".</p> : null}
         </nav>
         <div className="sidebar-footer">
           <span className="version">v{DESKTOP_APP_VERSION}</span>
@@ -490,7 +586,72 @@ function App() {
           : !data ? <LoadingState /> : <PageRouter page={activePage} data={data} updateState={updateState} />}
       </section>
       <InAppBrowser target={browserTarget} onClose={() => setBrowserTarget(null)} />
+      <CommandPalette
+        open={commandOpen}
+        query={commandQuery}
+        commands={commands}
+        onQueryChange={setCommandQuery}
+        onClose={() => setCommandOpen(false)}
+      />
     </main>
+  )
+}
+
+function CommandPalette({
+  open,
+  query,
+  commands,
+  onQueryChange,
+  onClose,
+}: {
+  open: boolean
+  query: string
+  commands: CommandAction[]
+  onQueryChange: (query: string) => void
+  onClose: () => void
+}) {
+  const normalized = query.trim().toLowerCase()
+  const filteredCommands = normalized
+    ? commands.filter((command) => `${command.label} ${command.detail}`.toLowerCase().includes(normalized)).slice(0, 10)
+    : commands.slice(0, 10)
+
+  if (!open) return null
+
+  function runCommand(command: CommandAction) {
+    command.run()
+    onClose()
+  }
+
+  return (
+    <div className="command-backdrop" role="presentation" onMouseDown={onClose}>
+      <section className="command-panel" role="dialog" aria-modal="true" aria-label="Login command center" onMouseDown={(event) => event.stopPropagation()}>
+        <div className="command-search">
+          <Search size={18} />
+          <input
+            autoFocus
+            value={query}
+            onChange={(event) => onQueryChange(event.target.value)}
+            placeholder="Jump to pages, refresh data, or open Login surfaces"
+          />
+          <kbd>Esc</kbd>
+        </div>
+        <div className="command-list">
+          {filteredCommands.map((command) => {
+            const Icon = command.icon
+            return (
+              <button key={command.id} type="button" className="command-item" onClick={() => runCommand(command)}>
+                <span className="command-icon"><Icon size={18} /></span>
+                <span>
+                  <strong>{command.label}</strong>
+                  <small>{command.detail}</small>
+                </span>
+              </button>
+            )
+          })}
+          {!filteredCommands.length ? <div className="command-empty">No command found. Try “logs”, “traffic”, “refresh”, or “Queenbee”.</div> : null}
+        </div>
+      </section>
+    </div>
   )
 }
 

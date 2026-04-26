@@ -23,7 +23,6 @@ jobs:
       DEPLOY_USER: ${{ secrets.APP_API_DESKTOP_DEPLOY_USER }}
       DEPLOY_KEY: ${{ secrets.APP_API_DESKTOP_DEPLOY_KEY }}
       DEPLOY_PATH: ${{ secrets.APP_API_DESKTOP_DEPLOY_PATH }}
-      TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
       TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
       DESKTOP_UPDATE_PUBLIC_BASE_URL: https://app.login.no/api/desktop
     defaults:
@@ -47,13 +46,15 @@ jobs:
         run: npm ci
 
       - name: Normalize updater signing key
+        env:
+          RAW_TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
         run: |
-          if [ -z "${TAURI_SIGNING_PRIVATE_KEY:-}" ]; then
+          if [ -z "${RAW_TAURI_SIGNING_PRIVATE_KEY:-}" ]; then
             echo "No updater signing key configured."
             exit 0
           fi
 
-          NORMALIZED_KEY="${TAURI_SIGNING_PRIVATE_KEY//\\n/$'\n'}"
+          NORMALIZED_KEY="${RAW_TAURI_SIGNING_PRIVATE_KEY//\\n/$'\n'}"
 
           if printf '%s' "$NORMALIZED_KEY" | grep -q 'untrusted comment:'; then
             {
