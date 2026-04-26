@@ -36,6 +36,9 @@ const linking: LinkingOptions<RootStackParamList> = {
                         screens: {
                             AboutScreen: 'about',
                             BusinessScreen: 'companies',
+                            SearchScreen: {
+                                path: 's',
+                            },
                             AlbumsScreen: 'albums',
                             FundScreen: 'fund',
                             VervScreen: 'verv',

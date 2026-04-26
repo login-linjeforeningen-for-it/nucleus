@@ -658,7 +658,7 @@ type MenuStackParamList = {
     AiScreen: undefined
     QueenbeeScreen: undefined
     InternalScreen: undefined
-    SearchScreen: undefined
+    SearchScreen: { s?: string } | undefined
     StatusScreen: undefined
     MusicScreen: undefined
     AlbumsScreen: undefined

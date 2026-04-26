@@ -4,7 +4,7 @@ import Swipe from '@components/nav/swipe'
 import Text from '@components/shared/text'
 import GS from '@styles/globalStyles'
 import T from '@styles/text'
-import { buildSearchEngineUrl } from '@utils/discoveryApi'
+import { buildSearchEngineUrl, decodeSearchAnimationToken } from '@utils/discoveryApi'
 import Clipboard from '@react-native-clipboard/clipboard'
 import { JSX, useEffect, useMemo, useRef, useState } from 'react'
 import { Alert, Animated, Dimensions, Easing, Linking, TextInput, TouchableOpacity, View } from 'react-native'
@@ -23,7 +23,7 @@ function formatEngineLabel(value: Engine) {
     }
 }
 
-export default function SearchScreen(): JSX.Element {
+export default function SearchScreen({ route }: MenuProps<'SearchScreen'>): JSX.Element {
     const { theme } = useSelector((state: ReduxState) => state.theme)
     const { lang } = useSelector((state: ReduxState) => state.lang)
     const text = lang ? require('@text/no.json').search : require('@text/en.json').search
@@ -80,8 +80,10 @@ export default function SearchScreen(): JSX.Element {
         Alert.alert(text.copiedTitle, text.copiedBody)
     }
 
-    async function openLink() {
-        if (!link) {
+    function startPlayback(nextQuery: string, nextEngine: Engine) {
+        const nextLink = buildSearchEngineUrl(nextQuery, nextEngine)
+
+        if (!nextLink) {
             Alert.alert(text.missingQueryTitle, text.missingQueryBody)
             return
         }
@@ -91,7 +93,7 @@ export default function SearchScreen(): JSX.Element {
         setTypedQuery('')
         setStage('typing')
 
-        const letters = Array.from(query.trim())
+        const letters = Array.from(nextQuery.trim())
 
         function step(index: number) {
             setTypedQuery(letters.slice(0, index).join(''))
@@ -104,7 +106,7 @@ export default function SearchScreen(): JSX.Element {
 
             setStage('opening')
             const timer = setTimeout(() => {
-                void Linking.openURL(link)
+                void Linking.openURL(nextLink)
                 setStage('idle')
             }, 500)
             timersRef.current.push(timer)
@@ -113,6 +115,31 @@ export default function SearchScreen(): JSX.Element {
         const timer = setTimeout(() => step(1), 120)
         timersRef.current.push(timer)
     }
+
+    async function openLink() {
+        if (!link) {
+            Alert.alert(text.missingQueryTitle, text.missingQueryBody)
+            return
+        }
+
+        startPlayback(query, engine)
+    }
+
+    useEffect(() => {
+        if (!route.params?.s) {
+            return
+        }
+
+        const payload = decodeSearchAnimationToken(route.params.s)
+        if (!payload) {
+            Alert.alert(text.missingQueryTitle, text.missingQueryBody)
+            return
+        }
+
+        setQuery(payload.query)
+        setEngine(payload.engine)
+        startPlayback(payload.query, payload.engine)
+    }, [route.params?.s])
 
     return (
         <Swipe left='MenuScreen'>

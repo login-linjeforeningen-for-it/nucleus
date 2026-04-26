@@ -1,6 +1,8 @@
 import {
+    buildSearchAnimationLink,
     buildSearchEngineUrl,
     buildSpotifyUrl,
+    decodeSearchAnimationToken,
     getSafeMusicActivity,
 } from '@/utils/discoveryApi'
 
@@ -45,5 +47,17 @@ describe('discoveryApi music/search helpers', () => {
             type: 'track',
             song_id: 'track-id',
         } as any)).toBe('https://open.spotify.com/track/track-id')
+    })
+
+    it('round-trips search animation links for native deep links', () => {
+        const link = buildSearchAnimationLink('søt robot', 'duckduckgo')
+        const token = new URL(link).searchParams.get('s')
+
+        expect(token).toBeTruthy()
+        expect(decodeSearchAnimationToken(token || '')).toEqual({
+            query: 'søt robot',
+            engine: 'duckduckgo',
+        })
+        expect(decodeSearchAnimationToken('not-valid')).toBeNull()
     })
 })
