@@ -13,6 +13,7 @@ import { Image, RefreshControl, ScrollView, TextInput, TouchableOpacity, View } 
 import { useSelector } from 'react-redux'
 
 type ContentTab = 'rules' | 'locations' | 'organizations'
+const CONTENT_PAGE_SIZE = 20
 
 export default function ContentScreen({ navigation }: MenuProps<'ContentScreen'>): JSX.Element {
     const { theme } = useSelector((state: ReduxState) => state.theme)
@@ -22,6 +23,7 @@ export default function ContentScreen({ navigation }: MenuProps<'ContentScreen'>
     const [locations, setLocations] = useState<WorkerbeeLocation[]>([])
     const [organizations, setOrganizations] = useState<WorkerbeeOrganization[]>([])
     const [counts, setCounts] = useState({ rules: 0, locations: 0, organizations: 0 })
+    const [limit, setLimit] = useState(CONTENT_PAGE_SIZE)
     const [query, setQuery] = useState('')
     const [refreshing, setRefreshing] = useState(false)
     const [error, setError] = useState('')
@@ -34,6 +36,8 @@ export default function ContentScreen({ navigation }: MenuProps<'ContentScreen'>
         locations: lang ? 'Steder' : 'Locations',
         organizations: lang ? 'Organisasjoner' : 'Organizations',
         search: lang ? 'Søk i innhold...' : 'Search content...',
+        showing: lang ? 'Viser' : 'Showing',
+        loadMore: lang ? 'Last inn mer' : 'Load more',
         updated: lang ? 'Oppdatert' : 'Updated',
         empty: lang ? 'Ingen treff å vise.' : 'No rows to show.',
         locationFallback: lang ? 'Ingen ekstra stedsdetaljer' : 'No additional location details',
@@ -72,14 +76,22 @@ export default function ContentScreen({ navigation }: MenuProps<'ContentScreen'>
         organization.link_facebook,
         organization.link_instagram,
     ]), [organizations, query])
+    const loadedCounts = {
+        rules: rules.length,
+        locations: locations.length,
+        organizations: organizations.length,
+    }
+    const loadedTotal = loadedCounts[activeTab]
+    const availableTotal = counts[activeTab]
+    const hasMore = loadedTotal < availableTotal
 
     async function load() {
         setRefreshing(true)
         try {
             const [nextRules, nextLocations, nextOrganizations] = await Promise.all([
-                fetchRules(),
-                fetchLocations(),
-                fetchOrganizations(),
+                fetchRules(limit),
+                fetchLocations(limit),
+                fetchOrganizations(limit),
             ])
 
             setRules(nextRules.rules)
@@ -100,7 +112,7 @@ export default function ContentScreen({ navigation }: MenuProps<'ContentScreen'>
 
     useEffect(() => {
         void load()
-    }, [])
+    }, [limit])
 
     return (
         <Swipe left='QueenbeeScreen'>
@@ -166,6 +178,10 @@ export default function ContentScreen({ navigation }: MenuProps<'ContentScreen'>
                                     fontSize: T.text15.fontSize,
                                 }}
                             />
+                            <Space height={10} />
+                            <Text style={{ ...T.text12, color: theme.oppositeTextColor }}>
+                                {labels.showing} {loadedTotal} / {availableTotal}
+                            </Text>
                         </View>
                     </Cluster>
 
@@ -197,9 +213,38 @@ export default function ContentScreen({ navigation }: MenuProps<'ContentScreen'>
                         />
                     ))}
                     {activeTab === 'organizations' && !visibleOrganizations.length && <EmptyContent label={labels.empty} />}
+                    {hasMore && (
+                        <>
+                            <LoadMoreButton
+                                label={labels.loadMore}
+                                onPress={() => setLimit((currentLimit) => currentLimit + CONTENT_PAGE_SIZE)}
+                            />
+                            <Space height={10} />
+                        </>
+                    )}
                 </ScrollView>
             </View>
         </Swipe>
+    )
+}
+
+function LoadMoreButton({ label, onPress }: { label: string; onPress: () => void }) {
+    const { theme } = useSelector((state: ReduxState) => state.theme)
+
+    return (
+        <TouchableOpacity onPress={onPress} activeOpacity={0.88}>
+            <Cluster>
+                <View style={{
+                    padding: 14,
+                    alignItems: 'center',
+                    borderWidth: 1,
+                    borderColor: theme.orangeTransparentBorderHighlighted,
+                    backgroundColor: theme.orangeTransparent,
+                }}>
+                    <Text style={{ ...T.text15, color: theme.textColor }}>{label}</Text>
+                </View>
+            </Cluster>
+        </TouchableOpacity>
     )
 }
 
