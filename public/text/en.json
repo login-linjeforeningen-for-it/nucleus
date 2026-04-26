@@ -19,6 +19,7 @@
         "MusicScreen": "Music",
         "AlbumsScreen": "Albums",
         "SpecificAlbumScreen": "Album",
+        "FundScreen": "Login Fund",
         "DashboardScreen": "Dashboard",
         "LoadBalancingScreen": "Load balancing",
         "DatabaseScreen": "Databases",
@@ -73,6 +74,54 @@
         "event": "Event",
         "openEvent": "Open event",
         "updated": "Updated"
+    },
+    "fund": {
+        "title": "Login Fund",
+        "intro": "We are excited to present the Login Fund!",
+        "holdings": {
+            "title": "Total holdings value",
+            "updated": "Updated",
+            "history": "Last month",
+            "change": "1-month change",
+            "empty": "No history data available yet."
+        },
+        "support": {
+            "title": "Apply to the Fund for support!",
+            "intro": "Do you have an initiative or an idea where financial support would bring joy to most members of Login? Submit an application!",
+            "target": "All groups and members affiliated with Login can apply. New initiatives are prioritized.",
+            "period": "The fund board normally opens applications once per semester through Login's main communication channels.",
+            "apply": "Send an email to fondet@login.no with the number of members or students involved and a complete budget."
+        },
+        "sections": [
+            {
+                "title": "Purpose",
+                "body": "The purpose of the Fund is to provide Login with financial security and ensure that Login's surplus is fairly distributed among current and future members."
+            },
+            {
+                "title": "Meetings",
+                "body": "Fund meetings are announced one week in advance. Everyone who wants to participate in the open quarter is encouraged to attend."
+            },
+            {
+                "title": "Open quarter",
+                "body": "All fund board meetings start with an open quarter where Login members can raise questions, suggest topics, or bring other input."
+            },
+            {
+                "title": "Yield",
+                "body": "The Fund has a long-term investment strategy with a low-risk factor, aiming for moderate but stable yield over time."
+            }
+        ],
+        "board": {
+            "title": "Fund Board",
+            "intro": "The Fund Board manages the Fund's assets in accordance with its purpose.",
+            "body": "The board consists of elected members. Want to know more? Contact fondet@login.no or talk to us in the hallway.",
+            "membersTitle": "Board Composition",
+            "members": [
+                { "title": "Board Leader", "name": "Lennart Krogh", "discord": "lenny8400", "image": "portrait-lennart.jpg" },
+                { "title": "Board Member", "name": "Aksel Wiersdalen", "discord": "masterjeb", "image": "buskflytter.gif" },
+                { "title": "Board Member", "name": "Jonas Kaarstein", "discord": "kaarstoned", "image": "" },
+                { "title": "Board Member", "name": "", "discord": "", "image": "" }
+            ]
+        }
     },
     "status": {
         "intro": "See whether Login's services are healthy right now, and how they have behaved over the latest checks.",

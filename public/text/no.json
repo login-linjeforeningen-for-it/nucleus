@@ -19,6 +19,7 @@
         "MusicScreen": "Musikk",
         "AlbumsScreen": "Albumer",
         "SpecificAlbumScreen": "Album",
+        "FundScreen": "Logins Fond",
         "DashboardScreen": "Dashboard",
         "LoadBalancingScreen": "Lastbalansering",
         "DatabaseScreen": "Databaser",
@@ -73,6 +74,54 @@
         "event": "Arrangement",
         "openEvent": "Åpne arrangement",
         "updated": "Oppdatert"
+    },
+    "fund": {
+        "title": "Logins Fond",
+        "intro": "Vi er glade for å presentere Logins Fond!",
+        "holdings": {
+            "title": "Total beholdningsverdi",
+            "updated": "Oppdatert",
+            "history": "Siste måned",
+            "change": "Endring siste måned",
+            "empty": "Ingen historikkdata er tilgjengelig ennå."
+        },
+        "support": {
+            "title": "Søk Fondet om støtte!",
+            "intro": "Brenner du inne med et initiativ eller en ide der økonomisk støtte vil gi glede til de fleste medlemmer i Login? Send en søknad!",
+            "target": "Alle grupper og medlemmer tilknyttet Login kan søke fondet om støtte. Nye initiativer prioriteres.",
+            "period": "Fondsstyret åpner normalt for søknader en gang per semester gjennom Login sine hovedkanaler.",
+            "apply": "Send e-post til fondet@login.no med antall medlemmer eller studenter involvert og et komplett budsjett."
+        },
+        "sections": [
+            {
+                "title": "Formål",
+                "body": "Formålet til Fondet er å gi Login økonomisk trygghet og sørge for at overskudd fordeles rettferdig mellom nåværende og fremtidige medlemmer."
+            },
+            {
+                "title": "Møter",
+                "body": "Fondets møter annonseres en uke i forveien. Alle som vil delta på åpent kvarter oppfordres til å møte."
+            },
+            {
+                "title": "Åpent kvarter",
+                "body": "Alle fondsstyremøter starter med et åpent kvarter der Loginmedlemmer kan stille spørsmål, foreslå saker eller gi andre innspill."
+            },
+            {
+                "title": "Avkastning",
+                "body": "Fondet har en langsiktig investeringsstrategi med lav risikofaktor, og sikter på moderat, stabil avkastning over tid."
+            }
+        ],
+        "board": {
+            "title": "Fondsstyret",
+            "intro": "Fondsstyret forvalter Fondets midler i tråd med formålet.",
+            "body": "Styret består av valgte medlemmer. Vil du vite mer? Kontakt fondet@login.no eller slå av en prat i gangen.",
+            "membersTitle": "Styresammensetning",
+            "members": [
+                { "title": "Styreleder", "name": "Lennart Krogh", "discord": "lenny8400", "image": "portrait-lennart.jpg" },
+                { "title": "Styremedlem", "name": "Aksel Wiersdalen", "discord": "masterjeb", "image": "buskflytter.gif" },
+                { "title": "Styremedlem", "name": "Jonas Kaarstein", "discord": "kaarstoned", "image": "" },
+                { "title": "Styremedlem", "name": "", "discord": "", "image": "" }
+            ]
+        }
     },
     "status": {
         "intro": "Se om Login sine tjenester er friske akkurat nå, og hvordan de har oppført seg i det siste.",

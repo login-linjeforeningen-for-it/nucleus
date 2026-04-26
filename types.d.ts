@@ -97,6 +97,25 @@ type GetAlbumsProps = {
     total_count: number
 }
 
+type FundHoldingsTotal = {
+    totalBase: number
+    currency: string
+    updatedAt: number
+}
+
+type FundHoldingsRange = '1m' | '6m'
+
+type FundHoldingsHistoryPoint = {
+    date: string
+    totalBase: number
+}
+
+type FundHoldingsHistory = {
+    points: FundHoldingsHistoryPoint[]
+    currency: string
+    updatedAt: number
+}
+
 type System = {
     ram: string
     processes: number
@@ -549,6 +568,7 @@ type MenuRoutes =
     | 'MusicScreen'
     | 'AlbumsScreen'
     | 'SpecificAlbumScreen'
+    | 'FundScreen'
     | 'DashboardScreen'
     | 'LoadBalancingScreen'
     | 'TrafficScreen'
@@ -582,6 +602,7 @@ type MenuStackParamList = {
     MusicScreen: undefined
     AlbumsScreen: undefined
     SpecificAlbumScreen: { albumID: number }
+    FundScreen: undefined
     DashboardScreen: undefined
     LoadBalancingScreen: undefined
     TrafficScreen: undefined

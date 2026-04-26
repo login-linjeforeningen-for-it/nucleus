@@ -48,6 +48,7 @@ import SearchScreen from '@screens/menu/search'
 import StatusScreen from '@screens/menu/status'
 import MusicScreen from '@screens/menu/music'
 import AlbumsScreen from '@screens/menu/albums'
+import FundScreen from '@screens/menu/fund'
 import DashboardScreen from '@screens/menu/dashboard'
 import LoadBalancingScreen from '@screens/menu/loadBalancing'
 import DatabaseScreen from '@screens/menu/database'
@@ -137,6 +138,7 @@ function Menu() {
             <MenuStack.Screen name='MusicScreen' component={MusicScreen} />
             <MenuStack.Screen name='AlbumsScreen' component={AlbumsScreen} />
             <MenuStack.Screen name='SpecificAlbumScreen' component={SpecificAlbumScreen} />
+            <MenuStack.Screen name='FundScreen' component={FundScreen} />
             <MenuStack.Screen name='DashboardScreen' component={DashboardScreen} />
             <MenuStack.Screen name='LoadBalancingScreen' component={LoadBalancingScreen} />
             <MenuStack.Screen name='TrafficScreen' component={TrafficScreen} />

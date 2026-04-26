@@ -61,6 +61,11 @@
             "id": 12,
             "nav": "AlbumsScreen",
             "title": "Albums"
+        },
+        {
+            "id": 13,
+            "nav": "FundScreen",
+            "title": "Login Fund"
         }
     ],
     "version": "Version ",

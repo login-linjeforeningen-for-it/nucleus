@@ -52,6 +52,7 @@ export default function MenuScreen({ navigation }: MenuProps<'MenuScreen'>): JSX
         SearchScreen: lang ? 'Søk og åpne direkte fra appen' : 'Search and open directly from the app',
         MusicScreen: lang ? 'Live musikkstatistikk fra Login' : 'Live music statistics from Login',
         AlbumsScreen: lang ? 'Bilder fra arrangementer og Login-liv' : 'Photos from events and Login life',
+        FundScreen: lang ? 'Fondet, søknader og beholdning' : 'The fund, applications, and holdings',
     }), [lang])
 
     function toggleFeedback() {

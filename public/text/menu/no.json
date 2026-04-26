@@ -61,6 +61,11 @@
             "id": 12,
             "nav": "AlbumsScreen",
             "title": "Albumer"
+        },
+        {
+            "id": 13,
+            "nav": "FundScreen",
+            "title": "Logins Fond"
         }
     ],
     "version": "Versjon ",
