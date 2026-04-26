@@ -570,6 +570,7 @@ type MenuRoutes =
     | 'SpecificAlbumScreen'
     | 'FundScreen'
     | 'VervScreen'
+    | 'PolicyScreen'
     | 'DashboardScreen'
     | 'LoadBalancingScreen'
     | 'TrafficScreen'
@@ -605,6 +606,7 @@ type MenuStackParamList = {
     SpecificAlbumScreen: { albumID: number }
     FundScreen: undefined
     VervScreen: undefined
+    PolicyScreen: undefined
     DashboardScreen: undefined
     LoadBalancingScreen: undefined
     TrafficScreen: undefined

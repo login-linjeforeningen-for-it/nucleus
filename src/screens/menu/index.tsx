@@ -54,6 +54,7 @@ export default function MenuScreen({ navigation }: MenuProps<'MenuScreen'>): JSX
         AlbumsScreen: lang ? 'Bilder fra arrangementer og Login-liv' : 'Photos from events and Login life',
         FundScreen: lang ? 'Fondet, søknader og beholdning' : 'The fund, applications, and holdings',
         VervScreen: lang ? 'Komiteer, verv og søknad' : 'Committees, roles, and applications',
+        PolicyScreen: lang ? 'Personvern og app-policy' : 'Privacy and app policy',
     }), [lang])
 
     function toggleFeedback() {

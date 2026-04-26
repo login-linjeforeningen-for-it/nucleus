@@ -21,6 +21,7 @@
         "SpecificAlbumScreen": "Album",
         "FundScreen": "Logins Fond",
         "VervScreen": "Verv",
+        "PolicyScreen": "Personvern",
         "DashboardScreen": "Dashboard",
         "LoadBalancingScreen": "Lastbalansering",
         "DatabaseScreen": "Databaser",
@@ -212,6 +213,49 @@
             "prLeader": { "name": "Andrea Karense Magnussen Oksendal", "discord": "andreakarense", "image": "pr.jpg" },
             "barkomLeader": { "name": "Frikk Braendsrod", "discord": "frikk.", "image": "barkom.jpg" }
         }
+    },
+    "policy": {
+        "title": "Privacy Policy",
+        "organization": "Login - Linjeforeningen for IT",
+        "sections": [
+            {
+                "title": "About our Privacy Policy",
+                "body": "This Privacy Policy governs the Login mobile application, developed and maintained by Login - Linjeforeningen for IT, a registered non-profit organization serving the student community at NTNU Gjøvik in Norway."
+            },
+            {
+                "title": "Introduction",
+                "body": "Safeguarding user privacy is important to Login. This policy outlines our practices for data collection, usage, sharing, and your choices concerning your information."
+            },
+            {
+                "title": "Information Collection",
+                "body": "The Login app does not collect personally identifiable information or sensitive data from its users. We do not require personal details such as names, email addresses, or contact information to use the app."
+            },
+            {
+                "title": "Utilization of Information",
+                "body": "Because the app does not collect personal information, there is no personal information to analyze, track, profile, sell, or trade."
+            },
+            {
+                "title": "Information Security",
+                "body": "Although we do not collect user data, we maintain security measures intended to protect the app and its infrastructure from unauthorized access or breaches."
+            },
+            {
+                "title": "Non-Disclosure of Information",
+                "body": "In line with our non-data-collection policy, we do not share user information with third parties."
+            },
+            {
+                "title": "Transparency and Communication",
+                "body": "We aim to provide clear information about privacy practices and invite users to contact us with questions, concerns, or feedback."
+            },
+            {
+                "title": "Policy Updates",
+                "body": "We may update, modify, or amend this Privacy Policy. Changes are effective when posted in the app or on Login's services."
+            },
+            {
+                "title": "Contact Information",
+                "body": "For questions about this Privacy Policy or our data practices, contact Login at kontakt@login.no."
+            }
+        ],
+        "download": "By downloading, installing, or using the Login app, you accept this Privacy Policy. If you disagree with any part of it, please refrain from using the app."
     },
     "status": {
         "intro": "Se om Login sine tjenester er friske akkurat nå, og hvordan de har oppført seg i det siste.",
