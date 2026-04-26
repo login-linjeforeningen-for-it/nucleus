@@ -33,6 +33,8 @@ const expectedRoutes = [
     ['nucleus/documentation', 'NucleusDocumentationScreen'],
     ['honey', 'HoneyScreen'],
     ['internal/db', 'DatabaseScreen'],
+    ['internal/db/backups', 'DatabaseBackupsScreen'],
+    ['internal/db/restore', 'DatabaseBackupsScreen'],
     ['internal/vulnerabilities', 'VulnerabilitiesScreen'],
     ['internal/logs', 'LogsScreen'],
 ] as const

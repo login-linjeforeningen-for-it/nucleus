@@ -89,6 +89,10 @@ const linking: LinkingOptions<RootStackParamList> = {
                                 path: 'internal/databases',
                                 alias: ['internal/db'],
                             },
+                            DatabaseBackupsScreen: {
+                                path: 'internal/db/backups',
+                                alias: ['internal/db/restore'],
+                            },
                             VulnerabilitiesScreen: 'internal/vulnerabilities',
                             LogsScreen: 'internal/logs'
                         }

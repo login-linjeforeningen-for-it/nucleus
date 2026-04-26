@@ -17,7 +17,13 @@ jest.mock('@redux/store', () => ({
     }
 }))
 
-import { listAiClients, selectBestNativeClient } from '@utils/queenbeeApi'
+import {
+    listAiClients,
+    listDatabaseBackupFiles,
+    listDatabaseBackups,
+    selectBestNativeClient,
+} from '@utils/queenbeeApi'
+import store from '@redux/store'
 
 describe('queenbeeApi AI helpers', () => {
     beforeEach(() => {
@@ -46,5 +52,59 @@ describe('queenbeeApi AI helpers', () => {
         expect(clients).toHaveLength(2)
         expect(selectBestNativeClient(clients)?.name).toBe('fast')
         expect(clients[0].model.currentTokens).toBe(0)
+    })
+
+    it('normalizes database backup endpoints', async () => {
+        ;(store.getState as unknown as { mockReturnValue: (value: unknown) => void }).mockReturnValue({
+            login: {
+                token: 'test-token',
+            },
+            profile: {
+                id: null,
+            },
+        })
+        global.fetch = jest.fn(async (url: string) => ({
+            ok: true,
+            text: async () => {
+                if (url.endsWith('/backup')) {
+                    return JSON.stringify([
+                        {
+                            id: 'backup-container-1',
+                            name: 'workerbee_database',
+                            status: 'up',
+                            lastBackup: null,
+                            nextBackup: '0 4 * * *',
+                        },
+                        { id: 42, name: 'invalid', status: 'up' },
+                    ])
+                }
+
+                return JSON.stringify([
+                    {
+                        service: 'workerbee',
+                        file: 'workerbee-2026-04-26.sql.gz',
+                        location: 'remote',
+                    },
+                    { service: 12, file: null },
+                ])
+            },
+        })) as any
+
+        await expect(listDatabaseBackups()).resolves.toEqual([
+            {
+                id: 'backup-container-1',
+                name: 'workerbee_database',
+                status: 'up',
+                lastBackup: null,
+                nextBackup: '0 4 * * *',
+            },
+        ])
+        await expect(listDatabaseBackupFiles()).resolves.toEqual([
+            {
+                service: 'workerbee',
+                file: 'workerbee-2026-04-26.sql.gz',
+                location: 'remote',
+            },
+        ])
     })
 })

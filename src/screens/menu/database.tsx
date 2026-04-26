@@ -7,7 +7,7 @@ import GS from '@styles/globalStyles'
 import T from '@styles/text'
 import { getDatabaseOverview } from '@utils/queenbeeApi'
 import { JSX, useEffect, useState } from 'react'
-import { RefreshControl, ScrollView, View } from 'react-native'
+import { RefreshControl, ScrollView, TouchableOpacity, View } from 'react-native'
 import { useSelector } from 'react-redux'
 
 export default function DatabaseScreen({ navigation }: MenuProps<'DatabaseScreen'>): JSX.Element {
@@ -84,6 +84,23 @@ export default function DatabaseScreen({ navigation }: MenuProps<'DatabaseScreen
                                     </View>
                                 </View>
                             </Cluster>
+                            <Space height={10} />
+                            <TouchableOpacity
+                                onPress={() => navigation.navigate('DatabaseBackupsScreen')}
+                                activeOpacity={0.88}
+                            >
+                                <Cluster style={{
+                                    borderWidth: 1,
+                                    borderColor: theme.orangeTransparentBorderHighlighted,
+                                    backgroundColor: theme.orangeTransparent,
+                                }}>
+                                    <View style={{ padding: 14, alignItems: 'center' }}>
+                                        <Text style={{ ...T.text15, color: theme.textColor }}>
+                                            Open backup management
+                                        </Text>
+                                    </View>
+                                </Cluster>
+                            </TouchableOpacity>
                             <Space height={10} />
                             {data.clusters.map(cluster => (
                                 <View key={cluster.id}>
