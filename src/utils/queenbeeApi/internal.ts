@@ -74,6 +74,44 @@ export async function getDatabaseContainerCount(): Promise<number> {
     return readNumber(payload.count) ?? readNumber(payload.databaseCount) ?? 0
 }
 
+export async function listDatabaseBackups(): Promise<NativeDatabaseBackup[]> {
+    const payload = await requestApi<unknown>(config.beekeeper_api_url, '/backup')
+    return Array.isArray(payload) ? payload.filter(isDatabaseBackup) : []
+}
+
+export async function triggerDatabaseBackup(): Promise<{ message: string }> {
+    return await requestApi<{ message: string }>(config.beekeeper_api_url, '/backup', {
+        method: 'POST',
+        body: {},
+    })
+}
+
+export async function listDatabaseBackupFiles(params?: {
+    service?: string
+    date?: string
+}): Promise<NativeDatabaseBackupFile[]> {
+    const query = new URLSearchParams()
+    if (params?.service) query.set('service', params.service)
+    if (params?.date) query.set('date', params.date)
+
+    const suffix = query.toString()
+    const payload = await requestApi<unknown>(
+        config.beekeeper_api_url,
+        suffix ? `/backup/files?${suffix}` : '/backup/files',
+    )
+    return Array.isArray(payload) ? payload.filter(isDatabaseBackupFile) : []
+}
+
+export async function restoreDatabaseBackup(body: {
+    service: string
+    file: string
+}): Promise<{ message: string }> {
+    return await requestApi<{ message: string }>(config.beekeeper_api_url, '/backup/restore', {
+        method: 'POST',
+        body,
+    })
+}
+
 export async function getVulnerabilitiesOverview(): Promise<GetVulnerabilities> {
     return await requestApi<GetVulnerabilities>(config.beekeeper_api_url, '/vulnerabilities')
 }
@@ -123,4 +161,17 @@ function formatBytes(bytes: number) {
 function readNumber(value: unknown) {
     const nextValue = Number(value)
     return Number.isFinite(nextValue) ? nextValue : null
+}
+
+function isDatabaseBackup(value: unknown): value is NativeDatabaseBackup {
+    return isObject(value)
+        && typeof value.id === 'string'
+        && typeof value.name === 'string'
+        && typeof value.status === 'string'
+}
+
+function isDatabaseBackupFile(value: unknown): value is NativeDatabaseBackupFile {
+    return isObject(value)
+        && typeof value.service === 'string'
+        && typeof value.file === 'string'
 }

@@ -18,6 +18,7 @@ type InternalNavRoute = Extract<keyof MenuStackParamList,
     | 'HoneyScreen'
     | 'NucleusDocumentationScreen'
     | 'DatabaseScreen'
+    | 'DatabaseBackupsScreen'
     | 'VulnerabilitiesScreen'
     | 'LogsScreen'
 >
@@ -93,6 +94,11 @@ export default function InternalNavMenu({ activeRoute, navigation }: Props): JSX
                 label: 'Databases',
                 description: 'Clusters, databases, and active queries',
                 route: 'DatabaseScreen',
+            },
+            {
+                label: 'Database backups',
+                description: 'Backup health, restore files, and backup trigger',
+                route: 'DatabaseBackupsScreen',
             },
             {
                 label: 'Vulnerabilities',

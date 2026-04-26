@@ -196,6 +196,25 @@ type System = {
     containers: number
 }
 
+type NativeDatabaseBackup = {
+    id: string
+    name: string
+    status: string
+    lastBackup: string | null
+    nextBackup: string
+    totalStorage: string
+    dbSize: string
+    error: string | null
+}
+
+type NativeDatabaseBackupFile = {
+    service: string
+    file: string
+    size?: string
+    mtime?: string
+    location?: 'local' | 'remote'
+}
+
 type DatabaseOverviewQuery = {
     database: string
     user: string | null
@@ -654,6 +673,7 @@ type MenuRoutes =
     | 'NucleusDocumentationScreen'
     | 'HoneyScreen'
     | 'DatabaseScreen'
+    | 'DatabaseBackupsScreen'
     | 'VulnerabilitiesScreen'
     | 'LogsScreen'
 
@@ -696,6 +716,7 @@ type MenuStackParamList = {
     NucleusDocumentationScreen: undefined
     HoneyScreen: undefined
     DatabaseScreen: undefined
+    DatabaseBackupsScreen: undefined
     VulnerabilitiesScreen: undefined
     LogsScreen: undefined
     MenuScreen: undefined

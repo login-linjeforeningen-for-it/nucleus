@@ -288,7 +288,7 @@ const editorConfigs = {
       { name: 'description_no', label: 'Description NO', type: 'textarea', required: true },
       { name: 'description_en', label: 'Description EN', type: 'textarea', required: true },
       { name: 'logo', label: 'Logo' },
-      { name: 'link_homepage', label: 'Homepage' },
+      { name: 'link_homepage', label: 'Homepage', required: true },
       { name: 'link_facebook', label: 'Facebook' },
       { name: 'link_instagram', label: 'Instagram' },
       { name: 'link_linkedin', label: 'LinkedIn' },
@@ -1133,7 +1133,79 @@ function JobsPage({ data }: { data: DashboardData }) {
 }
 
 function OrganizationsPage({ data }: { data: DashboardData }) {
-  return <EditorPage data={data} config={editorConfigs.organizations} preview={<TileGrid rows={data.organizations} status={data.health.organizations} kind="organization" />} />
+  const [query, setQuery] = useState('')
+  const [orderBy, setOrderBy] = useState('id')
+  const [sort, setSort] = useState<'asc' | 'desc'>('asc')
+  const [page, setPage] = useState(1)
+  const [rows, setRows] = useState<NamedItem[] | null>(null)
+  const [total, setTotal] = useState(data.counts.organizations)
+  const [message, setMessage] = useState('Public organizations loaded. Use the browser controls for Queenbee-style search, sort, and pagination.')
+  const [loading, setLoading] = useState(false)
+  const pageSize = 14
+  const organizationRows = rows || data.organizations
+  const organizationData = { ...data, organizations: organizationRows, counts: { ...data.counts, organizations: total || organizationRows.length } }
+
+  async function loadOrganizations(event?: React.FormEvent) {
+    event?.preventDefault()
+    setLoading(true)
+    const params = new URLSearchParams({
+      limit: String(pageSize),
+      offset: String(Math.max(0, page - 1) * pageSize),
+      order_by: orderBy,
+      sort,
+    })
+    if (query) params.set('search', query)
+    try {
+      const result = await fetch(`https://workerbee.login.no/api/v2/organizations?${params.toString()}`)
+      const payload = await result.json()
+      if (!result.ok) throw new Error(payload?.error || payload?.message || 'Unable to load organizations')
+      const nextRows = Array.isArray(payload.organizations) ? payload.organizations : []
+      setRows(nextRows)
+      setTotal(typeof payload.total_count === 'number' ? payload.total_count : nextRows.length)
+      setMessage(`Loaded ${nextRows.length} organizations from Workerbee.`)
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : 'Unable to load organizations.')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  function applyExample() {
+    window.dispatchEvent(new CustomEvent('login-desktop-editor-example', {
+      detail: {
+        title: 'Organizations',
+        values: {
+          name_no: 'Login - Linjeforeningen for IT',
+          name_en: 'Login - Student Organization for IT',
+          description_no: 'Login er linjeforeningen for IT- og teknologistudenter ved NTNU Gjovik.\\n- Arrangerer sosiale og faglige aktiviteter\\n- Nettverksbygging med naeringslivet\\n- Stotte til studenter gjennom semesteret',
+          description_en: 'Login is the student organization for IT and technology students at NTNU Gjovik.\\n- Organizes social and academic events\\n- Networking opportunities with companies\\n- Student support throughout the semester',
+          link_homepage: 'https://login.no/',
+          link_linkedin: 'https://www.linkedin.com/company/login-student-organization/',
+          link_facebook: 'https://www.facebook.com/loginlinjeforeningen',
+          link_instagram: 'https://www.instagram.com/loginlinjeforeningen/',
+          logo: 'tekkom_32.png',
+        },
+      },
+    }))
+  }
+
+  return (
+    <div className="stacked-page">
+      <section className="panel compact-panel">
+        <PanelTitle title="Organizations Browser" subtitle="Matches Queenbee search, sort, and page controls" />
+        <form className="event-browser-controls" onSubmit={loadOrganizations}>
+          <label className="editor-field"><span>Search</span><input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search organizations" /></label>
+          <label className="editor-field"><span>Order by</span><select value={orderBy} onChange={(event) => setOrderBy(event.target.value)}><option value="id">id</option><option value="name_en">name_en</option><option value="name_no">name_no</option><option value="updated_at">updated_at</option></select></label>
+          <label className="editor-field"><span>Sort</span><select value={sort} onChange={(event) => setSort(event.target.value as 'asc' | 'desc')}><option value="asc">asc</option><option value="desc">desc</option></select></label>
+          <label className="editor-field"><span>Page</span><input type="number" min="1" value={page} onChange={(event) => setPage(Math.max(1, Number(event.target.value) || 1))} /></label>
+          <button type="submit" disabled={loading}>{loading ? 'Loading...' : 'Load organizations'}</button>
+          <button type="button" onClick={applyExample}>Example</button>
+        </form>
+        <p className="editor-message">{message}</p>
+      </section>
+      <EditorPage data={organizationData} config={editorConfigs.organizations} preview={<TileGrid rows={organizationRows} status={data.health.organizations} kind="organization" />} />
+    </div>
+  )
 }
 
 function LocationsPage({ data }: { data: DashboardData }) {

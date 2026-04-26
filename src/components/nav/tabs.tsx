@@ -64,6 +64,7 @@ import ContentScreen from '@screens/menu/content'
 import AnnouncementsScreen from '@screens/menu/announcements'
 import NucleusDocumentationScreen from '@screens/menu/nucleusDocumentation'
 import HoneyScreen from '@screens/menu/honey'
+import DatabaseBackupsScreen from '@screens/menu/databaseBackups'
 import SpecificEventScreen from '@screens/event/specificEvent'
 import SpecificAdScreen from '@screens/ads/specificAd'
 import SpecificAlbumScreen from '@screens/menu/specificAlbum'
@@ -164,6 +165,7 @@ function Menu() {
             <MenuStack.Screen name='NucleusDocumentationScreen' component={NucleusDocumentationScreen} />
             <MenuStack.Screen name='HoneyScreen' component={HoneyScreen} />
             <MenuStack.Screen name='DatabaseScreen' component={DatabaseScreen} />
+            <MenuStack.Screen name='DatabaseBackupsScreen' component={DatabaseBackupsScreen} />
             <MenuStack.Screen name='VulnerabilitiesScreen' component={VulnerabilitiesScreen} />
             <MenuStack.Screen name='LogsScreen' component={LogsScreen} />
             <MenuStack.Screen name='CourseScreen' component={CourseScreen} />
