@@ -30,7 +30,8 @@
         "LogsScreen": "Logger",
         "TrafficScreen": "Trafikk",
         "TrafficRecordsScreen": "Trafikklogger",
-        "TrafficMapScreen": "Trafikkart"
+        "TrafficMapScreen": "Trafikkart",
+        "NucleusDocumentationScreen": "Nucleus docs"
     },
     "search": {
         "intro": "Søk fra appen og se animasjonen før den åpnes.",

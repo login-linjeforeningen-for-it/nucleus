@@ -30,7 +30,8 @@
         "LogsScreen": "Logs",
         "TrafficScreen": "Traffic",
         "TrafficRecordsScreen": "Traffic records",
-        "TrafficMapScreen": "Traffic map"
+        "TrafficMapScreen": "Traffic map",
+        "NucleusDocumentationScreen": "Nucleus docs"
     },
     "search": {
         "intro": "Search from the app and preview the motion before it opens.",

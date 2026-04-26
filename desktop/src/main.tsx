@@ -7,6 +7,7 @@ import {
   ArrowRight,
   Bell,
   BriefcaseBusiness,
+  CalendarClock,
   CalendarDays,
   CheckCircle2,
   Database,
@@ -31,6 +32,8 @@ import {
   RefreshCcw,
   Scale,
   Search,
+  Send,
+  SendHorizontal,
   Server,
   Settings,
   ShieldAlert,
@@ -38,12 +41,14 @@ import {
   Sparkles,
   Sun,
   Trash2,
+  Upload,
   UsersRound,
   X,
 } from 'lucide-react'
 import {
   AlbumItem,
   AnnouncementItem,
+  AppNotificationHistoryEntry,
   DashboardData,
   EventItem,
   JobItem,
@@ -51,13 +56,18 @@ import {
   RecentAddition,
   RuleItem,
   QueenbeeService,
+  ScheduledAppNotificationEntry,
   ServiceStatus,
   albumImageUrl,
+  appApiRequest,
   eventImageUrl,
+  getAppApiAdminToken,
   getQueenbeeToken,
+  hasAppApiAdminToken,
   hasQueenbeeToken,
   loadDashboardData,
   queenbeeRequest,
+  setAppApiAdminToken,
   setQueenbeeToken,
 } from './lib/api'
 import { AutoUpdateState, DESKTOP_APP_VERSION, fetchAppUpdateManifest, hasNewerDesktopVersion } from './lib/appUpdate'
@@ -940,6 +950,8 @@ function AlbumImagesPage({ data }: { data: DashboardData }) {
   const [albumId, setAlbumId] = useState(String(data.albums[0]?.id || ''))
   const [album, setAlbum] = useState<Record<string, unknown> | null>(null)
   const [message, setMessage] = useState('Choose an album and load its images.')
+  const [files, setFiles] = useState<File[]>([])
+  const [uploading, setUploading] = useState(false)
   const images = Array.isArray(album?.images) ? album.images as string[] : []
 
   async function loadAlbum(event?: React.FormEvent) {
@@ -960,7 +972,7 @@ function AlbumImagesPage({ data }: { data: DashboardData }) {
   async function setCover(imageName: string) {
     if (!window.confirm(`Set ${imageName} as album cover?`)) return
     try {
-      await queenbeeRequest({ service: 'workerbee', path: `albums/${albumId}/${imageName}`, method: 'PUT' })
+      await queenbeeRequest({ service: 'workerbee', path: `albums/${albumId}/cover/${encodeURIComponent(imageName)}`, method: 'PUT' })
       setMessage('Cover image updated.')
     } catch (error) {
       setMessage(error instanceof Error ? error.message : 'Unable to update cover.')
@@ -970,7 +982,7 @@ function AlbumImagesPage({ data }: { data: DashboardData }) {
   async function deleteImage(imageName: string) {
     if (!window.confirm(`Delete ${imageName} from album ${albumId}?`)) return
     try {
-      await queenbeeRequest({ service: 'workerbee', path: `albums/${albumId}/${imageName}`, method: 'DELETE' })
+      await queenbeeRequest({ service: 'workerbee', path: `albums/${albumId}/images/${encodeURIComponent(imageName)}`, method: 'DELETE' })
       setMessage('Image deleted. Reload the album to refresh.')
     } catch (error) {
       setMessage(error instanceof Error ? error.message : 'Unable to delete image.')
@@ -987,6 +999,27 @@ function AlbumImagesPage({ data }: { data: DashboardData }) {
     }
   }
 
+  async function uploadImages() {
+    if (!albumId || !files.length) {
+      setMessage('Choose an album and at least one image first.')
+      return
+    }
+    if (!window.confirm(`Upload ${files.length} image${files.length === 1 ? '' : 's'} to album ${albumId}? This pushes files to Workerbee object storage.`)) return
+    setUploading(true)
+    try {
+      const form = new FormData()
+      files.forEach((file) => form.append('images', file))
+      await queenbeeRequest({ service: 'workerbee', path: `albums/${albumId}/images`, method: 'POST', data: form, timeoutMs: 45000 })
+      setFiles([])
+      setMessage('Images uploaded. Reloading album images...')
+      await loadAlbum()
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : 'Unable to upload album images.')
+    } finally {
+      setUploading(false)
+    }
+  }
+
   return (
     <PagePanel title="Album Images" status={data.health.albums}>
       <form className="mini-admin-form inline" onSubmit={loadAlbum}>
@@ -996,6 +1029,18 @@ function AlbumImagesPage({ data }: { data: DashboardData }) {
         <button type="submit"><RefreshCcw size={14} />Load</button>
         <button type="button" disabled={!hasQueenbeeToken()} onClick={compressAlbums}>Compress all albums</button>
       </form>
+      <div className="media-upload-panel">
+        <div>
+          <h3>Upload album images</h3>
+          <p>Select one or more images and push them to the live album media endpoint.</p>
+        </div>
+        <label className="file-picker">
+          <Upload size={16} />
+          <span>{files.length ? `${files.length} file${files.length === 1 ? '' : 's'} selected` : 'Choose images'}</span>
+          <input type="file" accept="image/*" multiple onChange={(event) => setFiles(Array.from(event.target.files || []))} />
+        </label>
+        <button type="button" disabled={!hasQueenbeeToken() || uploading || !files.length} onClick={uploadImages}>{uploading ? 'Uploading...' : 'Upload to album'}</button>
+      </div>
       <p className="editor-message">{message}</p>
       <div className="album-image-grid">
         {images.map((imageName) => (
@@ -1024,7 +1069,20 @@ function OrganizationsPage({ data }: { data: DashboardData }) {
 }
 
 function LocationsPage({ data }: { data: DashboardData }) {
-  return <EditorPage data={data} config={editorConfigs.locations} preview={<TileGrid rows={data.locations} status={data.health.locations} kind="location" />} />
+  const [type, setType] = useState('all')
+  const locationRows = data.locations.filter((row) => type === 'all' || stringValue((row as EditableRow).type).toLowerCase() === type)
+  const locationData = { ...data, locations: locationRows }
+  return (
+    <div className="stacked-page">
+      <section className="panel compact-panel">
+        <PanelTitle title="Location Type" subtitle="Matches Queenbee address / coordinate / mazemap / digital filters" />
+        <div className="segment-row">
+          {['all', 'address', 'coordinate', 'mazemap', 'digital'].map((item) => <button key={item} className={type === item ? 'active' : ''} onClick={() => setType(item)}>{item}</button>)}
+        </div>
+      </section>
+      <EditorPage data={locationData} config={editorConfigs.locations} preview={<TileGrid rows={locationRows} status={data.health.locations} kind="location" />} />
+    </div>
+  )
 }
 
 function RulesPage({ data }: { data: DashboardData }) {
@@ -1047,8 +1105,10 @@ function EditorPage<T extends EditableRow>({ data, config, preview }: { data: Da
   const [message, setMessage] = useState('Ready. Add a Queenbee token in Settings to push changes.')
   const [query, setQuery] = useState('')
   const [busy, setBusy] = useState(false)
+  const [mediaMessage, setMediaMessage] = useState('')
   const tokenReady = hasQueenbeeToken()
   const filteredRows = rows.filter((row) => `${config.titleOf(row)} ${config.metaOf(row)} ${row.id}`.toLowerCase().includes(query.toLowerCase()))
+  const imageUploadPath = imagePathForEditor(config.title)
 
   function startCreate() {
     setMode('create')
@@ -1112,7 +1172,9 @@ function EditorPage<T extends EditableRow>({ data, config, preview }: { data: Da
             {mode === 'update' && editing ? <button type="button" className="danger-action" disabled={busy || !tokenReady} onClick={() => remove(editing)}><Trash2 size={15} />Delete</button> : null}
           </div>
         </form>
+        {imageUploadPath ? <EditorMediaTools path={imageUploadPath} fields={config.fields} onMessage={setMediaMessage} /> : null}
         <p className="editor-message">{message}</p>
+        {mediaMessage ? <p className="editor-message">{mediaMessage}</p> : null}
       </section>
 
       <section className="panel editor-list-panel">
@@ -1133,6 +1195,85 @@ function EditorPage<T extends EditableRow>({ data, config, preview }: { data: Da
       </section>
 
       {preview ? <section className="panel editor-preview-panel"><PanelTitle title="Public Preview" subtitle="Read-only current output" />{preview}</section> : null}
+    </div>
+  )
+}
+
+function imagePathForEditor(title: string) {
+  if (title === 'Events') return 'events'
+  if (title === 'Jobs') return 'jobs'
+  if (title === 'Organizations') return 'organizations'
+  return ''
+}
+
+function EditorMediaTools({ path, fields, onMessage }: { path: string; fields: EditorField[]; onMessage: (message: string) => void }) {
+  const [file, setFile] = useState<File | null>(null)
+  const [images, setImages] = useState<string[]>([])
+  const [busy, setBusy] = useState('')
+  const imageFields = fields.filter((field) => field.name.includes('image'))
+
+  async function loadImages() {
+    setBusy('load')
+    try {
+      const result = await queenbeeRequest<string[]>({ service: 'workerbee', path: `images/${path}`, method: 'GET', timeoutMs: 15000 })
+      setImages(Array.isArray(result) ? result : [])
+      onMessage(`Loaded ${Array.isArray(result) ? result.length : 0} ${path} media files.`)
+    } catch (error) {
+      onMessage(error instanceof Error ? error.message : `Unable to load ${path} images.`)
+    } finally {
+      setBusy('')
+    }
+  }
+
+  async function uploadImage() {
+    if (!file) {
+      onMessage('Choose an image first.')
+      return
+    }
+    if (!window.confirm(`Upload ${file.name} to ${path} images? This pushes a file to Workerbee object storage.`)) return
+    setBusy('upload')
+    try {
+      const form = new FormData()
+      form.append('image', file)
+      const result = await queenbeeRequest<{ image?: string; name?: string }>({ service: 'workerbee', path: `images/${path}`, method: 'POST', data: form, timeoutMs: 30000 })
+      const name = result?.name || file.name
+      setImages((current) => current.includes(name) ? current : [name, ...current])
+      onMessage(`Uploaded ${name}. Use it in ${imageFields.map((field) => field.label).join(' or ')}.`)
+    } catch (error) {
+      onMessage(error instanceof Error ? error.message : `Unable to upload ${path} image.`)
+    } finally {
+      setBusy('')
+    }
+  }
+
+  async function deleteImage(name: string) {
+    if (!window.confirm(`Delete ${name} from ${path} media? This removes the live file.`)) return
+    setBusy(`delete-${name}`)
+    try {
+      await queenbeeRequest({ service: 'workerbee', path: `images/${path}/${encodeURIComponent(name)}`, method: 'DELETE' })
+      setImages((current) => current.filter((image) => image !== name))
+      onMessage(`Deleted ${name}.`)
+    } catch (error) {
+      onMessage(error instanceof Error ? error.message : `Unable to delete ${name}.`)
+    } finally {
+      setBusy('')
+    }
+  }
+
+  return (
+    <div className="media-upload-panel editor-media-tools">
+      <div>
+        <h3>{path} media</h3>
+        <p>Upload, list, and delete images used by this Queenbee page.</p>
+      </div>
+      <label className="file-picker">
+        <Upload size={16} />
+        <span>{file ? file.name : 'Choose image'}</span>
+        <input type="file" accept="image/*" onChange={(event) => setFile(event.target.files?.[0] || null)} />
+      </label>
+      <button type="button" disabled={!hasQueenbeeToken() || busy === 'upload' || !file} onClick={uploadImage}>Upload</button>
+      <button type="button" disabled={!hasQueenbeeToken() || busy === 'load'} onClick={loadImages}>List existing</button>
+      {images.length ? <div className="media-chip-list">{images.slice(0, 18).map((name) => <span key={name}>{name}<button type="button" disabled={busy === `delete-${name}`} onClick={() => void deleteImage(name)}><X size={12} /></button></span>)}</div> : null}
     </div>
   )
 }
@@ -1210,25 +1351,239 @@ function InternalPage({ data }: { data: DashboardData }) {
 }
 
 function NucleusAdminPage({ data }: { data: DashboardData }) {
-  const items = [
-    ['Notifications', 'Schedule, resend, and review app notification history.', Bell, 'https://queenbee.login.no/notifications'],
-    ['Events', 'Open Queenbee event editing for content parity checks.', Pencil, 'https://queenbee.login.no/events'],
-    ['App Links', 'Review native app routing and public Login surfaces.', KeyRound, 'https://login.no/app'],
-  ] as const
+  const [formValues, setFormValues] = useState({ title: '', body: '', topic: 'maintenance', screen: '', scheduledAt: '' })
+  const [history, setHistory] = useState<AppNotificationHistoryEntry[]>([])
+  const [scheduled, setScheduled] = useState<ScheduledAppNotificationEntry[]>([])
+  const [message, setMessage] = useState('Ready to manage Nucleus notifications.')
+  const [busy, setBusy] = useState('')
+  const tokenReady = hasAppApiAdminToken()
+  const status: ServiceStatus = tokenReady ? 'live' : 'locked'
+
+  async function loadHistory() {
+    if (!tokenReady) {
+      setHistory([])
+      setMessage('Add an App API admin token in Settings to load notification history.')
+      return
+    }
+    setBusy('history')
+    try {
+      const result = await appApiRequest<AppNotificationHistoryEntry[]>({ path: 'notifications?limit=12' })
+      setHistory(Array.isArray(result) ? result : [])
+      setMessage(`Loaded ${Array.isArray(result) ? result.length : 0} sent notifications.`)
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : 'Unable to load notification history.')
+    } finally {
+      setBusy('')
+    }
+  }
+
+  async function loadScheduled() {
+    if (!tokenReady) {
+      setScheduled([])
+      setMessage('Add an App API admin token in Settings to load scheduled notifications.')
+      return
+    }
+    setBusy('scheduled')
+    try {
+      const result = await appApiRequest<ScheduledAppNotificationEntry[]>({ path: 'notifications/scheduled?limit=12' })
+      setScheduled(Array.isArray(result) ? result : [])
+      setMessage(`Loaded ${Array.isArray(result) ? result.length : 0} scheduled notifications.`)
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : 'Unable to load scheduled notifications.')
+    } finally {
+      setBusy('')
+    }
+  }
+
+  useEffect(() => {
+    if (!tokenReady) return
+    void loadHistory()
+    void loadScheduled()
+  }, [tokenReady])
+
+  async function pushNotification(schedule: boolean) {
+    if (!tokenReady) {
+      setMessage('Add an App API admin token in Settings before sending notifications.')
+      return
+    }
+    if (!formValues.title || !formValues.body) {
+      setMessage('Title and body are required.')
+      return
+    }
+    if (schedule && !formValues.scheduledAt) {
+      setMessage('Choose a schedule time first.')
+      return
+    }
+    const action = schedule ? 'schedule this Nucleus push notification' : 'send this Nucleus push notification now'
+    if (!window.confirm(`Confirm ${action} to topic "${formValues.topic || 'maintenance'}"? This may notify subscribed app users.`)) return
+    setBusy(schedule ? 'schedule-submit' : 'send')
+    try {
+      const payload = {
+        title: formValues.title,
+        body: formValues.body,
+        topic: formValues.topic || 'maintenance',
+        data: normalizeNotificationScreen(formValues.screen),
+        ...(schedule ? { scheduledAt: new Date(formValues.scheduledAt).toISOString() } : {}),
+      }
+      await appApiRequest({ path: schedule ? 'notifications/scheduled' : 'notifications', method: 'POST', data: payload, timeoutMs: 15000 })
+      setMessage(schedule ? 'Notification scheduled.' : 'Notification sent.')
+      await Promise.all([loadHistory(), loadScheduled()])
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : 'Notification request failed.')
+    } finally {
+      setBusy('')
+    }
+  }
+
+  async function runScheduled(item: ScheduledAppNotificationEntry) {
+    if (!tokenReady) {
+      setMessage('Add an App API admin token in Settings before sending scheduled notifications.')
+      return
+    }
+    if (!window.confirm(`Send scheduled notification "${item.title}" now? This may notify subscribed app users.`)) return
+    setBusy(`run-${item.id}`)
+    try {
+      await appApiRequest({ path: `notifications/scheduled/${item.id}/send`, method: 'POST', timeoutMs: 15000 })
+      setMessage('Scheduled notification sent.')
+      await Promise.all([loadHistory(), loadScheduled()])
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : 'Unable to send scheduled notification.')
+    } finally {
+      setBusy('')
+    }
+  }
+
+  async function cancelScheduled(item: ScheduledAppNotificationEntry) {
+    if (!tokenReady) {
+      setMessage('Add an App API admin token in Settings before cancelling scheduled notifications.')
+      return
+    }
+    if (!window.confirm(`Cancel scheduled notification "${item.title}"?`)) return
+    setBusy(`cancel-${item.id}`)
+    try {
+      await appApiRequest({ path: `notifications/scheduled/${item.id}`, method: 'DELETE' })
+      setMessage('Scheduled notification cancelled.')
+      await loadScheduled()
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : 'Unable to cancel scheduled notification.')
+    } finally {
+      setBusy('')
+    }
+  }
+
+  async function resendHistory(item: AppNotificationHistoryEntry) {
+    if (!tokenReady) {
+      setMessage('Add an App API admin token in Settings before resending notifications.')
+      return
+    }
+    if (!window.confirm(`Resend notification "${item.title}" to topic "${item.topic}"? This may notify subscribed app users.`)) return
+    setBusy(`resend-${item.id}`)
+    try {
+      await appApiRequest({ path: `notifications/${item.id}/resend`, method: 'POST', timeoutMs: 15000 })
+      setMessage('Notification resent.')
+      await loadHistory()
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : 'Unable to resend notification.')
+    } finally {
+      setBusy('')
+    }
+  }
 
   return (
-    <PagePanel title="Nucleus Admin" status={combinedStatus(data.health, ['announcements', 'status'])}>
-      <div className="queenbee-grid">
-        {items.map(([title, body, Icon, url]) => (
-          <button className="queenbee-card" key={title} onClick={() => openInAppBrowser(url)}>
-            <Icon size={18} />
-            <h3>{title}</h3>
-            <p>{body}</p>
-            <span>Open surface</span>
-          </button>
-        ))}
+    <PagePanel title="Nucleus Admin" status={status}>
+      {!tokenReady ? (
+        <div className="locked-notice">
+          <KeyRound size={18} />
+          <span>Add an App API admin token in Settings to load notification history, schedule pushes, or send/resend notifications.</span>
+        </div>
+      ) : null}
+      <div className="nucleus-admin-layout">
+        <form className="mini-admin-form nucleus-send-form" onSubmit={(event) => { event.preventDefault(); void pushNotification(false) }}>
+          <h3>Send notification</h3>
+          <label className="editor-field"><span>Title</span><input value={formValues.title} onChange={(event) => setFormValues({ ...formValues, title: event.target.value })} required /></label>
+          <label className="editor-field"><span>Body</span><textarea value={formValues.body} onChange={(event) => setFormValues({ ...formValues, body: event.target.value })} required /></label>
+          <label className="editor-field"><span>Topic</span><input value={formValues.topic} onChange={(event) => setFormValues({ ...formValues, topic: event.target.value })} /></label>
+          <label className="editor-field"><span>Screen</span><input value={formValues.screen} onChange={(event) => setFormValues({ ...formValues, screen: event.target.value })} placeholder="event:123, ad:456, ai, admin, login" /></label>
+          <label className="editor-field"><span>Schedule for</span><input type="datetime-local" value={formValues.scheduledAt} onChange={(event) => setFormValues({ ...formValues, scheduledAt: event.target.value })} /></label>
+          <div className="editor-actions">
+            <button type="button" onClick={() => setFormValues({ title: 'Welcome to Nucleus', body: 'This is a test push notification.', topic: 'example', screen: 'login', scheduledAt: '' })}><Plus size={14} />Example</button>
+            <button type="submit" disabled={!tokenReady || busy === 'send'}><Send size={14} />Send</button>
+            <button type="button" disabled={!tokenReady || busy === 'schedule-submit'} onClick={() => void pushNotification(true)}><CalendarClock size={14} />Schedule</button>
+          </div>
+          <p className="editor-message">{message}</p>
+        </form>
+        <div className="notification-preview">
+          <span>Nucleus preview</span>
+          <strong>{formValues.title || 'Notification title'}</strong>
+          <p>{formValues.body || 'Notification body preview appears here while you type.'}</p>
+          <small>{formValues.topic || 'maintenance'} · {Object.values(normalizeNotificationScreen(formValues.screen)).join(' / ') || 'NotificationScreen'}</small>
+        </div>
+      </div>
+      <div className="traffic-grid">
+        <NotificationList title="Scheduled notifications" icon={<CalendarClock size={16} />} loading={busy === 'scheduled'} isEmpty={!scheduled.length} onRefresh={loadScheduled}>
+          {scheduled.map((item) => (
+            <article className="notification-row" key={item.id}>
+              <div><strong>{item.title}</strong><p>{item.body}</p><span>{item.topic} · {item.status} · {formatDate(item.scheduledAt)}</span>{item.lastError ? <small>{item.lastError}</small> : null}</div>
+              <div className="editor-actions">
+                <button onClick={() => void runScheduled(item)} disabled={busy === `run-${item.id}`}><SendHorizontal size={14} />Send now</button>
+                {item.status !== 'cancelled' && item.status !== 'sent' ? <button className="danger-action" onClick={() => void cancelScheduled(item)} disabled={busy === `cancel-${item.id}`}><Trash2 size={14} />Cancel</button> : null}
+              </div>
+            </article>
+          ))}
+        </NotificationList>
+        <NotificationList title="Recent notifications" icon={<Bell size={16} />} loading={busy === 'history'} isEmpty={!history.length} onRefresh={loadHistory}>
+          {history.map((item) => (
+            <article className="notification-row" key={item.id}>
+              <div><strong>{item.title}</strong><p>{item.body}</p><span>{item.topic} · delivered {item.delivered ?? 0} · failed {item.failed ?? 0}</span>{item.sentAt ? <small>{formatDate(item.sentAt)}</small> : null}</div>
+              <button onClick={() => void resendHistory(item)} disabled={busy === `resend-${item.id}`}><SendHorizontal size={14} />Resend</button>
+            </article>
+          ))}
+        </NotificationList>
+      </div>
+      <div className="editor-toolbar">
+        <button onClick={() => openInAppBrowser('https://queenbee.login.no/nucleus')}>Open Queenbee Nucleus <ExternalLink size={14} /></button>
+        <button onClick={() => openInAppBrowser('https://queenbee.login.no/nucleus/documentation')}>Documentation <ExternalLink size={14} /></button>
       </div>
     </PagePanel>
+  )
+}
+
+function normalizeNotificationScreen(screen: string) {
+  const value = screen.trim()
+  const lower = value.toLowerCase()
+  if (!value) return {}
+  if (lower.startsWith('event:')) return { target: 'event', id: value.split(':')[1] || '' }
+  if (lower.startsWith('ad:')) return { target: 'ad', id: value.split(':')[1] || '' }
+  if (lower.startsWith('menu:')) return { target: 'menu', screen: value.split(':')[1] || 'NotificationScreen' }
+  if (lower === 'ai') return { target: 'menu', screen: 'AiScreen' }
+  if (lower === 'admin') return { target: 'menu', screen: 'AdminScreen' }
+  if (lower === 'login') return { target: 'menu', screen: 'LoginScreen' }
+  return { target: 'menu', screen: 'NotificationScreen' }
+}
+
+function NotificationList({
+  title,
+  icon,
+  loading,
+  isEmpty,
+  onRefresh,
+  children,
+}: {
+  title: string
+  icon: React.ReactNode
+  loading: boolean
+  isEmpty: boolean
+  onRefresh: () => void
+  children: React.ReactNode
+}) {
+  return (
+    <section className="notification-panel">
+      <div className="notification-panel-head">
+        <div>{icon}<h3>{title}</h3></div>
+        <button onClick={() => void onRefresh()}><RefreshCcw className={loading ? 'spin' : ''} size={14} />Refresh</button>
+      </div>
+      <div className="notification-list">{isEmpty ? <EmptyState icon={<Bell />} label="No notifications returned." /> : children}</div>
+    </section>
   )
 }
 
@@ -1805,10 +2160,17 @@ function SettingsPage({
 }) {
   const [tokenDraft, setTokenDraft] = useState(() => getQueenbeeToken())
   const [tokenSaved, setTokenSaved] = useState(() => hasQueenbeeToken())
+  const [appTokenDraft, setAppTokenDraft] = useState(() => getAppApiAdminToken())
+  const [appTokenSaved, setAppTokenSaved] = useState(() => hasAppApiAdminToken())
 
   function saveToken() {
     setQueenbeeToken(tokenDraft)
     setTokenSaved(Boolean(tokenDraft.trim()))
+  }
+
+  function saveAppToken() {
+    setAppApiAdminToken(appTokenDraft)
+    setAppTokenSaved(Boolean(appTokenDraft.trim()))
   }
 
   return (
@@ -1843,6 +2205,17 @@ function SettingsPage({
           </label>
           <button onClick={saveToken}><KeyRound size={15} />{tokenSaved ? 'Update token' : 'Save token'}</button>
           <p>{tokenSaved ? 'Write actions are enabled locally and still ask for confirmation before pushing.' : 'Without a token, editor pages stay safely read-only.'}</p>
+        </div>
+      </section>
+      <section className="settings-card">
+        <PanelTitle title="Nucleus Push Access" subtitle="Optional App API admin token for notification history and scheduling" />
+        <div className="token-box">
+          <label>
+            <span>App API token</span>
+            <input type="password" value={appTokenDraft} onChange={(event) => setAppTokenDraft(event.target.value)} placeholder="Paste an App API admin token" />
+          </label>
+          <button onClick={saveAppToken}><KeyRound size={15} />{appTokenSaved ? 'Update token' : 'Save token'}</button>
+          <p>{appTokenSaved ? 'Nucleus notification actions can use the stored App API bearer token.' : 'If the App API is restricted, Nucleus notification actions will stay locked until this is set.'}</p>
         </div>
       </section>
       <section className="settings-card">

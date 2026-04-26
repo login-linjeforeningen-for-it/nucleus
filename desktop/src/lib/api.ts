@@ -94,6 +94,30 @@ export type AnnouncementItem = {
   created_at?: string
 }
 
+export type AppNotificationHistoryEntry = {
+  id: string
+  title: string
+  body: string
+  topic: string
+  data?: Record<string, string>
+  sentAt?: string
+  delivered?: number
+  failed?: number
+}
+
+export type ScheduledAppNotificationEntry = {
+  id: string
+  title: string
+  body: string
+  topic: string
+  data?: Record<string, string>
+  scheduledAt: string
+  status: 'scheduled' | 'processing' | 'sent' | 'failed' | 'cancelled' | string
+  lastError?: string | null
+  delivered?: number | null
+  failed?: number | null
+}
+
 export type RuleItem = {
   id: number | string
   name_no?: string
@@ -385,8 +409,10 @@ type WorkerbeeResponse<T, K extends string> = {
 const WORKERBEE = import.meta.env.VITE_WORKERBEE_API ?? 'https://workerbee.login.no/api/v2'
 const BEEKEEPER = import.meta.env.VITE_BEEKEEPER_API ?? 'https://beekeeper.login.no/api'
 const BOT = import.meta.env.VITE_BOT_API ?? 'https://bot.login.no/api'
+const APP_API = import.meta.env.VITE_APP_API ?? 'https://app.login.no/api'
 const BEEKEEPER_TOKEN = import.meta.env.VITE_BEEKEEPER_TOKEN
 const QUEENBEE_TOKEN_KEY = 'login-desktop.queenbee-token'
+const APP_API_TOKEN_KEY = 'login-desktop.app-api-token'
 
 export type QueenbeeService = 'workerbee' | 'bot' | 'beekeeper'
 
@@ -402,6 +428,20 @@ export function setQueenbeeToken(token: string) {
 
 export function hasQueenbeeToken() {
   return Boolean(getQueenbeeToken())
+}
+
+export function getAppApiAdminToken() {
+  return window.localStorage.getItem(APP_API_TOKEN_KEY) || ''
+}
+
+export function setAppApiAdminToken(token: string) {
+  const trimmed = token.trim()
+  if (trimmed) window.localStorage.setItem(APP_API_TOKEN_KEY, trimmed)
+  else window.localStorage.removeItem(APP_API_TOKEN_KEY)
+}
+
+export function hasAppApiAdminToken() {
+  return Boolean(getAppApiAdminToken())
 }
 
 function serviceBase(service: QueenbeeService) {
@@ -455,20 +495,21 @@ export async function queenbeeRequest<T>({
   const controller = new AbortController()
   const timeout = window.setTimeout(() => controller.abort(), timeoutMs)
   const url = `${serviceBase(service)}/${path.replace(/^\/+/, '')}`
+  const isFormData = typeof FormData !== 'undefined' && data instanceof FormData
 
   try {
     const response = await fetch(url, {
       method,
       headers: {
-        'Content-Type': 'application/json',
+        ...(!isFormData ? { 'Content-Type': 'application/json' } : {}),
         Authorization: `Bearer ${token}`,
         ...(service === 'bot' ? { btg: 'tekkom-bot' } : {}),
       },
-      body: data === undefined ? undefined : JSON.stringify(data),
+      body: data === undefined ? undefined : isFormData ? data : JSON.stringify(data),
       signal: controller.signal,
     })
     const text = await response.text()
-    const body = text ? JSON.parse(text) : null
+    const body = parseJsonResponse(text)
     if (!response.ok) {
       const message = typeof body?.message === 'string' ? body.message : typeof body?.error === 'string' ? body.error : response.statusText
       throw new Error(message || `Queenbee ${method} failed`)
@@ -476,6 +517,53 @@ export async function queenbeeRequest<T>({
     return body as T
   } finally {
     window.clearTimeout(timeout)
+  }
+}
+
+export async function appApiRequest<T>({
+  path,
+  method = 'GET',
+  data,
+  timeoutMs = 9000,
+}: {
+  path: string
+  method?: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE'
+  data?: unknown
+  timeoutMs?: number
+}): Promise<T> {
+  const token = getAppApiAdminToken()
+  const controller = new AbortController()
+  const timeout = window.setTimeout(() => controller.abort(), timeoutMs)
+  const url = `${APP_API}/${path.replace(/^\/+/, '')}`
+
+  try {
+    const response = await fetch(url, {
+      method,
+      headers: {
+        'Content-Type': 'application/json',
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      },
+      body: data === undefined ? undefined : JSON.stringify(data),
+      signal: controller.signal,
+    })
+    const text = await response.text()
+    const body = parseJsonResponse(text)
+    if (!response.ok) {
+      const message = typeof body?.message === 'string' ? body.message : typeof body?.error === 'string' ? body.error : response.statusText
+      throw new Error(message || `App API ${method} failed`)
+    }
+    return body as T
+  } finally {
+    window.clearTimeout(timeout)
+  }
+}
+
+function parseJsonResponse(text: string) {
+  if (!text) return null
+  try {
+    return JSON.parse(text)
+  } catch {
+    return { message: text }
   }
 }
 

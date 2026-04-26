@@ -635,6 +635,7 @@ type MenuRoutes =
     | 'TrafficRecordsScreen'
     | 'TrafficMapScreen'
     | 'ContentScreen'
+    | 'NucleusDocumentationScreen'
     | 'DatabaseScreen'
     | 'VulnerabilitiesScreen'
     | 'LogsScreen'
@@ -673,6 +674,7 @@ type MenuStackParamList = {
     TrafficRecordsScreen: undefined
     TrafficMapScreen: undefined
     ContentScreen: undefined
+    NucleusDocumentationScreen: undefined
     DatabaseScreen: undefined
     VulnerabilitiesScreen: undefined
     LogsScreen: undefined

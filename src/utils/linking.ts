@@ -67,6 +67,10 @@ const linking: LinkingOptions<RootStackParamList> = {
                             TrafficRecordsScreen: 'internal/traffic/records',
                             TrafficMapScreen: 'internal/traffic/map',
                             ContentScreen: 'internal/content',
+                            NucleusDocumentationScreen: {
+                                path: 'internal/nucleus/documentation',
+                                alias: ['nucleus/documentation'],
+                            },
                             DatabaseScreen: {
                                 path: 'internal/databases',
                                 alias: ['internal/db'],

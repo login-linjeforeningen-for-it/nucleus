@@ -23,6 +23,8 @@ const expectedRoutes = [
     ['internal/traffic/records', 'TrafficRecordsScreen'],
     ['internal/traffic/map', 'TrafficMapScreen'],
     ['internal/content', 'ContentScreen'],
+    ['internal/nucleus/documentation', 'NucleusDocumentationScreen'],
+    ['nucleus/documentation', 'NucleusDocumentationScreen'],
     ['internal/db', 'DatabaseScreen'],
     ['internal/vulnerabilities', 'VulnerabilitiesScreen'],
     ['internal/logs', 'LogsScreen'],
