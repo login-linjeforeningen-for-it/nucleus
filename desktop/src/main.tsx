@@ -75,8 +75,9 @@ import type { BrowserTarget } from './lib/inAppBrowser'
 import { openInAppBrowser } from './lib/inAppBrowser'
 import './styles.css'
 import enText from '../../public/text/en.json'
+import aboutText from '../../public/text/menu/about/en.json'
 
-type PageKey = 'dashboard' | 'events' | 'announcements' | 'albums' | 'albumImages' | 'jobs' | 'organizations' | 'locations' | 'rules' | 'alerts' | 'honey' | 'partners' | 'fund' | 'games' | 'pwned' | 'music' | 'status' | 'nucleusAdmin' | 'nucleusDocs' | 'internal' | 'loadbalancing' | 'databases' | 'dbRestore' | 'monitoring' | 'services' | 'serviceDetail' | 'traffic' | 'trafficRecords' | 'trafficMap' | 'backups' | 'vulnerabilities' | 'logs' | 'ai' | 'settings'
+type PageKey = 'dashboard' | 'events' | 'announcements' | 'albums' | 'albumImages' | 'jobs' | 'organizations' | 'locations' | 'rules' | 'alerts' | 'honey' | 'partners' | 'about' | 'verv' | 'policy' | 'fund' | 'games' | 'pwned' | 'music' | 'status' | 'nucleusAdmin' | 'nucleusDocs' | 'internal' | 'loadbalancing' | 'databases' | 'dbRestore' | 'monitoring' | 'services' | 'serviceDetail' | 'traffic' | 'trafficRecords' | 'trafficMap' | 'backups' | 'vulnerabilities' | 'logs' | 'ai' | 'settings'
 type ThemePreference = 'light' | 'dark' | 'system'
 
 type NavItem = { key: PageKey; label: string; icon: React.ComponentType<{ size?: number }> }
@@ -128,6 +129,9 @@ const menu: NavItem[] = [
   { key: 'alerts', label: 'Alerts', icon: AlertCircle },
   { key: 'honey', label: 'Honey', icon: Sparkles },
   { key: 'partners', label: 'For Companies', icon: Handshake },
+  { key: 'about', label: 'About Login', icon: UsersRound },
+  { key: 'verv', label: 'Verv', icon: Handshake },
+  { key: 'policy', label: 'Privacy Policy', icon: ShieldCheck },
   { key: 'fund', label: 'Login Fund', icon: Scale },
   { key: 'games', label: 'Games', icon: Sparkles },
   { key: 'pwned', label: 'Pwned', icon: ShieldAlert },
@@ -750,6 +754,9 @@ function PageRouter({ page, data, updateState }: { page: PageKey; data: Dashboar
     case 'alerts': return <AlertsPage data={data} />
     case 'honey': return <HoneyPage data={data} />
     case 'partners': return <PartnersPage data={data} />
+    case 'about': return <AboutPage />
+    case 'verv': return <VervPage />
+    case 'policy': return <PolicyPage />
     case 'fund': return <FundPage data={data} />
     case 'games': return <GamesPage data={data} />
     case 'pwned': return <PwnedPage />
@@ -860,6 +867,9 @@ function pageMeta(page: PageKey, data: DashboardData | null) {
     alerts: { title: 'Alerts', kicker: `${data?.alerts.length ?? 0} loaded`, description: 'Queenbee alert banners and page-level notices from Workerbee.', icon: AlertCircle },
     honey: { title: 'Honey', kicker: `${data?.honey.length ?? 0} loaded`, description: 'Structured Login/Queenbee text content from the Workerbee honey store.', icon: Sparkles },
     partners: { title: 'For Companies', kicker: data?.companiesText ? 'Beehive text' : 'Loading', description: 'Company presentation and sponsor information from login.no.', icon: Handshake },
+    about: { title: 'About Login', kicker: 'Student association', description: 'Native overview of Login, committees, programmes, and public documents.', icon: UsersRound },
+    verv: { title: 'Verv', kicker: 'Committees', description: 'Native committee and application overview inspired by Nucleus mobile.', icon: Handshake },
+    policy: { title: 'Privacy Policy', kicker: 'Public document', description: 'The Login app privacy policy, readable without opening the mobile app.', icon: ShieldCheck },
     fund: { title: 'Login Fund', kicker: data?.fund.holdings ? formatCurrency(data.fund.holdings.totalBase) : 'Public', description: 'Native fund holdings, history, support guidance, and board shortcuts.', icon: Scale },
     games: { title: 'Games', kicker: `${data?.games.length ?? 0} decks`, description: 'Native overview of Login party games and community decks from App API.', icon: Sparkles },
     pwned: { title: 'Pwned', kicker: 'Lock screen', description: 'The classic Login reminder to lock your screen, now inside desktop too.', icon: ShieldAlert },
@@ -1583,6 +1593,139 @@ function dateInputValue(value: unknown) {
 
 function PartnersPage({ data }: { data: DashboardData }) {
   return <PagePanel title="For Companies" status={data.health['companies-text']}><CompaniesContent data={data} /></PagePanel>
+}
+
+function AboutPage() {
+  const committees = aboutText.committeeSection.info
+  const programmes = [
+    { title: 'Bachelor', rows: Object.values(aboutText.bachelor) },
+    { title: 'Master', rows: Object.values(aboutText.master) },
+    { title: 'PhD', rows: Object.values(aboutText.phd) },
+  ]
+
+  return (
+    <PagePanel title="About Login" status="live">
+      <section className="docs-card">
+        <h3>{aboutText.title}</h3>
+        <p>{aboutText.intro}</p>
+      </section>
+      <div className="queenbee-grid">
+        {programmes.map((group) => (
+          <article className="queenbee-card" key={group.title}>
+            <UsersRound size={18} />
+            <h3>{group.title}</h3>
+            <p>{group.rows.join(' · ')}</p>
+            <span>Automatic Login membership</span>
+          </article>
+        ))}
+      </div>
+      <section className="docs-card">
+        <h3>{aboutText.about.title}</h3>
+        <p>{aboutText.about.intro}</p>
+        <p>{aboutText.about.body.p1}</p>
+        <p>{aboutText.about.body.p2}</p>
+      </section>
+      <section className="docs-card">
+        <h3>{aboutText.committeeSection.title}</h3>
+        <p>{aboutText.committeeSection.intro}</p>
+        <div className="committee-grid">
+          {committees.map((committee) => (
+            <article className="queenbee-card" key={committee.id}>
+              <Handshake size={18} />
+              <h3>{committee.title}</h3>
+              <p>{committee.description}</p>
+              <span>{committee.quote || 'Login committee'}</span>
+            </article>
+          ))}
+        </div>
+      </section>
+      <div className="editor-toolbar">
+        <button onClick={() => openInAppBrowser('https://wiki.login.no')}>Open public docs <ExternalLink size={14} /></button>
+        <button onClick={() => openInAppBrowser('https://login.no')}>Open login.no <ExternalLink size={14} /></button>
+      </div>
+    </PagePanel>
+  )
+}
+
+function VervPage() {
+  const text = enText.verv
+  const [activeCommittee, setActiveCommittee] = useState(text.committees[0]?.id || '')
+  const committee = text.committees.find((item) => item.id === activeCommittee) || text.committees[0]
+  const leader = committee ? text.leaderData[committee.leaderKey as keyof typeof text.leaderData] : null
+  const leaderTitle = committee ? text.leaders[committee.leaderKey as keyof typeof text.leaders] : ''
+
+  return (
+    <PagePanel title="Verv" status="live">
+      <section className="docs-card">
+        <h3>{text.title}</h3>
+        <p>{text.intro}</p>
+        <p>{text.intro2}</p>
+      </section>
+      <div className="verv-photo-rail">
+        {text.photos.map((photo) => (
+          <article key={photo.image}>
+            <img src={`https://cdn.login.no/img/imagecarousel/${photo.image}`} alt="" />
+            <strong>{photo.title}</strong>
+            <span>{photo.description}</span>
+          </article>
+        ))}
+      </div>
+      <section className="docs-card">
+        <h3>{text.committeeTitle}</h3>
+        <p>{text.committeeIntro}</p>
+        <div className="docs-chip-grid">
+          {text.committees.map((item) => (
+            <button key={item.id} className={item.id === activeCommittee ? 'active-chip' : ''} onClick={() => setActiveCommittee(item.id)}>{item.title}</button>
+          ))}
+        </div>
+        {committee ? (
+          <article className="verv-leader-card">
+            <div>
+              <h3>{committee.title}</h3>
+              <p>{committee.intro}</p>
+              <p>{committee.body}</p>
+            </div>
+            <div className="leader-lockup">
+              {leader?.image ? <img src={`https://cdn.login.no/img/board/portraits/2026/${leader.image}`} alt="" /> : <span>{(leader?.name || committee.title).slice(0, 1)}</span>}
+              <strong>{leader?.name || committee.title}</strong>
+              <small>{leaderTitle}{leader?.discord ? ` · ${leader.discord}` : ''}</small>
+            </div>
+          </article>
+        ) : null}
+      </section>
+      <section className="docs-card">
+        <h3>{text.apply.title}</h3>
+        <p>{text.apply.body}</p>
+        <button onClick={() => openInAppBrowser('https://forms.gle/nQrJuqo3C9URLRM29')}>{text.apply.action} <ExternalLink size={14} /></button>
+      </section>
+    </PagePanel>
+  )
+}
+
+function PolicyPage() {
+  const text = enText.policy
+  return (
+    <PagePanel title="Privacy Policy" status="live">
+      <section className="docs-card">
+        <h3>{text.title}</h3>
+        <p>{text.organization}</p>
+      </section>
+      <div className="queenbee-grid">
+        {text.sections.map((section) => (
+          <article className="queenbee-card" key={section.title}>
+            <ShieldCheck size={18} />
+            <h3>{section.title}</h3>
+            <p>{section.body}</p>
+            <span>Login app policy</span>
+          </article>
+        ))}
+      </div>
+      <section className="docs-card">
+        <p>{text.download}</p>
+        <button onClick={() => openInAppBrowser('mailto:kontakt@login.no')}>kontakt@login.no</button>
+      </section>
+    </PagePanel>
+  )
 }
 
 function FundPage({ data }: { data: DashboardData }) {
