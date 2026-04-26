@@ -37,7 +37,8 @@ const linking: LinkingOptions<RootStackParamList> = {
                             AboutScreen: 'about',
                             BusinessScreen: 'companies',
                             SearchScreen: {
-                                path: 's',
+                                path: 'search',
+                                alias: ['s'],
                             },
                             AlbumsScreen: 'albums',
                             FundScreen: 'fund',

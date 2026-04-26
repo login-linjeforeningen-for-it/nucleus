@@ -5,6 +5,7 @@ const publicPaths = [
     '/career',
     '/about',
     '/companies',
+    '/search',
     '/s',
     '/albums',
     '/fund',

@@ -5,6 +5,7 @@ const publicUniversalLinkPaths = [
     '/career',
     '/about',
     '/companies',
+    '/search',
     '/s',
     '/albums',
     '/fund',
