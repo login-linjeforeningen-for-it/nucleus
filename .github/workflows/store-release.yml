@@ -39,6 +39,7 @@ jobs:
         with:
           token: ${{ secrets.EXPO_TOKEN }}
           eas-version: latest
+          packager: npm
 
       - name: Install dependencies
         run: npm ci
