@@ -290,6 +290,26 @@ export async function fetchAnnouncements(limit = 20): Promise<GetAnnouncementsPr
     }
 }
 
+export async function fetchAlerts(limit = 20): Promise<GetAlertsProps> {
+    try {
+        const params = new URLSearchParams({
+            limit: String(limit),
+        })
+        const response = await fetch(`${config.api}/alerts?${params.toString()}`)
+        if (!response.ok) {
+            throw new Error('Failed to fetch alerts')
+        }
+
+        const data = await response.json()
+        return {
+            alerts: Array.isArray(data?.alerts) ? data.alerts : [],
+            total_count: typeof data?.total_count === 'number' ? data.total_count : 0,
+        }
+    } catch {
+        return { alerts: [], total_count: 0 }
+    }
+}
+
 /**
  * Checks how long its been since a date object
  *

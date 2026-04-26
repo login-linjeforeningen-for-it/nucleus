@@ -80,6 +80,7 @@ const linking: LinkingOptions<RootStackParamList> = {
                                 path: 'announcements',
                                 alias: ['internal/announcements'],
                             },
+                            AlertsScreen: 'internal/alerts',
                             NucleusDocumentationScreen: {
                                 path: 'internal/nucleus/documentation',
                                 alias: ['nucleus/documentation'],

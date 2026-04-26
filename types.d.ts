@@ -670,6 +670,7 @@ type MenuRoutes =
     | 'TrafficMapScreen'
     | 'ContentScreen'
     | 'AnnouncementsScreen'
+    | 'AlertsScreen'
     | 'NucleusDocumentationScreen'
     | 'HoneyScreen'
     | 'DatabaseScreen'
@@ -713,6 +714,7 @@ type MenuStackParamList = {
     TrafficMapScreen: undefined
     ContentScreen: undefined
     AnnouncementsScreen: undefined
+    AlertsScreen: undefined
     NucleusDocumentationScreen: undefined
     HoneyScreen: undefined
     DatabaseScreen: undefined
@@ -810,6 +812,23 @@ type BotAnnouncement = {
 
 type GetAnnouncementsProps = {
     announcements: BotAnnouncement[]
+    total_count: number
+}
+
+type WorkerbeeAlert = {
+    id: number
+    service: string
+    page: string
+    title_en: string
+    title_no: string
+    description_en: string
+    description_no: string
+    created_at?: string
+    updated_at?: string
+}
+
+type GetAlertsProps = {
+    alerts: WorkerbeeAlert[]
     total_count: number
 }
 

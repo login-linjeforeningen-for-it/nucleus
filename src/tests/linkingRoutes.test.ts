@@ -29,6 +29,7 @@ const expectedRoutes = [
     ['organizations', 'ContentScreen'],
     ['announcements', 'AnnouncementsScreen'],
     ['internal/announcements', 'AnnouncementsScreen'],
+    ['internal/alerts', 'AlertsScreen'],
     ['internal/nucleus/documentation', 'NucleusDocumentationScreen'],
     ['nucleus/documentation', 'NucleusDocumentationScreen'],
     ['honey', 'HoneyScreen'],

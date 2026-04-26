@@ -15,6 +15,7 @@ type InternalNavRoute = Extract<keyof MenuStackParamList,
     | 'TrafficMapScreen'
     | 'ContentScreen'
     | 'AnnouncementsScreen'
+    | 'AlertsScreen'
     | 'HoneyScreen'
     | 'NucleusDocumentationScreen'
     | 'DatabaseScreen'
@@ -79,6 +80,11 @@ export default function InternalNavMenu({ activeRoute, navigation }: Props): JSX
                 label: 'Announcements',
                 description: 'Discord announcements from the TekKom bot',
                 route: 'AnnouncementsScreen',
+            },
+            {
+                label: 'Alerts',
+                description: 'Website page alerts from Workerbee',
+                route: 'AlertsScreen',
             },
             {
                 label: 'Nucleus docs',

@@ -1,4 +1,5 @@
 import {
+    fetchAlerts,
     fetchAnnouncements,
     fetchLocations,
     fetchHoneyList,
@@ -99,6 +100,31 @@ describe('Workerbee content fetch helpers', () => {
         )
     })
 
+    it('normalizes Workerbee alert payloads', async () => {
+        global.fetch = jest.fn(async () => ({
+            ok: true,
+            json: async () => ({
+                alerts: [{
+                    id: 7,
+                    service: 'beehive',
+                    page: '/status',
+                    title_en: 'Maintenance',
+                }],
+                total_count: 1,
+            }),
+        })) as any
+
+        await expect(fetchAlerts()).resolves.toEqual({
+            alerts: [{
+                id: 7,
+                service: 'beehive',
+                page: '/status',
+                title_en: 'Maintenance',
+            }],
+            total_count: 1,
+        })
+    })
+
     it('returns empty collections when endpoint shapes drift', async () => {
         global.fetch = jest.fn(async () => ({
             ok: true,
@@ -109,6 +135,7 @@ describe('Workerbee content fetch helpers', () => {
         await expect(fetchLocations()).resolves.toEqual({ locations: [], total_count: 0 })
         await expect(fetchOrganizations()).resolves.toEqual({ organizations: [], total_count: 0 })
         await expect(fetchAnnouncements()).resolves.toEqual({ announcements: [], total_count: 0 })
+        await expect(fetchAlerts()).resolves.toEqual({ alerts: [], total_count: 0 })
     })
 
     it('returns empty collections when requests fail', async () => {
@@ -123,5 +150,6 @@ describe('Workerbee content fetch helpers', () => {
         await expect(fetchHoneyServices()).resolves.toEqual([])
         await expect(fetchHoneyList('beehive')).resolves.toEqual({ honeys: [], total_count: 0 })
         await expect(fetchAnnouncements()).resolves.toEqual({ announcements: [], total_count: 0 })
+        await expect(fetchAlerts()).resolves.toEqual({ alerts: [], total_count: 0 })
     })
 })
