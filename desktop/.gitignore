@@ -1,0 +1,9 @@
+node_modules/
+dist/
+src-tauri/target/
+.DS_Store
+*.log
+src-tauri/gen/
+login-desktop-*.png
+.updater-private.key
+.updater-private.key.pub
