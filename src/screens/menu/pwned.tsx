@@ -20,7 +20,7 @@ export default function PwnedScreen(): JSX.Element {
     const text = lang ? require('@text/no.json').pwned : require('@text/en.json').pwned
     const memes = Array.isArray(text.pwned) ? text.pwned as PwnedMeme[] : []
     const [secondsElapsed, setSecondsElapsed] = useState(1)
-    const [memeIndex, setMemeIndex] = useState(() => Math.floor(Math.random() * memes.length))
+    const [memeIndex, setMemeIndex] = useState(() => memes.length ? Math.floor(Math.random() * memes.length) : 0)
     const meme = memes[memeIndex] || memes[0] || null
     const secondsLabel = secondsElapsed === 1 ? text.second : text.seconds
 
