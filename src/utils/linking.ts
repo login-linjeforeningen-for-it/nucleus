@@ -71,6 +71,7 @@ const linking: LinkingOptions<RootStackParamList> = {
                                 path: 'internal/nucleus/documentation',
                                 alias: ['nucleus/documentation'],
                             },
+                            HoneyScreen: 'honey',
                             DatabaseScreen: {
                                 path: 'internal/databases',
                                 alias: ['internal/db'],

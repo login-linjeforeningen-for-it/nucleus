@@ -1,5 +1,7 @@
 import {
     fetchLocations,
+    fetchHoneyList,
+    fetchHoneyServices,
     fetchOrganizations,
     fetchRules,
 } from '@utils/fetch'
@@ -46,6 +48,28 @@ describe('Workerbee content fetch helpers', () => {
         })
     })
 
+    it('normalizes honey services and honey list payloads', async () => {
+        global.fetch = jest.fn(async (url: string) => ({
+            ok: true,
+            json: async () => {
+                if (url.endsWith('/text')) {
+                    return ['beehive', 42, null]
+                }
+
+                return {
+                    honeys: [{ id: 4, page: '/companies', language: 'en' }],
+                    total_count: 1,
+                }
+            },
+        })) as any
+
+        await expect(fetchHoneyServices()).resolves.toEqual(['beehive'])
+        await expect(fetchHoneyList('beehive')).resolves.toEqual({
+            honeys: [{ id: 4, page: '/companies', language: 'en' }],
+            total_count: 1,
+        })
+    })
+
     it('returns empty collections when endpoint shapes drift', async () => {
         global.fetch = jest.fn(async () => ({
             ok: true,
@@ -66,5 +90,7 @@ describe('Workerbee content fetch helpers', () => {
         await expect(fetchRules()).resolves.toEqual({ rules: [], total_count: 0 })
         await expect(fetchLocations()).resolves.toEqual({ locations: [], total_count: 0 })
         await expect(fetchOrganizations()).resolves.toEqual({ organizations: [], total_count: 0 })
+        await expect(fetchHoneyServices()).resolves.toEqual([])
+        await expect(fetchHoneyList('beehive')).resolves.toEqual({ honeys: [], total_count: 0 })
     })
 })

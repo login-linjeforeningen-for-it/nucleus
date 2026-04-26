@@ -14,7 +14,9 @@ type InternalNavRoute = Extract<keyof MenuStackParamList,
     | 'TrafficRecordsScreen'
     | 'TrafficMapScreen'
     | 'ContentScreen'
+    | 'HoneyScreen'
     | 'NucleusDocumentationScreen'
+    | 'HoneyScreen'
     | 'DatabaseScreen'
     | 'VulnerabilitiesScreen'
     | 'LogsScreen'
@@ -76,6 +78,11 @@ export default function InternalNavMenu({ activeRoute, navigation }: Props): JSX
                 label: 'Nucleus docs',
                 description: 'Push topics, intervals, and notification examples',
                 route: 'NucleusDocumentationScreen',
+            },
+            {
+                label: 'Honey',
+                description: 'Service text snippets and page content',
+                route: 'HoneyScreen',
             },
             {
                 label: 'Databases',

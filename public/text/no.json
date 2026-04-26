@@ -31,7 +31,8 @@
         "TrafficScreen": "Trafikk",
         "TrafficRecordsScreen": "Trafikklogger",
         "TrafficMapScreen": "Trafikkart",
-        "NucleusDocumentationScreen": "Nucleus docs"
+        "NucleusDocumentationScreen": "Nucleus docs",
+        "HoneyScreen": "Honey"
     },
     "search": {
         "intro": "Søk fra appen og se animasjonen før den åpnes.",

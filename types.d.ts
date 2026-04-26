@@ -173,6 +173,21 @@ type GetOrganizationsProps = {
     total_count: number
 }
 
+type WorkerbeeHoney = {
+    id: number
+    service?: string
+    language: string
+    page: string
+    text?: string
+    created_at?: string
+    updated_at?: string
+}
+
+type GetHoneyListProps = {
+    honeys: WorkerbeeHoney[]
+    total_count: number
+}
+
 type System = {
     ram: string
     processes: number
@@ -636,6 +651,7 @@ type MenuRoutes =
     | 'TrafficMapScreen'
     | 'ContentScreen'
     | 'NucleusDocumentationScreen'
+    | 'HoneyScreen'
     | 'DatabaseScreen'
     | 'VulnerabilitiesScreen'
     | 'LogsScreen'
@@ -675,6 +691,7 @@ type MenuStackParamList = {
     TrafficMapScreen: undefined
     ContentScreen: undefined
     NucleusDocumentationScreen: undefined
+    HoneyScreen: undefined
     DatabaseScreen: undefined
     VulnerabilitiesScreen: undefined
     LogsScreen: undefined
