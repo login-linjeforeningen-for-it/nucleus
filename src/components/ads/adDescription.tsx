@@ -1,7 +1,7 @@
-import Embed from "@components/event/embed"
-import { useMemo } from "react"
-import Markdown from "react-native-markdown-display"
-import { useSelector } from "react-redux"
+import Embed from '@components/event/embed'
+import { useMemo } from 'react'
+import Markdown from 'react-native-markdown-display'
+import { useSelector } from 'react-redux'
 
 type RenderDescriptionProps = {
     description: string
@@ -27,7 +27,11 @@ export default function RenderDescription({ description }: RenderDescriptionProp
                 return <Markdown key={index} style={{ text: { color: '#FFF' } }}>{markdown}</Markdown>
             }
 
-            return <Embed key={index} id={number} type={content.includes('[:event]') ? "event" : "ad"} />
+            return <Embed
+                key={index}
+                id={number}
+                type={content.includes('[:event]') ? 'event' : 'ad'}
+            />
         })
     }, [lang, description, theme.textColor])
 

@@ -1,11 +1,11 @@
-import { useSelector } from "react-redux"
-import { View, Text } from "react-native"
-import ES from "@styles/eventStyles"
-import T from "@styles/text"
-import { JSX, ReactNode } from "react"
+import { useSelector } from 'react-redux'
+import { View, Text } from 'react-native'
+import ES from '@styles/eventStyles'
+import T from '@styles/text'
+import { JSX, ReactNode } from 'react'
 import GS from '@styles/globalStyles'
-import { Animated, Pressable } from "react-native"
-import { useRef } from "react"
+import { Animated, Pressable } from 'react-native'
+import { useRef } from 'react'
 
 // Ony children or height can be defined at the same time. Both cant be arguments at the same time
 type LineProps = {
@@ -36,12 +36,12 @@ type SpaceProps = {
 }
 
 type ErrorMessageProps = {
-    argument: "wifi" | "nomatch"
-    screen: "event" | "ad"
+    argument: 'wifi' | 'nomatch'
+    screen: 'event' | 'ad'
 }
 
 /**
- * Function for creating an empty view, for adding spaces between objects such 
+ * Function for creating an empty view, for adding spaces between objects such
  * as views paragraphs etc
  *
  * @param {float} height How big the space should be
@@ -52,7 +52,7 @@ export default function Space({ height }: SpaceProps): JSX.Element {
 }
 
 /**
- * Function for drawing a dynamic line, can be adjusted as you wish using 
+ * Function for drawing a dynamic line, can be adjusted as you wish using
  * the height and width
  *
  * @param width Width of the line
@@ -99,15 +99,15 @@ export function random({ min, max }: randomProps): number {
 export function ErrorMessage({ argument, screen }: ErrorMessageProps): JSX.Element {
     const { theme } = useSelector((state: ReduxState) => state.theme)
     const { lang } = useSelector((state: ReduxState) => state.lang)
-    const eventScreen = ["Ingen arrangementer", "No events"]
-    const adsScreen = ["Ingen jobbannonser", "No matching jobs"]
-    const error = screen === "event" ? eventScreen : adsScreen
+    const eventScreen = ['Ingen arrangementer', 'No events']
+    const adsScreen = ['Ingen jobbannonser', 'No matching jobs']
+    const error = screen === 'event' ? eventScreen : adsScreen
 
     const text = {
-        "wifi": lang
-            ? "Sjekk nettverkstilkoblingen din og prøv igjen. Kontakt TEKKOM dersom problemet vedvarer."
-            : "Check your wifi connection and try again. Contact TEKKOM if the issue persists.",
-        "nomatch": lang ? error[0] : error[1]
+        'wifi': lang
+            ? 'Sjekk nettverkstilkoblingen din og prøv igjen. Kontakt TEKKOM dersom problemet vedvarer.'
+            : 'Check your wifi connection and try again. Contact TEKKOM if the issue persists.',
+        'nomatch': lang ? error[0] : error[1]
     }
 
     const scale = useRef(new Animated.Value(1)).current
@@ -128,12 +128,12 @@ export function ErrorMessage({ argument, screen }: ErrorMessageProps): JSX.Eleme
     }
 
     return (
-        <View style={{ alignSelf: "center", justifyContent: "center", display: "flex", flex: 1 }}>
+        <View style={{ alignSelf: 'center', justifyContent: 'center', display: 'flex', flex: 1 }}>
             <Pressable onPress={handlePress}>
-                <Animated.Text style={{ 
-                    ...T.centered20, 
-                    fontWeight: 600, 
-                    color: theme.textColor, 
+                <Animated.Text style={{
+                    ...T.centered20,
+                    fontWeight: 600,
+                    color: theme.textColor,
                     marginBottom: 50 ,
                     transform: [{ scale }]
                 }}>
@@ -146,7 +146,7 @@ export function ErrorMessage({ argument, screen }: ErrorMessageProps): JSX.Eleme
                             transform: [{ scale }],
                         },
                     ]}
-                    source={require("../../../public/assets/icons/404.jpg")}
+                    source={require('../../../public/assets/icons/404.jpg')}
                 />
             </Pressable>
         </View>
@@ -161,10 +161,10 @@ export function ErrorMessage({ argument, screen }: ErrorMessageProps): JSX.Eleme
 export function Month({ month, color }: MonthProps): JSX.Element {
     const { lang } = useSelector((state: ReduxState) => state.lang)
 
-    const monthsEN = ["Jan", "Feb", "Mar", "Apr", "May", "Jun",
-        "Jul", "Aug", "Sep", "Oct", "Nov", "Des"]
-    const monthsNO = ["Jan", "Feb", "Mar", "Apr", "Mai", "Jun",
-        "Jul", "Aug", "Sep", "Okt", "Nov", "Des"]
+    const monthsEN = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+        'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Des']
+    const monthsNO = ['Jan', 'Feb', 'Mar', 'Apr', 'Mai', 'Jun',
+        'Jul', 'Aug', 'Sep', 'Okt', 'Nov', 'Des']
 
     return <Text style={{ ...ES.monthText, color: color }}>
         {lang ? monthsNO[month] : monthsEN[month]}

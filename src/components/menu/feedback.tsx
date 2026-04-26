@@ -1,9 +1,9 @@
-import { View, Text, TouchableOpacity } from "react-native"
-import ES from "@styles/eventStyles"
-import T from "@styles/text"
-import { useSelector } from "react-redux"
-import { TextLink } from "@components/shared/link"
-import config from "@/constants"
+import { View, Text, TouchableOpacity } from 'react-native'
+import ES from '@styles/eventStyles'
+import T from '@styles/text'
+import { useSelector } from 'react-redux'
+import { TextLink } from '@components/shared/link'
+import config from '@/constants'
 
 type FeedbackProps = {
     index: number
@@ -23,10 +23,10 @@ export default function Feedback({ index, setting, feedback, toggleFeedback }: F
                     <Text
                         style={{
                             ...T.contact,
-                            textDecorationLine: "underline",
+                            textDecorationLine: 'underline',
                             color: theme.oppositeTextColor
                         }}>
-                        {lang ? "Gi tilbakemelding" : "Give feedback"}
+                        {lang ? 'Gi tilbakemelding' : 'Give feedback'}
                     </Text>
                 </View>
             </TouchableOpacity>
@@ -35,22 +35,22 @@ export default function Feedback({ index, setting, feedback, toggleFeedback }: F
 
     if (index === setting.length - 1 && feedback) {
         return (
-            <View style={{ ...ES.row, justifyContent: "space-evenly", marginBottom: 10 }}>
+            <View style={{ ...ES.row, justifyContent: 'space-evenly', marginBottom: 10 }}>
                 <TextLink
-                    url="https://discordapp.com/users/376827396764073997"
-                    text="Discord"
+                    url='https://discordapp.com/users/376827396764073997'
+                    text='Discord'
                     style={{
                         ...T.contact,
-                        textDecorationLine: "underline",
+                        textDecorationLine: 'underline',
                         color: theme.oppositeTextColor
                     }}
                 />
                 <TextLink
                     url={config.mailto_url}
-                    text="Mail"
+                    text='Mail'
                     style={{
                         ...T.contact,
-                        textDecorationLine: "underline",
+                        textDecorationLine: 'underline',
                         color: theme.oppositeTextColor
                     }}
                 />

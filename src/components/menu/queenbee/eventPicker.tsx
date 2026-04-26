@@ -1,8 +1,8 @@
-import Space from "@/components/shared/utils"
-import Text from "@components/shared/text"
-import T from "@styles/text"
-import { JSX } from "react"
-import { ScrollView, TouchableOpacity, View } from "react-native"
+import Space from '@/components/shared/utils'
+import Text from '@components/shared/text'
+import T from '@styles/text'
+import { JSX } from 'react'
+import { ScrollView, TouchableOpacity, View } from 'react-native'
 
 type Props = {
     events: GetEventProps[]
@@ -32,7 +32,7 @@ export default function EventPicker({
             <Text style={{ ...T.text20, color: textColor }}>Queenbee events</Text>
             <Space height={8} />
             <ScrollView horizontal showsHorizontalScrollIndicator={false} nestedScrollEnabled>
-                <View style={{ flexDirection: "row", gap: 10 }}>
+                <View style={{ flexDirection: 'row', gap: 10 }}>
                     {events.map(event => {
                         const isActive = activeEventId === event.id
 

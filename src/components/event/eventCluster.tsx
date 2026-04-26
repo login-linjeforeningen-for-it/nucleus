@@ -1,17 +1,16 @@
-import Cluster from "@components/shared/cluster"
-import { useNavigation } from "@react-navigation/native"
-import { toggleSearch } from "@redux/event"
-import { LinearGradient } from "expo-linear-gradient"
-import { Dimensions, Text, TouchableOpacity, View } from "react-native"
-import { useDispatch, useSelector } from "react-redux"
-import EventClusterTitle from "./EventClusterTitle"
-import Bell from "./bell"
-import ES from "@styles/eventStyles"
-import CategorySquare from "@components/shared/category"
-import Space from "@components/shared/utils"
-import T from "@styles/text"
-import { EventStackParamList } from "@type/screenTypes"
-import { StackNavigationProp } from "@react-navigation/stack"
+import Cluster from '@components/shared/cluster'
+import { useNavigation } from '@react-navigation/native'
+import { toggleSearch } from '@redux/event'
+import { LinearGradient } from 'expo-linear-gradient'
+import { Dimensions, Text, TouchableOpacity, View } from 'react-native'
+import { useDispatch, useSelector } from 'react-redux'
+import EventClusterTitle from './EventClusterTitle'
+import Bell from './bell'
+import ES from '@styles/eventStyles'
+import CategorySquare from '@components/shared/category'
+import Space from '@components/shared/utils'
+import T from '@styles/text'
+import { StackNavigationProp } from '@react-navigation/stack'
 import { JSX } from 'react'
 
 type EventClusterProps = {
@@ -36,8 +35,10 @@ export default function EventCluster({ item, index }: EventClusterProps): JSX.El
     return (
         <View style={item.highlight && { marginTop: 2, top: -2 }}>
             <TouchableOpacity onPress={() => {
-                search && dispatch(toggleSearch())
-                navigation.push("SpecificEventScreen", { eventID: item.id })
+                if (search) {
+                    dispatch(toggleSearch())
+                }
+                navigation.push('SpecificEventScreen', { eventID: item.id })
             }}>
                 <LinearGradient
                     start={[0, 0.5]}
@@ -74,10 +75,10 @@ function ListFooter({ index }: ListFooterProps): JSX.Element {
                 ...T.contact,
                 color: theme.oppositeTextColor
             }}>
-                {lang ? "Oppdatert kl:" : "Updated:"} {lastFetch}.
+                {lang ? 'Oppdatert kl:' : 'Updated:'} {lastFetch}.
             </Text>}
             {index === renderedEvents.length - 1 &&
-                <Space height={Dimensions.get("window").height / 7} />}
+                <Space height={Dimensions.get('window').height / 7} />}
         </>
     )
 }
@@ -87,7 +88,7 @@ function ListFooter({ index }: ListFooterProps): JSX.Element {
  */
 function FullCategorySquare({ item, height }: FullCategorySquareProps): JSX.Element {
     const startDate = item?.time_start ? new Date(item.time_start) : new Date()
-    const endDate = item?.time_type == "default" ? new Date(item.time_end) : undefined
+    const endDate = item?.time_type == 'default' ? new Date(item.time_end) : undefined
 
     return (
         <View style={{ flexDirection: 'row' }}>

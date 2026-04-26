@@ -1,10 +1,10 @@
-import TopicSwitchList from "@/components/settings/topicSwitch"
-import Cluster from "@/components/shared/cluster"
-import { TouchableOpacity, Image, View, Text } from "react-native"
-import GS from "@styles/globalStyles"
-import { useSelector } from "react-redux"
-import { useState } from "react"
-import T from "@styles/text"
+import TopicSwitchList from '@/components/settings/topicSwitch'
+import Cluster from '@/components/shared/cluster'
+import { TouchableOpacity, Image, View, Text } from 'react-native'
+import GS from '@styles/globalStyles'
+import { useSelector } from 'react-redux'
+import { useState } from 'react'
+import T from '@styles/text'
 
 /**
  * Creates a full dropdownmenu for reminders
@@ -17,14 +17,14 @@ export default function Reminders() {
     const [category, setCategory] = useState(-1)
 
     const categories = [
-        { id: 1, source: "tekkom", title: "TekKom" },
-        { id: 2, source: "ctf", title: "CTF" },
-        { id: 3, source: "social", title: lang ? "Sosialt" : "Social" },
-        { id: 4, source: "karrieredag", title: lang ? "Karrieredag" : "Career day" },
-        { id: 5, source: "fadderuka", title: "Fadderuka" },
-        { id: 6, source: "bedpres", title: "Bedpres" },
-        { id: 7, source: "login", title: "Login" },
-        { id: 8, source: "annet", title: lang ? "Annet" : "Other" }
+        { id: 1, source: 'tekkom', title: 'TekKom' },
+        { id: 2, source: 'ctf', title: 'CTF' },
+        { id: 3, source: 'social', title: lang ? 'Sosialt' : 'Social' },
+        { id: 4, source: 'karrieredag', title: lang ? 'Karrieredag' : 'Career day' },
+        { id: 5, source: 'fadderuka', title: 'Fadderuka' },
+        { id: 6, source: 'bedpres', title: 'Bedpres' },
+        { id: 7, source: 'login', title: 'Login' },
+        { id: 8, source: 'annet', title: lang ? 'Annet' : 'Other' }
     ]
 
     return (
@@ -43,7 +43,7 @@ export default function Reminders() {
                             }}>
                                 <View style={{
                                     width: 3,
-                                    alignSelf: "stretch",
+                                    alignSelf: 'stretch',
                                     borderRadius: 99,
                                     backgroundColor: theme.orange,
                                     marginRight: 10,
@@ -59,8 +59,8 @@ export default function Reminders() {
                                 <Image
                                     style={GS.reminderDropdownArrow}
                                     source={index === category
-                                        ? require("@assets/icons/reminderDropdownOrange.png")
-                                        : require("@assets/icons/dropdownBase.png")}
+                                        ? require('@assets/icons/reminderDropdownOrange.png')
+                                        : require('@assets/icons/dropdownBase.png')}
                                 />
                             </View>
                         </Cluster>

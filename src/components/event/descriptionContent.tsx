@@ -1,8 +1,8 @@
-import { useSelector } from "react-redux"
-import Embed from "@components/event/embed"
-import { useContext, useMemo } from "react"
-import Markdown from "react-native-markdown-display"
-import { EventContext } from "@utils/contextProvider"
+import { useSelector } from 'react-redux'
+import Embed from '@components/event/embed'
+import { useContext, useMemo } from 'react'
+import Markdown from 'react-native-markdown-display'
+import { EventContext } from '@utils/contextProvider'
 
 export default function Description() {
     const event = useContext(EventContext)
@@ -29,7 +29,11 @@ export default function Description() {
                 return <Markdown key={index} style={{ text: { color: theme.textColor } }}>{markdown}</Markdown>
             }
 
-            return <Embed key={index} id={number} type={sliced.includes('[:event]') ? "event" : "ad"} />
+            return <Embed
+                key={index}
+                id={number}
+                type={sliced.includes('[:event]') ? 'event' : 'ad'}
+            />
         })
     }, [lang, theme.textColor])
 

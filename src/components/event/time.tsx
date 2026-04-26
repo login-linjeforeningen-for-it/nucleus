@@ -1,7 +1,7 @@
-import { View, Text } from "react-native"
-import { useSelector } from "react-redux"
-import T from "@styles/text"
-import { JSX, useEffect, useState } from "react"
+import { View, Text } from 'react-native'
+import { useSelector } from 'react-redux'
+import T from '@styles/text'
+import { JSX, useEffect, useState } from 'react'
 
 type EventTimeProps = {
     time_start: string | undefined
@@ -27,7 +27,7 @@ export default function EventTime({ time_start, time_end }: EventTimeProps): JSX
         let interval: Interval = 0
 
         interval = setInterval(() => {
-            let newTime = displayedEventTime(lang, time_start, time_end)
+            const newTime = displayedEventTime(lang, time_start, time_end)
             setTime(newTime)
         }, 1000)
 
@@ -54,7 +54,7 @@ export default function EventTime({ time_start, time_end }: EventTimeProps): JSX
  */
 export function GetEndTime({ time_end }: GetEndTimeProps) {
     const { theme } = useSelector((state: ReduxState) => state.theme)
-    let endTime = "..."
+    let endTime = '...'
 
     if (time_end) {
         endTime = `${time_end[11]}${time_end[12]}:${time_end[14]}${time_end[15]}`
@@ -76,8 +76,38 @@ export function GetEndTime({ time_end }: GetEndTimeProps) {
  * @returns The event time that should be displayed
  */
 function displayedEventTime(lang: boolean, time_start?: string, time_end?: string) {
-    const textEN = ["Starts in", "Tomorrow", "Next", "Ends in", "Ends tomorrow", "Ended", "Yesterday", "Last", " ago", "month", "days", "h", "min", "s"]
-    const textNO = ["Starter om", "I morgen", "Neste", "Slutter om", "Slutter i morgen", "Sluttet for", "I går", "Sist", " siden", "måned", "dager", "t", "min", "s"]
+    const textEN = [
+        'Starts in',
+        'Tomorrow',
+        'Next',
+        'Ends in',
+        'Ends tomorrow',
+        'Ended',
+        'Yesterday',
+        'Last',
+        ' ago',
+        'month',
+        'days',
+        'h',
+        'min',
+        's',
+    ]
+    const textNO = [
+        'Starter om',
+        'I morgen',
+        'Neste',
+        'Slutter om',
+        'Slutter i morgen',
+        'Sluttet for',
+        'I går',
+        'Sist',
+        ' siden',
+        'måned',
+        'dager',
+        't',
+        'min',
+        's',
+    ]
     const text = lang ? textNO : textEN
     let lookup
 
@@ -121,8 +151,8 @@ function displayedEventTime(lang: boolean, time_start?: string, time_end?: strin
     function pluralize(word: string, count: number) {
         if (!count) return ''
 
-        const textNO = [word[word.length - 1] === 'e' ? 'r' : "er", " og", "t", "min"]
-        const textEN = ['s', " and", "hour", "minute"]
+        const textNO = [word[word.length - 1] === 'e' ? 'r' : 'er', ' og', 't', 'min']
+        const textEN = ['s', ' and', 'hour', 'minute']
         const text = lang ? textNO : textEN
         const suffix = word.includes(text[2]) ? ',' : word.includes(text[3]) ? text[1] : ''
 
@@ -147,8 +177,15 @@ function displayedEventTime(lang: boolean, time_start?: string, time_end?: strin
     }
 
     if (hours) {
-        return `${lookup.type} ${hours > 0 ? `${hours}${text[11]} ` : ''}${minutes > 0 ? `${minutes + 1}${text[12]} ` : ''}${lookup.end}`
+        return `${lookup.type} `
+            + `${hours > 0 ? `${hours}${text[11]} ` : ''}`
+            + `${minutes > 0 ? `${minutes + 1}${text[12]} ` : ''}`
+            + lookup.end
     }
 
-    return `${lookup.type} ${hours > 0 ? `${hours}${text[11]} ` : ''}${minutes > 0 ? `${minutes}${text[12]} ` : ''}${seconds > 0 ? `${seconds}${text[13]} ` : ''}${lookup.end}`
+    return `${lookup.type} `
+        + `${hours > 0 ? `${hours}${text[11]} ` : ''}`
+        + `${minutes > 0 ? `${minutes}${text[12]} ` : ''}`
+        + `${seconds > 0 ? `${seconds}${text[13]} ` : ''}`
+        + lookup.end
 }

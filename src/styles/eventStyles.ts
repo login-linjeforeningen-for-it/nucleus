@@ -1,10 +1,10 @@
-import { StyleSheet, Dimensions, Platform } from "react-native"
-import T from "./text"
+import { StyleSheet, Dimensions, Platform } from 'react-native'
+import T from './text'
 
 export const ES = StyleSheet.create({
     // Middle card view
     view2: {
-        justifyContent: "center",
+        justifyContent: 'center',
         marginLeft: 5,
         top: 2,
         width: '80%',
@@ -16,7 +16,7 @@ export const ES = StyleSheet.create({
     },
     // Card height and direction on eventscreen
     eventBack: {
-        flexDirection: "row",
+        flexDirection: 'row',
     },
     // Eventmonth text on specificEventScreen
     monthText: {
@@ -41,15 +41,15 @@ export const ES = StyleSheet.create({
     //======================== SpecificEventScreen ===================
     // Layout for specificEventScreen
     specificEventInfoView: {
-        flexDirection: "row",
-        alignItems: "center",
+        flexDirection: 'row',
+        alignItems: 'center',
         marginBottom: 5,
     },
     // The header image on specificEventScreen
     specificEventImage: {
-        alignSelf: "center",
-        width: Dimensions.get("window").width - 24,
-        resizeMode: "stretch",
+        alignSelf: 'center',
+        width: Dimensions.get('window').width - 24,
+        resizeMode: 'stretch',
         height: 150,
         marginTop: 8
     },
@@ -69,14 +69,14 @@ export const ES = StyleSheet.create({
     },
     // View to change the flex direction to horizontally align items
     absoluteView: {
-        flexDirection: "row",
+        flexDirection: 'row',
         display: 'flex'
     },
     // Position of specific event color circle
     eventLight: {
-        top: Platform.OS === "ios" ? -9 : -8,
+        top: Platform.OS === 'ios' ? -9 : -8,
         height: 0,
-        alignSelf: "center",
+        alignSelf: 'center',
         left: 2,
     },
     // Position of specific event color circle
@@ -113,25 +113,25 @@ export const ES = StyleSheet.create({
     },
     // Filter view
     clusterFilterView: {
-        flexDirection: "row",
+        flexDirection: 'row',
         maxHeight: 100
     },
     // EventScreen filter text
     clusterFilterText: {
-        alignSelf: "center",
-        alignItems: "center",
+        alignSelf: 'center',
+        alignItems: 'center',
         height: 40,
-        color: "white", // White text color (should be moved to depend on theme)
+        color: 'white', // White text color (should be moved to depend on theme)
         display: 'flex',
         flexGrow: 1
     },
     // Position of eventfilter check icon
     checkBox: {
-        top: "-45%",
+        top: '-45%',
     },
     // Eventfilter checked icon
     checkedBox: {
-        top: "-80%",
+        top: '-80%',
         right: 20,
     },
     // Checkmark on check icon
@@ -141,10 +141,10 @@ export const ES = StyleSheet.create({
     },
     // View for categories inside the filter
     clusterCategoryView: {
-        flexDirection: "row",
+        flexDirection: 'row',
         left: 6,
-        width: Dimensions.get("window").width / 3.1,
-        alignItems: "center",
+        width: Dimensions.get('window').width / 3.1,
+        alignItems: 'center',
     },
     // Filter reset icon
     clusterFilterResetIcon: {
@@ -153,8 +153,8 @@ export const ES = StyleSheet.create({
     },
     eventButton: {
         height: 40,
-        width: Dimensions.get("window").width * 0.95,
-        alignSelf: "center",
+        width: Dimensions.get('window').width * 0.95,
+        alignSelf: 'center',
         borderRadius: 10,
     },
     // Mazemap icon used on SES
@@ -166,10 +166,10 @@ export const ES = StyleSheet.create({
     // When all u need is a row
     row: {
         top: 4,
-        flexDirection: "row",
+        flexDirection: 'row',
     },
     sesContent: {
-        height: Dimensions.get("window").height + 200,
+        height: Dimensions.get('window').height + 200,
     },
     id: {
         alignSelf: 'center',

@@ -1,10 +1,10 @@
-import GS from "@styles/globalStyles"
-import Cluster from "@/components/shared/cluster"
-import { useState } from "react"
-import T from "@styles/text"
-import Link from "@components/shared/link"
-import { useSelector } from "react-redux"
-import { View, Text, TouchableOpacity, Image } from "react-native"
+import GS from '@styles/globalStyles'
+import Cluster from '@/components/shared/cluster'
+import { useState } from 'react'
+import T from '@styles/text'
+import Link from '@components/shared/link'
+import { useSelector } from 'react-redux'
+import { View, Text, TouchableOpacity, Image } from 'react-native'
 
 type DropdownItemProps = {
     title: string
@@ -28,41 +28,41 @@ export default function Dropdown() {
     const { lang } = useSelector((state: ReduxState) => state.lang)
 
     const titleNO = {
-        data: "Dataingeniør",
-        digsec: "Digital infrastruktur og cybersikkerhet",
-        prog: "Programmering",
-        infosec: "Informasjonsikkerhet og kommunikasjonsteknologi",
-        cs: "Datateknologi og informatikk",
-        phet: "Elektronikk og telekommunikasjon"
+        data: 'Dataingeniør',
+        digsec: 'Digital infrastruktur og cybersikkerhet',
+        prog: 'Programmering',
+        infosec: 'Informasjonsikkerhet og kommunikasjonsteknologi',
+        cs: 'Datateknologi og informatikk',
+        phet: 'Elektronikk og telekommunikasjon'
     }
 
     const titleEN = {
-        data: "Computer Science",
-        digsec: "Digital Infrastructure and Cyber Security",
-        prog: "Programming",
-        infosec: "Information Security and Communication Technology",
-        cs: "Computer Science",
-        phet: "Electronics and Telecommunication"
+        data: 'Computer Science',
+        digsec: 'Digital Infrastructure and Cyber Security',
+        prog: 'Programming',
+        infosec: 'Information Security and Communication Technology',
+        cs: 'Computer Science',
+        phet: 'Electronics and Telecommunication'
     }
 
     const title = lang ? titleNO : titleEN
 
     const bcourses = [
-        { id: 0, title: title.data, link: "https://www.ntnu.no/studier/bidata" },
-        { id: 1, title: title.digsec, link: "https://www.ntnu.no/studier/bdigsec" },
-        { id: 2, title: title.prog, link: "https://www.ntnu.no/studier/bprog" }
+        { id: 0, title: title.data, link: 'https://www.ntnu.no/studier/bidata' },
+        { id: 1, title: title.digsec, link: 'https://www.ntnu.no/studier/bdigsec' },
+        { id: 2, title: title.prog, link: 'https://www.ntnu.no/studier/bprog' }
     ]
 
     const mcourses = [
-        { id: 0, title: "Information Security", link: "https://www.ntnu.no/studier/mis" },
-        { id: 1, title: "Applied Computer Science", link: "https://www.ntnu.edu/studies/macs" },
-        { id: 2, title: "Computational colour and spectral imaging", link: "https://www.ntnu.no/studier/mscosi" }
+        { id: 0, title: 'Information Security', link: 'https://www.ntnu.no/studier/mis' },
+        { id: 1, title: 'Applied Computer Science', link: 'https://www.ntnu.edu/studies/macs' },
+        { id: 2, title: 'Computational colour and spectral imaging', link: 'https://www.ntnu.no/studier/mscosi' }
     ]
 
     const pcourses = [
-        { id: 0, title: title.infosec, link: "https://www.ntnu.no/studier/phisct" },
-        { id: 1, title: title.cs, link: "https://www.ntnu.no/studier/phcos" },
-        { id: 2, title: title.phet, link: "https://www.ntnu.no/studier/phet" }
+        { id: 0, title: title.infosec, link: 'https://www.ntnu.no/studier/phisct' },
+        { id: 1, title: title.cs, link: 'https://www.ntnu.no/studier/phcos' },
+        { id: 2, title: title.phet, link: 'https://www.ntnu.no/studier/phet' }
     ]
 
     const [course, selectCourse] = useState(0)
@@ -77,9 +77,9 @@ export default function Dropdown() {
 
     return (
         <View style={{ marginTop: 2, marginBottom: 4 }}>
-            <DropdownItem title="Bachelor" course={course} selectedDegree={selectedDegree} courses={bcourses} degree={1} />
-            <DropdownItem title="Master" course={course} selectedDegree={selectedDegree} courses={mcourses} degree={2} />
-            <DropdownItem title="Ph.d" course={course} selectedDegree={selectedDegree} courses={pcourses} degree={3} />
+            <DropdownItem title='Bachelor' course={course} selectedDegree={selectedDegree} courses={bcourses} degree={1} />
+            <DropdownItem title='Master' course={course} selectedDegree={selectedDegree} courses={mcourses} degree={2} />
+            <DropdownItem title='Ph.d' course={course} selectedDegree={selectedDegree} courses={pcourses} degree={3} />
         </View>
     )
 }
@@ -87,8 +87,8 @@ export default function Dropdown() {
 function DropdownItem({ title, course, selectedDegree, courses, degree }: DropdownItemProps) {
     const { theme } = useSelector((state: ReduxState) => state.theme)
     const arrow = course === degree
-        ? require("@assets/icons/linkselected.png")
-        : require("@assets/icons/dropdown-orange.png")
+        ? require('@assets/icons/linkselected.png')
+        : require('@assets/icons/dropdown-orange.png')
 
     return (
         <>
@@ -105,7 +105,7 @@ function DropdownItem({ title, course, selectedDegree, courses, degree }: Dropdo
                     }}>
                         <View style={{
                             width: 3,
-                            alignSelf: "stretch",
+                            alignSelf: 'stretch',
                             borderRadius: 99,
                             backgroundColor: theme.orange,
                             marginRight: 10,
@@ -116,7 +116,7 @@ function DropdownItem({ title, course, selectedDegree, courses, degree }: Dropdo
                             ...T.text18,
                             color: theme.textColor,
                             flex: 1,
-                            textAlign: "left",
+                            textAlign: 'left',
                         }}>
                             {title}
                         </Text>
@@ -140,7 +140,7 @@ function DropdownItem({ title, course, selectedDegree, courses, degree }: Dropdo
                                     }}>
                                         <View style={{
                                             width: 3,
-                                            alignSelf: "stretch",
+                                            alignSelf: 'stretch',
                                             borderRadius: 99,
                                             backgroundColor: theme.orange,
                                             marginRight: 10,
@@ -155,7 +155,7 @@ function DropdownItem({ title, course, selectedDegree, courses, degree }: Dropdo
                                         </Text>
                                         <Image
                                             style={{ ...GS.smallDropImage, height: 22, width: 18 }}
-                                            source={require("@assets/icons/linkicon-white.png")}
+                                            source={require('@assets/icons/linkicon-white.png')}
                                         />
                                     </View>
                                 </Cluster>

@@ -1,4 +1,4 @@
-import config from "../constants"
+import config from '../constants'
 
 // Fetches the list of games from the server
 export async function getGames() {

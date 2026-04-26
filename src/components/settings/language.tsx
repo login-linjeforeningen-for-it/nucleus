@@ -1,8 +1,8 @@
-import { View, Text, TouchableOpacity } from "react-native"
-import topic from "@/utils/topic"
-import { useSelector, useDispatch } from "react-redux"
-import SS from "@styles/settingStyles"
-import { changeLang } from "@redux/lang"
+import { View, Text, TouchableOpacity } from 'react-native'
+import topic from '@/utils/topic'
+import { useSelector, useDispatch } from 'react-redux'
+import SS from '@styles/settingStyles'
+import { changeLang } from '@redux/lang'
 
 /**
  * Choosing language of the application
@@ -18,14 +18,14 @@ export default function Language() {
         dispatch(changeLang())
 
         // Sets up notifications to follow language
-        topic({ topicID: "langChange", lang, notification })
+        topic({ topicID: 'langChange', lang, notification })
     }
 
     return (
         <View>
             <TouchableOpacity onPress={() => handleLangChange()}>
                 <Text style={{ ...SS.langSwitch, color: theme.textColor }}>
-                    {lang ? "EN" : "NO"}
+                    {lang ? 'EN' : 'NO'}
                 </Text>
             </TouchableOpacity>
         </View>

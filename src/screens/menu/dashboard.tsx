@@ -1,28 +1,27 @@
-import Cluster from "@/components/shared/cluster"
-import Space from "@/components/shared/utils"
-import Swipe from "@components/nav/swipe"
-import Text from "@components/shared/text"
-import GS from "@styles/globalStyles"
-import T from "@styles/text"
-import { MenuProps } from "@type/screenTypes"
-import { getDashboardSummary, type NativeDashboardSummary } from "@utils/discoveryApi"
-import { JSX, useEffect, useState } from "react"
-import { RefreshControl, ScrollView, View } from "react-native"
-import { useSelector } from "react-redux"
+import Cluster from '@/components/shared/cluster'
+import Space from '@/components/shared/utils'
+import Swipe from '@components/nav/swipe'
+import Text from '@components/shared/text'
+import GS from '@styles/globalStyles'
+import T from '@styles/text'
+import { getDashboardSummary } from '@utils/discoveryApi'
+import { JSX, useEffect, useState } from 'react'
+import { RefreshControl, ScrollView, View } from 'react-native'
+import { useSelector } from 'react-redux'
 
-export default function DashboardScreen(_: MenuProps<"DashboardScreen">): JSX.Element {
+export default function DashboardScreen(): JSX.Element {
     const { theme } = useSelector((state: ReduxState) => state.theme)
     const [data, setData] = useState<NativeDashboardSummary | null>(null)
     const [refreshing, setRefreshing] = useState(false)
-    const [error, setError] = useState("")
+    const [error, setError] = useState('')
 
     async function load() {
         setRefreshing(true)
         try {
             setData(await getDashboardSummary())
-            setError("")
+            setError('')
         } catch (loadError) {
-            setError(loadError instanceof Error ? loadError.message : "Failed to load dashboard")
+            setError(loadError instanceof Error ? loadError.message : 'Failed to load dashboard')
         } finally {
             setRefreshing(false)
         }
@@ -33,41 +32,31 @@ export default function DashboardScreen(_: MenuProps<"DashboardScreen">): JSX.El
     }, [])
 
     return (
-        <Swipe left="MenuScreen">
+        <Swipe left='MenuScreen'>
             <View style={{ flex: 1, backgroundColor: theme.darker }}>
                 <ScrollView
                     refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => void load()} />}
                     style={GS.content}
-                    contentContainerStyle={{ paddingHorizontal: 12, paddingBottom: 80 }}
+                    contentContainerStyle={{ paddingBottom: 80 }}
                 >
                     <Space height={90} />
-                    <Cluster>
-                        <View style={{ padding: 12 }}>
-                            <Text style={{ ...T.text25, color: theme.textColor }}>Dashboard</Text>
-                            <Space height={6} />
-                            <Text style={{ ...T.text15, color: theme.oppositeTextColor }}>
-                                Queenbee directly in the app.
-                            </Text>
-                        </View>
-                    </Cluster>
-                    <Space height={12} />
                     {error ? (
                         <Cluster>
                             <View style={{ padding: 12 }}>
-                                <Text style={{ ...T.text15, color: "#ff8b8b" }}>{error}</Text>
+                                <Text style={{ ...T.text15, color: '#ff8b8b' }}>{error}</Text>
                             </View>
                         </Cluster>
                     ) : null}
                     {data ? (
                         <>
                             <Cluster>
-                                <View style={{ padding: 5, flexDirection: "row", gap: 10 }}>
-                                    <Metric label="Events" value={data.counts.events} />
-                                    <Metric label="Jobs" value={data.counts.jobs} />
+                                <View style={{ padding: 5, flexDirection: 'row', gap: 10 }}>
+                                    <Metric label='Events' value={data.counts.events} />
+                                    <Metric label='Jobs' value={data.counts.jobs} />
                                 </View>
-                                <View style={{ padding: 5, flexDirection: "row", gap: 10 }}>
-                                    <Metric label="Organizations" value={data.counts.organizations} />
-                                    <Metric label="Albums" value={data.counts.albums} />
+                                <View style={{ padding: 5, flexDirection: 'row', gap: 10 }}>
+                                    <Metric label='Organizations' value={data.counts.organizations} />
+                                    <Metric label='Albums' value={data.counts.albums} />
                                 </View>
                             </Cluster>
                             <Space height={10} />
@@ -76,7 +65,14 @@ export default function DashboardScreen(_: MenuProps<"DashboardScreen">): JSX.El
                                     <Text style={{ ...T.text20, color: theme.textColor }}>Top categories</Text>
                                     <Space height={8} />
                                     {data.categories.slice(0, 6).map((item) => (
-                                        <View key={item.id} style={{ flexDirection: "row", justifyContent: "space-between", marginBottom: 8 }}>
+                                        <View
+                                            key={item.id}
+                                            style={{
+                                                flexDirection: 'row',
+                                                justifyContent: 'space-between',
+                                                marginBottom: 8,
+                                            }}
+                                        >
                                             <Text style={{ ...T.text15, color: theme.textColor }}>{item.name_en}</Text>
                                             <Text style={{ ...T.text15, color: theme.textColor }}>{item.event_count}</Text>
                                         </View>
@@ -110,9 +106,9 @@ function Metric({ label, value }: { label: string, value: number }) {
 
     return (
         <View style={{
-            minWidth: "47%",
+            minWidth: '47%',
             borderWidth: 1,
-            borderColor: "#ffffff18",
+            borderColor: '#ffffff18',
             borderRadius: 14,
             padding: 12,
         }}>
@@ -127,7 +123,7 @@ function RecentAdditionRow({
     item,
     showDivider,
 }: {
-    item: NativeDashboardSummary["additions"][number]
+    item: NativeDashboardSummary['additions'][number]
     showDivider: boolean
 }) {
     const { theme } = useSelector((state: ReduxState) => state.theme)
@@ -136,12 +132,12 @@ function RecentAdditionRow({
         <View style={{
             paddingVertical: 10,
             borderBottomWidth: showDivider ? 1 : 0,
-            borderBottomColor: "#ffffff10",
+            borderBottomColor: '#ffffff10',
         }}>
             <View style={{
-                flexDirection: "row",
-                justifyContent: "space-between",
-                alignItems: "flex-start",
+                flexDirection: 'row',
+                justifyContent: 'space-between',
+                alignItems: 'flex-start',
                 gap: 12,
             }}>
                 <View style={{ flex: 1 }}>
@@ -156,15 +152,19 @@ function RecentAdditionRow({
                 <View style={{
                     borderRadius: 999,
                     borderWidth: 1,
-                    borderColor: item.action === "created" ? "#fd873833" : "#ffffff12",
-                    backgroundColor: item.action === "created" ? "#fd873814" : "#ffffff08",
+                    borderColor: item.action === 'created'
+                        ? theme.orangeTransparentBorder
+                        : theme.orangeTransparentBorderHighlighted,
+                    backgroundColor: item.action === 'created'
+                        ? theme.orangeTransparent
+                        : theme.orangeTransparentHighlighted,
                     paddingHorizontal: 10,
                     paddingVertical: 5,
-                    alignSelf: "center",
+                    alignSelf: 'center',
                 }}>
                     <Text style={{
                         ...T.text12,
-                        color: item.action === "created" ? theme.textColor : theme.oppositeTextColor
+                        color: item.action === 'created' ? theme.textColor : theme.oppositeTextColor
                     }}>
                         {formatAdditionAction(item.action)}
                     </Text>
@@ -176,15 +176,15 @@ function RecentAdditionRow({
 
 function formatAdditionSource(source: string) {
     if (!source) {
-        return "Unknown"
+        return 'Unknown'
     }
 
     return source
-        .split("_")
-        .join(" ")
+        .split('_')
+        .join(' ')
         .replace(/\b\w/g, (letter) => letter.toUpperCase())
 }
 
-function formatAdditionAction(action: "created" | "updated") {
-    return action === "created" ? "Created" : "Updated"
+function formatAdditionAction(action: 'created' | 'updated') {
+    return action === 'created' ? 'Created' : 'Updated'
 }

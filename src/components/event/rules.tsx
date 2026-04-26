@@ -1,16 +1,16 @@
-import Markdown from "@components/course/markdown"
-import Card from "@components/shared/card"
-import { EventContext } from "@utils/contextProvider"
-import { useContext } from "react"
-import { useSelector } from "react-redux"
-import T from "@styles/text"
-import { Text } from "react-native"
+import Markdown from '@components/course/markdown'
+import Card from '@components/shared/card'
+import { EventContext } from '@utils/contextProvider'
+import { useContext } from 'react'
+import { useSelector } from 'react-redux'
+import T from '@styles/text'
+import { Text } from 'react-native'
 
 export default function Rules() {
     const event = useContext(EventContext)
     const { lang } = useSelector((state: ReduxState) => state.lang)
     const { theme } = useSelector((state: ReduxState) => state.theme)
-    const rule = event && event.rule ? 
+    const rule = event && event.rule ?
         lang ? event.rule.description_no : event.rule.description_en
         : undefined
 

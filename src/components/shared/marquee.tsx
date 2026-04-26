@@ -1,5 +1,5 @@
-import { useEffect, useMemo, useRef, useState } from "react"
-import { Animated, Easing, Text, View } from "react-native"
+import { useEffect, useMemo, useRef, useState } from 'react'
+import { Animated, Easing, Text, View } from 'react-native'
 
 type MarqueeProps = {
     children: string
@@ -19,9 +19,9 @@ export default function Marquee({
     const [singleLineWidth, setSingleLineWidth] = useState(0)
     const [measuredLineCount, setMeasuredLineCount] = useState(1)
 
-    const lineHeight = typeof (style as { lineHeight?: number } | undefined)?.lineHeight === "number"
+    const lineHeight = typeof (style as { lineHeight?: number } | undefined)?.lineHeight === 'number'
         ? (style as { lineHeight?: number }).lineHeight as number
-        : typeof (style as { fontSize?: number } | undefined)?.fontSize === "number"
+        : typeof (style as { fontSize?: number } | undefined)?.fontSize === 'number'
             ? ((style as { fontSize?: number }).fontSize as number) * 1.35
             : 20
 
@@ -73,8 +73,8 @@ export default function Marquee({
     return (
         <View
             style={[{
-                overflow: "hidden",
-                width: "100%",
+                overflow: 'hidden',
+                width: '100%',
                 minHeight: containerHeight,
                 height: containerHeight,
             }, containerStyle]}
@@ -82,7 +82,7 @@ export default function Marquee({
         >
             <Text
                 style={[style, {
-                    position: "absolute",
+                    position: 'absolute',
                     opacity: 0,
                     left: -10000,
                     top: -10000,
@@ -95,7 +95,7 @@ export default function Marquee({
             {containerWidth > 0 ? (
                 <Text
                     style={[style, {
-                        position: "absolute",
+                        position: 'absolute',
                         opacity: 0,
                         width: containerWidth,
                         left: -10000,

@@ -1,10 +1,10 @@
-import { Gesture, GestureDetector, GestureHandlerRootView } from "react-native-gesture-handler"
-import { useDispatch, useSelector } from "react-redux"
-import * as ImagePicker from "expo-image-picker"
-import PS from "@styles/profileStyles"
-import { setImage } from "@redux/profile"
-import { JSX, useState } from "react"
-import T from "@styles/text"
+import { Gesture, GestureDetector, GestureHandlerRootView } from 'react-native-gesture-handler'
+import { useDispatch, useSelector } from 'react-redux'
+import * as ImagePicker from 'expo-image-picker'
+import PS from '@styles/profileStyles'
+import { setImage } from '@redux/profile'
+import { JSX, useState } from 'react'
+import T from '@styles/text'
 
 import {
     TouchableOpacity,
@@ -12,13 +12,13 @@ import {
     Image,
     View,
     Text,
-} from "react-native"
+} from 'react-native'
 
 import Animated, {
     useAnimatedStyle,
     useSharedValue,
     withTiming,
-} from "react-native-reanimated"
+} from 'react-native-reanimated'
 
 type ChangeProfileCardProps = {
     hide: () => void
@@ -30,8 +30,8 @@ type ChangeProfileCardProps = {
  * @param {string} category    Category of the event, Format: "CATEGORY"
  * @returns                     Small circle of the categories color
  */
-export default function ChangeProfileCard({ hide, trigger }: 
-    ChangeProfileCardProps): JSX.Element {
+export default function ChangeProfileCard({ trigger }:
+ChangeProfileCardProps): JSX.Element {
     const { theme, isDark } = useSelector((state: ReduxState) => state.theme)
     const { lang } = useSelector((state: ReduxState) => state.lang)
 
@@ -39,23 +39,23 @@ export default function ChangeProfileCard({ hide, trigger }:
     const dispatch = useDispatch()
 
     // Profile info
-    let { image } = useSelector((state: ReduxState) => state.profile)
+    const { image } = useSelector((state: ReduxState) => state.profile)
 
     // Selected local profile image
-    const [tempImage, setTempImage] = useState("")
+    const [tempImage, setTempImage] = useState('')
 
     // Height of the screen window
-    let windowHeight = Dimensions.get("window").height
+    const windowHeight = Dimensions.get('window').height
 
     // Shared value for reanimated library
-    let translateY = useSharedValue(windowHeight)
+    const translateY = useSharedValue(windowHeight)
     const startY = useSharedValue(0)
 
     // Trigger for slideUp animation
-    let [shouldTrigger, setShouldTrigger] = useState(trigger)
+    const [shouldTrigger, setShouldTrigger] = useState(trigger)
 
     // Starts increasing value when swiping starts
-   const panGesture = Gesture.Pan()
+    const panGesture = Gesture.Pan()
         .onBegin(() => {
             startY.value = translateY.value
         })
@@ -90,7 +90,7 @@ export default function ChangeProfileCard({ hide, trigger }:
 
     async function selectImage() {
         // No permissions request is necessary for launching the image library
-        let result = await ImagePicker.launchImageLibraryAsync({
+        const result = await ImagePicker.launchImageLibraryAsync({
             mediaTypes: ImagePicker.MediaTypeOptions.All,
             allowsEditing: true,
             aspect: [4, 3],
@@ -108,7 +108,7 @@ export default function ChangeProfileCard({ hide, trigger }:
         <GestureHandlerRootView>
             <GestureDetector gesture={panGesture}>
                 <Animated.View style={[PS.animatedProfileChangeCard, animation,
-                { backgroundColor: theme.darker }]}>
+                    { backgroundColor: theme.darker }]}>
                     <View style={[PS.animatedView, {
                         backgroundColor:
                             theme.darker
@@ -119,11 +119,11 @@ export default function ChangeProfileCard({ hide, trigger }:
                                 source={tempImage || image
                                     ? { uri: tempImage ? tempImage : image }
                                     : isDark
-                                        ? require("@assets/icons/loginperson-white.png")
-                                        : require("@assets/icons/loginperson-black.png")}
+                                        ? require('@assets/icons/loginperson-white.png')
+                                        : require('@assets/icons/loginperson-black.png')}
                             />
                             <Text style={{ ...T.centered15, color: theme.oppositeTextColor }}>
-                                {lang ? "Velg bilde" : "Choose image"}
+                                {lang ? 'Velg bilde' : 'Choose image'}
                             </Text>
                         </TouchableOpacity>
                     </View>

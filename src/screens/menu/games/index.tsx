@@ -1,10 +1,9 @@
-import Cluster from "@/components/shared/cluster"
-import Space from "@/components/shared/utils"
-import Swipe from "@components/nav/swipe"
-import { MenuProps, MenuStackParamList } from "@type/screenTypes"
-import { getGames } from "@utils/game"
-import { JSX, useCallback, useEffect, useMemo, useState } from "react"
-import { useSelector } from "react-redux"
+import Cluster from '@/components/shared/cluster'
+import Space from '@/components/shared/utils'
+import Swipe from '@components/nav/swipe'
+import { getGames } from '@utils/game'
+import { JSX, useCallback, useEffect, useMemo, useState } from 'react'
+import { useSelector } from 'react-redux'
 import {
     Dimensions,
     Image,
@@ -13,14 +12,14 @@ import {
     Text,
     TouchableOpacity,
     View,
-} from "react-native"
-import { StackNavigationProp } from "@react-navigation/stack"
-import GS from "@styles/globalStyles"
-import T from "@styles/text"
+} from 'react-native'
+import { StackNavigationProp } from '@react-navigation/stack'
+import GS from '@styles/globalStyles'
+import T from '@styles/text'
 
 type GameListProps = {
     game: Game
-    navigation: StackNavigationProp<MenuStackParamList, "GameScreen">
+    navigation: StackNavigationProp<MenuStackParamList, 'GameScreen'>
     theme: Theme
     text: {
         diceTitle: string
@@ -32,7 +31,7 @@ type GameListProps = {
 
 type FeaturedGameProps = {
     name: string
-    navigation: StackNavigationProp<MenuStackParamList, "GameScreen">
+    navigation: StackNavigationProp<MenuStackParamList, 'GameScreen'>
     theme: Theme
     text: {
         diceBody: string
@@ -51,25 +50,25 @@ type GameScreenText = {
 }
 
 const GAME_ASSETS = [
-    require("@assets/games/terning.png"),
-    require("@assets/games/100questions.png"),
-    require("@assets/games/neverhaveiever.png"),
-    require("@assets/games/okredflagdealbreaker.png"),
+    require('@assets/games/terning.png'),
+    require('@assets/games/100questions.png'),
+    require('@assets/games/neverhaveiever.png'),
+    require('@assets/games/okredflagdealbreaker.png'),
 ]
 
-export default function GameScreen({ navigation }: MenuProps<"GameScreen">): JSX.Element {
+export default function GameScreen({ navigation }: MenuProps<'GameScreen'>): JSX.Element {
     const [games, setGames] = useState<string | Game[]>([])
     const [refreshing, setRefreshing] = useState(false)
     const { theme } = useSelector((state: ReduxState) => state.theme)
     const { lang } = useSelector((state: ReduxState) => state.lang)
     const text: GameScreenText = lang
-        ? require("@text/no.json").games
-        : require("@text/en.json").games
+        ? require('@text/no.json').games
+        : require('@text/en.json').games
 
-    const headerOffset = Dimensions.get("window").height / 8.2
+    const headerOffset = Dimensions.get('window').height / 8.2
 
     const listedGames = useMemo(
-        () => typeof games === "string" ? [] : games,
+        () => typeof games === 'string' ? [] : games,
         [games]
     )
 
@@ -87,7 +86,7 @@ export default function GameScreen({ navigation }: MenuProps<"GameScreen">): JSX
     }, [onRefresh])
 
     return (
-        <Swipe left="MenuScreen">
+        <Swipe left='MenuScreen'>
             <View style={{ ...GS.content, backgroundColor: theme.darker }}>
                 <ScrollView
                     showsVerticalScrollIndicator={false}
@@ -106,7 +105,7 @@ export default function GameScreen({ navigation }: MenuProps<"GameScreen">): JSX
                     <Cluster style={{ paddingHorizontal: 0 }}>
                         <View style={{ paddingHorizontal: 14, paddingVertical: 16 }}>
                             <Text style={{ ...T.text20, color: theme.textColor, marginBottom: 6 }}>
-                                {lang ? "Spillkveld" : "Game night"}
+                                {lang ? 'Spillkveld' : 'Game night'}
                             </Text>
                             <Text style={{ ...T.text15, color: theme.oppositeTextColor }}>
                                 {text.intro}
@@ -128,7 +127,7 @@ export default function GameScreen({ navigation }: MenuProps<"GameScreen">): JSX
                     <SectionTitle title={text.library} theme={theme} />
                     <Space height={8} />
 
-                    {typeof games === "string" ? (
+                    {typeof games === 'string' ? (
                         <Cluster style={{ paddingHorizontal: 0 }}>
                             <View style={{ paddingHorizontal: 14, paddingVertical: 16 }}>
                                 <Text style={{ ...T.text15, color: theme.textColor }}>
@@ -137,7 +136,7 @@ export default function GameScreen({ navigation }: MenuProps<"GameScreen">): JSX
                             </View>
                         </Cluster>
                     ) : (
-                        listedGames.map((game: Game, index: number) => (
+                        listedGames.map((game: Game) => (
                             <GameList
                                 key={game.id}
                                 game={game}
@@ -159,7 +158,7 @@ function SectionTitle({ title, theme }: { title: string, theme: Theme }): JSX.El
             ...T.text15,
             color: theme.oppositeTextColor,
             letterSpacing: 0.5,
-            textTransform: "uppercase",
+            textTransform: 'uppercase',
             marginLeft: 4,
         }}>
             {title}
@@ -169,7 +168,7 @@ function SectionTitle({ title, theme }: { title: string, theme: Theme }): JSX.El
 
 function GameList({ game, navigation, theme, text }: GameListProps): JSX.Element {
     function handlePress() {
-        navigation.navigate("SpecificGameScreen", { gameID: game.id, gameName: game.name })
+        navigation.navigate('SpecificGameScreen', { gameID: game.id, gameName: game.name })
     }
 
     const image = GAME_ASSETS[game.id + 1] || GAME_ASSETS[1]
@@ -178,8 +177,8 @@ function GameList({ game, navigation, theme, text }: GameListProps): JSX.Element
         <TouchableOpacity style={{ marginBottom: 10 }} onPress={handlePress} activeOpacity={0.88}>
             <Cluster style={{ paddingHorizontal: 0 }}>
                 <View style={{
-                    flexDirection: "row",
-                    alignItems: "center",
+                    flexDirection: 'row',
+                    alignItems: 'center',
                     paddingHorizontal: 14,
                     paddingVertical: 14,
                     gap: 12,
@@ -188,13 +187,13 @@ function GameList({ game, navigation, theme, text }: GameListProps): JSX.Element
                         width: 64,
                         height: 64,
                         borderRadius: 18,
-                        alignItems: "center",
-                        justifyContent: "center",
-                        backgroundColor: "rgba(253,135,56,0.10)",
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        backgroundColor: 'rgba(253,135,56,0.10)',
                     }}>
                         <Image
                             source={image}
-                            style={{ width: 42, height: 42, resizeMode: "contain" }}
+                            style={{ width: 42, height: 42, resizeMode: 'contain' }}
                         />
                     </View>
                     <View style={{ flex: 1 }}>
@@ -205,7 +204,7 @@ function GameList({ game, navigation, theme, text }: GameListProps): JSX.Element
                             {text.communityDeck}
                         </Text>
                     </View>
-                    <View style={{ alignItems: "flex-end" }}>
+                    <View style={{ alignItems: 'flex-end' }}>
                         <Text style={{ ...T.text15, color: theme.orange }}>
                             {text.tapToOpen}
                         </Text>
@@ -218,7 +217,7 @@ function GameList({ game, navigation, theme, text }: GameListProps): JSX.Element
 
 function FeaturedGame({ name, navigation, theme, text }: FeaturedGameProps): JSX.Element {
     function handlePress() {
-        navigation.navigate("DiceScreen")
+        navigation.navigate('DiceScreen')
     }
 
     return (
@@ -227,24 +226,24 @@ function FeaturedGame({ name, navigation, theme, text }: FeaturedGameProps): JSX
                 <View style={{ paddingHorizontal: 14, paddingVertical: 14 }}>
                     <View style={{
                         borderRadius: 24,
-                        backgroundColor: "rgba(253,135,56,0.10)",
+                        backgroundColor: 'rgba(253,135,56,0.10)',
                         paddingHorizontal: 14,
                         paddingVertical: 14,
-                        flexDirection: "row",
-                        alignItems: "center",
+                        flexDirection: 'row',
+                        alignItems: 'center',
                         gap: 14,
                     }}>
                         <View style={{
                             width: 72,
                             height: 72,
                             borderRadius: 20,
-                            alignItems: "center",
-                            justifyContent: "center",
-                            backgroundColor: "rgba(253,135,56,0.12)",
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            backgroundColor: 'rgba(253,135,56,0.12)',
                         }}>
                             <Image
                                 source={GAME_ASSETS[0]}
-                                style={{ width: 50, height: 50, resizeMode: "contain" }}
+                                style={{ width: 50, height: 50, resizeMode: 'contain' }}
                             />
                         </View>
                         <View style={{ flex: 1 }}>

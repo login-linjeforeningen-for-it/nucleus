@@ -1,7 +1,7 @@
-import Text from "@components/shared/text"
-import T from "@styles/text"
-import { JSX } from "react"
-import { Pressable, TextInput, View } from "react-native"
+import Text from '@components/shared/text'
+import T from '@styles/text'
+import { JSX } from 'react'
+import { Pressable, TextInput, View } from 'react-native'
 
 type Props = {
     value: string
@@ -38,18 +38,18 @@ export default function AiComposer({ value, onChangeText, onSend, theme, placeho
                 <Pressable
                     onPress={onSend}
                     style={{
-                        position: "absolute",
+                        position: 'absolute',
                         right: 8,
                         top: 8,
                         width: 32,
                         height: 32,
                         borderRadius: 10,
                         backgroundColor: theme.orange,
-                        alignItems: "center",
-                        justifyContent: "center",
+                        alignItems: 'center',
+                        justifyContent: 'center',
                     }}
                 >
-                    <Text style={{ ...T.text16, color: theme.darker, fontWeight: "700" }}>
+                    <Text style={{ ...T.text16, color: theme.darker, fontWeight: '700' }}>
                         ↑
                     </Text>
                 </Pressable>

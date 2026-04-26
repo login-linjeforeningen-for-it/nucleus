@@ -1,9 +1,9 @@
-import Notification from "@/components/settings/notification"
-import Cluster from "@/components/shared/cluster"
-import GS from "@styles/globalStyles"
+import Notification from '@/components/settings/notification'
+import Cluster from '@/components/shared/cluster'
+import GS from '@styles/globalStyles'
 import { JSX } from 'react'
-import { View, Text } from "react-native"
-import { useSelector } from "react-redux"
+import { View, Text } from 'react-native'
+import { useSelector } from 'react-redux'
 
 type TopicSwitchListProps = {
     category: string
@@ -27,15 +27,15 @@ type TopicSwitchProps = {
 export default function TopicSwitchList({ category, showLast }: TopicSwitchListProps): JSX.Element {
     return (
         <View>
-            <TopicSwitch topic={category + "10m"} textNo="10 min før" textEn="10 min before" />
-            <TopicSwitch topic={category + "30m"} textNo="30 min før" textEn="30 min before" />
-            <TopicSwitch topic={category + "1h"} textNo="1 time før" textEn="1 hour before" />
-            <TopicSwitch topic={category + "2h"} textNo="2 timer før" textEn="2 hours before" />
-            <TopicSwitch topic={category + "3h"} textNo="3 timer før" textEn="3 hours before" />
-            <TopicSwitch topic={category + "6h"} textNo="6 timer før" textEn="6 hours before" />
-            <TopicSwitch topic={category + "1d"} textNo="1 dag før" textEn="1 day before" />
-            <TopicSwitch topic={category + "2d"} textNo="2 dager før" textEn="2 days before" />
-            {showLast ? <TopicSwitch topic={category + "1w"} textNo="1 uke før" textEn="1 week before" /> : null}
+            <TopicSwitch topic={category + '10m'} textNo='10 min før' textEn='10 min before' />
+            <TopicSwitch topic={category + '30m'} textNo='30 min før' textEn='30 min before' />
+            <TopicSwitch topic={category + '1h'} textNo='1 time før' textEn='1 hour before' />
+            <TopicSwitch topic={category + '2h'} textNo='2 timer før' textEn='2 hours before' />
+            <TopicSwitch topic={category + '3h'} textNo='3 timer før' textEn='3 hours before' />
+            <TopicSwitch topic={category + '6h'} textNo='6 timer før' textEn='6 hours before' />
+            <TopicSwitch topic={category + '1d'} textNo='1 dag før' textEn='1 day before' />
+            <TopicSwitch topic={category + '2d'} textNo='2 dager før' textEn='2 days before' />
+            {showLast ? <TopicSwitch topic={category + '1w'} textNo='1 uke før' textEn='1 week before' /> : null}
         </View>
     )
 }
@@ -59,7 +59,7 @@ function TopicSwitch({ topic, textNo, textEn }: TopicSwitchProps): JSX.Element {
                 }}>
                     <View style={{
                         width: 3,
-                        alignSelf: "stretch",
+                        alignSelf: 'stretch',
                         borderRadius: 99,
                         backgroundColor: theme.orange,
                         marginRight: 10,
@@ -81,9 +81,9 @@ function TopicSwitch({ topic, textNo, textEn }: TopicSwitchProps): JSX.Element {
                         ...GS.view2,
                         minWidth: 52,
                         marginLeft: 12,
-                        alignSelf: "center",
-                        alignItems: "center",
-                        justifyContent: "center",
+                        alignSelf: 'center',
+                        alignItems: 'center',
+                        justifyContent: 'center',
                     }}>
                         <Notification category={topic} skip />
                     </View>

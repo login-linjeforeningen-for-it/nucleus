@@ -1,10 +1,10 @@
-import { setClickedEvents } from "@redux/event"
-import { Linking, Text, TouchableOpacity, View } from "react-native"
-import { useDispatch, useSelector } from "react-redux"
-import ES from "@styles/eventStyles"
-import T from "@styles/text"
-import { useContext } from "react"
-import { EventContext } from "@utils/contextProvider"
+import { setClickedEvents } from '@redux/event'
+import { Linking, Text, TouchableOpacity, View } from 'react-native'
+import { useDispatch, useSelector } from 'react-redux'
+import ES from '@styles/eventStyles'
+import T from '@styles/text'
+import { useContext } from 'react'
+import { EventContext } from '@utils/contextProvider'
 
 export default function JoinButton() {
     const { theme } = useSelector((state: ReduxState) => state.theme)
@@ -12,7 +12,7 @@ export default function JoinButton() {
     const { clickedEvents } = useSelector((state: ReduxState) => state.event)
     const event = useContext(EventContext)
     const dispatch = useDispatch()
-    const text = lang ? "Meld meg på" : "Join event"
+    const text = lang ? 'Meld meg på' : 'Join event'
 
     if (!event) {
         return null

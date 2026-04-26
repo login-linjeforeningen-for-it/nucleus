@@ -1,15 +1,15 @@
-import { createSlice } from "@reduxjs/toolkit"
-import Dark from "@themes/dark"
-import Light from "@themes/light"
-import Abyss from "@themes/abyss"
-import Sunset from "@themes/sunset"
-import Easter from "@themes/easter"
-import Christmas from "@themes/christmas"
+import { createSlice } from '@reduxjs/toolkit'
+import Dark from '@themes/dark'
+import Light from '@themes/light'
+import Abyss from '@themes/abyss'
+import Sunset from '@themes/sunset'
+import Easter from '@themes/easter'
+import Christmas from '@themes/christmas'
 
 // Declares the theme slice
 export const ThemeSlice = createSlice({
     // Names the slice as "theme"
-    name: "theme",
+    name: 'theme',
     // Initial state of the slice
     initialState: {
         // Default 0 (dark theme)

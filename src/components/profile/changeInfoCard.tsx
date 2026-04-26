@@ -1,9 +1,9 @@
-import { Gesture, GestureDetector, GestureHandlerRootView } from "react-native-gesture-handler"
-import { useDispatch, useSelector } from "react-redux"
-import PS from "@styles/profileStyles"
-import { Line } from "@/components/shared/utils"
-import { useEffect, useState } from "react"
-import T from "@styles/text"
+import { Gesture, GestureDetector, GestureHandlerRootView } from 'react-native-gesture-handler'
+import { useDispatch, useSelector } from 'react-redux'
+import PS from '@styles/profileStyles'
+import { Line } from '@/components/shared/utils'
+import { useEffect, useState } from 'react'
+import T from '@styles/text'
 
 import {
     TouchableOpacity,
@@ -12,13 +12,13 @@ import {
     Keyboard,
     View,
     Text
-} from "react-native"
+} from 'react-native'
 
 import Animated, {
     useAnimatedStyle,
     useSharedValue,
     withTiming
-} from "react-native-reanimated"
+} from 'react-native-reanimated'
 
 import {
     setAllergies,
@@ -26,7 +26,7 @@ import {
     setMail,
     setSchoolyear,
     setDegree
-} from "@redux/profile"
+} from '@redux/profile'
 import { scheduleOnRN } from 'react-native-worklets'
 
 type ChangeInfoCardProps = {
@@ -51,7 +51,7 @@ type CancelProps = {
  * @param {string} category    Category of the event, Format: "CATEGORY"
  * @returns                     Small circle of the categories color
  */
-export default function ChangeInfoCard({type, value, hide, trigger}: 
+export default function ChangeInfoCard({type, value, hide, trigger}:
 ChangeInfoCardProps) {
 
     const { theme } = useSelector((state: ReduxState) => state.theme)
@@ -60,17 +60,17 @@ ChangeInfoCardProps) {
     const dispatch = useDispatch()
 
     // Profile info
-    const { degree, schoolyear, mail, preferences, allergies } = 
+    const { degree, schoolyear, mail, preferences, allergies } =
         useSelector((state: ReduxState) => state.profile)
     const profile = { degree, schoolyear, mail, preferences, allergies }
 
     // Checks if any info has been edited by the user
     const [edited, setEdited] = useState(false)
-    const [text, setText] = useState("")
+    const [text, setText] = useState('')
 
     // Dimensions of the screen window
-    const height = Dimensions.get("window").height
-    const width = Dimensions.get("window").width
+    const height = Dimensions.get('window').height
+    const width = Dimensions.get('window').width
 
     // Shared value for reanimated library
     const translateY = useSharedValue(height)
@@ -90,24 +90,24 @@ ChangeInfoCardProps) {
 
     // Starts increasing value when swiping starts
     const panGesture = Gesture.Pan()
-    .onBegin(() => {
+        .onBegin(() => {
         // replaces onStart
-        startY.value = translateY.value;
-    })
-    .onUpdate((event) => {
+            startY.value = translateY.value
+        })
+        .onUpdate((event) => {
         // replaces onActive
-        translateY.value = startY.value + event.translationY;
-    })
-    .onEnd((event) => {
-        if (event.velocityY > height / 2) {
-        translateY.value = withTiming(height);
+            translateY.value = startY.value + event.translationY
+        })
+        .onEnd((event) => {
+            if (event.velocityY > height / 2) {
+                translateY.value = withTiming(height)
 
-        // new API
-        scheduleOnRN(Keyboard.dismiss);
-        } else {
-        translateY.value = withTiming(0);
-        }
-    });
+                // new API
+                scheduleOnRN(Keyboard.dismiss)
+            } else {
+                translateY.value = withTiming(0)
+            }
+        })
 
     // Animates the sliding
     const animation = useAnimatedStyle(() => {
@@ -129,7 +129,7 @@ ChangeInfoCardProps) {
 
     useEffect(() => {
         // Add listener
-        const keyboardListener = Keyboard.addListener("keyboardDidHide", 
+        const keyboardListener = Keyboard.addListener('keyboardDidHide',
             _keyboardDidHide)
 
         // Cleanup function
@@ -189,12 +189,12 @@ ChangeInfoCardProps) {
                         <TextInput style={{...PS.inputText, color: theme.textColor}}
                             placeholder = {findBestPlaceHolder()}
                             placeholderTextColor={theme.titleTextColor}
-                            textAlign="center"
+                            textAlign='center'
                             keyboardType={value === 1
-                                ? "numeric"
+                                ? 'numeric'
                                 : value === 2
-                                    ? "email-address"
-                                    : "default"
+                                    ? 'email-address'
+                                    : 'default'
                             }
                             onChangeText={(val) => handleText(val)}
                             autoFocus={true}
@@ -203,7 +203,7 @@ ChangeInfoCardProps) {
                         <View style={PS.inputInfoView}>
                             <Cancel tryToHide={tryToHide} />
                             <Text style={{
-                                ...T.centered15, 
+                                ...T.centered15,
                                 color: theme.oppositeTextColor
                             }}>
                                 {type}
@@ -211,10 +211,10 @@ ChangeInfoCardProps) {
                             <Save edited={edited} save={save} />
                         </View>
                         <View style={[PS.centeredLine, {top: 20}]}>
-                            <Line 
-                                height={2} 
-                                width={width*(2/3)} 
-                                fill={theme.oppositeTextColor} 
+                            <Line
+                                height={2}
+                                width={width*(2/3)}
+                                fill={theme.oppositeTextColor}
                             />
                         </View>
                     </View>
@@ -231,19 +231,19 @@ function Save({edited, save}: SaveProps) {
     if (edited) {
         return (
             <TouchableOpacity style={{right: 20}} onPress={() => save()}>
-            <Text style={{...T.centered15, color: theme.textColor}}>
-                {lang ? "Lagre" : "Save"}
-            </Text>
-        </TouchableOpacity>
+                <Text style={{...T.centered15, color: theme.textColor}}>
+                    {lang ? 'Lagre' : 'Save'}
+                </Text>
+            </TouchableOpacity>
         )
     } else {
         return (
             <Text style={{
-                ...T.centered15, 
-                right: 20, 
+                ...T.centered15,
+                right: 20,
                 color: theme.oppositeTextColor
             }}>
-                {lang ? "Lagre" : "Save"}
+                {lang ? 'Lagre' : 'Save'}
             </Text>
         )
     }
@@ -256,7 +256,7 @@ function Cancel({tryToHide}: CancelProps) {
     return (
         <TouchableOpacity style={{left: 20}} onPress={() => tryToHide()}>
             <Text style={{...T.centered15, color: theme.textColor}}>
-                {lang ? "Avbryt" : "Cancel"}
+                {lang ? 'Avbryt' : 'Cancel'}
             </Text>
         </TouchableOpacity>
     )

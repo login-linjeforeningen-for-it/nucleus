@@ -1,7 +1,7 @@
-import { fetchAdDetails, fetchEventDetails } from "@/utils/fetch"
-import { setCalendarID } from "@redux/misc"
-import { Platform } from "react-native"
-import { UnknownAction, Dispatch } from "redux"
+import { fetchAdDetails, fetchEventDetails } from '@/utils/fetch'
+import { setCalendarID } from '@redux/misc'
+import { Platform } from 'react-native'
+import { UnknownAction, Dispatch } from 'redux'
 import {
     requestCalendarPermissionsAsync,
     getDefaultCalendarAsync,
@@ -14,9 +14,9 @@ import {
     EntityTypes,
     Availability,
     EventStatus,
-} from "expo-calendar"
-import capitalizeFirstLetter from "./capitalizeFirstLetter"
-import config from "@/constants"
+} from 'expo-calendar'
+import capitalizeFirstLetter from './capitalizeFirstLetter'
+import config from '@/constants'
 
 type handleDownloadProps = {
     items: GetEventProps[] | GetJobProps[]
@@ -61,13 +61,13 @@ export default async function handleDownload({ items, calendarID,
 
 /**
  * Adds the passed items to the default calendar of the phone
- * @param item Items to add to calendar 
- * @param calendarID ID of the calendar to add the items to 
+ * @param item Items to add to calendar
+ * @param calendarID ID of the calendar to add the items to
  */
 export async function updateCalendar({ items, calendarID, lang, isEventScreen }: updateCalendarProps) {
     const { status } = await requestCalendarPermissionsAsync()
 
-    if (status !== "granted") return
+    if (status !== 'granted') return
 
     const calendarEvents = await getEventsAsync(
         [calendarID],
@@ -111,7 +111,7 @@ export async function updateCalendar({ items, calendarID, lang, isEventScreen }:
 async function calendarExists(calendarID: string) {
     const { status } = await requestCalendarPermissionsAsync()
 
-    if (status !== "granted") return
+    if (status !== 'granted') return
 
     try {
         const calendars = await getCalendarsAsync(EntityTypes.EVENT)
@@ -129,25 +129,25 @@ async function calendarExists(calendarID: string) {
 async function createCalendar(items: GetEventProps[] | GetJobProps[], lang: boolean, isEventScreen: boolean) {
     const { status } = await requestCalendarPermissionsAsync()
 
-    if (status !== "granted") return
+    if (status !== 'granted') return
 
     try {
-        const defaultCalendarSource = Platform.OS === "ios"
+        const defaultCalendarSource = Platform.OS === 'ios'
             ? await getDefaultCalendarSource()
-            : { isLocalAccount: true, name: "Login", id: "", type: "" }
+            : { isLocalAccount: true, name: 'Login', id: '', type: '' }
 
         if (!defaultCalendarSource) {
-            throw new Error("Default calendar source is undefined")
+            throw new Error('Default calendar source is undefined')
         }
 
         const calendarID = await createCalendarAsync({
-            title: "Login",
-            color: "#fd8738",
+            title: 'Login',
+            color: '#fd8738',
             entityType: EntityTypes.EVENT,
             sourceId: defaultCalendarSource.id,
             source: defaultCalendarSource,
-            name: "internalCalendarName",
-            ownerAccount: "personal",
+            name: 'internalCalendarName',
+            ownerAccount: 'personal',
             accessLevel: CalendarAccessLevel.OWNER,
         })
 
@@ -166,8 +166,8 @@ async function createCalendar(items: GetEventProps[] | GetJobProps[], lang: bool
  * @returns                   Native calendar objects
  */
 async function eventsToCalendarFormat({ items, calendarID, lang, isEventScreen }:
-    itemsToCalendarFormatProps) {
-    let formattedEvents = []
+itemsToCalendarFormatProps) {
+    const formattedEvents = []
 
     for (const item of items) {
         const event = await fetchEventDetails(item.id)
@@ -182,16 +182,21 @@ async function eventsToCalendarFormat({ items, calendarID, lang, isEventScreen }
             location = lang
                 ? event.location?.name_no || event.location?.name_no || ''
                 : event.location?.name_en || event.location?.name_en || ''
-            title = lang ? event.name_no || event.name_en || '' : event.name_en || event.name_no || ''
-            const fixedDesc = lang ? event.description_no || event.description_en || '' : event.description_en || event.description_no || ''
+            title = lang
+                ? event.name_no || event.name_en || ''
+                : event.name_en || event.name_no || ''
+            const fixedDesc = lang
+                ? event.description_no || event.description_en || ''
+                : event.description_en || event.description_no || ''
 
             notes = fixedDesc.replace(/\\n/g, '\n') || undefined
             if (!location.length) location = `${config.login_url}/events/${item.id}`
             startDate = new Date(event.time_start)
             endDate = new Date(event.time_end)
         } else if (ad) {
-            location = ad.cities?.map(city => capitalizeFirstLetter(city)).join(", ") || ''
-            title = `${lang ? 'Frist for å søke jobb - ' : 'Deadline to apply - '}${lang ? ad.title_no || ad.title_en : ad.title_en || ad.title_no}!`
+            location = ad.cities?.map(city => capitalizeFirstLetter(city)).join(', ') || ''
+            title = `${lang ? 'Frist for å søke jobb - ' : 'Deadline to apply - '}`
+                + `${lang ? ad.title_no || ad.title_en : ad.title_en || ad.title_no}!`
             const tempShort = lang
                 ? ad.description_short_no || ad.description_short_en
                 : ad.description_short_en || ad.description_short_no
@@ -212,9 +217,9 @@ async function eventsToCalendarFormat({ items, calendarID, lang, isEventScreen }
             allDay: false,
             id: `${isEventScreen ? 'e' : 'a'}${item.id}`,
             title, notes, location, startDate, endDate,
-            timeZone: "Europe/Oslo",
-            status: "CONFIRMED",
-            availability: "BUSY",
+            timeZone: 'Europe/Oslo',
+            status: 'CONFIRMED',
+            availability: 'BUSY',
             alarms: [{ relativeOffset: -30 }]
         }
         formattedEvents.push(obj)
@@ -231,7 +236,7 @@ async function eventsToCalendarFormat({ items, calendarID, lang, isEventScreen }
 async function getDefaultCalendarSource() {
     const { status } = await requestCalendarPermissionsAsync()
 
-    if (status !== "granted") return
+    if (status !== 'granted') return
 
     try {
         const defaultCalendar = await getDefaultCalendarAsync()
@@ -252,7 +257,7 @@ async function getDefaultCalendarSource() {
  * @see createCalendar  Creates a new calendar if no calendar is to be found
  */
 async function executeDownload({ items, calendarID, dispatch, lang, isEventScreen }: executeDownloadProps) {
-    if (typeof await calendarExists(calendarID) != "undefined") {
+    if (typeof await calendarExists(calendarID) != 'undefined') {
         await updateCalendar({ items, calendarID, lang, isEventScreen })
     } else {
         dispatch(setCalendarID(await createCalendar(items, lang, isEventScreen)))

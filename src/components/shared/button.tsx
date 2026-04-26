@@ -1,7 +1,7 @@
-import SS from "@styles/settingStyles"
-import { useSelector } from "react-redux"
-import { ReactNode } from "react"
-import { View } from "react-native"
+import SS from '@styles/settingStyles'
+import { useSelector } from 'react-redux'
+import { ReactNode } from 'react'
+import { View } from 'react-native'
 
 type ButtonProps = {
     children: ReactNode

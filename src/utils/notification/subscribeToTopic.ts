@@ -9,8 +9,8 @@ export async function subscribeToTopic(topic: string) {
         const token = await getPushToken()
 
         const response = await fetch(`${config.app_api_url}/subscribe`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ token, topic }),
         })
 
@@ -32,8 +32,8 @@ export async function unsubscribeFromTopic(topic: string) {
         const token = await getPushToken()
 
         const response = await fetch(`${config.app_api_url}/unsubscribe`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ token, topic }),
         })
 

@@ -31,7 +31,7 @@ export default function Swiper({ course, clicked, setClicked }: CourseContentPro
     const startX = useSharedValue(0)
 
     if (!course.cards.length) {
-        return <ReadOnly text={course.notes} />
+        return <ReadOnly courseId={Number(course.id)} text={course.notes} />
     }
 
     function handlePrevious() {

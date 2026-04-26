@@ -1,17 +1,16 @@
-import AdList from "@components/ads/adList"
-import DownloadButton from "@components/shared/downloadButton"
-import GS from "@styles/globalStyles"
-import LastFetch, { fetchAds } from "@/utils/fetch"
-import LogoNavigation from "@/components/shared/logoNavigation"
-import React, { JSX, useEffect, useState } from "react"
-import Swipe from "@components/nav/swipe"
-import { FilterButton, FilterUI } from "@components/shared/filter"
-import { StatusBar } from "expo-status-bar"
-import { setAds, setLastFetch, setLastSave } from "@redux/ad"
-import { useFocusEffect } from "@react-navigation/native"
-import { useDispatch, useSelector } from "react-redux"
-import { View } from "react-native"
-import { AdScreenProps } from "@type/screenTypes"
+import AdList from '@components/ads/adList'
+import DownloadButton from '@components/shared/downloadButton'
+import GS from '@styles/globalStyles'
+import LastFetch, { fetchAds } from '@/utils/fetch'
+import LogoNavigation from '@/components/shared/logoNavigation'
+import React, { JSX, useEffect } from 'react'
+import Swipe from '@components/nav/swipe'
+import { FilterButton, FilterUI } from '@components/shared/filter'
+import { StatusBar } from 'expo-status-bar'
+import { setAds, setLastFetch, setLastSave } from '@redux/ad'
+import { useFocusEffect } from '@react-navigation/native'
+import { useDispatch, useSelector } from 'react-redux'
+import { View } from 'react-native'
 
 /**
  * Parent AdScreen component
@@ -26,11 +25,6 @@ import { AdScreenProps } from "@type/screenTypes"
  * @returns AdScreen
  */
 export default function AdScreen({ navigation }: AdScreenProps<'AdScreen'>): JSX.Element {
-    // Push notification
-    const [pushNotification, setPushNotification] = useState(false)
-    const [pushNotificationContent, setPushNotificationContent] =
-        useState<JSX.Element | undefined>(undefined)
-
     // Redux states
     const { search, lastSave, skills } = useSelector((state: ReduxState) => state.ad)
     const { theme, isDark } = useSelector((state: ReduxState) => state.theme)
@@ -90,14 +84,14 @@ export default function AdScreen({ navigation }: AdScreenProps<'AdScreen'>): JSX
     }, [search])
 
     useEffect(() => {
-        if (lastSave === "") {
+        if (lastSave === '') {
             (async () => { dispatch(setLastSave(LastFetch())) })()
         }
     }, [lastSave])
 
     // Sets the component of the header
     useEffect(() => {
-        const right = ads.length ? [skills.length ? <FilterButton /> : null, <DownloadButton screen="ad" />] : []
+        const right = ads.length ? [skills.length ? <FilterButton /> : null, <DownloadButton screen='ad' />] : []
         navigation.setOptions({
             headerComponents: {
                 bottom: [<FilterUI />],
@@ -108,15 +102,14 @@ export default function AdScreen({ navigation }: AdScreenProps<'AdScreen'>): JSX
     }, [navigation])
 
     return (
-        <Swipe left="EventNav" right="MenuNav">
+        <Swipe left='EventNav' right='MenuNav'>
             <View>
-                <StatusBar style={isDark ? "light" : "dark"} />
+                <StatusBar style={isDark ? 'light' : 'dark'} />
                 <View style={{
                     ...GS.content,
                     paddingHorizontal: 5,
                     backgroundColor: theme.darker
                 }}>
-                    {pushNotification && pushNotificationContent}
                     <AdList />
                 </View>
             </View>

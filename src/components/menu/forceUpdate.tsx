@@ -1,8 +1,8 @@
-import { View, Alert, Linking, Platform } from "react-native"
-import { nativeApplicationVersion } from "expo-application"
-import { useSelector } from "react-redux"
-import { useEffect, useState } from "react"
-import config from "@/constants"
+import { View, Alert, Linking, Platform } from 'react-native'
+import { nativeApplicationVersion } from 'expo-application'
+import { useSelector } from 'react-redux'
+import { useEffect, useState } from 'react'
+import config from '@/constants'
 
 export default function ForceUpdate() {
     const { lang } = useSelector((state: ReduxState) => state.lang)
@@ -17,7 +17,7 @@ export default function ForceUpdate() {
     function openStore() {
         const url = Platform.OS === 'ios' ? appUrls.ios : appUrls.android
         Linking.openURL(url).catch(() => {
-            Alert.alert("Error", "Could not open the store")
+            Alert.alert('Error', 'Could not open the store')
         })
     }
 

@@ -1,16 +1,16 @@
-import Card from "@components/shared/card"
-import ES from "@styles/eventStyles"
-import { Text, View } from "react-native"
-import { GetEndTime } from "./time"
-import Category from "./category"
-import Map from "./map"
-import T from "@styles/text"
-import { useSelector } from "react-redux"
-import { TextLink } from "@components/shared/link"
-import InfoBlock from "@components/shared/infoBlock"
-import Skeleton from "@components/shared/skeleton"
-import { EventContext } from "@utils/contextProvider"
-import { useContext } from "react"
+import Card from '@components/shared/card'
+import ES from '@styles/eventStyles'
+import { Text, View } from 'react-native'
+import { GetEndTime } from './time'
+import Category from './category'
+import Map from './map'
+import T from '@styles/text'
+import { useSelector } from 'react-redux'
+import { TextLink } from '@components/shared/link'
+import InfoBlock from '@components/shared/infoBlock'
+import Skeleton from '@components/shared/skeleton'
+import { EventContext } from '@utils/contextProvider'
+import { useContext } from 'react'
 
 export default function BasicInfo() {
     const event = useContext(EventContext)
@@ -21,8 +21,8 @@ export default function BasicInfo() {
     let text = { host: '', more: '' }, info = ''
 
     if (event && Object.keys(event).length) {
-        const textNO = { host: "Arrangør:   ", more: "Mer info" }
-        const textEN = { host: "Organizer:   ", more: "More info" }
+        const textNO = { host: 'Arrangør:   ', more: 'Mer info' }
+        const textEN = { host: 'Organizer:   ', more: 'More info' }
         text = lang ? textNO : textEN
         info = lang ? event.informational_no : event.informational_en
     }
@@ -30,7 +30,7 @@ export default function BasicInfo() {
     const host = findOrgName()
     function findOrgName() {
         if (!event || !('organization' in event)) {
-            return ""
+            return ''
         }
 
         switch (event.organization?.shortname) {
@@ -60,13 +60,37 @@ export default function BasicInfo() {
                     <Text style={{ ...T.specificEventInfoContent, color: theme.textColor }}>
                         {host}
                         {event && 'link_stream' in event && ' - '}
-                        {event && 'link_stream' in event && <TextLink style={{ ...T.text20, color: "#fd8738", top: 3 }} text="Stream" url={event.link_stream!} />}
+                        {event && 'link_stream' in event && (
+                            <TextLink
+                                style={{ ...T.text20, color: theme.orange, top: 3 }}
+                                text='Stream'
+                                url={event.link_stream!}
+                            />
+                        )}
                         {event && 'link_discord' in event && ' - '}
-                        {event && 'link_discord' in event && <TextLink style={{ ...T.text20, color: "#fd8738", top: 3 }} text="Discord" url={event.link_discord!} />}
+                        {event && 'link_discord' in event && (
+                            <TextLink
+                                style={{ ...T.text20, color: theme.orange, top: 3 }}
+                                text='Discord'
+                                url={event.link_discord!}
+                            />
+                        )}
                         {event && 'link_facebook' in event && ' - '}
-                        {event && 'link_facebook' in event && <TextLink style={{ ...T.text20, color: "#fd8738", top: 3 }} text="Facebook" url={event.link_facebook!} />}
+                        {event && 'link_facebook' in event && (
+                            <TextLink
+                                style={{ ...T.text20, color: theme.orange, top: 3 }}
+                                text='Facebook'
+                                url={event.link_facebook!}
+                            />
+                        )}
                         {event && 'organization' in event && event.organization?.link_homepage && ' - '}
-                        {event && 'organization' in event && event.organization?.link_homepage && <TextLink style={{ ...T.text20, color: "#fd8738", top: 3 }} text={text.more} url={event.organization?.link_homepage} />}
+                        {event && 'organization' in event && event.organization?.link_homepage && (
+                            <TextLink
+                                style={{ ...T.text20, color: theme.orange, top: 3 }}
+                                text={text.more}
+                                url={event.organization?.link_homepage}
+                            />
+                        )}
                     </Text>
                 </View>
                 <>{info && <InfoBlock text={info} />}</>
@@ -79,7 +103,7 @@ function Start() {
     const event = useContext(EventContext)
     const { theme } = useSelector((state: ReduxState) => state.theme)
     const { lang } = useSelector((state: ReduxState) => state.lang)
-    const start = lang ? "Starter:      " : "Starts:         "
+    const start = lang ? 'Starter:      ' : 'Starts:         '
 
     if (!event || !Object.keys(event).length) {
         return null
@@ -102,7 +126,7 @@ function End() {
     const event = useContext(EventContext)
     const { theme } = useSelector((state: ReduxState) => state.theme)
     const { lang } = useSelector((state: ReduxState) => state.lang)
-    const end = lang ? "Slutter:       " : "Ends:           "
+    const end = lang ? 'Slutter:       ' : 'Ends:           '
 
     return (
         <View style={ES.specificEventInfoView}>
@@ -123,7 +147,7 @@ function Location() {
         return <></>
     }
 
-    const text = lang ? "Lokasjon:   " : "Location:     "
+    const text = lang ? 'Lokasjon:   ' : 'Location:     '
 
     // Uses best available location
     const location = lang
@@ -132,7 +156,7 @@ function Location() {
 
     return (
         <View style={{
-            flexDirection: "row",
+            flexDirection: 'row',
             maxWidth: '100%',
             overflow: 'hidden',
             flexWrap: 'wrap',

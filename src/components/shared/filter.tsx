@@ -1,15 +1,15 @@
-import ES from "@styles/eventStyles"
-import getHeight from "@utils/getHeight"
-import MS from "@styles/menuStyles"
-import T from "@styles/text"
-import { CheckBox, CheckedBox } from "@components/event/check"
-import { reset as resetAds, setInput as setAds } from "@redux/ad"
-import { toggleSearch as adToggleSearch } from "@redux/ad"
-import { ScrollView } from "react-native-gesture-handler"
-import { setClickedSkills } from "@redux/ad"
-import { JSX, useRef } from "react"
-import { useRoute } from "@react-navigation/native"
-import { useSelector, useDispatch } from "react-redux"
+import ES from '@styles/eventStyles'
+import getHeight from '@utils/getHeight'
+import MS from '@styles/menuStyles'
+import T from '@styles/text'
+import { CheckBox, CheckedBox } from '@components/event/check'
+import { reset as resetAds, setInput as setAds } from '@redux/ad'
+import { toggleSearch as adToggleSearch } from '@redux/ad'
+import { ScrollView } from 'react-native-gesture-handler'
+import { setClickedSkills } from '@redux/ad'
+import { JSX, useRef } from 'react'
+import { useRoute } from '@react-navigation/native'
+import { useSelector, useDispatch } from 'react-redux'
 import {
     TouchableOpacity,
     TextInput,
@@ -18,13 +18,13 @@ import {
     Text,
     Dimensions,
     Platform,
-} from "react-native"
+} from 'react-native'
 import {
     reset as resetEvents,
     setClickedCategories,
     setInput as setEvents,
     toggleSearch as eventToggleSearch
-} from "@redux/event"
+} from '@redux/event'
 
 /**
  * User interface for the filter
@@ -36,13 +36,13 @@ export function FilterUI(): JSX.Element {
     const { search } = useSelector((state: ReduxState) => state.event)
     const ad = useSelector((state: ReduxState) => state.ad)
     const resetIcon = isDark
-        ? require("@assets/icons/reset.png")
-        : require("@assets/icons/reset-black.png")
+        ? require('@assets/icons/reset.png')
+        : require('@assets/icons/reset-black.png')
     const dispatch = useDispatch()
     const textInputRef = useRef<TextInput | null>(null)
     const route = useRoute()
-    const isSearchingEvents = route.name === "EventScreen" && search
-    const isSearchingAds = route.name === "AdScreen" && ad.search
+    const isSearchingEvents = route.name === 'EventScreen' && search
+    const isSearchingAds = route.name === 'AdScreen' && ad.search
     const isSearching = isSearchingEvents || isSearchingAds
     const top = (isSearchingAds && 35) || Platform.OS === 'ios' ? 40 : 35
 
@@ -53,15 +53,19 @@ export function FilterUI(): JSX.Element {
                     ref={textInputRef}
                     style={{ ...ES.clusterFilterText }}
                     maxLength={40}
-                    placeholder={lang ? "Søk.." : "Search.."}
+                    placeholder={lang ? 'Søk..' : 'Search..'}
                     placeholderTextColor={theme.titleTextColor}
-                    textAlign="center"
+                    textAlign='center'
                     onChangeText={(val) => dispatch(isSearchingEvents ? setEvents(val) : setAds(val))}
                     selectionColor={theme.orange}
                 />
                 <TouchableOpacity onPress={() => {
-                    isSearchingEvents && dispatch(resetEvents())
-                    isSearchingAds && dispatch(resetAds())
+                    if (isSearchingEvents) {
+                        dispatch(resetEvents())
+                    }
+                    if (isSearchingAds) {
+                        dispatch(resetAds())
+                    }
                     if (textInputRef.current) textInputRef.current.clear()
                 }}>
                     <Image style={ES.clusterFilterResetIcon} source={resetIcon} />
@@ -82,14 +86,18 @@ export function FilterButton() {
     const ad = useSelector((state: ReduxState) => state.ad)
     const dispatch = useDispatch()
     const route = useRoute()
-    const isSearching = route.name === "EventScreen" && search || route.name === "AdScreen" && ad.search
+    const isSearching = route.name === 'EventScreen' && search || route.name === 'AdScreen' && ad.search
     const filtered = clickedCategories.length || ad.clickedSkills.length || input.length || ad.input.length
-    const hasFilterEnabled = (route.name === "EventScreen" || route.name === "AdScreen")
+    const hasFilterEnabled = (route.name === 'EventScreen' || route.name === 'AdScreen')
         && filtered
 
     function handlePress() {
-        route.name === "EventScreen" && dispatch(eventToggleSearch())
-        route.name === "AdScreen" && dispatch(adToggleSearch())
+        if (route.name === 'EventScreen') {
+            dispatch(eventToggleSearch())
+        }
+        if (route.name === 'AdScreen') {
+            dispatch(adToggleSearch())
+        }
     }
 
     return (
@@ -97,7 +105,7 @@ export function FilterButton() {
             {isSearching
                 ? <Image
                     style={MS.multiIcon}
-                    source={require("@assets/icons/filter-orange.png")}
+                    source={require('@assets/icons/filter-orange.png')}
                 />
                 :
                 hasFilterEnabled
@@ -105,15 +113,15 @@ export function FilterButton() {
                     <Image
                         style={MS.multiIcon}
                         source={isDark
-                            ? require("@assets/icons/filter-active.png")
-                            : require("@assets/icons/filter-black-active.png")}
+                            ? require('@assets/icons/filter-active.png')
+                            : require('@assets/icons/filter-black-active.png')}
                     />
                     :
                     <Image
                         style={MS.multiIcon}
                         source={isDark
-                            ? require("@assets/icons/filter.png")
-                            : require("@assets/icons/filter-black.png")
+                            ? require('@assets/icons/filter.png')
+                            : require('@assets/icons/filter-black.png')
                         }
                     />
             }
@@ -123,7 +131,7 @@ export function FilterButton() {
 
 /**
  * Displays the filter checkboxes for categories or skills
- * @returns 
+ * @returns
  */
 function FilterCategoriesOrSkills() {
     const { lang } = useSelector((state: ReduxState) => state.lang)
@@ -151,7 +159,7 @@ function FilterCategoriesOrSkills() {
     // Clones cat because it is read only
     const categories = [...cat]
     const skills = [...ad.skills]
-    const isFilteringOnEventScreen = event.search && route.name === "EventScreen"
+    const isFilteringOnEventScreen = event.search && route.name === 'EventScreen'
     const item = isFilteringOnEventScreen ? categories : skills
     const height = getHeight(item.length)
 
@@ -162,26 +170,27 @@ function FilterCategoriesOrSkills() {
             showsVerticalScrollIndicator={false}
         >
             {item.map((text, index) => {
-                if (text === "Påmeldt" || text === "Enrolled") {
-                    text = lang ? "Påmeldt" : "Enrolled"
+                if (text === 'Påmeldt' || text === 'Enrolled') {
+                    text = lang ? 'Påmeldt' : 'Enrolled'
                 }
 
                 if (index % 3 === 0) {
                     return (
-                        <View key={index / 3} style={{ flexDirection: "row" }}>
+                        <View key={index / 3} style={{ flexDirection: 'row' }}>
                             <FilterItem text={text || ''} />
                             <FilterItem text={item[index + 1] || ''} />
                             <FilterItem text={item[index + 2] || ''} />
                         </View>
                     )
                 }
+                return null
             })}
         </ScrollView>
     )
 }
 
 /**
- * Displays a small checkbox in the filter UI. 
+ * Displays a small checkbox in the filter UI.
  * @param text Text to display on the screen
  */
 function FilterItem({ text }: { text: string }) {
@@ -192,7 +201,7 @@ function FilterItem({ text }: { text: string }) {
     const ad = useSelector((state: ReduxState) => state.ad)
     const dispatch = useDispatch()
     const route = useRoute()
-    const isFilteringOnEventScreen = event.search && route.name === "EventScreen"
+    const isFilteringOnEventScreen = event.search && route.name === 'EventScreen'
     const checked = event.search && event.clickedCategories.includes(text) ||
         ad.search && ad.clickedSkills.includes(text)
 
@@ -216,11 +225,11 @@ function FilterItem({ text }: { text: string }) {
         <View style={ES.clusterCategoryView}>
             <TouchableOpacity onPress={() => checked ? handleUnchecked(text) : handleChecked(text)}>
                 <View style={{
-                    flexDirection: "row",
+                    flexDirection: 'row',
                     maxHeight: 50,
                     minHeight: 30,
-                    alignItems: "center",
-                    width: Dimensions.get("window").width / 4
+                    alignItems: 'center',
+                    width: Dimensions.get('window').width / 4
                 }}>
                     {checked ? <CheckedBox /> : <CheckBox />}
                     <Text style={{

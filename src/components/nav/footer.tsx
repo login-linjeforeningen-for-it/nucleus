@@ -1,19 +1,19 @@
-import { View, TouchableOpacity, Platform } from "react-native"
-import { useSelector } from "react-redux"
-import MS from "@styles/menuStyles"
-import { BlurView } from "expo-blur"
-import NotificationIcon from "@components/notification/notificationIcon"
+import { View, TouchableOpacity, Platform } from 'react-native'
+import { useSelector } from 'react-redux'
+import MS from '@styles/menuStyles'
+import { BlurView } from 'expo-blur'
+import NotificationIcon from '@components/notification/notificationIcon'
 import { BottomTabNavigationOptions } from '@react-navigation/bottom-tabs'
 import {
     NavigationHelpers,
     ParamListBase,
     TabNavigationState
-} from "@react-navigation/native"
+} from '@react-navigation/native'
 import { BottomTabNavigationEventMap } from '@react-navigation/bottom-tabs'
-import { useSafeAreaInsets } from "react-native-safe-area-context"
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { JSX } from 'react'
 
-export type FooterProps = {
+type FooterProps = {
     state: TabNavigationState<ParamListBase>
     descriptors: Record<string, {
         options: BottomTabNavigationOptions
@@ -29,7 +29,7 @@ function Content({ state, descriptors, navigation }: FooterProps) {
     const { theme } = useSelector((state: ReduxState) => state.theme)
     const navBar = useSafeAreaInsets().bottom
     const offset = navBar > 35 ? 0.1 : 0
-    const bottom = !!offset ? offset : MS.bMenu.bottom
+    const bottom = offset ? offset : MS.bMenu.bottom
 
     return (
         <>
@@ -51,7 +51,7 @@ function Content({ state, descriptors, navigation }: FooterProps) {
                     // Emitt the normal tab events
                     function onPress() {
                         const event = navigation.emit({
-                            type: "tabPress",
+                            type: 'tabPress',
                             target: route.key,
                             canPreventDefault: true,
                         })
@@ -64,13 +64,13 @@ function Content({ state, descriptors, navigation }: FooterProps) {
                     }
 
                     function onLongPress() {
-                        navigation.emit({ type: "tabLongPress", target: route.key })
+                        navigation.emit({ type: 'tabLongPress', target: route.key })
                     }
 
                     return (
                         <TouchableOpacity
                             key={route.key}
-                            accessibilityRole="button"
+                            accessibilityRole='button'
                             accessibilityState={isFocused
                                 ? { selected: true }
                                 : {}}
@@ -78,7 +78,7 @@ function Content({ state, descriptors, navigation }: FooterProps) {
                             onPress={onPress}
                             onLongPress={onLongPress}
                         >
-                            {!isFocused && route.name === "MenuScreenRoot" && <NotificationIcon position="bottom" />}
+                            {!isFocused && route.name === 'MenuScreenRoot' && <NotificationIcon position='bottom' />}
                             {options.tabBarIcon ? options.tabBarIcon({ focused: isFocused, color: '', size: 0 }) : null}
                         </TouchableOpacity>
                     )

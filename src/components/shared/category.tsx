@@ -1,7 +1,7 @@
-import { View, Text, Platform } from "react-native"
-import { useSelector } from "react-redux"
-import T from "@styles/text"
-import { Month } from "./utils"
+import { View, Text, Platform } from 'react-native'
+import { useSelector } from 'react-redux'
+import T from '@styles/text'
+import { Month } from './utils'
 import { JSX } from 'react'
 
 type CategorySquareProps = {
@@ -20,15 +20,15 @@ type CategorySquareProps = {
 export default function CategorySquare({ color, startDate, endDate }: CategorySquareProps): JSX.Element {
 
     const { theme } = useSelector((state: ReduxState) => state.theme)
-    const startDay = typeof startDate === "number" ? startDate : startDate.getDate()
-    const startMonth = typeof startDate === "number" ? 0 : startDate.getMonth()
+    const startDay = typeof startDate === 'number' ? startDate : startDate.getDate()
+    const startMonth = typeof startDate === 'number' ? 0 : startDate.getMonth()
     const endDay = endDate?.getDate()
     const multiday = endDay && startDay != endDay ? true : false
 
     return (
         <View style={{
             width: multiday ? 62 : 38,
-            height: Platform.OS === "ios" ? 65 : 65,
+            height: Platform.OS === 'ios' ? 65 : 65,
             borderRadius: 10,
             overflow: 'hidden',
             backgroundColor: color,
@@ -37,7 +37,7 @@ export default function CategorySquare({ color, startDate, endDate }: CategorySq
         }}>
             <Text style={{ ...T.text20, color: theme.textColor }}>
                 {startDay}
-                {multiday && "-" + endDay}
+                {multiday && '-' + endDay}
             </Text>
             {startMonth !== null && <Month month={startMonth} color={theme.textColor} />}
         </View>)
@@ -52,7 +52,7 @@ export function Title() {
     const { lang } = useSelector((state: ReduxState) => state.lang)
 
     return <Text style={{ ...T.specificEventInfo, color: theme.textColor }}>
-        {lang ? "Kategori:      " : "Category:      "}
+        {lang ? 'Kategori:      ' : 'Category:      '}
     </Text>
 }
 

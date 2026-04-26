@@ -1,9 +1,9 @@
-import BellIcon from "@components/shared/bellIcon"
-import ES from "@styles/eventStyles"
-import { TouchableOpacity, View } from "react-native"
-import { useSelector, useDispatch } from "react-redux"
-import { setClickedEvents } from "@redux/event"
-import TopicManager from "@utils/notification/topicManager"
+import BellIcon from '@components/shared/bellIcon'
+import ES from '@styles/eventStyles'
+import { TouchableOpacity, View } from 'react-native'
+import { useSelector, useDispatch } from 'react-redux'
+import { setClickedEvents } from '@redux/event'
+import TopicManager from '@utils/notification/topicManager'
 import { JSX } from 'react'
 
 type BellProps = {

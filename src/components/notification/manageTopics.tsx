@@ -1,10 +1,10 @@
-import { useRef, useState } from "react"
-import { Image, TextInput, TouchableOpacity, View } from "react-native"
-import { useSelector } from "react-redux"
-import TopicManager from "@utils/notification/topicManager"
-import Text from "@components/shared/text"
-import T from "@styles/text"
-import IS from "@styles/internalStyles"
+import { useRef, useState } from 'react'
+import { Image, TextInput, TouchableOpacity, View } from 'react-native'
+import { useSelector } from 'react-redux'
+import TopicManager from '@utils/notification/topicManager'
+import Text from '@components/shared/text'
+import T from '@styles/text'
+import IS from '@styles/internalStyles'
 
 enum Topic {
     Subscribe = 1,
@@ -17,8 +17,10 @@ export default function ManageTopics() {
     const [result, setResult] = useState<TopicManagerResult>({ result: false, feedback: 'undefined' })
     const [display, setDisplay] = useState(false)
     const { theme } = useSelector((state: ReduxState) => state.theme)
-    const [text, setText] = useState("")
-    const copyText = mode ? 'Subscribe mode (click here for unsubscribe mode)' : 'Unsubscribe mode (click here for subscribe mode)'
+    const [text, setText] = useState('')
+    const copyText = mode
+        ? 'Subscribe mode (click here for unsubscribe mode)'
+        : 'Unsubscribe mode (click here for subscribe mode)'
     const textInputRef = useRef<TextInput | null>(null)
 
     function handleText(val: string) {
@@ -54,13 +56,13 @@ export default function ManageTopics() {
     }
 
     return (
-        <View style={{ flexDirection: "row" }}>
+        <View style={{ flexDirection: 'row' }}>
             <View style={{ width: '100%' }}>
                 <TextInput style={{ ...IS.inputText, color: theme.textColor }}
                     ref={textInputRef}
                     placeholder={`Enter topic to ${mode ? 'subscribe to' : 'unsubscribe from'}...`}
                     placeholderTextColor={theme.titleTextColor}
-                    textAlign="center"
+                    textAlign='center'
                     onChangeText={(val) => handleText(val)}
                     selectionColor={theme.orange}
                 />
@@ -79,7 +81,7 @@ export default function ManageTopics() {
                 onPress={() => handleAction()}
                 style={{ ...IS.touch, backgroundColor: theme.dark }}
             >
-                <Image style={IS.dropImage} source={require("@assets/icons/plane-orange.png")} />
+                <Image style={IS.dropImage} source={require('@assets/icons/plane-orange.png')} />
             </TouchableOpacity>
         </View>
     )

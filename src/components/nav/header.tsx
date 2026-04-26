@@ -1,21 +1,21 @@
 /**
  * The header is a custom component created to integrate search and filtering.
  * It does this by defining a custom option for the screen that contains the search.
- * 
- * In 7.X of react navigation search was added to the header, 
+ *
+ * In 7.X of react navigation search was added to the header,
  * so it might be worth rewriting this component/checking if the default header can be used
  */
 import GS from '@styles/globalStyles'
 import GM from '@styles/gameStyles'
 import getHeight from '@utils/getHeight'
 import getCategories from '@utils/getCategories'
-import { PropsWithChildren, ReactNode, useEffect, useMemo } from 'react'
+import { PropsWithChildren, ReactNode, useMemo } from 'react'
 import { BlurView } from 'expo-blur'
 import { Dimensions, Platform, View, Text, StatusBar, Pressable } from 'react-native'
 import { HeaderProps } from '@/interfaces'
 import { useSelector } from 'react-redux'
 import { useRoute } from '@react-navigation/native'
-import { Image } from "react-native"
+import { Image } from 'react-native'
 import { useDispatch } from 'react-redux'
 import { setTag } from '@redux/event'
 
@@ -28,9 +28,21 @@ export default function Header({ options, route, navigation }: HeaderProps): Rea
     const { tag, eventName } = useSelector((state: ReduxState) => state.event)
     const { adName } = useSelector((state: ReduxState) => state.ad)
     const dispatch = useDispatch()
-    const SES = route.name === "SpecificEventScreen"
-    const SAS = route.name === "SpecificAdScreen"
+    const SES = route.name === 'SpecificEventScreen'
+    const SAS = route.name === 'SpecificAdScreen'
     const exceptions = ['SpecificGameScreen']
+    const aiPositionedRightRoutes = [
+        'AiScreen',
+        'QueenbeeScreen',
+        'StatusScreen',
+        'LoadBalancingScreen',
+        'DatabaseScreen',
+        'VulnerabilitiesScreen',
+        'LogsScreen',
+        'TrafficScreen',
+        'TrafficRecordsScreen',
+        'TrafficMapScreen',
+    ]
 
     const title = useMemo(() => {
         if (route.name === localTitle?.screen && localTitle.title) {
@@ -40,14 +52,14 @@ export default function Header({ options, route, navigation }: HeaderProps): Rea
         if (SES) {
             return getCompactHeaderTitle({
                 value: options.title || eventName,
-                fallback: lang ? "Arrangement" : "Event"
+                fallback: lang ? 'Arrangement' : 'Event'
             })
         }
 
         if (SAS) {
             return getCompactHeaderTitle({
                 value: options.title || adName,
-                fallback: lang ? "Jobbannonse" : "Job ad"
+                fallback: lang ? 'Jobbannonse' : 'Job ad'
             })
         }
 
@@ -56,13 +68,13 @@ export default function Header({ options, route, navigation }: HeaderProps): Rea
             : require('@text/en.json').screens[route.name])
     }, [SAS, SES, adName, eventName, lang, localTitle?.screen, localTitle?.title, options.title, route.name])
 
-    if (route.name === "ProfileScreen") {
+    if (route.name === 'ProfileScreen') {
         return <></>
     }
 
     function handlePress() {
         if (tag?.title) {
-            dispatch(setTag({ title: "", body: "" }))
+            dispatch(setTag({ title: '', body: '' }))
         }
 
         navigation.goBack()
@@ -70,7 +82,7 @@ export default function Header({ options, route, navigation }: HeaderProps): Rea
 
     return (
         <BlurWrapper>
-            <View style={{ ...GS.headerView, top: Dimensions.get("window").height / 17 }}>
+            <View style={{ ...GS.headerView, top: Dimensions.get('window').height / 17 }}>
                 <View style={GS.innerHeaderViewOne}>
                     {options.headerComponents?.left ? options.headerComponents?.left.map((node, index) =>
                         <View style={GS.logo} key={index}>{node}</View>
@@ -83,13 +95,13 @@ export default function Header({ options, route, navigation }: HeaderProps): Rea
                                 height: 42,
                                 borderRadius: 21,
                                 borderWidth: 1,
-                                borderColor: isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.08)",
+                                borderColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.08)',
                                 backgroundColor: pressed
-                                    ? (isDark ? "rgba(255,255,255,0.12)" : "rgba(0,0,0,0.05)")
-                                    : (isDark ? "rgba(255,255,255,0.07)" : "rgba(255,255,255,0.46)"),
-                                alignItems: "center",
-                                justifyContent: "center",
-                                shadowColor: "#000",
+                                    ? (isDark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.05)')
+                                    : (isDark ? 'rgba(255,255,255,0.07)' : 'rgba(255,255,255,0.46)'),
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                shadowColor: '#000',
                                 shadowOpacity: isDark ? 0.12 : 0.05,
                                 shadowRadius: 8,
                                 shadowOffset: { width: 0, height: 3 },
@@ -100,9 +112,9 @@ export default function Header({ options, route, navigation }: HeaderProps): Rea
                                 color: theme.orange,
                                 fontSize: 26,
                                 lineHeight: 28,
-                                fontWeight: "600",
+                                fontWeight: '600',
                                 marginLeft: -2,
-                                marginTop: Platform.OS === "ios" ? -1 : -3,
+                                marginTop: Platform.OS === 'ios' ? -1 : -3,
                             }}>
                                 ‹
                             </Text>
@@ -113,33 +125,33 @@ export default function Header({ options, route, navigation }: HeaderProps): Rea
                     ...GS.headerTitle,
                     color: theme.textColor,
                     width: 260,
-                    textAlign: "center",
+                    textAlign: 'center',
                     top: title?.length > 30 ? Platform.OS === 'ios' ? 4 : -6 : undefined,
-                    fontWeight: "700",
+                    fontWeight: '700',
                     letterSpacing: 0.2,
-                    textShadowColor: isDark ? "rgba(0,0,0,0.16)" : "rgba(255,255,255,0.12)",
+                    textShadowColor: isDark ? 'rgba(0,0,0,0.16)' : 'rgba(255,255,255,0.12)',
                     textShadowOffset: { width: 0, height: 1 },
                     textShadowRadius: 6,
-                    backgroundColor: isDark ? "rgba(255,255,255,0.05)" : "rgba(255,255,255,0.42)",
+                    backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(255,255,255,0.42)',
                     borderRadius: 16,
-                    overflow: "hidden",
+                    overflow: 'hidden',
                     paddingHorizontal: 14,
                     paddingVertical: 8,
                     borderWidth: 1,
-                    borderColor: isDark ? "rgba(255,255,255,0.06)" : "rgba(255,255,255,0.28)",
+                    borderColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(255,255,255,0.28)',
                 }}>
                     {title}
                 </Text>}
                 <View style={GS.innerHeaderViewTwo}>
                     {options.headerComponents?.right?.map((node, index) => (
-                        <View style={route.name === "AiScreen"
+                        <View style={aiPositionedRightRoutes.includes(route.name)
                             ? { marginRight: 0 }
                             : index === 1
-                            ? {
-                                ...GS.customMenuIcon,
-                                width: Platform.OS === "ios" ? 28 : 5,
-                                left: Platform.OS === 'ios' ? 34 : 40
-                            } : { ...GS.customMenuIcon, left: 24 }} key={index}>{node}
+                                ? {
+                                    ...GS.customMenuIcon,
+                                    width: Platform.OS === 'ios' ? 28 : 5,
+                                    left: Platform.OS === 'ios' ? 34 : 40
+                                } : { ...GS.customMenuIcon, left: 24 }} key={index}>{node}
                         </View>
                     ))}
                 </View>
@@ -170,20 +182,20 @@ function BlurWrapper(props: PropsWithChildren) {
         ) + (StatusBar.currentHeight ? StatusBar.currentHeight - 2 // Subtractor for Statusbar visible on Android
             : 0 // Defaults to 0 if no statusbar is visible on Android
         )
-    const isSearchingEvents = event.search && route.name === "EventScreen"
+    const isSearchingEvents = event.search && route.name === 'EventScreen'
     const categories = getCategories({ lang, categories: event.categories })
     const item = isSearchingEvents ? categories : ad.skills
-    const isSearchingAds = ad.search && route.name === "AdScreen"
+    const isSearchingAds = ad.search && route.name === 'AdScreen'
     const extraHeight = getHeight(item.length)
-    const windowHeight = Dimensions.get("window").height
+    const windowHeight = Dimensions.get('window').height
     const largeDeviceReduction = windowHeight > 915 ? -15 : 0
     const height = defaultHeight + (isSearchingEvents || isSearchingAds
-        ? Platform.OS === "ios"
+        ? Platform.OS === 'ios'
             ? 50 + extraHeight // Extraheight on iOS
             : isSearchingEvents
                 ? 35 + extraHeight + largeDeviceReduction // Extraheight during eventSearch on Android
                 : 25 + extraHeight + largeDeviceReduction // Extraheight during adSearch on Android
-        : Platform.OS === "ios"
+        : Platform.OS === 'ios'
             ? 20 // Extra base height for header on iOS while not searching
             : defaultHeight <= 100
                 ? 5 // Extra base height for header on Android while not searching
@@ -194,10 +206,10 @@ function BlurWrapper(props: PropsWithChildren) {
 
     const gameID = (route.params as any)?.gameID
     const gameImages = [
-        { style: GM.terning, icon: require("@assets/games/terning.png")},
-        { style: GM.questions, icon: require("@assets/games/100questions.png")},
-        { style: GM.neverhaveiever, icon: require("@assets/games/neverhaveiever.png")},
-        { style: GM.okredflagdealbreaker, icon: require("@assets/games/okredflagdealbreaker.png")}
+        { style: GM.terning, icon: require('@assets/games/terning.png')},
+        { style: GM.questions, icon: require('@assets/games/100questions.png')},
+        { style: GM.neverhaveiever, icon: require('@assets/games/neverhaveiever.png')},
+        { style: GM.okredflagdealbreaker, icon: require('@assets/games/okredflagdealbreaker.png')}
     ]
 
     return (
@@ -205,7 +217,7 @@ function BlurWrapper(props: PropsWithChildren) {
             {!exceptions.includes(route.name) && <BlurView
                 style={{ height }}
                 blurMethod='dimezisBlurView'
-                intensity={Platform.OS === "ios" ? 30 : 20}
+                intensity={Platform.OS === 'ios' ? 30 : 20}
             />}
             <View style={{
                 ...GS.blurBackgroundView,

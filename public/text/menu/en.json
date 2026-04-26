@@ -49,21 +49,11 @@
         },
         {
             "id": 10,
-            "nav": "DashboardScreen",
-            "title": "Dashboard"
-        },
-        {
-            "id": 11,
-            "nav": "StatusScreen",
-            "title": "Status"
-        },
-        {
-            "id": 12,
             "nav": "SearchScreen",
             "title": "Search"
         },
         {
-            "id": 13,
+            "id": 11,
             "nav": "MusicScreen",
             "title": "Music"
         }

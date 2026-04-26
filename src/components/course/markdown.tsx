@@ -1,7 +1,7 @@
-import T from "@styles/text"
-import { Dimensions, Image, Text } from "react-native"
-import MarkdownDisplay, { getUniqueID } from "react-native-markdown-display"
-import { useSelector } from "react-redux"
+import T from '@styles/text'
+import { Dimensions, Image, Text } from 'react-native'
+import MarkdownDisplay, { getUniqueID } from 'react-native-markdown-display'
+import { useSelector } from 'react-redux'
 
 type MarkdownProps = {
     text: string
@@ -107,7 +107,7 @@ function rules(theme: Theme) {
             )
         },
         // @ts-expect-error
-        list_item: (_, children, __, ___) => {
+        list_item: (_, children) => {
             return (
                 <Text key={getUniqueID()} style={{ marginVertical: 4 }}>
                     <Text style={{ color: theme.orange, fontWeight: 900 }}>•</Text> {children}

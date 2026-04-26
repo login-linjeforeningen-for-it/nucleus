@@ -2,20 +2,20 @@ import Cluster from '@components/shared/cluster'
 import Marquee from '@components/shared/marquee'
 import Space from '@components/shared/utils'
 import T from '@styles/text'
-import { buildSpotifyUrl, type NativeMusicRow } from '@utils/discoveryApi'
+import { buildSpotifyUrl } from '@utils/discoveryApi'
 import { Linking, Pressable, Image, Text, View } from 'react-native'
 import { useSelector } from 'react-redux'
 
 type SongListProps = {
     title: string
     items: NativeMusicRow[]
-    metricLabel: "plays" | "listeners"
+    metricLabel: 'plays' | 'listeners'
 }
 
 export default function SongList({ title, items, metricLabel }: SongListProps) {
     const { theme } = useSelector((state: ReduxState) => state.theme)
     const { lang } = useSelector((state: ReduxState) => state.lang)
-    const text = lang ? require("@text/no.json").music : require("@text/en.json").music
+    const text = lang ? require('@text/no.json').music : require('@text/en.json').music
 
     async function openItem(item: NativeMusicRow) {
         const url = buildSpotifyUrl(item)
@@ -41,10 +41,10 @@ export default function SongList({ title, items, metricLabel }: SongListProps) {
                             key={`${title}-${item.name}-${index}`}
                             onPress={url ? () => void openItem(item) : undefined}
                             style={{
-                                flexDirection: "row",
+                                flexDirection: 'row',
                                 gap: 10,
                                 marginBottom: index === 4 ? 0 : 12,
-                                alignItems: "center"
+                                alignItems: 'center'
                             }}
                         >
                             <SongImage item={item} />
@@ -61,7 +61,7 @@ export default function SongList({ title, items, metricLabel }: SongListProps) {
                                     {item.artist}
                                 </Marquee>
                             </View>
-                            <View style={{ alignItems: "flex-end", minWidth: 62 }}>
+                            <View style={{ alignItems: 'flex-end', minWidth: 62 }}>
                                 <Text style={{ ...T.text15, color: theme.textColor }}>
                                     {metric.value}
                                 </Text>
@@ -79,14 +79,14 @@ export default function SongList({ title, items, metricLabel }: SongListProps) {
 
 function formatMetricValue(
     listens: number,
-    metricLabel: "plays" | "listeners",
+    metricLabel: 'plays' | 'listeners',
     labels: {
         plays: string
         listener: string
         listeners: string
     }
 ) {
-    if (metricLabel !== "listeners") {
+    if (metricLabel !== 'listeners') {
         return {
             value: listens,
             label: labels.plays,
@@ -108,19 +108,19 @@ function SongImage({ item }: { item: NativeMusicRow }) {
                 width: 52,
                 height: 52,
                 borderRadius: 14,
-                backgroundColor: "#ffffff10",
-                alignItems: "center",
-                justifyContent: "center"
+                backgroundColor: '#ffffff10',
+                alignItems: 'center',
+                justifyContent: 'center'
             }}>
-                <Text style={{ ...T.text12, color: "#ffffff88" }}>♪</Text>
+                <Text style={{ ...T.text12, color: '#ffffff88' }}>♪</Text>
             </View>
         )
     }
 
     return (
         <Image
-            source={{ uri: item.image, cache: "force-cache" }}
-            style={{ width: 52, height: 52, borderRadius: 14, backgroundColor: "#222" }}
+            source={{ uri: item.image, cache: 'force-cache' }}
+            style={{ width: 52, height: 52, borderRadius: 14, backgroundColor: '#222' }}
         />
     )
 }

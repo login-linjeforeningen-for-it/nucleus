@@ -1,9 +1,9 @@
-import { Dimensions, StyleSheet } from "react-native"
-import T from "./text"
+import { Dimensions, StyleSheet } from 'react-native'
+import T from './text'
 
 export const IS = StyleSheet.create({
     inputText: {
-        minWidth: "80%",
+        minWidth: '80%',
         height: 35,
         borderRadius: 20,
         top: 25,
@@ -11,7 +11,7 @@ export const IS = StyleSheet.create({
         marginBottom: 25
     },
     dropImage: {
-        alignSelf: "center",
+        alignSelf: 'center',
         height: 80,
         width: 40,
         top: -20,

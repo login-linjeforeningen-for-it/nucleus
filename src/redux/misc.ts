@@ -1,15 +1,15 @@
-import { createSlice } from "@reduxjs/toolkit"
+import { createSlice } from '@reduxjs/toolkit'
 
 // Declares Misc Slice
 export const MiscSlice = createSlice({
     // Slice name
-    name: "misc",
+    name: 'misc',
     // Initial state
     initialState: {
         // Title of the screen
         localTitle: {} as { title: string, screen: string },
         // Empty till the user makes a calendar
-        calendarID: "",
+        calendarID: '',
     },
     // Declares slice reducer
     reducers: {

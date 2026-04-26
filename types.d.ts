@@ -144,11 +144,32 @@ type GetDatabaseOverview = {
 type SeverityLevel = 'critical' | 'high' | 'medium' | 'low' | 'unknown'
 type SeverityCount = Record<SeverityLevel, number>
 
+type VulnerabilityGroup = {
+    source: string
+    total: number
+    severity: SeverityCount
+}
+
+type VulnerabilityDetail = {
+    id: string
+    title: string
+    severity: SeverityLevel
+    source: string
+    packageName: string | null
+    packageType: string | null
+    installedVersion: string | null
+    fixedVersion: string | null
+    description: string | null
+    references: string[]
+}
+
 type ImageVulnerabilityReport = {
     image: string
     scannedAt: string
     totalVulnerabilities: number
     severity: SeverityCount
+    groups: VulnerabilityGroup[]
+    vulnerabilities: VulnerabilityDetail[]
     scanError: string | null
 }
 
@@ -204,6 +225,365 @@ type LogsPayload = {
     totalContainers: number
     containers: LogContainer[]
 }
+
+type RequestOptions = {
+    method?: 'GET' | 'POST' | 'PUT' | 'DELETE'
+    body?: object
+    requiresAuth?: boolean
+    includeAiSession?: boolean
+}
+
+type NativeModelMetrics = {
+    conversationId: string | null
+    status: 'idle' | 'preparing' | 'generating' | 'error'
+    currentTokens: number
+    maxTokens: number
+    promptTokens: number
+    generatedTokens: number
+    contextTokens: number
+    contextMaxTokens: number
+    tps: number
+    lastUpdated: string | null
+    lastError: string | null
+}
+
+type NativeClient = {
+    name: string
+    model: NativeModelMetrics
+}
+
+type NativeConversationSummary = {
+    id: string
+    title: string
+    originalClientName: string
+    activeClientName: string
+    createdAt: string
+    updatedAt: string
+    lastMessagePreview: string | null
+    messageCount: number
+}
+
+type NativeStoredMessage = {
+    id: string
+    role: 'system' | 'user' | 'assistant'
+    content: string
+    error: boolean
+    clientName: string | null
+    createdAt: string
+}
+
+type NativeConversationRecord = NativeConversationSummary & {
+    messages: NativeStoredMessage[]
+}
+
+type NativeLoadBalancingSite = {
+    id: number
+    name: string
+    ip: string
+    primary: boolean
+    operational: boolean
+    maintenance: boolean
+    note: string | null
+    updated_at: string
+}
+
+type NativeMonitoringBar = {
+    status: boolean
+    delay: number
+    expectedDown: boolean
+    timestamp: string
+    note: string
+}
+
+type NativeMonitoringService = {
+    id: number
+    uptime: number
+    name: string
+    enabled: boolean
+    notification: number | null
+    maxConsecutiveFailures: number
+    port: number | null
+    tags: { id: number, name: string }[]
+    bars: NativeMonitoringBar[]
+    certificate?: unknown
+}
+
+type NativeDetailedMonitoringService = NativeMonitoringService & {
+    type: 'fetch' | 'post' | 'tcp'
+    url: string
+    userAgent: string | null
+    expectedDown: boolean
+    upsideDown: boolean
+    interval: number
+    note: string
+}
+
+type NativeServiceNotification = {
+    id: number
+    name: string
+    message: string
+    webhook: string
+}
+
+type NativeServiceNotificationForm = {
+    name: string
+    message: string
+    webhook: string
+}
+
+type NativeMonitoringServiceForm = {
+    name: string
+    type: 'fetch' | 'post' | 'tcp'
+    url: string
+    port: number
+    interval: number
+    userAgent: string | null
+    notification: string | null
+    expectedDown: boolean
+    upsideDown: boolean
+    maxConsecutiveFailures: number
+    note: string
+    enabled: boolean
+}
+
+type NativeInternalOverview = {
+    system: System
+    requestsToday: number
+    databaseCount: number | null
+    databaseOverview: GetDatabaseOverview | null
+}
+
+type TrafficRecord = {
+    id: number
+    timestamp: string
+    method: string
+    path: string
+    domain: string
+    country_iso?: string
+    status: number
+    request_time: number
+    user_agent?: string
+    referer?: string
+}
+
+type TrafficRecordsProps = {
+    result: TrafficRecord[]
+    total: number
+}
+
+type TrafficEntry = {
+    key: string
+    count?: number
+    avg_time?: number
+}
+
+type TrafficMetricsProps = {
+    total_requests: number
+    error_count: number
+    avg_response_time: number
+    avg_request_time?: number
+    error_rate: number
+    top_methods: TrafficEntry[]
+    top_status_codes: TrafficEntry[]
+    top_domains: TrafficEntry[]
+    top_os: TrafficEntry[]
+    top_browsers: TrafficEntry[]
+    top_paths: TrafficEntry[]
+    top_slow_paths: TrafficEntry[]
+    top_error_paths: TrafficEntry[]
+    requests_over_time: { key: string, count: number }[]
+}
+
+type NativeMusicActivity = {
+    stats: {
+        avg_seconds: number
+        total_minutes: number
+        total_minutes_this_year: number
+        total_songs: number
+    }
+    currentlyListening: NativeMusicRow[]
+    topFiveToday: NativeMusicRow[]
+    topFiveThisWeek: NativeMusicRow[]
+    topFiveThisMonth: NativeMusicRow[]
+}
+
+type NativeMusicRow = {
+    id: number | string
+    type: 'track' | 'episode' | 'artist' | 'album'
+    name: string
+    artist: string
+    album: string | null
+    image: string
+    listens: number
+    song_id?: string
+    artist_id?: string
+    album_id?: string
+}
+
+type NativeDashboardSummary = {
+    counts: {
+        events: number
+        jobs: number
+        organizations: number
+        locations: number
+        albums: number
+    }
+    categories: { id: number, name_en: string, event_count: number, color: string }[]
+    additions: { id: number, name_en: string, updated_at: string, action: 'created' | 'updated', source: string }[]
+    yearly: { insert_date: string, inserted_count: number }[]
+}
+
+type CourseNotesUpdateResult = {
+    ok: boolean
+    error?: string
+}
+
+type AuthentikProfile = {
+    id: string
+    name: string | null
+    email: string | null
+    username: string | null
+    preferredUsername: string | null
+    nickname: string | null
+    givenName: string | null
+    familyName: string | null
+    emailVerified: boolean | null
+    picture: string | null
+    groups: string[]
+    authentik: {
+        available: boolean
+        pk: number | string | null
+        uid: string | null
+        username: string | null
+        name: string | null
+        email: string | null
+        isActive: boolean | null
+        lastLogin: string | null
+        dateJoined: string | null
+        path: string | null
+        type: string | null
+        groups: unknown[]
+        attributes: Record<string, unknown>
+    }
+}
+
+type Navigation = import('@react-navigation/bottom-tabs').BottomTabNavigationProp<
+    import('@react-navigation/native').ParamListBase,
+    string,
+    string
+>
+
+type NotificationScreenProps = {
+    back: string
+    navigation: Navigation
+}
+
+type TabBarProps<T extends keyof TabBarParamList> =
+    import('@react-navigation/bottom-tabs').BottomTabScreenProps<TabBarParamList, T>
+
+type EventStackParamList = {
+    EventScreen: undefined
+    SpecificEventScreen: { eventID: number }
+}
+
+type EventScreenProps<T extends keyof EventStackParamList> =
+    import('@react-navigation/native').CompositeScreenProps<
+        import('@react-navigation/stack').StackScreenProps<EventStackParamList, T>,
+        import('@react-navigation/bottom-tabs').BottomTabScreenProps<TabBarParamList>
+    >
+
+type AdStackParamList = {
+    AdScreen: undefined
+    SpecificAdScreen: { adID: number }
+}
+
+type AdScreenProps<T extends keyof AdStackParamList> =
+    import('@react-navigation/native').CompositeScreenProps<
+        import('@react-navigation/stack').StackScreenProps<AdStackParamList, T>,
+        import('@react-navigation/bottom-tabs').BottomTabScreenProps<TabBarParamList>
+    >
+
+type MenuRoutes =
+    'ProfileScreen'
+    | 'SettingScreen'
+    | 'NotificationScreen'
+    | 'AboutScreen'
+    | 'BusinessScreen'
+    | 'CourseScreen'
+    | 'SpecificCourseScreen'
+    | 'LoginScreen'
+    | 'AiScreen'
+    | 'QueenbeeScreen'
+    | 'InternalScreen'
+    | 'GameScreen'
+    | 'SpecificGameScreen'
+    | 'SearchScreen'
+    | 'StatusScreen'
+    | 'MusicScreen'
+    | 'DashboardScreen'
+    | 'LoadBalancingScreen'
+    | 'TrafficScreen'
+    | 'TrafficRecordsScreen'
+    | 'TrafficMapScreen'
+    | 'DatabaseScreen'
+    | 'VulnerabilitiesScreen'
+    | 'LogsScreen'
+
+type ItemProps = {
+    id: number
+    nav: MenuRoutes
+    title: string
+}
+
+type MenuProps<T extends keyof MenuStackParamList> =
+    import('@react-navigation/stack').StackScreenProps<MenuStackParamList, T>
+
+type MenuStackParamList = {
+    ProfileScreen: undefined
+    SettingScreen: undefined
+    NotificationScreen: undefined
+    AboutScreen: undefined
+    BusinessScreen: undefined
+    LoginScreen: undefined
+    AiScreen: undefined
+    QueenbeeScreen: undefined
+    InternalScreen: undefined
+    SearchScreen: undefined
+    StatusScreen: undefined
+    MusicScreen: undefined
+    DashboardScreen: undefined
+    LoadBalancingScreen: undefined
+    TrafficScreen: undefined
+    TrafficRecordsScreen: undefined
+    TrafficMapScreen: undefined
+    DatabaseScreen: undefined
+    VulnerabilitiesScreen: undefined
+    LogsScreen: undefined
+    MenuScreen: undefined
+    CourseScreen: undefined
+    SpecificCourseScreen: { code: string, id: number }
+    GameScreen: undefined
+    SpecificGameScreen: { gameID: number, gameName: string }
+    DiceScreen: undefined
+}
+
+type TabBarParamList = {
+    EventNav: import('@react-navigation/native').NavigatorScreenParams<EventStackParamList>
+    AdNav: import('@react-navigation/native').NavigatorScreenParams<AdStackParamList>
+    MenuNav: import('@react-navigation/native').NavigatorScreenParams<MenuStackParamList>
+}
+
+type RootStackParamList = {
+    Tabs: import('@react-navigation/native').NavigatorScreenParams<TabBarParamList>
+    InfoModal: undefined
+    NotificationModal: { title: string, body: string, data: Record<string, unknown> }
+}
+
+type RootStackProps<T extends keyof RootStackParamList> =
+    import('@react-navigation/native').CompositeScreenProps<
+        import('@react-navigation/stack').StackScreenProps<RootStackParamList, T>,
+        import('@react-navigation/bottom-tabs').BottomTabScreenProps<TabBarParamList>
+    >
 
 // Jobs
 type Job = {
@@ -359,9 +739,9 @@ type ReduxState = {
         lang: boolean
     }
     misc: {
-        localTitle: { 
+        localTitle: {
             title: string
-            screen: string 
+            screen: string
         }
         calendarID: string
     }
@@ -404,25 +784,26 @@ type ReduxState = {
     }
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 type ProfileProps = any
 
-type CategoryProps = 
-    "tekkom"
-    | "social"
-    | "ctf"
-    | "karrieredag"
-    | "fadderuka"
-    | "bedpres"
-    | "login"
-    | "annet"
-    | "TEKKOM"
-    | "SOCIAL"
-    | "CTF"
-    | "KARRIEREDAG"
-    | "FADDERUKA"
-    | "BEDPRES"
-    | "LOGIN"
-    | "ANNET"
+type CategoryProps =
+    'tekkom'
+    | 'social'
+    | 'ctf'
+    | 'karrieredag'
+    | 'fadderuka'
+    | 'bedpres'
+    | 'login'
+    | 'annet'
+    | 'TEKKOM'
+    | 'SOCIAL'
+    | 'CTF'
+    | 'KARRIEREDAG'
+    | 'FADDERUKA'
+    | 'BEDPRES'
+    | 'LOGIN'
+    | 'ANNET'
 
 type Interval = NodeJS.Timeout | number
 
@@ -539,7 +920,7 @@ type NotificationProps = {
     // Key used for indexing
     [key: string]:      boolean[]
 }
-  
+
 type NotificationListProps = {
     title: string
     body: string
@@ -552,12 +933,11 @@ type NotificationListProps = {
 type Setting = {
     screen: string
     nav: string
-    setting: 
-        {
-            id: number
-            nav: MenuRoutes
-            title: string
-        }[]
+    setting: {
+        id: number
+        nav: MenuRoutes
+        title: string
+    }[]
 }
 
 type ListFooterProps = {
@@ -571,6 +951,12 @@ type Theme = {
     transparent: string
     transparentAndroid: string
     orange: string
+    orangeTransparent: string
+    orangeTransparentBorder: string
+    orangeTransparentHighlighted: string
+    orangeTransparentBorderHighlighted: string
+    greyTransparent: string
+    greyTransparentBorder: string
     discord: string
     textColor: string
     titleTextColor: string
@@ -600,6 +986,7 @@ type Tag = {
 type NotificationModal = {
     title: string
     body: string
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     data: any
 }
 
@@ -684,63 +1071,4 @@ type OkRedFlagDealBreaker = {
     title_no: string
     title_en: string
     categories: string[]
-}
-
-type NativeModelMetrics = {
-    conversationId: string | null
-    status: "idle" | "preparing" | "generating" | "error"
-    currentTokens: number
-    maxTokens: number
-    promptTokens: number
-    generatedTokens: number
-    contextTokens: number
-    contextMaxTokens: number
-    tps: number
-    lastUpdated: string | null
-    lastError: string | null
-}
-
-type NativeClient = {
-    name: string
-    model: NativeModelMetrics
-}
-
-type NativeConversationSummary = {
-    id: string
-    title: string
-    originalClientName: string
-    activeClientName: string
-    createdAt: string
-    updatedAt: string
-    lastMessagePreview: string | null
-    messageCount: number
-}
-
-type NativeStoredMessage = {
-    id: string
-    role: "system" | "user" | "assistant"
-    content: string
-    error: boolean
-    clientName: string | null
-    createdAt: string
-}
-
-type NativeConversationRecord = NativeConversationSummary & {
-    messages: NativeStoredMessage[]
-}
-
-type NativeLoadBalancingSite = {
-    id: number
-    name: string
-    ip: string
-    primary: boolean
-    operational: boolean
-    maintenance: boolean
-    note: string | null
-    updated_at: string
-}
-
-type RequestOptions = {
-    method?: "GET" | "POST" | "PUT" | "DELETE"
-    body?: object
 }

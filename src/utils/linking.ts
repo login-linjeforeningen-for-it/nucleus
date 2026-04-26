@@ -1,6 +1,5 @@
-import { LinkingOptions } from "@react-navigation/native"
-import * as Linking from "expo-linking"
-import { RootStackParamList } from "../types/screenTypes"
+import { LinkingOptions } from '@react-navigation/native'
+import * as Linking from 'expo-linking'
 
 const prefix = Linking.createURL('/')
 
@@ -36,7 +35,9 @@ const linking: LinkingOptions<RootStackParamList> = {
                     MenuNav: {
                         screens: {
                             AboutScreen: 'about',
-                            BusinessScreen: 'companies'
+                            BusinessScreen: 'companies',
+                            QueenbeeScreen: 'internal',
+                            VulnerabilitiesScreen: 'internal/vulnerabilities'
                         }
                     }
                 }

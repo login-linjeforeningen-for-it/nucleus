@@ -1,7 +1,7 @@
-import { useSelector } from "react-redux"
-import ES from "@styles/eventStyles"
-import { View } from "react-native"
-import React from "react"
+import { useSelector } from 'react-redux'
+import ES from '@styles/eventStyles'
+import { View } from 'react-native'
+import React from 'react'
 
 /**
  * Card function for styling a div, displays a view containing curved corners with content inside

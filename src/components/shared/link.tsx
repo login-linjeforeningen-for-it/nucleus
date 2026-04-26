@@ -1,9 +1,9 @@
-import en from "@text/shared/link/en.json"
-import no from "@text/shared/link/no.json"
-import { useSelector } from "react-redux"
-import T from "@styles/text"
-import { ReactNode } from "react"
-import AS from "@styles/adStyles"
+import en from '@text/shared/link/en.json'
+import no from '@text/shared/link/no.json'
+import { useSelector } from 'react-redux'
+import T from '@styles/text'
+import { ReactNode } from 'react'
+import AS from '@styles/adStyles'
 import {
     Alert,
     Linking,
@@ -12,7 +12,7 @@ import {
     TextStyle,
     TouchableOpacity,
     View
-} from "react-native"
+} from 'react-native'
 
 type LinkProps = {
     url: string
@@ -43,7 +43,7 @@ type MarkdownLinkProps = {
  * when any child element is tapped.
  * @param url URL to open on click
  * @param children ReactNodes, implicitly passed
- * @param errorMessage Message to display if the link could not be opened 
+ * @param errorMessage Message to display if the link could not be opened
  * @returns Link wrapper
  */
 export default function Link({ url, children, errorMessage }: LinkProps) {
@@ -72,7 +72,7 @@ export default function Link({ url, children, errorMessage }: LinkProps) {
  * @param text Text to display
  * @param url URL to open on click
  * @param style Style to give the text
- * @param errorMessage Optional message to display if the link could not be 
+ * @param errorMessage Optional message to display if the link could not be
  * opened, has a default link could not be opened message.
  * @returns Link wrapper
  */
@@ -104,7 +104,7 @@ export function TextLink({ text, url, style, errorMessage }: TextLinkProps) {
  * @param text Text to display
  * @param url URL to open on click
  * @param style Style to give the text
- * @param errorMessage Optional message to display if the link could not be 
+ * @param errorMessage Optional message to display if the link could not be
  * opened, has a default link could not be opened message.
  * @returns Link wrapper
  */
@@ -150,6 +150,7 @@ export function TextWithLinks({ text, style, linkStyle }: MarkdownLinkProps) {
                 text={part}
             />
         }
+        return null
     })
 
     return (

@@ -1,136 +1,145 @@
-import Cluster from "@/components/shared/cluster"
-import Space from "@/components/shared/utils"
-import Swipe from "@components/nav/swipe"
-import Text from "@components/shared/text"
-import GS from "@styles/globalStyles"
-import T from "@styles/text"
-import { MenuProps } from "@type/screenTypes"
-import { getPublicStatus, type NativeMonitoringService } from "@utils/discoveryApi"
-import { JSX, useEffect, useState } from "react"
-import { RefreshControl, ScrollView, TouchableOpacity, View } from "react-native"
-import { useSelector } from "react-redux"
+import Space from '@/components/shared/utils'
+import InternalNavMenu from '@components/menu/queenbee/internalNavMenu'
+import Swipe from '@components/nav/swipe'
+import Text from '@components/shared/text'
+import GS from '@styles/globalStyles'
+import T from '@styles/text'
+import { JSX, useEffect, useState } from 'react'
+import { Alert, Dimensions, RefreshControl, ScrollView, View } from 'react-native'
+import { useSelector } from 'react-redux'
+import {
+    NotificationForm,
+    ServiceDetails,
+    ServiceForm,
+    ServiceRow,
+} from './status/statusComponents'
+import useStatusServices from './status/useStatusServices'
 
-export default function StatusScreen(_: MenuProps<"StatusScreen">): JSX.Element {
+export default function StatusScreen({ navigation }: MenuProps<'StatusScreen'>): JSX.Element {
     const { theme } = useSelector((state: ReduxState) => state.theme)
     const { lang } = useSelector((state: ReduxState) => state.lang)
-    const screenTitle = lang ? require("@text/no.json").screens.StatusScreen : require("@text/en.json").screens.StatusScreen
-    const text = lang ? require("@text/no.json").status : require("@text/en.json").status
-    const [services, setServices] = useState<NativeMonitoringService[]>([])
-    const [refreshing, setRefreshing] = useState(false)
-    const [error, setError] = useState("")
+    const text = lang ? require('@text/no.json').status : require('@text/en.json').status
+    const status = useStatusServices(text.failedToLoad)
+    const [newServiceOpen, setNewServiceOpen] = useState(false)
 
-    async function load() {
-        setRefreshing(true)
-        try {
-            setServices(await getPublicStatus())
-            setError("")
-        } catch (loadError) {
-            setError(loadError instanceof Error ? loadError.message : text.failedToLoad)
-        } finally {
-            setRefreshing(false)
+    function confirmDelete() {
+        if (!status.editing) {
+            return
         }
+
+        Alert.alert('Delete service', `Delete ${status.editing.name}?`, [
+            { text: 'Cancel', style: 'cancel' },
+            {
+                text: 'Delete',
+                style: 'destructive',
+                onPress: () => void status.removeService(status.editing!.id),
+            },
+        ])
     }
 
     useEffect(() => {
-        void load()
+        void status.load()
     }, [])
 
     return (
-        <Swipe left="MenuScreen">
+        <Swipe left='QueenbeeScreen'>
             <View style={{ flex: 1, backgroundColor: theme.darker }}>
+                <InternalNavMenu activeRoute='StatusScreen' navigation={navigation} />
                 <ScrollView
-                    refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => void load()} />}
+                    refreshControl={<RefreshControl refreshing={status.refreshing} onRefresh={() => void status.load()} />}
                     style={GS.content}
-                    contentContainerStyle={{ paddingHorizontal: 12, paddingBottom: 80 }}
+                    contentContainerStyle={{ paddingBottom: 80 }}
+                    keyboardShouldPersistTaps='handled'
                 >
-                    <Space height={90} />
-                    <Cluster>
-                        <View style={{ padding: 12 }}>
-                            <Text style={{ ...T.text25, color: theme.textColor }}>{screenTitle}</Text>
-                            <Space height={6} />
-                            <Text style={{ ...T.text15, color: theme.oppositeTextColor }}>
-                                {text.intro}
-                            </Text>
+                    <Space height={Dimensions.get('window').height / 8} />
+                    {status.error && <Text style={{ ...T.text15, color: '#ff8b8b' }}>{status.error}</Text>}
+                    <Space height={10} />
+                    {status.editing && (
+                        <>
+                            {status.addingNotification && (
+                                <>
+                                    <NotificationForm
+                                        form={status.notificationForm}
+                                        onChange={status.setNotificationForm}
+                                        onSave={() => void status.saveNotification()}
+                                        onCancel={status.cancelNotification}
+                                        saving={status.saving}
+                                    />
+                                    <Space height={10} />
+                                </>
+                            )}
+                            <ServiceForm
+                                form={status.form}
+                                notifications={status.notifications}
+                                onChange={status.setForm}
+                                onSave={() => void status.saveService()}
+                                onCancel={status.cancelEdit}
+                                onDelete={status.editing ? confirmDelete : undefined}
+                                onAddNotification={() => status.setAddingNotification(true)}
+                                saving={status.saving}
+                                editing
+                            />
+                            <Space height={10} />
+                        </>
+                    )}
+                    {!status.editing && !status.selectedService && (
+                        <>
+                            {newServiceOpen && (
+                                <>
+                                    {status.addingNotification && (
+                                        <>
+                                            <NotificationForm
+                                                form={status.notificationForm}
+                                                onChange={status.setNotificationForm}
+                                                onSave={() => void status.saveNotification()}
+                                                onCancel={status.cancelNotification}
+                                                saving={status.saving}
+                                            />
+                                            <Space height={10} />
+                                        </>
+                                    )}
+                                </>
+                            )}
+                            <ServiceForm
+                                form={status.form}
+                                notifications={status.notifications}
+                                onChange={status.setForm}
+                                onSave={() => void status.saveService()}
+                                onCancel={() => {
+                                    status.cancelEdit()
+                                    setNewServiceOpen(false)
+                                }}
+                                onAddNotification={() => status.setAddingNotification(true)}
+                                saving={status.saving}
+                                editing={false}
+                                open={newServiceOpen}
+                                onToggle={() => setNewServiceOpen(current => !current)}
+                            />
+                            <Space height={10} />
+                        </>
+                    )}
+                    {status.selectedService && !status.editing && (
+                        <>
+                            <ServiceDetails
+                                service={status.selectedService}
+                                onEdit={() => void status.beginEdit(status.selectedService!)}
+                            />
+                            <Space height={10} />
+                        </>
+                    )}
+                    {status.services.map((service) => (
+                        <View key={service.id}>
+                            <ServiceRow
+                                service={service}
+                                selected={status.selectedService?.id === service.id}
+                                onPress={() => status.selectService(service)}
+                                onEdit={() => void status.beginEdit(service)}
+                            />
+                            <Space height={10} />
                         </View>
-                    </Cluster>
-                    <Space height={12} />
-                    {error ? (
-                        <Cluster>
-                            <View style={{ padding: 12 }}>
-                                <Text style={{ ...T.text15, color: "#ff8b8b" }}>{error}</Text>
-                            </View>
-                        </Cluster>
-                    ) : null}
-                    {services.map((service) => {
-                        const latest = service.bars?.[0]
-                        const healthy = latest ? latest.status < 400 : false
-                        return (
-                            <TouchableOpacity key={service.id} onPress={() => void 0} activeOpacity={0.9}>
-                                <Cluster>
-                                    <View style={{ padding: 12, gap: 10 }}>
-                                        <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
-                                            <View style={{ flex: 1, paddingRight: 12 }}>
-                                                <Text style={{ ...T.text20, color: theme.textColor }}>
-                                                    {service.name}
-                                                </Text>
-                                                <Text style={{ ...T.text15, color: theme.oppositeTextColor }}>
-                                                    {service.url || text.noUrl}
-                                                </Text>
-                                            </View>
-                                            <View style={{
-                                                backgroundColor: healthy ? "#113c1b" : "#4a1616",
-                                                borderRadius: 999,
-                                                paddingHorizontal: 12,
-                                                paddingVertical: 6,
-                                            }}>
-                                                <Text style={{ ...T.text15, color: "#fff" }}>
-                                                    {healthy ? text.healthy : text.issue}
-                                                </Text>
-                                            </View>
-                                        </View>
-                                        <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 8 }}>
-                                            <MetricPill label={text.uptime} value={`${service.uptime}%`} />
-                                            <MetricPill label={text.response} value={latest ? `${Math.round(latest.delay)} ${text.ms}` : text.noDelay} />
-                                        </View>
-                                    </View>
-                                </Cluster>
-                                <Space height={10} />
-                            </TouchableOpacity>
-                        )
-                    })}
+                    ))}
                 </ScrollView>
             </View>
         </Swipe>
-    )
-}
-
-function MetricPill({ label, value }: { label: string, value: string }) {
-    const { theme } = useSelector((state: ReduxState) => state.theme)
-
-    return (
-        <View style={{
-            flexDirection: "row",
-            alignItems: "center",
-            gap: 6,
-            borderRadius: 999,
-            borderWidth: 1,
-            borderColor: "#ffffff12",
-            backgroundColor: "#ffffff08",
-            paddingHorizontal: 10,
-            paddingVertical: 7,
-        }}>
-            <View style={{
-                width: 7,
-                height: 7,
-                borderRadius: 999,
-                backgroundColor: theme.orange,
-            }} />
-            <Text style={{ ...T.text12, color: theme.oppositeTextColor }}>
-                {label}
-            </Text>
-            <Text style={{ ...T.text15, color: theme.textColor }}>
-                {value}
-            </Text>
-        </View>
     )
 }

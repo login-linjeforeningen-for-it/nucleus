@@ -1,6 +1,6 @@
-import Svg, { Circle } from "react-native-svg"
-import { DimensionValue } from "react-native"
-import { View } from "react-native"
+import Svg, { Circle } from 'react-native-svg'
+import { DimensionValue } from 'react-native'
+import { View } from 'react-native'
 import { JSX } from 'react'
 
 type DynamicCircleProps = {
@@ -37,8 +37,8 @@ export default function DynamicCircle({ height, width, color, left, right, top,
             height: height,
             width: width
         }}>
-            <Svg height="100%" width="100%" viewBox="0 0 100 100" >
-                <Circle cx="50" cy="50" r="50" fill={color} />
+            <Svg height='100%' width='100%' viewBox='0 0 100 100' >
+                <Circle cx='50' cy='50' r='50' fill={color} />
             </Svg>
         </View>
     )

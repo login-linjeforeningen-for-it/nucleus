@@ -1,7 +1,7 @@
-import Text from "@components/shared/text"
-import T from "@styles/text"
-import { JSX } from "react"
-import { ScrollView, TouchableOpacity, View } from "react-native"
+import Text from '@components/shared/text'
+import T from '@styles/text'
+import { JSX } from 'react'
+import { ScrollView, TouchableOpacity, View } from 'react-native'
 
 type Props = {
     clients: NativeClient[]
@@ -20,7 +20,7 @@ export default function AiModelPicker({
 }: Props): JSX.Element {
     return (
         <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-            <View style={{ flexDirection: "row", gap: 10 }}>
+            <View style={{ flexDirection: 'row', gap: 10 }}>
                 {clients.map(client => {
                     const isActive = activeClientName === client.name
 
@@ -28,7 +28,9 @@ export default function AiModelPicker({
                         <TouchableOpacity key={client.name} onPress={() => onSelect(client.name)}>
                             <View style={{
                                 borderRadius: 16,
-                                backgroundColor: isActive ? "#fd873814" : "#ffffff08",
+                                borderWidth: 1,
+                                borderColor: isActive ? theme.orangeTransparentBorderHighlighted : theme.orangeTransparentBorder,
+                                backgroundColor: isActive ? theme.orangeTransparentHighlighted : theme.orangeTransparent,
                                 paddingHorizontal: 14,
                                 paddingVertical: 10,
                                 minWidth: 140

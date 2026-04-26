@@ -1,13 +1,13 @@
-import CornerSquare from "@/components/about/cornerSquare"
-import DefaultBanner from "@components/event/defaultBanner"
-import ES from "@styles/eventStyles"
-import GS from "@styles/globalStyles"
-import Link, { TextLink } from "@components/shared/link"
-import T from "@styles/text"
+import CornerSquare from '@/components/about/cornerSquare'
+import DefaultBanner from '@components/event/defaultBanner'
+import ES from '@styles/eventStyles'
+import GS from '@styles/globalStyles'
+import Link, { TextLink } from '@components/shared/link'
+import T from '@styles/text'
 import { JSX } from 'react'
-import { useSelector } from "react-redux"
-import { random } from "@/components/shared/utils"
-import personInfo from "@utils/personInfo"
+import { useSelector } from 'react-redux'
+import { random } from '@/components/shared/utils'
+import personInfo from '@utils/personInfo'
 import {
     Image,
     ImageSourcePropType,
@@ -15,8 +15,8 @@ import {
     Text,
     TouchableOpacity,
     View,
-} from "react-native"
-import config from "@/constants"
+} from 'react-native'
+import config from '@/constants'
 
 type PersonProps = {
     person: string
@@ -55,14 +55,14 @@ export default function Person({ person }: PersonProps): JSX.Element {
 
     const { theme } = useSelector((state: ReduxState) => state.theme)
     const { lang } = useSelector((state: ReduxState) => state.lang)
-    let obj = personInfo({ person, lang })
-    let corner = random({ min: 0, max: 4 })
+    const obj = personInfo({ person, lang })
+    const corner = random({ min: 0, max: 4 })
 
     return (
         <View style={{ marginBottom: 20 }}>
-            <Image style={{ ...GS.personImage }} source={{ uri: obj.img, cache: "force-cache" }} />
+            <Image style={{ ...GS.personImage }} source={{ uri: obj.img, cache: 'force-cache' }} />
             <CornerSquare corner={corner} />
-            <View style={{ width: "72%", alignSelf: "center" }}>
+            <View style={{ width: '72%', alignSelf: 'center' }}>
                 <Text style={{ ...T.leaderTitle, left: 0 }}>{obj.title}</Text>
                 <Text style={{ ...T.leaderName, left: 0, color: theme.textColor }}>
                     {obj.name}
@@ -71,7 +71,7 @@ export default function Person({ person }: PersonProps): JSX.Element {
                     <Text style={{ ...T.discord, left: 0, color: theme.discord }}>
                         <Image
                             style={GS.tiny}
-                            source={require("@assets/social/discord-colored.png")}
+                            source={require('@assets/social/discord-colored.png')}
                         />
                         {obj.tag}
                     </Text>
@@ -88,16 +88,16 @@ export default function Person({ person }: PersonProps): JSX.Element {
 export function AllComitees(): JSX.Element {
     return (
         <View>
-            <Person person="leader" />
-            <Person person="coleader" />
-            <Person person="secretary" />
-            <Person person="evntkom" />
-            <Person person="pr" />
-            <Person person="tekkom" />
-            <Person person="ctf" />
-            <Person person="eco" />
-            <Person person="bedkom" />
-            <Person person="barkom" />
+            <Person person='leader' />
+            <Person person='coleader' />
+            <Person person='secretary' />
+            <Person person='evntkom' />
+            <Person person='pr' />
+            <Person person='tekkom' />
+            <Person person='ctf' />
+            <Person person='eco' />
+            <Person person='bedkom' />
+            <Person person='barkom' />
         </View>
     )
 }
@@ -113,45 +113,45 @@ export function Social() {
         discord: {
             link: config.discord_url,
             logo: isDark
-                ? require("@assets/social/discord-white.png")
-                : require("@assets/social/discord-black.png")
+                ? require('@assets/social/discord-white.png')
+                : require('@assets/social/discord-black.png')
         },
         instagram: {
             link: config.instagram_url,
             logo: isDark
-                ? require("@assets/social/instagram-white.png")
-                : require("@assets/social/instagram-black.png")
+                ? require('@assets/social/instagram-white.png')
+                : require('@assets/social/instagram-black.png')
         },
         facebook: {
             link: config.facebook_url,
             logo: isDark
-                ? require("@assets/social/facebook-white.png")
-                : require("@assets/social/facebook-black.png")
+                ? require('@assets/social/facebook-white.png')
+                : require('@assets/social/facebook-black.png')
         },
         linkedin: {
             link: config.linkedin_url,
             logo: isDark
-                ? require("@assets/social/linkedin-white.png")
-                : require("@assets/social/linkedin-black.png")
+                ? require('@assets/social/linkedin-white.png')
+                : require('@assets/social/linkedin-black.png')
         },
         gitlab: {
             link: config.github_url,
             logo: isDark
-                ? require("@assets/social/github-white.png")
-                : require("@assets/social/github-black.png")
+                ? require('@assets/social/github-white.png')
+                : require('@assets/social/github-black.png')
         },
         wiki: {
             link: config.wiki_url,
             logo: isDark
-                ? require("@assets/social/wiki-white.png")
-                : require("@assets/social/wiki-black.png")
+                ? require('@assets/social/wiki-white.png')
+                : require('@assets/social/wiki-black.png')
         }
     }
 
     return (
         <View style={{
-            flexDirection: "row",
-            justifyContent: "center",
+            flexDirection: 'row',
+            justifyContent: 'center',
             marginTop: 10
         }}>
             {Object.values(media).map((item, index) => (
@@ -179,13 +179,13 @@ export function Social() {
  * @returns Full object packed in a view component
  */
 export function Styret() {
-    let corner = random({ min: 0, max: 4 })
+    const corner = random({ min: 0, max: 4 })
 
     return (
         <View>
             <Image
                 style={{ ...GS.aboutImage }}
-                source={{ uri: `${config.cdn}/board/group/styret_2026.jpg`, cache: "force-cache" }}
+                source={{ uri: `${config.cdn}/board/group/styret_2026.jpg`, cache: 'force-cache' }}
             />
             <CornerSquare corner={corner} type={true} />
         </View>
@@ -203,11 +203,11 @@ export function Contact() {
     const color = theme.textColor
 
     const info = {
-        contact: lang ? "Kontakt" : "Contact",
-        name: "Login - Linjeforeningen for IT",
-        address: "Teknologivegen 22",
-        location: lang ? "Bygg A, rom 155" : "Building A, room 155",
-        post: "2815 GJØVIK"
+        contact: lang ? 'Kontakt' : 'Contact',
+        name: 'Login - Linjeforeningen for IT',
+        address: 'Teknologivegen 22',
+        location: lang ? 'Bygg A, rom 155' : 'Building A, room 155',
+        post: '2815 GJØVIK'
     }
 
     return (
@@ -221,7 +221,7 @@ export function Contact() {
             <TextLink
                 url={config.mailto_url}
                 text={config.mail_url}
-                style={{ ...T.orange15, top: 3.2, alignSelf: "center", marginBottom: 20 }}
+                style={{ ...T.orange15, top: 3.2, alignSelf: 'center', marginBottom: 20 }}
             />
         </View>
     )
@@ -239,7 +239,8 @@ export function Copyright() {
     return (
         <View>
             <Text style={{ ...T.copyright, color: theme.oppositeTextColor }}>
-                {`${lang ? "Opphavsrett" : "Copyright"} © 2022-${new Date().getFullYear()} Login - Linjeforeningen for IT\nD-U-N-S 345 129 409\nNO 811 940 372`}
+                {`${lang ? 'Opphavsrett' : 'Copyright'} © 2022-${new Date().getFullYear()} Login`
+                    + ' - Linjeforeningen for IT\nD-U-N-S 345 129 409\nNO 811 940 372'}
             </Text>
         </View>
     )

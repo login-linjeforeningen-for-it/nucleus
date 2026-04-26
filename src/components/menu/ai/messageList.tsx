@@ -1,8 +1,8 @@
-import Clipboard from "@react-native-clipboard/clipboard"
-import Text from "@components/shared/text"
-import T from "@styles/text"
-import { JSX, useRef, useState } from "react"
-import { Pressable, ScrollView, View } from "react-native"
+import Clipboard from '@react-native-clipboard/clipboard'
+import Text from '@components/shared/text'
+import T from '@styles/text'
+import { JSX, useRef, useState } from 'react'
+import { Pressable, ScrollView, View } from 'react-native'
 
 type Props = {
     session: {
@@ -47,45 +47,45 @@ export default function AiMessageList({ session, theme, isLoggedIn, text }: Prop
             keyboardShouldPersistTaps='handled'
         >
             {(session?.messages || []).map(message => {
-                const isUser = message.role === "user"
-                const content = message.content || (session?.isSending ? text.typing : "")
+                const isUser = message.role === 'user'
+                const content = message.content || (session?.isSending ? text.typing : '')
                 const isCopied = copiedMessageId === message.id
 
                 return (
                     <View
                         key={message.id}
                         style={{
-                            alignItems: isUser ? "flex-end" : "flex-start",
+                            alignItems: isUser ? 'flex-end' : 'flex-start',
                             marginBottom: 14
                         }}
                     >
                         <View style={{
-                            maxWidth: isUser ? "86%" : "92%",
-                            alignItems: isUser ? "flex-end" : "flex-start",
+                            maxWidth: isUser ? '86%' : '92%',
+                            alignItems: isUser ? 'flex-end' : 'flex-start',
                         }}>
                             <View style={{
-                                position: "relative",
-                                alignSelf: isUser ? "flex-end" : "flex-start",
+                                position: 'relative',
+                                alignSelf: isUser ? 'flex-end' : 'flex-start',
                             }}>
                                 {isCopied ? (
                                     <View style={{
-                                        position: "absolute",
+                                        position: 'absolute',
                                         top: -3,
                                         right: -4,
                                         bottom: -3,
                                         left: -4,
                                         borderRadius: isUser ? 22 : 14,
                                         borderWidth: 1,
-                                        borderColor: "rgba(56,210,122,0.18)",
-                                        backgroundColor: "rgba(56,210,122,0.035)",
+                                        borderColor: 'rgba(56,210,122,0.18)',
+                                        backgroundColor: 'rgba(56,210,122,0.035)',
                                         opacity: 1,
-                                        pointerEvents: "none",
+                                        pointerEvents: 'none',
                                     }} />
                                 ) : null}
                                 <Pressable
                                     onPress={() => content && copyMessage(message.id, content)}
                                     style={{
-                                        backgroundColor: isUser ? theme.orange : "transparent",
+                                        backgroundColor: isUser ? theme.orange : 'transparent',
                                         borderRadius: isUser ? 18 : 0,
                                         paddingHorizontal: isUser ? 12 : 0,
                                         paddingVertical: isUser ? 10 : 0,
@@ -104,12 +104,17 @@ export default function AiMessageList({ session, theme, isLoggedIn, text }: Prop
                                         minWidth: 32,
                                         height: 32,
                                         borderRadius: 12,
-                                        backgroundColor: isCopied ? "rgba(56,210,122,0.08)" : "#ffffff08",
-                                        alignItems: "center",
-                                        justifyContent: "center",
+                                        backgroundColor: isCopied ? 'rgba(56,210,122,0.08)' : '#ffffff08',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
                                     }}
                                 >
-                                    <Text style={{ ...T.text15, color: isCopied ? "rgba(56,210,122,0.8)" : theme.oppositeTextColor }}>⧉</Text>
+                                    <Text style={{
+                                        ...T.text15,
+                                        color: isCopied ? 'rgba(56,210,122,0.8)' : theme.oppositeTextColor,
+                                    }}>
+                                        ⧉
+                                    </Text>
                                 </Pressable>
                             ) : null}
                         </View>

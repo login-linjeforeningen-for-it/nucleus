@@ -11,7 +11,7 @@ type Positions = {
 }
 
 export default function DiceScreen() {
-    const width = Dimensions.get('window').width * 0.6;
+    const width = Dimensions.get('window').width * 0.6
     const rotateAnimation = useRef(new Animated.Value(0)).current
     const { theme } = useSelector((state: ReduxState) => state.theme)
     const [isAnimating, setIsAnimating] = useState(false)

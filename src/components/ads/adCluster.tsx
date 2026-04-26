@@ -1,18 +1,17 @@
-import BellIcon from "@components/shared/bellIcon"
-import Cluster from "@components/shared/cluster"
-import Marquee from "@components/shared/marquee"
-import Space from "@/components/shared/utils"
-import LastFetch from "@/utils/fetch"
-import T from "@styles/text"
-import { AdClusterImage, getAdClusterMeta } from "@components/ads/adContent"
-import { setClickedAds, toggleSearch } from "@redux/ad"
-import { useNavigation } from "@react-navigation/native"
-import { useDispatch, useSelector } from "react-redux"
-import { TouchableOpacity, Dimensions, Text, View } from "react-native"
-import TopicManager from "@utils/notification/topicManager"
-import { StackNavigationProp } from "@react-navigation/stack"
-import { AdStackParamList } from "@type/screenTypes"
-import { JSX } from "react"
+import BellIcon from '@components/shared/bellIcon'
+import Cluster from '@components/shared/cluster'
+import Marquee from '@components/shared/marquee'
+import Space from '@/components/shared/utils'
+import LastFetch from '@/utils/fetch'
+import T from '@styles/text'
+import { AdClusterImage, getAdClusterMeta } from '@components/ads/adContent'
+import { setClickedAds, toggleSearch } from '@redux/ad'
+import { useNavigation } from '@react-navigation/native'
+import { useDispatch, useSelector } from 'react-redux'
+import { TouchableOpacity, Dimensions, Text, View } from 'react-native'
+import TopicManager from '@utils/notification/topicManager'
+import { StackNavigationProp } from '@react-navigation/stack'
+import { JSX } from 'react'
 
 type Ad = {
     ad: GetJobProps
@@ -30,7 +29,7 @@ export default function AdCluster({ ad, index }: Ad): JSX.Element {
     const title = lang ? ad.title_no || ad.title_en : ad.title_en || ad.title_no
     const meta = getAdClusterMeta(ad, lang)
     const deadline = LastFetch(ad.time_expire)
-    const metaLine = [meta, deadline].filter(Boolean).join(" · ")
+    const metaLine = [meta, deadline].filter(Boolean).join(' · ')
 
     function isClicked() {
         return clickedAds.some((clickedAd) => ad.id === clickedAd.id)
@@ -40,7 +39,7 @@ export default function AdCluster({ ad, index }: Ad): JSX.Element {
         dispatch(setClickedAds(clickedAds.some((entry) => entry.id === ad.id)
             ? clickedAds.filter((entry) => entry.id !== ad.id)
             : [...clickedAds, ad]))
-        TopicManager({ topic: `${lang ? "n" : "e"}a${ad.id}`, unsub: isClicked() })
+        TopicManager({ topic: `${lang ? 'n' : 'e'}a${ad.id}`, unsub: isClicked() })
     }
 
     function handleOpen() {
@@ -48,7 +47,7 @@ export default function AdCluster({ ad, index }: Ad): JSX.Element {
             dispatch(toggleSearch())
         }
 
-        navigation.navigate("SpecificAdScreen", { adID: ad.id })
+        navigation.navigate('SpecificAdScreen', { adID: ad.id })
     }
 
     return (
@@ -60,18 +59,18 @@ export default function AdCluster({ ad, index }: Ad): JSX.Element {
                         paddingVertical: 12,
                     }}>
                         <View style={{
-                            flexDirection: "row",
-                            alignItems: "stretch",
+                            flexDirection: 'row',
+                            alignItems: 'stretch',
                             gap: 12,
                         }}>
                             <View style={{
                                 width: 74,
                                 minHeight: 60,
                                 borderRadius: 12,
-                                backgroundColor: "#ffffff08",
-                                alignItems: "center",
-                                justifyContent: "center",
-                                overflow: "hidden",
+                                backgroundColor: '#ffffff08',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                overflow: 'hidden',
                             }}>
                                 <AdClusterImage
                                     logoUrl={ad.organization?.logo}
@@ -82,15 +81,15 @@ export default function AdCluster({ ad, index }: Ad): JSX.Element {
                             <View style={{ flex: 1, minWidth: 0 }}>
                                 {ad.highlight ? (
                                     <View style={{
-                                        alignSelf: "flex-start",
+                                        alignSelf: 'flex-start',
                                         borderRadius: 999,
-                                        backgroundColor: "rgba(253,135,56,0.14)",
+                                        backgroundColor: 'rgba(253,135,56,0.14)',
                                         paddingHorizontal: 8,
                                         paddingVertical: 4,
                                         marginBottom: 8,
                                     }}>
                                         <Text style={{ ...T.text12, color: theme.orange }}>
-                                            {lang ? "Fremhevet" : "Featured"}
+                                            {lang ? 'Fremhevet' : 'Featured'}
                                         </Text>
                                     </View>
                                 ) : null}
@@ -116,9 +115,9 @@ export default function AdCluster({ ad, index }: Ad): JSX.Element {
                             </View>
                             <TouchableOpacity
                                 onPress={handleNotificationPress}
-                                style={{ alignSelf: "center" }}
+                                style={{ alignSelf: 'center' }}
                             >
-                                <View style={{ padding: 2, justifyContent: "center", alignItems: "center" }}>
+                                <View style={{ padding: 2, justifyContent: 'center', alignItems: 'center' }}>
                                     <BellIcon orange={isSubscribed} />
                                 </View>
                             </TouchableOpacity>
@@ -142,10 +141,10 @@ export function ListFooter({ index }: ListFooterProps) {
                 ...T.contact,
                 color: theme.oppositeTextColor
             }}>
-                {lang ? "Oppdatert kl:" : "Updated:"} {lastFetch}.
+                {lang ? 'Oppdatert kl:' : 'Updated:'} {lastFetch}.
             </Text>}
             {index === renderedAds.length - 1 &&
-                <Space height={Dimensions.get("window").height / 7} />}
+                <Space height={Dimensions.get('window').height / 7} />}
         </>
     )
 }

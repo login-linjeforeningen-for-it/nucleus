@@ -1,9 +1,9 @@
-import { createSlice } from "@reduxjs/toolkit"
+import { createSlice } from '@reduxjs/toolkit'
 
 // Declares Profile Slice
 export const ProfileSlice = createSlice({
     // Slice name
-    name: "profile",
+    name: 'profile',
     // Initial state
     initialState: {
         id: null,

@@ -1,11 +1,11 @@
-import MS from "@styles/menuStyles"
-import { ImageSourcePropType, TouchableOpacity } from "react-native"
-import handleDownload from "@/utils/calendar"
-import { Image } from "react-native"
-import { timeSince } from "@/utils/fetch"
-import { useSelector, useDispatch } from "react-redux"
-import { setDownloadState } from "@redux/event"
-import { useState } from "react"
+import MS from '@styles/menuStyles'
+import { ImageSourcePropType, TouchableOpacity } from 'react-native'
+import handleDownload from '@/utils/calendar'
+import { Image } from 'react-native'
+import { timeSince } from '@/utils/fetch'
+import { useSelector, useDispatch } from 'react-redux'
+import { setDownloadState } from '@redux/event'
+import { useState } from 'react'
 
 type DownloadButtonProps = {
     screen: 'event' | 'ad'
@@ -17,9 +17,9 @@ export default function DownloadButton({ screen }: DownloadButtonProps) {
     const { calendarID } = useSelector((state: ReduxState) => state.misc)
     const event = useSelector((state: ReduxState) => state.event)
     const ad = useSelector((state: ReduxState) => state.ad)
-    const dark: ImageSourcePropType = require("@assets/icons/download.png")
-    const light: ImageSourcePropType = require("@assets/icons/download-black.png")
-    const orange: ImageSourcePropType = require("@assets/icons/download-orange.png")
+    const dark: ImageSourcePropType = require('@assets/icons/download.png')
+    const light: ImageSourcePropType = require('@assets/icons/download-black.png')
+    const orange: ImageSourcePropType = require('@assets/icons/download-orange.png')
     const [icon, setIcon] = useState<ImageSourcePropType>(isDark ? dark : light)
     const dispatch = useDispatch()
     const isEventScreen = screen === 'event'

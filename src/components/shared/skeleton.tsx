@@ -1,6 +1,6 @@
 import { useRef, useEffect, ReactNode } from 'react'
 import { View, Animated, StyleSheet, Easing, Dimensions } from 'react-native'
-import { LinearGradient } from "expo-linear-gradient"
+import { LinearGradient } from 'expo-linear-gradient'
 import { useSelector } from 'react-redux'
 
 type SkeletonProps = {
@@ -38,14 +38,14 @@ export default function Skeleton({ children, height, loading, noColor }: Skeleto
     return (
         <View style={{ ...styles.container, height, backgroundColor: noColor ? undefined : theme.background, borderRadius: 10 }}>
             <Animated.View style={[styles.line,
-            {
-                transform: [{
-                    translateX: lineWidth.interpolate({
-                        inputRange: [0, 1],
-                        outputRange: [-width, width],
-                    })
-                }]
-            }
+                {
+                    transform: [{
+                        translateX: lineWidth.interpolate({
+                            inputRange: [0, 1],
+                            outputRange: [-width, width],
+                        })
+                    }]
+                }
             ]}>
                 <LinearGradient
                     colors={[

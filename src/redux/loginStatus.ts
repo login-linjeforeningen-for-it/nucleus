@@ -1,9 +1,9 @@
-import { createSlice } from "@reduxjs/toolkit"
+import { createSlice } from '@reduxjs/toolkit'
 
 // Declares Login status slice
 export const LoginSlice = createSlice({
     // Slice name
-    name: "login",
+    name: 'login',
     // Initial state
     initialState: {
         // true is logged in, false is logged out

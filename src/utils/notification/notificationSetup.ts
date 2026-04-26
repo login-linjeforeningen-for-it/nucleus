@@ -1,8 +1,8 @@
-import { setNotificationStateTrue } from "@redux/notifications"
-import { subscribeToTopic } from "@utils/notification/subscribeToTopic"
-import { Dispatch, UnknownAction } from "redux"
-import { resetTheme } from "@redux/theme"
-import { Alert, Platform } from "react-native"
+import { setNotificationStateTrue } from '@redux/notifications'
+import { subscribeToTopic } from '@utils/notification/subscribeToTopic'
+import { Dispatch, UnknownAction } from 'redux'
+import { resetTheme } from '@redux/theme'
+import { Alert, Platform } from 'react-native'
 import { getPermissionsAsync, requestPermissionsAsync } from 'expo-notifications'
 import { isDevice } from 'expo-device'
 import { configureNotificationChannel } from './getPushToken'
@@ -16,14 +16,14 @@ type initializeNotificationsProps = {
 
 /**
  * Sets up initial notifications
- * 
- * @param shouldRun Specifies if notifications should be initialised, starts as 
- * true and is set to false when the setup is completed 
- * 
- * @param hasBeenSet Specifies if the notifications have already been 
- * initialized, in which case it will not run. Used between rerenders before 
+ *
+ * @param shouldRun Specifies if notifications should be initialised, starts as
+ * true and is set to false when the setup is completed
+ *
+ * @param hasBeenSet Specifies if the notifications have already been
+ * initialized, in which case it will not run. Used between rerenders before
  * hasBeenSet has updated
- * 
+ *
  * @param setShouldSetupNotifications Setter function for the shouldRun variable
  */
 export default function initializeNotifications({ shouldRun, hasBeenSet,
@@ -42,14 +42,14 @@ export async function notificationSetup(dispatch: Dispatch<UnknownAction>) {
     const granted = await requestNotificationPermission()
     if (granted) {
         await configureNotificationChannel()
-        const topics = ["IMPORTANT", "BEDPRES", "TEKKOM", "CTF", "SOCIAL", "KARRIEREDAG", "FADDERUKA", "LOGIN", "ANNET"]
+        const topics = ['IMPORTANT', 'BEDPRES', 'TEKKOM', 'CTF', 'SOCIAL', 'KARRIEREDAG', 'FADDERUKA', 'LOGIN', 'ANNET']
 
         for (const topic of topics) {
             await subscribeToTopic(`n${topic}`)
         }
     }
 
-    dispatch(setNotificationStateTrue({ category: "SETUP" }))
+    dispatch(setNotificationStateTrue({ category: 'SETUP' }))
 }
 
 export async function requestNotificationPermission() {
@@ -108,11 +108,11 @@ export async function requestNotificationPermission() {
 }
 
 function isNotificationsGranted(permissions: unknown) {
-    if (!permissions || typeof permissions !== "object") {
+    if (!permissions || typeof permissions !== 'object') {
         return false
     }
 
     const maybePermissions = permissions as { granted?: boolean, status?: string }
 
-    return maybePermissions.granted === true || maybePermissions.status === "granted"
+    return maybePermissions.granted === true || maybePermissions.status === 'granted'
 }

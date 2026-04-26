@@ -1,15 +1,15 @@
-import AsyncStorage from "@react-native-async-storage/async-storage"
-import { combineReducers, configureStore } from "@reduxjs/toolkit"
-import NotificationReducer from "@redux/notifications"
-import { persistReducer, createMigrate } from "redux-persist"
-import LoginReducer from "@redux/loginStatus"
-import ProfileReducer from "@redux/profile"
-import ThemeReducer from "@redux/theme"
-import EventReducer from "@redux/event"
-import LangReducer from "@redux/lang"
-import MiscReducer from "@redux/misc"
-import AdReducer from "@redux/ad"
-import { thunk } from "redux-thunk"
+import AsyncStorage from '@react-native-async-storage/async-storage'
+import { combineReducers, configureStore } from '@reduxjs/toolkit'
+import NotificationReducer from '@redux/notifications'
+import { persistReducer, createMigrate } from 'redux-persist'
+import LoginReducer from '@redux/loginStatus'
+import ProfileReducer from '@redux/profile'
+import ThemeReducer from '@redux/theme'
+import EventReducer from '@redux/event'
+import LangReducer from '@redux/lang'
+import MiscReducer from '@redux/misc'
+import AdReducer from '@redux/ad'
+import { thunk } from 'redux-thunk'
 
 // Combines all reducers
 const reducers = combineReducers({
@@ -36,7 +36,7 @@ const reducers = combineReducers({
 
 // It is hard to test this, I had to make an apk and then change the version number and update the app to test it
 const migrations = {
-    0: (state: any) => {
+    0: () => {
         return {}
     }
 }
@@ -45,19 +45,19 @@ const migrations = {
 const saveState = {
     version: 0,
     // Key property: root
-    key: "root",
+    key: 'root',
     // Declares which storage to use, AsyncStorage has most active community
     storage: AsyncStorage,
     // Whitelists the names of the states to save
     whitelist: [
-        "ad",
-        "event",
-        "lang",
-        "login",
-        "misc",
-        "notification",
-        "profile",
-        "theme"
+        'ad',
+        'event',
+        'lang',
+        'login',
+        'misc',
+        'notification',
+        'profile',
+        'theme'
     ],
     migrate: createMigrate(migrations as any)
 }

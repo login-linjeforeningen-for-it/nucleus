@@ -4,6 +4,7 @@ import {
     TouchableOpacity,
     TextStyle,
     StyleProp,
+    TextProps as RNTextProps,
     Alert
 } from 'react-native'
 
@@ -12,6 +13,7 @@ type TextProps = {
     style: StyleProp<TextStyle>
     copyable?: boolean
     warning?: string[]
+    numberOfLines?: RNTextProps['numberOfLines']
 }
 
 /**
@@ -19,10 +21,10 @@ type TextProps = {
  * arrays to be joined and objects to be destructured.
  * @param children string | object | number to display as string
  * @param style Style object for React Natives Text component
- * @param copyable Whether the text should be copyable 
- * @returns 
+ * @param copyable Whether the text should be copyable
+ * @returns
  */
-export default function Text({ children, style, copyable, warning }: TextProps) {
+export default function Text({ children, style, copyable, warning, numberOfLines }: TextProps) {
     let text = ''
 
     if (typeof children != 'string') {
@@ -42,7 +44,7 @@ export default function Text({ children, style, copyable, warning }: TextProps) 
     }
 
     if (!copyable) {
-        return <RNText style={style}>{text}</RNText>
+        return <RNText style={style} numberOfLines={numberOfLines}>{text}</RNText>
     }
 
     // Copies the text to clipboard
@@ -56,7 +58,7 @@ export default function Text({ children, style, copyable, warning }: TextProps) 
 
     return (
         <TouchableOpacity onPress={() => handleCopy(text)}>
-            <RNText style={style}>{text}</RNText>
+            <RNText style={style} numberOfLines={numberOfLines}>{text}</RNText>
         </TouchableOpacity>
     )
 }

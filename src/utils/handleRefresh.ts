@@ -1,4 +1,4 @@
-import { NativeScrollEvent, NativeSyntheticEvent } from "react-native"
+import { NativeScrollEvent, NativeSyntheticEvent } from 'react-native'
 
 type handleRefreshProps = {
     event: NativeSyntheticEvent<NativeScrollEvent>

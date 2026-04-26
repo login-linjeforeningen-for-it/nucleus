@@ -1,7 +1,7 @@
-import AsyncStorage from "@react-native-async-storage/async-storage"
-import { useEffect, useState } from "react"
-import { View } from "react-native"
-import { useSelector } from "react-redux"
+import AsyncStorage from '@react-native-async-storage/async-storage'
+import { useEffect, useState } from 'react'
+import { View } from 'react-native'
+import { useSelector } from 'react-redux'
 
 type NotificationIconProps = {
     position: 'bottom' | 'left'
@@ -15,7 +15,7 @@ export default function NotificationIcon({ position }: NotificationIconProps) {
 
     // Fetches notifications from localstorage
     async function getNotifications() {
-        let unread = await unreadNotifications()
+        const unread = await unreadNotifications()
 
         if (unread) {
             setDisplay(true)
@@ -41,7 +41,7 @@ export default function NotificationIcon({ position }: NotificationIconProps) {
         backgroundColor: theme.orange,
         height: 6,
         width: 6,
-        position: "absolute",
+        position: 'absolute',
         borderRadius: 100,
         right: position === 'bottom' ? 30 : undefined,
         left: position === 'left' ? lang ? 88 : 108 : undefined,
@@ -52,10 +52,10 @@ export default function NotificationIcon({ position }: NotificationIconProps) {
 
 // Checks for unread notifications
 async function unreadNotifications(): Promise<boolean> {
-    let notifications = await AsyncStorage.getItem('notificationList')
+    const notifications = await AsyncStorage.getItem('notificationList')
 
     if (notifications) {
-        let parsed = JSON.parse(notifications)
+        const parsed = JSON.parse(notifications)
 
         for (let i = 0; i < parsed.length; i++) {
             if (!('read' in parsed[i]) || parsed[i].read == false) {

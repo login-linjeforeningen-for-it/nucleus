@@ -1,0 +1,53 @@
+name: Release Nucleus To Stores
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+concurrency:
+  group: nucleus-store-release
+  cancel-in-progress: false
+
+jobs:
+  release:
+    name: Build and submit iOS + Android
+    runs-on:
+      - self-hosted
+      - macOS
+      - tekkommacmini
+      - nucleus-release
+    timeout-minutes: 120
+    env:
+      EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+      GOOGLE_SERVICES_JSON_BASE64: ${{ secrets.GOOGLE_SERVICES_JSON_BASE64 }}
+      GOOGLE_SERVICES_PLIST_BASE64: ${{ secrets.GOOGLE_SERVICES_PLIST_BASE64 }}
+      CI: '1'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 25.8.1
+          cache: npm
+
+      - name: Setup Expo and EAS
+        uses: expo/expo-github-action@v8
+        with:
+          token: ${{ secrets.EXPO_TOKEN }}
+          eas-version: latest
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Preflight release environment
+        run: node scripts/ci/verify-store-release-env.mjs --strict
+
+      - name: Test project
+        run: npm test -- --runInBand
+
+      - name: Build and submit to Apple and Google
+        run: eas build --platform all --profile production --non-interactive --auto-submit

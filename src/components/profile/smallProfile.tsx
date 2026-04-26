@@ -1,9 +1,8 @@
-import { Image, View, Text, TouchableOpacity } from "react-native"
-import PS from "@styles/profileStyles"
-import CS from "@styles/clusterStyles"
-import { Navigation } from "@/interfaces"
-import T from "@styles/text"
-import { useSelector } from "react-redux"
+import { Image, View, Text, TouchableOpacity } from 'react-native'
+import PS from '@styles/profileStyles'
+import CS from '@styles/clusterStyles'
+import T from '@styles/text'
+import { useSelector } from 'react-redux'
 import { JSX } from 'react'
 
 type SmallProfileProps = {
@@ -19,7 +18,7 @@ type SmallProfileProps = {
  * @returns                     Small circle of the categories color
  */
 export default function SmallProfile({ navigation, profile, login }:
-    SmallProfileProps): JSX.Element {  // SVG showing the color of the category
+SmallProfileProps): JSX.Element {  // SVG showing the color of the category
 
     const { theme, isDark } = useSelector((state: ReduxState) => state.theme)
     const { lang } = useSelector((state: ReduxState) => state.lang)
@@ -28,8 +27,8 @@ export default function SmallProfile({ navigation, profile, login }:
 
     return (
         <TouchableOpacity onPress={() => login
-            ? navigation.navigate("ProfileScreen")
-            : navigation.navigate("LoginScreen")}
+            ? navigation.navigate('ProfileScreen')
+            : navigation.navigate('LoginScreen')}
         >
             <View style={PS.profileBackground}>
                 <View style={PS.smallProfileLeftTriplet}>
@@ -39,13 +38,13 @@ export default function SmallProfile({ navigation, profile, login }:
                             source={profile.image
                                 ? { uri: profile.image }
                                 : isDark
-                                    ? require("@assets/icons/loginperson-white.png")
-                                    : require("@assets/icons/loginperson-black.png")}
+                                    ? require('@assets/icons/loginperson-white.png')
+                                    : require('@assets/icons/loginperson-black.png')}
                         />
                     </View>
                 </View>
                 <View style={PS.smallProfileMiddleTriplet}>
-                    {typeof profile.id === "number" ?
+                    {typeof profile.id === 'number' ?
                         <>
                             <Text style={{ ...T.text20, color: theme.textColor }}>
                                 {profile.name}
@@ -54,7 +53,7 @@ export default function SmallProfile({ navigation, profile, login }:
                                 ...T.text15,
                                 color: theme.oppositeTextColor
                             }}>
-                                {lang ? "Vis profil" : "Show profile"}
+                                {lang ? 'Vis profil' : 'Show profile'}
                             </Text>
                         </>
                         :
@@ -66,7 +65,7 @@ export default function SmallProfile({ navigation, profile, login }:
                 <View style={PS.smallProfileRightTriplet}>
                     <Image
                         style={CS.arrowImage}
-                        source={require("@assets/icons/dropdownBase.png")}
+                        source={require('@assets/icons/dropdownBase.png')}
                     />
                 </View>
             </View>

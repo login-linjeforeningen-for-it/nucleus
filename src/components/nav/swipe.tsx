@@ -1,12 +1,12 @@
-import { ReactNode, useRef } from "react"
-import { useNavigation } from "@react-navigation/native"
+import { ReactNode, useRef } from 'react'
+import { useNavigation } from '@react-navigation/native'
 import {
     PanResponder,
     Platform,
     View,
     GestureResponderEvent,
     PanResponderGestureState
-} from "react-native"
+} from 'react-native'
 
 type SwipeProps = {
     children: ReactNode

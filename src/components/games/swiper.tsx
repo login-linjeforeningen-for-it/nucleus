@@ -1,5 +1,5 @@
 import T from '@styles/text'
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { Text, View, Dimensions, StyleProp, TextStyle } from 'react-native'
 import { Gesture, GestureDetector } from 'react-native-gesture-handler'
 import Animated, {
@@ -68,7 +68,7 @@ export default function Swiper({ game, mode, school, ntnu }: GameListContentProp
             const isForward = direction === 'next'
 
             function resolveNextIndex() {
-                if (!game[0].hasOwnProperty('categories')) {
+                if (!Object.hasOwn(game[0], 'categories')) {
                     return isForward
                         ? currentIndex + 1
                         : Math.max(0, currentIndex - 1)

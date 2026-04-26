@@ -1,29 +1,28 @@
-import { MenuProps } from "@type/screenTypes"
-import { useDispatch, useSelector } from "react-redux"
-import Parent from "@components/shared/parent"
-import { setLocalTitle } from "@redux/misc"
-import { JSX, useEffect, useState } from "react"
-import { Dimensions, Text, View } from "react-native"
+import { useDispatch, useSelector } from 'react-redux'
+import Parent from '@components/shared/parent'
+import { setLocalTitle } from '@redux/misc'
+import { JSX, useEffect, useState } from 'react'
+import { Dimensions, Text, View } from 'react-native'
 import {
     getQuestions,
     getNeverHaveIEver,
     getOkRedFlagDealbreaker
-} from "@utils/game"
-import Swiper from "@components/games/swiper"
-import Filters from "@components/games/filters"
-import { ScrollView } from "react-native-gesture-handler"
-import T from "@styles/text"
+} from '@utils/game'
+import Swiper from '@components/games/swiper'
+import Filters from '@components/games/filters'
+import { ScrollView } from 'react-native-gesture-handler'
+import T from '@styles/text'
 
 type GameProps = {
     game: Question[] | NeverHaveIEver[] | OkRedFlagDealBreaker[]
 }
 
-export default function SpecificGameScreen({ route }: MenuProps<"SpecificGameScreen">): JSX.Element {
+export default function SpecificGameScreen({ route }: MenuProps<'SpecificGameScreen'>): JSX.Element {
     const { theme } = useSelector((state: ReduxState) => state.theme)
     const { localTitle } = useSelector((state: ReduxState) => state.misc)
-    const [game, setGame] = useState<Question[] | NeverHaveIEver[] | OkRedFlagDealBreaker[] | string>("")
+    const [game, setGame] = useState<Question[] | NeverHaveIEver[] | OkRedFlagDealBreaker[] | string>('')
     const dispatch = useDispatch()
-    const height = Dimensions.get("window").height
+    const height = Dimensions.get('window').height
 
     async function fetchGame() {
         const game = await determineGame()
@@ -44,9 +43,9 @@ export default function SpecificGameScreen({ route }: MenuProps<"SpecificGameScr
 
     useEffect(() => {
         if (localTitle?.screen !== route.params?.gameName) {
-            dispatch(setLocalTitle({ 
+            dispatch(setLocalTitle({
                 title: route.params?.gameName,
-                screen: "SpecificGameScreen"
+                screen: 'SpecificGameScreen'
             }))
         }
     }, [localTitle?.screen, route.params?.gameName, dispatch])
@@ -114,7 +113,7 @@ function Game({ game }: GameProps) {
     return (
         <View style={{ alignItems: 'center', paddingBottom: Dimensions.get('window').height * 0.5 }}>
             <Swiper game={game} mode={mode} school={school} ntnu={ntnu} />
-            {game[0].hasOwnProperty('categories') && <Filters
+            {Object.hasOwn(game[0], 'categories') && <Filters
                 mode={mode}
                 school={school}
                 ntnu={ntnu}

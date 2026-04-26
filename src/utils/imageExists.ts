@@ -12,7 +12,7 @@ export default async function imageExists(url: string) {
         }
 
         return response.status
-    } catch (error) {
+    } catch {
         return 404
     }
 }

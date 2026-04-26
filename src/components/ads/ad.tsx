@@ -1,12 +1,12 @@
-import LastFetch from "@/utils/fetch"
-import Space from "@/components/shared/utils"
-import { useSelector } from "react-redux"
-import AS from "@styles/adStyles"
-import T from "@styles/text"
-import { useEffect, useMemo, useState } from "react"
-import { SvgUri } from "react-native-svg"
-import Link from "@components/shared/link"
-import Skeleton from "@components/shared/skeleton"
+import LastFetch from '@/utils/fetch'
+import Space from '@/components/shared/utils'
+import { useSelector } from 'react-redux'
+import AS from '@styles/adStyles'
+import T from '@styles/text'
+import { useEffect, useMemo, useState } from 'react'
+import { SvgUri } from 'react-native-svg'
+import Link from '@components/shared/link'
+import Skeleton from '@components/shared/skeleton'
 import {
     TouchableOpacity,
     Dimensions,
@@ -16,14 +16,14 @@ import {
     View,
     Text,
     ImageSourcePropType,
-} from "react-native"
-import RenderDescription from "./adDescription"
-import capitalizeFirstLetter from "@utils/capitalizeFirstLetter"
-import validFileType from "@utils/validFileType"
-import config from "@/constants"
+} from 'react-native'
+import RenderDescription from './adDescription'
+import capitalizeFirstLetter from '@utils/capitalizeFirstLetter'
+import validFileType from '@utils/validFileType'
+import config from '@/constants'
 
-type SocialProps = {
-    url: string | undefined
+type ActiveSocialProps = {
+    url: string
     source: ImageSourcePropType
 }
 
@@ -41,8 +41,8 @@ const isIOS = Platform.OS === 'ios'
  */
 export default function AdInfo({ ad }: { ad: GetJobProps | undefined }) {
     const { lang } = useSelector((state: ReduxState) => state.lang)
-    const [deadline, setDeadline] = useState("")
-    const loc = ad?.cities?.map(city => capitalizeFirstLetter(city)).join(", ")
+    const [deadline, setDeadline] = useState('')
+    const loc = ad?.cities?.map(city => capitalizeFirstLetter(city)).join(', ')
     const type = capitalizeFirstLetter(lang ? ad?.job_type?.name_no : ad?.job_type?.name_en)
 
     useEffect(() => {
@@ -56,9 +56,9 @@ export default function AdInfo({ ad }: { ad: GetJobProps | undefined }) {
     return (
         <View style={{ marginBottom: 10 }}>
             <Skeleton loading={!ad} height={60}>
-                <InfoView titleNO="Sted: " titleEN="Location: " text={loc} />
-                <InfoView titleNO="Ansettelsesform: " titleEN="Position: " text={type} />
-                <InfoView titleNO="Frist: " titleEN="Deadline: " text={deadline} />
+                <InfoView titleNO='Sted: ' titleEN='Location: ' text={loc} />
+                <InfoView titleNO='Ansettelsesform: ' titleEN='Position: ' text={type} />
+                <InfoView titleNO='Frist: ' titleEN='Deadline: ' text={deadline} />
             </Skeleton>
         </View>
     )
@@ -73,11 +73,11 @@ export function AdBanner({ url }: { url: string | null }) {
     const [ratio, setRatio] = useState(5 / 2)
 
     useEffect(() => {
-        if (!url || url.endsWith(".svg")) {
+        if (!url || url.endsWith('.svg')) {
             return
         }
 
-        const sourceUrl = validFileType(url) && !url.startsWith("http")
+        const sourceUrl = validFileType(url) && !url.startsWith('http')
             ? `${config.cdn}/jobs/${url}`
             : url
 
@@ -94,29 +94,34 @@ export function AdBanner({ url }: { url: string | null }) {
 
     if (!url) return null
 
-    if (url.endsWith(".svg")) {
+    if (url.endsWith('.svg')) {
         return <SvgUri
-            style={{ alignSelf: "center", backgroundColor: "white" }}
-            width={(Dimensions.get("window").width) / 1.2}
-            height={Dimensions.get("window").width / 3}
+            style={{ alignSelf: 'center', backgroundColor: 'white' }}
+            width={(Dimensions.get('window').width) / 1.2}
+            height={Dimensions.get('window').width / 3}
             uri={`${config.cdn}/jobs/${url}`}
         />
     }
 
-    if (validFileType(url) && !url.startsWith("http")) {
+    if (validFileType(url) && !url.startsWith('http')) {
         return <Image
             style={{ ...AS.adBanner, aspectRatio: ratio, borderRadius: 18 }}
-            source={{ uri: `${config.cdn}/jobs/${url}`, cache: "force-cache" }}
+            source={{ uri: `${config.cdn}/jobs/${url}`, cache: 'force-cache' }}
         />
     }
 
-    if (validFileType(url) && url.includes("http")) {
-        return <Image style={{ ...AS.adBanner, aspectRatio: ratio, borderRadius: 18 }} source={{ uri: url, cache: "force-cache" }} />
+    if (validFileType(url) && url.includes('http')) {
+        return (
+            <Image
+                style={{ ...AS.adBanner, aspectRatio: ratio, borderRadius: 18 }}
+                source={{ uri: url, cache: 'force-cache' }}
+            />
+        )
     }
 
     return <Image
         style={{ ...AS.adBanner, aspectRatio: ratio, borderRadius: 18 }}
-        source={{ uri: `${config.cdn}/jobs/adbanner.png`, cache: "force-cache" }}
+        source={{ uri: `${config.cdn}/jobs/adbanner.png`, cache: 'force-cache' }}
     />
 }
 
@@ -130,7 +135,7 @@ export function AdDescription({ ad }: { ad: GetJobProps | undefined }) {
     const { theme } = useSelector((state: ReduxState) => state.theme)
 
     const content = useMemo(() => {
-        const skills = ad?.skills ? ad.skills.join(", ") : []
+        const skills = ad?.skills ? ad.skills.join(', ') : []
 
         const tempShort = lang
             ? ad?.description_short_no || ad?.description_short_en
@@ -146,14 +151,14 @@ export function AdDescription({ ad }: { ad: GetJobProps | undefined }) {
             <View style={{ marginBottom: 10 }}>
                 <Skeleton loading={!ad} height={200}>
                     <Text style={{ ...AS.adInfoBold, color: theme.textColor }}>
-                        {lang ? "Kort fortalt" : 'In short'}
+                        {lang ? 'Kort fortalt' : 'In short'}
                     </Text>
                     <Text style={{ ...T.paragraph, color: theme.textColor }} selectable={isIOS}>
                         {shortDescription}
                     </Text>
                     <Space height={10} />
                     <Text style={{ ...AS.adInfoBold, color: theme.textColor }}>
-                        {lang ? "Ferdigheter" : "Skills"}
+                        {lang ? 'Ferdigheter' : 'Skills'}
                     </Text>
                     <Text style={{ ...T.paragraph, color: theme.textColor }} selectable={isIOS}>
                         {skills}
@@ -163,7 +168,7 @@ export function AdDescription({ ad }: { ad: GetJobProps | undefined }) {
                 </Skeleton>
                 <Skeleton loading={!ad} height={400}>
                     <Text style={{ ...AS.adInfoBold, color: theme.textColor }}>
-                        {lang ? "Om stillingen" : 'About the position'}
+                        {lang ? 'Om stillingen' : 'About the position'}
                     </Text>
                     {LongDescription && <RenderDescription description={LongDescription} />}
                 </Skeleton>
@@ -186,26 +191,26 @@ export function AdMedia({ ad }: { ad: GetJobProps }) {
         {
             url: ad.organization?.link_instagram,
             source: isDark
-                ? require("@assets/social/instagram-white.png")
-                : require("@assets/social/instagram-black.png")
+                ? require('@assets/social/instagram-white.png')
+                : require('@assets/social/instagram-black.png')
         },
         {
             url: ad.organization?.link_homepage,
             source: isDark
-                ? require("@assets/social/web-white.png")
-                : require("@assets/social/web-black.png")
+                ? require('@assets/social/web-white.png')
+                : require('@assets/social/web-black.png')
         },
         {
             url: ad.organization?.link_facebook,
             source: isDark
-                ? require("@assets/social/facebook-white.png")
-                : require("@assets/social/facebook-black.png")
+                ? require('@assets/social/facebook-white.png')
+                : require('@assets/social/facebook-black.png')
         },
         {
             url: ad.organization?.link_linkedin,
             source: isDark
-                ? require("@assets/social/linkedin-white.png")
-                : require("@assets/social/linkedin-black.png")
+                ? require('@assets/social/linkedin-white.png')
+                : require('@assets/social/linkedin-black.png')
         },
     ]
 
@@ -219,8 +224,9 @@ export function AdMedia({ ad }: { ad: GetJobProps }) {
         <View style={{ marginBottom: 10 }}>
             <Skeleton loading={!ad} height={70}>
                 <View style={AS.socialView}>
-                    {social.map((platform: SocialProps) => {
-                        if (platform.url?.length) return (
+                    {social
+                        .filter((platform): platform is ActiveSocialProps => Boolean(platform.url?.length))
+                        .map((platform) => (
                             <View key={platform.url}>
                                 <Link url={platform.url}>
                                     <Image
@@ -229,8 +235,7 @@ export function AdMedia({ ad }: { ad: GetJobProps }) {
                                     />
                                 </Link>
                             </View>
-                        )
-                    })}
+                        ))}
                 </View>
                 <View style={AS.socialView}>
                     {ad?.application_url &&
@@ -243,7 +248,7 @@ export function AdMedia({ ad }: { ad: GetJobProps }) {
                                     ...AS.adButtonText,
                                     color: theme.textColor
                                 }}>
-                                    {lang ? "Søk nå" : "Apply"}
+                                    {lang ? 'Søk nå' : 'Apply'}
                                 </Text>
                             </View>
                         </TouchableOpacity>
@@ -267,9 +272,9 @@ export function AdTitle({ ad }: { ad: GetJobProps }) {
 
     function Logo() {
         // Handles svg icons
-        if (logo?.endsWith(".svg")) {
+        if (logo?.endsWith('.svg')) {
             return <SvgUri
-                style={{ alignSelf: "center", backgroundColor: "white", marginTop: 12 }}
+                style={{ alignSelf: 'center', backgroundColor: 'white', marginTop: 12 }}
                 width={90}
                 height={60}
                 uri={`${config.cdn}/organizations/${logo}`}
@@ -277,7 +282,7 @@ export function AdTitle({ ad }: { ad: GetJobProps }) {
         }
 
         // Handles png, jpg and gif icons from Login CDN
-        if (validFileType(logo) && !logo?.startsWith("http")) {
+        if (validFileType(logo) && !logo?.startsWith('http')) {
             return <Image
                 style={AS.adBannerSmall}
                 source={{ uri: `${config.cdn}/organizations/${logo}` }}
@@ -285,7 +290,7 @@ export function AdTitle({ ad }: { ad: GetJobProps }) {
         }
 
         // Handles png, jpg and gif icons from extern location
-        if (validFileType(logo) && logo?.includes("http")) {
+        if (validFileType(logo) && logo?.includes('http')) {
             return <Image style={AS.adBannerSmall} source={{ uri: logo }} />
         }
 
@@ -324,8 +329,8 @@ export function AdUpdateInfo({ ad }: { ad: GetJobProps | undefined }) {
     const updated = LastFetch(ad?.updated_at)
     const created = LastFetch(ad?.time_publish)
     const didUpdate = created !== updated
-    const textNO = ["Oppdatert kl:", "Opprettet kl:"]
-    const textEN = ["Updated:", "Created:"]
+    const textNO = ['Oppdatert kl:', 'Opprettet kl:']
+    const textEN = ['Updated:', 'Created:']
     const text = lang ? textNO : textEN
 
     return (
@@ -359,7 +364,7 @@ function InfoView({ titleNO, titleEN, text }: InfoViewProps) {
     return (
         <View style={AS.adInfoInsideView}>
             <Text style={{
-                ...AS.adInfoType, width: lang ? "40%" : "25%",
+                ...AS.adInfoType, width: lang ? '40%' : '25%',
                 color: theme.oppositeTextColor
             }}>
                 {lang ? titleNO : titleEN}

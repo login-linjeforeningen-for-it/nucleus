@@ -74,7 +74,9 @@ export function registerAuthListener() {
 
 export async function startLogin(target = 'app') {
     const redirectUri = ExpoLinking.createURL('auth')
-    const loginUrl = `${config.app_api_url}/auth/login?redirect_uri=${encodeURIComponent(redirectUri)}&target=${encodeURIComponent(target)}`
+    const loginUrl = `${config.app_api_url}/auth/login`
+        + `?redirect_uri=${encodeURIComponent(redirectUri)}`
+        + `&target=${encodeURIComponent(target)}`
     await Linking.openURL(loginUrl)
 }
 
@@ -87,8 +89,12 @@ export async function openAuthenticatedDestination(destination: 'gpt' | 'queenbe
     }
 
     const url = destination === 'gpt'
-        ? `${config.login_url}/api/auth/token?access_token=${encodeURIComponent(token)}&redirect=${encodeURIComponent('/ai')}`
-        : `${config.queenbee_url}/api/auth/token?access_token=${encodeURIComponent(token)}&redirect=${encodeURIComponent('/internal')}`
+        ? `${config.login_url}/api/auth/token`
+            + `?access_token=${encodeURIComponent(token)}`
+            + `&redirect=${encodeURIComponent('/ai')}`
+        : `${config.queenbee_url}/api/auth/token`
+            + `?access_token=${encodeURIComponent(token)}`
+            + `&redirect=${encodeURIComponent('/internal')}`
 
     await Linking.openURL(url)
 }

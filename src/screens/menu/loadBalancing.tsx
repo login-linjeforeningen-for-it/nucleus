@@ -1,19 +1,20 @@
-import Cluster from "@/components/shared/cluster"
-import Space from "@/components/shared/utils"
-import Swipe from "@components/nav/swipe"
-import Text from "@components/shared/text"
-import GS from "@styles/globalStyles"
-import T from "@styles/text"
-import { getLoadBalancingSites, setPrimaryLoadBalancingSite, type NativeLoadBalancingSite } from "@utils/queenbeeApi"
-import { JSX, useEffect, useMemo, useState } from "react"
-import { RefreshControl, ScrollView, TouchableOpacity, View } from "react-native"
-import { useSelector } from "react-redux"
+import Cluster from '@/components/shared/cluster'
+import Space from '@/components/shared/utils'
+import InternalNavMenu from '@components/menu/queenbee/internalNavMenu'
+import Swipe from '@components/nav/swipe'
+import Text from '@components/shared/text'
+import GS from '@styles/globalStyles'
+import T from '@styles/text'
+import { getLoadBalancingSites, setPrimaryLoadBalancingSite } from '@utils/queenbeeApi'
+import { JSX, useEffect, useMemo, useState } from 'react'
+import { RefreshControl, ScrollView, TouchableOpacity, View } from 'react-native'
+import { useSelector } from 'react-redux'
 
-export default function LoadBalancingScreen(): JSX.Element {
+export default function LoadBalancingScreen({ navigation }: MenuProps<'LoadBalancingScreen'>): JSX.Element {
     const { theme } = useSelector((state: ReduxState) => state.theme)
     const [sites, setSites] = useState<NativeLoadBalancingSite[]>([])
     const [refreshing, setRefreshing] = useState(false)
-    const [error, setError] = useState("")
+    const [error, setError] = useState('')
     const [switchingId, setSwitchingId] = useState<number | null>(null)
 
     const summary = useMemo(() => {
@@ -26,9 +27,9 @@ export default function LoadBalancingScreen(): JSX.Element {
         setRefreshing(true)
         try {
             setSites(await getLoadBalancingSites())
-            setError("")
+            setError('')
         } catch (loadError) {
-            setError(loadError instanceof Error ? loadError.message : "Failed to load load balancing")
+            setError(loadError instanceof Error ? loadError.message : 'Failed to load load balancing')
         } finally {
             setRefreshing(false)
         }
@@ -40,7 +41,7 @@ export default function LoadBalancingScreen(): JSX.Element {
             await setPrimaryLoadBalancingSite(id)
             await load()
         } catch (switchError) {
-            setError(switchError instanceof Error ? switchError.message : "Failed to switch primary")
+            setError(switchError instanceof Error ? switchError.message : 'Failed to switch primary')
         } finally {
             setSwitchingId(null)
         }
@@ -51,37 +52,33 @@ export default function LoadBalancingScreen(): JSX.Element {
     }, [])
 
     return (
-        <Swipe left="QueenbeeScreen">
+        <Swipe left='QueenbeeScreen'>
             <View style={{ flex: 1, backgroundColor: theme.darker }}>
+                <InternalNavMenu activeRoute='LoadBalancingScreen' navigation={navigation} />
                 <ScrollView
                     refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => void load()} />}
                     style={GS.content}
-                    contentContainerStyle={{ paddingHorizontal: 12, paddingBottom: 80 }}
+                    contentContainerStyle={{ paddingHorizontal: 4, paddingBottom: 80 }}
                     showsVerticalScrollIndicator={false}
                 >
                     <Space height={90} />
                     <Cluster>
-                        <View style={{ padding: 12 }}>
-                            <Text style={{ ...T.text25, color: theme.textColor }}>Load balancing</Text>
-                            <Space height={6} />
-                            <Text style={{ ...T.text15, color: theme.oppositeTextColor }}>
-                                Review active targets and switch the primary site directly from the app.
-                            </Text>
-                        </View>
-                    </Cluster>
-                    <Space height={10} />
-                    <Cluster>
-                        <View style={{ padding: 12, flexDirection: "row", flexWrap: "wrap", gap: 10 }}>
-                            <View style={{ flexBasis: "47%", flexGrow: 1 }}>
-                                <Text style={{ ...T.text12, color: theme.oppositeTextColor }}>Primary site</Text>
-                                <Space height={4} />
-                                <Text style={{ ...T.text20, color: theme.textColor }}>{summary.primary?.name || "Unset"}</Text>
-                            </View>
-                            <View style={{ flexBasis: "47%", flexGrow: 1 }}>
-                                <Text style={{ ...T.text12, color: theme.oppositeTextColor }}>Healthy targets</Text>
-                                <Space height={4} />
-                                <Text style={{ ...T.text20, color: theme.textColor }}>{summary.healthy}/{sites.length}</Text>
-                            </View>
+                        <Space height={14} />
+                        <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 10 }}>
+                            <SummaryMetric
+                                label='Primary site'
+                                value={summary.primary?.name || 'Unset'}
+                                detail={summary.primary?.ip || 'No active primary target'}
+                                tone={summary.primary?.operational ? 'healthy' : 'idle'}
+                            />
+                            <SummaryMetric
+                                label='Healthy targets'
+                                value={`${summary.healthy}/${sites.length}`}
+                                detail={sites.length
+                                    ? `${sites.length - summary.healthy} unavailable or in maintenance`
+                                    : 'No targets configured'}
+                                tone={summary.healthy === sites.length && sites.length > 0 ? 'healthy' : 'warning'}
+                            />
                         </View>
                     </Cluster>
                     {!!error && (
@@ -89,7 +86,7 @@ export default function LoadBalancingScreen(): JSX.Element {
                             <Space height={10} />
                             <Cluster>
                                 <View style={{ padding: 12 }}>
-                                    <Text style={{ ...T.text15, color: "#ff8b8b" }}>{error}</Text>
+                                    <Text style={{ ...T.text15, color: '#ff8b8b' }}>{error}</Text>
                                 </View>
                             </Cluster>
                         </>
@@ -104,7 +101,8 @@ export default function LoadBalancingScreen(): JSX.Element {
                                     <Text style={{ ...T.text15, color: theme.oppositeTextColor }}>{site.ip}</Text>
                                     <Space height={8} />
                                     <Text style={{ ...T.text12, color: theme.oppositeTextColor }}>
-                                        {site.primary ? "Primary" : "Secondary"} · {site.operational ? "Operational" : "Down"}{site.maintenance ? " · Maintenance" : ""}
+                                        {site.primary ? 'Primary' : 'Secondary'} · {site.operational ? 'Operational' : 'Down'}
+                                        {site.maintenance ? ' · Maintenance' : ''}
                                     </Text>
                                     {!!site.note && (
                                         <>
@@ -113,15 +111,23 @@ export default function LoadBalancingScreen(): JSX.Element {
                                         </>
                                     )}
                                     <Space height={10} />
-                                    <TouchableOpacity disabled={site.primary || switchingId === site.id} onPress={() => void makePrimary(site.id)}>
+                                    <TouchableOpacity
+                                        disabled={site.primary || switchingId === site.id}
+                                        onPress={() => void makePrimary(site.id)}
+                                    >
                                         <View style={{
                                             borderRadius: 14,
-                                            backgroundColor: site.primary ? "#ffffff10" : theme.orange,
+                                            backgroundColor: site.primary ? '#ffffff10' : theme.orange,
                                             paddingHorizontal: 14,
                                             paddingVertical: 10
                                         }}>
-                                            <Text style={{ ...T.centered15, color: site.primary ? theme.textColor : theme.darker }}>
-                                                {site.primary ? "Serving traffic" : switchingId === site.id ? "Switching..." : "Make primary"}
+                                            <Text style={{
+                                                ...T.centered15,
+                                                color: site.primary ? theme.textColor : theme.darker,
+                                            }}>
+                                                {site.primary
+                                                    ? 'Serving traffic'
+                                                    : switchingId === site.id ? 'Switching...' : 'Make primary'}
                                             </Text>
                                         </View>
                                     </TouchableOpacity>
@@ -133,5 +139,68 @@ export default function LoadBalancingScreen(): JSX.Element {
                 </ScrollView>
             </View>
         </Swipe>
+    )
+}
+
+function SummaryMetric({
+    label,
+    value,
+    detail,
+    tone,
+}: {
+    label: string
+    value: string
+    detail: string
+    tone: 'healthy' | 'warning' | 'idle'
+}) {
+    const { theme } = useSelector((state: ReduxState) => state.theme)
+    const dotColor = tone === 'healthy'
+        ? '#70e2a0'
+        : tone === 'warning'
+            ? theme.orange
+            : theme.oppositeTextColor
+
+    return (
+        <View style={{
+            flexBasis: '47%',
+            flexGrow: 1,
+            minHeight: 108,
+            borderRadius: 18,
+            borderWidth: 1,
+            borderColor: 'rgba(255,255,255,0.08)',
+            backgroundColor: 'rgba(255,255,255,0.06)',
+            padding: 14,
+            justifyContent: 'space-between',
+        }}>
+            <View style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+                gap: 7,
+            }}>
+                <View style={{
+                    width: 8,
+                    height: 8,
+                    borderRadius: 4,
+                    backgroundColor: dotColor,
+                }} />
+                <Text style={{
+                    ...T.text12,
+                    color: theme.oppositeTextColor,
+                    textTransform: 'uppercase',
+                    letterSpacing: 0.6,
+                }}>
+                    {label}
+                </Text>
+            </View>
+            <View>
+                <Text style={{ ...T.text25, color: theme.textColor }}>
+                    {value}
+                </Text>
+                <Space height={4} />
+                <Text style={{ ...T.text12, color: theme.oppositeTextColor }}>
+                    {detail}
+                </Text>
+            </View>
+        </View>
     )
 }

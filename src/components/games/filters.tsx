@@ -1,7 +1,7 @@
-import T from "@styles/text"
-import { Dispatch, SetStateAction } from "react"
-import { Image, Platform, Text, TouchableOpacity, View } from "react-native"
-import { useSelector } from "react-redux"
+import T from '@styles/text'
+import { Dispatch, SetStateAction } from 'react'
+import { Image, Platform, Text, TouchableOpacity, View } from 'react-native'
+import { useSelector } from 'react-redux'
 
 type FiltersProps = {
     mode: number
@@ -18,14 +18,14 @@ function Slash({ size }: { size: number }) {
     return (
         <View
             style={{
-                position: "absolute",
+                position: 'absolute',
                 width: size,
                 height: 2,
-                backgroundColor: "red",
-                transform: [{ rotate: "45deg" }],
+                backgroundColor: 'red',
+                transform: [{ rotate: '45deg' }],
                 zIndex: 10,
-                top: "50%",
-                left: "50%",
+                top: '50%',
+                left: '50%',
                 marginLeft: -size / 2,
                 marginTop: -1
             }}
@@ -82,15 +82,15 @@ export default function Filters({
                         <Text style={{ color: theme.textColor, ...T.text20 }}>
                             {lang
                                 ? index === 0
-                                    ? "Snill"
+                                    ? 'Snill'
                                     : index === 1
-                                        ? "Blandet"
-                                        : "Dristig"
+                                        ? 'Blandet'
+                                        : 'Dristig'
                                 : index === 0
-                                    ? "Kind"
+                                    ? 'Kind'
                                     : index === 1
-                                        ? "Mix"
-                                        : "Bold"}
+                                        ? 'Mix'
+                                        : 'Bold'}
                         </Text>
                     </TouchableOpacity>
                 ))}
@@ -108,7 +108,7 @@ export default function Filters({
                 }}
             >
                 {/* SCHOOL */}
-                {displaySchool && <View style={{ alignItems: "center", justifyContent: "center" }}>
+                {displaySchool && <View style={{ alignItems: 'center', justifyContent: 'center' }}>
                     <TouchableOpacity onPress={() => setSchool(!school)}>
                         <Text style={{ color: theme.textColor, ...T.text30 }}>
                             🎓
@@ -119,7 +119,7 @@ export default function Filters({
                 </View>}
 
                 {/* NTNU */}
-                {displayNTNU && <View style={{ alignItems: "center", justifyContent: "center" }}>
+                {displayNTNU && <View style={{ alignItems: 'center', justifyContent: 'center' }}>
                     <TouchableOpacity onPress={() => setNTNU(!ntnu)}>
                         <Image
                             style={{ width: 50, height: 50 }}

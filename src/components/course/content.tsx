@@ -1,11 +1,11 @@
-import { Dimensions, Text, TouchableOpacity, View } from "react-native"
-import { useSelector } from "react-redux"
-import { Dispatch, SetStateAction, useEffect, useState } from "react"
-import { ScrollView } from "react-native-gesture-handler"
-import Markdown from "./markdown"
-import ThumbsUp from "./thumbsUp"
-import ThumbsDown from "./thumbsDown"
-import T from "@styles/text"
+import { Dimensions, Text, TouchableOpacity, View } from 'react-native'
+import { useSelector } from 'react-redux'
+import { Dispatch, SetStateAction, useEffect, useState } from 'react'
+import { ScrollView } from 'react-native-gesture-handler'
+import Markdown from './markdown'
+import ThumbsUp from './thumbsUp'
+import ThumbsDown from './thumbsDown'
+import T from '@styles/text'
 
 type CourseContentProps = {
     course: Course,
@@ -42,13 +42,10 @@ export default function CourseContent({
     setClicked,
     cardID,
     displayCardID,
-    setCardID,
-    previous,
-    next,
     showFooter = true,
 }: CourseContentProps) {
     const { theme } = useSelector((state: ReduxState) => state.theme)
-    const height = Dimensions.get("window").height
+    const height = Dimensions.get('window').height
     const [shuffledAlternatives, setShuffledAlternatives] = useState<string[]>([])
     const [indexMapping, setIndexMapping] = useState<number[]>([])
     const resolvedCardID = displayCardID ?? cardID
@@ -88,7 +85,7 @@ export default function CourseContent({
         for (let i = shuffled.length - 1; i > 0; i--) {
             const j = Math.floor(Math.random() * (i + 1))
                 ;[shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]]
-                ;[mapping[i], mapping[j]] = [mapping[j], mapping[i]]
+            ;[mapping[i], mapping[j]] = [mapping[j], mapping[i]]
         }
 
         setShuffledAlternatives(shuffled)
@@ -225,7 +222,11 @@ function CardFooter({ votes, clicked, setClicked, correct }: CardFooterProps) {
         : lang ? 'Vis svar' : 'Show answer'
 
     function handleReveal() {
-        solved ? setClicked([]) : setClicked([...correct])
+        if (solved) {
+            setClicked([])
+        } else {
+            setClicked([...correct])
+        }
     }
 
     return (

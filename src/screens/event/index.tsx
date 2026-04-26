@@ -1,19 +1,18 @@
-import React, { JSX, useEffect, useState } from "react"
-import EventList from "@components/event/eventList"
-import GS from "@styles/globalStyles"
+import React, { JSX, useEffect, useState } from 'react'
+import EventList from '@components/event/eventList'
+import GS from '@styles/globalStyles'
 import initializeNotifications
-    from "@utils/notification/notificationSetup"
-import LastFetch, { fetchEvents } from "@/utils/fetch"
-import LogoNavigation from "@/components/shared/logoNavigation"
-import Swipe from "@components/nav/swipe"
-import DownloadButton from "@components/shared/downloadButton"
-import { useFocusEffect } from "@react-navigation/native"
-import { useDispatch, useSelector } from "react-redux"
-import { StatusBar } from "expo-status-bar"
-import { setEvents, setLastFetch, setLastSave } from "@redux/event"
-import { View } from "react-native"
-import { FilterButton, FilterUI } from "@components/shared/filter"
-import { EventScreenProps } from "@type/screenTypes"
+    from '@utils/notification/notificationSetup'
+import LastFetch, { fetchEvents } from '@/utils/fetch'
+import LogoNavigation from '@/components/shared/logoNavigation'
+import Swipe from '@components/nav/swipe'
+import DownloadButton from '@components/shared/downloadButton'
+import { useFocusEffect } from '@react-navigation/native'
+import { useDispatch, useSelector } from 'react-redux'
+import { StatusBar } from 'expo-status-bar'
+import { setEvents, setLastFetch, setLastSave } from '@redux/event'
+import { View } from 'react-native'
+import { FilterButton, FilterUI } from '@components/shared/filter'
 
 /**
  * Parent EventScreen component
@@ -28,10 +27,6 @@ import { EventScreenProps } from "@type/screenTypes"
  * @returns EventScreen
  */
 export default function EventScreen({ navigation }: EventScreenProps<'EventScreen'>): JSX.Element {
-    // Push notification
-    const [pushNotification, setPushNotification] = useState(false)
-    const [pushNotificationContent, setPushNotificationContent] =
-        useState<JSX.Element | undefined>(undefined)
     // Notification state
     const [shouldSetupNotifications, setShouldSetupNotifications] = useState(true)
 
@@ -74,7 +69,7 @@ export default function EventScreen({ navigation }: EventScreenProps<'EventScree
 
     useEffect(() => {
         // Displays when the API was last fetched successfully
-        if (lastSave === "") {
+        if (lastSave === '') {
             (async () => { dispatch(setLastSave(LastFetch())) })()
         }
     }, [lastSave])
@@ -85,32 +80,31 @@ export default function EventScreen({ navigation }: EventScreenProps<'EventScree
             headerComponents: {
                 bottom: [<FilterUI />],
                 left: [<LogoNavigation />],
-                right: [<FilterButton />, <DownloadButton screen="event" />]
+                right: [<FilterButton />, <DownloadButton screen='event' />]
             }
         } as any)
     }, [navigation])
 
     initializeNotifications({
         shouldRun: shouldSetupNotifications,
-        hasBeenSet: notification["SETUP"],
+        hasBeenSet: notification['SETUP'],
         setShouldSetupNotifications,
         dispatch
     })
 
     // Displays the EventScreen
     return (
-        <Swipe right="AdNav">
+        <Swipe right='AdNav'>
             <View>
-                <StatusBar style={isDark ? "light" : "dark"} />
+                <StatusBar style={isDark ? 'light' : 'dark'} />
                 <View
                     style={{
                         ...GS.content,
                         paddingHorizontal: 5,
                         backgroundColor: theme.darker
                     }}
-                    testID="eventScreen"
+                    testID='eventScreen'
                 >
-                    {pushNotification && pushNotificationContent}
                     <EventList />
                 </View>
             </View>

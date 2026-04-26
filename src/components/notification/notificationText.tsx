@@ -1,6 +1,6 @@
-import NS from "../../styles/notificationStyles"
-import { View, Text } from "react-native"
-import { useSelector } from "react-redux"
+import NS from '../../styles/notificationStyles'
+import { View, Text } from 'react-native'
+import { useSelector } from 'react-redux'
 
 type NotificationTextProps = {
     title: string
@@ -22,7 +22,7 @@ export default function NotificationText({ title, body }: NotificationTextProps)
                     {title}
                 </Text>
             </View>
-            <View style={{ flexDirection: "row" }}>
+            <View style={{ flexDirection: 'row' }}>
                 <Text style={{ ...NS.loc, color: theme.oppositeTextColor }}>
                     {body}
                 </Text>

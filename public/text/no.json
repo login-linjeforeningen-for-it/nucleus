@@ -21,7 +21,10 @@
         "LoadBalancingScreen": "Lastbalansering",
         "DatabaseScreen": "Databaser",
         "VulnerabilitiesScreen": "Sårbarheter",
-        "LogsScreen": "Logger"
+        "LogsScreen": "Logger",
+        "TrafficScreen": "Trafikk",
+        "TrafficRecordsScreen": "Trafikklogger",
+        "TrafficMapScreen": "Trafikkart"
     },
     "search": {
         "intro": "Søk fra appen og se animasjonen før den åpnes.",

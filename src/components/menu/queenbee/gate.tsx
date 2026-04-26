@@ -1,10 +1,10 @@
-import Swipe from "@components/nav/swipe"
-import Space from "@components/shared/utils"
-import Text from "@components/shared/text"
-import GS from "@styles/globalStyles"
-import T from "@styles/text"
-import { JSX, ReactNode } from "react"
-import { Dimensions, ScrollView, TouchableOpacity, View } from "react-native"
+import Swipe from '@components/nav/swipe'
+import Space from '@components/shared/utils'
+import Text from '@components/shared/text'
+import GS from '@styles/globalStyles'
+import T from '@styles/text'
+import { JSX, ReactNode } from 'react'
+import { Dimensions, ScrollView, TouchableOpacity, View } from 'react-native'
 
 type Props = {
     backgroundColor: string
@@ -32,10 +32,10 @@ export default function QueenbeeGate({
     children
 }: Props): JSX.Element {
     return (
-        <Swipe left="MenuScreen">
+        <Swipe left='MenuScreen'>
             <View style={{ flex: 1, backgroundColor }}>
                 <ScrollView style={GS.content} contentContainerStyle={{ paddingBottom: 40 }}>
-                    <Space height={Dimensions.get("window").height / 8} />
+                    <Space height={Dimensions.get('window').height / 8} />
                     <Text style={{ ...T.centeredBold20, color: textColor }}>{title}</Text>
                     <Space height={14} />
                     <Text style={{ ...T.centered15, color: mutedTextColor }}>

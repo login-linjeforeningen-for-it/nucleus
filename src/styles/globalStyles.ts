@@ -1,18 +1,18 @@
-import { StyleSheet, Dimensions, Platform } from "react-native"
-import T from "./text"
+import { StyleSheet, Dimensions, Platform } from 'react-native'
+import T from './text'
 
 export const GS = StyleSheet.create({
     // Main view of every screen
     content: {
         flex: 1,
-        minHeight: "100%",
-        width: "100%",
+        minHeight: '100%',
+        width: '100%',
         paddingHorizontal: 12
     },
     // Horizontal card views on setting notifications
     notificationBack: {
-        flexDirection: "row",
-        alignItems: "center",
+        flexDirection: 'row',
+        alignItems: 'center',
     },
     // Notification card text
     notificationText: {
@@ -24,81 +24,81 @@ export const GS = StyleSheet.create({
     },
     // ReportScreen name and notifier text
     inputText: {
-        alignSelf: "center",
-        alignItems: "center",
-        width: "80%",
+        alignSelf: 'center',
+        alignItems: 'center',
+        width: '80%',
         height: 50,
         borderRadius: 20,
     },
     // Left view of notificationScreen
     view: {
-        alignSelf: "center",
-        width: "84%",
+        alignSelf: 'center',
+        width: '84%',
     },
     // Right view of notificationScreen
     view2: {
-        justifyContent: "center",
+        justifyContent: 'center',
         marginVertical: 2,
     },
     // Used anywhere there is a small image
     smallImage: {
-        alignSelf: "center",
+        alignSelf: 'center',
         height: 150,
         width: 150,
     },
     parentCommitteeView: {
-        flexDirection: "row",
-        justifyContent: "space-between",
+        flexDirection: 'row',
+        justifyContent: 'space-between',
         marginVertical: 8,
-        maxWidth: "93%"
+        maxWidth: '93%'
     },
     committee: {
         borderRadius: 10,
     },
     image80: {
-        alignSelf: "center",
+        alignSelf: 'center',
         height: 80,
         width: 80,
     },
     dropdown: {
-        flexDirection: "row",
+        flexDirection: 'row',
         paddingLeft: 5,
-        alignItems: "center",
+        alignItems: 'center',
         height: 40,
     },
     reminderDropdown: {
-        flexDirection: "row",
-        alignItems: "center",
+        flexDirection: 'row',
+        alignItems: 'center',
         height: 40,
-        justifyContent: "space-between",
+        justifyContent: 'space-between',
     },
     dropdownContent: {
-        flexDirection: "row",
+        flexDirection: 'row',
         paddingLeft: 10,
-        alignItems: "center",
+        alignItems: 'center',
         height: 36,
     },
     dropImage: {
-        alignSelf: "center",
+        alignSelf: 'center',
         height: 60,
         width: 40,
     },
     reminderDropdownArrow: {
-        alignSelf: "center",
+        alignSelf: 'center',
         height: 20,
         width: 20,
-        resizeMode: "contain",
+        resizeMode: 'contain',
     },
     smallDropImage: {
-        alignSelf: "center",
+        alignSelf: 'center',
         height: 40,
         width: 25
     },
     row: {
-        flexDirection: "row",
+        flexDirection: 'row',
     },
     aboutImage: {
-        width: "100%",
+        width: '100%',
         height: undefined,
         aspectRatio: 1.5,
     },
@@ -107,7 +107,7 @@ export const GS = StyleSheet.create({
         width: 25,
     },
     medium: {
-        alignSelf: "center",
+        alignSelf: 'center',
         height: 50,
         width: 50,
     },
@@ -116,19 +116,19 @@ export const GS = StyleSheet.create({
         width: 35,
     },
     personImage: {
-        alignSelf: "center",
+        alignSelf: 'center',
         width: 220,
         height: 220,
         marginBottom: 10
     },
     socialView: {
-        flexDirection: "row",
-        alignItems: "center",
-        justifyContent: "center",
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
     },
     socialPartView: {
-        width: "15%",
-        alignItems: "center",
+        width: '15%',
+        alignItems: 'center',
     },
     notificationDropdownTouchable: {
         top: 50,
@@ -136,28 +136,28 @@ export const GS = StyleSheet.create({
         zIndex: 3,
         borderRadius: 20,
         height: 70,
-        alignItems: "flex-start",
+        alignItems: 'flex-start',
         paddingHorizontal: 14
     },
     notificationDropdownBlur: {
         top: 50,
-        position: "absolute",
+        position: 'absolute',
         marginHorizontal: 12,
-        width: "94%",
+        width: '94%',
         zIndex: 1,
         borderRadius: 10,
         height: 70,
-        overflow: "hidden"
+        overflow: 'hidden'
     },
     notificationDropdownTitle: {
-        fontWeight: "500",
+        fontWeight: '500',
         ...T.text20,
     },
     notificationDropdownBody: {
         ...T.text18,
     },
     headerView: {
-        position: "absolute",
+        position: 'absolute',
         zIndex: 1,
         display: 'flex',
         flexDirection: 'row',
@@ -180,32 +180,32 @@ export const GS = StyleSheet.create({
         ...T.text18,
     },
     blurBackgroundView: {
-        position: "absolute",
-        width: "100%",
-        justifyContent: "center",
+        position: 'absolute',
+        width: '100%',
+        justifyContent: 'center',
     },
     customMenuIcon: {
-        right: Platform.OS === "ios"
-            ? Dimensions.get("window").width / 50
-            : Dimensions.get("window").width / 30
+        right: Platform.OS === 'ios'
+            ? Dimensions.get('window').width / 50
+            : Dimensions.get('window').width / 30
     },
     logo: {
-        left: Platform.OS === "ios"
-            ? Dimensions.get("window").width / 21.5
-            : Dimensions.get("window").width / 20
+        left: Platform.OS === 'ios'
+            ? Dimensions.get('window').width / 21.5
+            : Dimensions.get('window').width / 20
     },
     tag: {
         width: 15,
         height: 15,
         top: 1,
-        resizeMode: "contain",
+        resizeMode: 'contain',
     },
     animatedCard: {
-        position: "absolute",
+        position: 'absolute',
         zIndex: 2,
         bottom: 0,
-        height: Platform.OS == "ios" ? Dimensions.get("window").height / 1.48 : Dimensions.get("window").height / 1.40,
-        width: "100%",
+        height: Platform.OS == 'ios' ? Dimensions.get('window').height / 1.48 : Dimensions.get('window').height / 1.40,
+        width: '100%',
         borderRadius: 20,
     },
     trashCan: {
@@ -213,9 +213,9 @@ export const GS = StyleSheet.create({
         width: 50
     },
     errorImage: {
-        alignSelf: "center",
-        width: Dimensions.get("window").width - 30,
-        resizeMode: "stretch",
+        alignSelf: 'center',
+        width: Dimensions.get('window').width - 30,
+        resizeMode: 'stretch',
         height: 300,
         marginTop: 8
     },

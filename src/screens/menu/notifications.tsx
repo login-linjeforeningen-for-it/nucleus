@@ -1,9 +1,8 @@
-import Cluster from "@/components/shared/cluster"
-import Space from "@/components/shared/utils"
-import GS from "@styles/globalStyles"
-import React, { JSX, useCallback, useEffect, useRef, useState } from "react"
-import { Navigation } from "@/interfaces"
-import { useSelector } from "react-redux"
+import Cluster from '@/components/shared/cluster'
+import Space from '@/components/shared/utils'
+import GS from '@styles/globalStyles'
+import React, { JSX, useCallback, useEffect, useRef, useState } from 'react'
+import { useSelector } from 'react-redux'
 import {
     View,
     Text,
@@ -12,24 +11,24 @@ import {
     Platform,
     Animated,
     TouchableHighlight
-} from "react-native"
-import NS from "@styles/notificationStyles"
-import AsyncStorage from "@react-native-async-storage/async-storage"
-import NotificationText from "@/components/notification/notificationText"
-import Swipe from "@components/nav/swipe"
-import { useNavigation } from "@react-navigation/native"
-import { RefreshControl, ScrollView } from "react-native-gesture-handler"
+} from 'react-native'
+import NS from '@styles/notificationStyles'
+import AsyncStorage from '@react-native-async-storage/async-storage'
+import NotificationText from '@/components/notification/notificationText'
+import Swipe from '@components/nav/swipe'
+import { useNavigation } from '@react-navigation/native'
+import { RefreshControl, ScrollView } from 'react-native-gesture-handler'
 import { Swipeable } from 'react-native-gesture-handler'
-import TrashCan from "@components/menu/navigation"
-import { NotificationSeperator } from "@components/event/seperator"
-import T from "@styles/text"
+import TrashCan from '@components/menu/navigation'
+import { NotificationSeperator } from '@components/event/seperator'
+import T from '@styles/text'
 import {
     getFirstReadIndex,
     markNotificationsRead,
     parseNotificationList,
     pruneOldNotifications,
     resolveNotificationTarget,
-} from "@utils/notification/list"
+} from '@utils/notification/list'
 
 type NotificationModalProps = {
     item: NotificationListProps
@@ -63,14 +62,14 @@ export default function NotificationScreen(): JSX.Element {
     const [readIndex, setReadIndex] = useState<number>(-1)
 
     async function getList() {
-        const temp = await AsyncStorage.getItem("notificationList")
+        const temp = await AsyncStorage.getItem('notificationList')
         const storedList = parseNotificationList(temp)
         const prunedList = pruneOldNotifications(storedList)
         const nextList = markNotificationsRead(prunedList)
 
         setList(nextList)
         findIndexOfFirstReadIfAny({ list: nextList, setReadIndex })
-        await AsyncStorage.setItem("notificationList", JSON.stringify(nextList))
+        await AsyncStorage.setItem('notificationList', JSON.stringify(nextList))
         return true
     }
 
@@ -85,22 +84,30 @@ export default function NotificationScreen(): JSX.Element {
     }, [])
 
     return (
-        <Swipe left="MenuScreen">
+        <Swipe left='MenuScreen'>
             <View>
                 <View style={{ ...GS.content, backgroundColor: theme.darker, paddingHorizontal: 0 }}>
-                    <Space height={Dimensions.get("window").height / 8.1} />
+                    <Space height={Dimensions.get('window').height / 8.1} />
                     <ScrollView
                         showsVerticalScrollIndicator={false}
                         scrollEventThrottle={100}
-                        style={{ minHeight: "100%", top: -5 }}
+                        style={{ minHeight: '100%', top: -5 }}
                     >
                         <RefreshControl refreshing={refresh} onRefresh={onRefresh} />
                         {Array.isArray(list) && list.length
-                            ? <List list={list} setList={setList} hideOld={hideOld} setHideOld={setHideOld} readIndex={readIndex} />
+                            ? (
+                                <List
+                                    list={list}
+                                    setList={setList}
+                                    hideOld={hideOld}
+                                    setHideOld={setHideOld}
+                                    readIndex={readIndex}
+                                />
+                            )
                             : <Text style={{ ...NS.error, color: theme.oppositeTextColor }}>
                                 {lang
-                                    ? "Ingen varslinger. Kom tilbake senere."
-                                    : "You have no notifications at this time. Check back later."}
+                                    ? 'Ingen varslinger. Kom tilbake senere.'
+                                    : 'You have no notifications at this time. Check back later.'}
                             </Text>}
                     </ScrollView>
                 </View>
@@ -121,12 +128,12 @@ function Notification({ item, list, id, setList, hideOld, setHideOld, readIndex 
         const target = resolveNotificationTarget(item.data)
 
         if (target?.kind === 'ad') {
-            navigation.navigate("SpecificAdScreen", { adID: target.adID })
+            navigation.navigate('SpecificAdScreen', { adID: target.adID })
             return
         }
 
         if (target?.kind === 'event') {
-            navigation.navigate("SpecificEventScreen", { eventID: target.eventID })
+            navigation.navigate('SpecificEventScreen', { eventID: target.eventID })
         }
     }
 
@@ -134,7 +141,7 @@ function Notification({ item, list, id, setList, hideOld, setHideOld, readIndex 
         // Copies the list to ensure that React detects the change since splice mutates the list undetectably.
         const newList = list.filter((_, index) => index !== id)
         setList(newList)
-        await AsyncStorage.setItem("notificationList", JSON.stringify(newList))
+        await AsyncStorage.setItem('notificationList', JSON.stringify(newList))
         swipeableRef.current?.close()
     }
 
@@ -145,7 +152,7 @@ function Notification({ item, list, id, setList, hideOld, setHideOld, readIndex 
     function DisplayPrevious() {
         return (
             <TouchableOpacity onPress={handlePress}>
-                <NotificationSeperator text={lang ? "Tidligere" : "Previous"} />
+                <NotificationSeperator text={lang ? 'Tidligere' : 'Previous'} />
             </TouchableOpacity>
         )
     }
@@ -163,7 +170,7 @@ function Notification({ item, list, id, setList, hideOld, setHideOld, readIndex 
                 )}
                 ref={swipeableRef}
                 // Red background when deleting item
-                containerStyle={{ backgroundColor: "red" }}
+                containerStyle={{ backgroundColor: 'red' }}
                 // Indents corners as soon as they start dragging
                 onSwipeableWillOpen={() => {
                     setIsSwiping(true)
@@ -172,7 +179,7 @@ function Notification({ item, list, id, setList, hideOld, setHideOld, readIndex 
                 onSwipeableWillClose={() => {
                     setIsSwiping(false)
                 }}
-                rightThreshold={Dimensions.get("window").width * 0.28}
+                rightThreshold={Dimensions.get('window').width * 0.28}
                 overshootRight={false}
                 onSwipeableOpen={(direction) => {
                     if (direction === 'right') {
@@ -181,16 +188,20 @@ function Notification({ item, list, id, setList, hideOld, setHideOld, readIndex 
                 }}
             >
                 {/*
-                    Using TouchableHighlight since we want feedback on touch, 
-                    but not opacity change, since the background is red because 
-                    of the delete functionality. Therefore we "highlight" the 
-                    click using a different foreground color instead. 
+                    Using TouchableHighlight since we want feedback on touch,
+                    but not opacity change, since the background is red because
+                    of the delete functionality. Therefore we "highlight" the
+                    click using a different foreground color instead.
                 */}
                 <TouchableHighlight
                     activeOpacity={1}
                     onPress={navigateIfPossible}
                     underlayColor={theme.background}
-                    style={{ backgroundColor: theme.darker, borderTopRightRadius: isSwiping ? 8 : 0, borderBottomRightRadius: isSwiping ? 8 : 0 }}
+                    style={{
+                        backgroundColor: theme.darker,
+                        borderTopRightRadius: isSwiping ? 8 : 0,
+                        borderBottomRightRadius: isSwiping ? 8 : 0,
+                    }}
                 >
                     <Animated.View>
                         <Cluster marginVertical={12} noColor={true}>
@@ -215,7 +226,7 @@ function displayTime(time: string): string {
     const currentTime = new Date()
 
     if (Number.isNaN(date.getTime())) {
-        return ""
+        return ''
     }
 
     // Calculate the time difference in milliseconds
@@ -238,15 +249,26 @@ function displayTime(time: string): string {
 function List({ list, setList, hideOld, setHideOld, readIndex }: NotificationList): JSX.Element {
     if (!list) return <></>
 
-    const offset = Dimensions.get("window").height / (Platform.OS === "ios" ? 3.8 : 3.8)
+    const offset = Dimensions.get('window').height / (Platform.OS === 'ios' ? 3.8 : 3.8)
     const { theme } = useSelector((state: ReduxState) => state.theme)
     const { lang } = useSelector((state: ReduxState) => state.lang)
-    const text = lang ? "Varslinger slettes automatisk etter 30 dager" : "Notifications are automatically deleted after 30 days"
+    const text = lang ? 'Varslinger slettes automatisk etter 30 dager' : 'Notifications are automatically deleted after 30 days'
 
     return (
         <>
-            {readIndex > 0 && <NotificationSeperator text={lang ? "Nye" : "New"} />}
-            {list.map((item, index) => <Notification key={index} list={list} item={item} id={index} setList={setList} hideOld={hideOld} setHideOld={setHideOld} readIndex={readIndex} />)}
+            {readIndex > 0 && <NotificationSeperator text={lang ? 'Nye' : 'New'} />}
+            {list.map((item, index) => (
+                <Notification
+                    key={index}
+                    list={list}
+                    item={item}
+                    id={index}
+                    setList={setList}
+                    hideOld={hideOld}
+                    setHideOld={setHideOld}
+                    readIndex={readIndex}
+                />
+            ))}
             <Text style={{ alignSelf: 'center', ...T.text12, marginVertical: 10, color: theme.oppositeTextColor }}>{text}</Text>
             <Space height={offset} />
         </>
@@ -276,7 +298,7 @@ function DeleteAction({ dragX, onDelete }: {
                 flexDirection: 'row',
                 alignItems: 'center',
                 justifyContent: 'flex-end',
-                height: "100%"
+                height: '100%'
             }}>
                 <Animated.View style={{ transform: [{ scale }] }}>
                     <TrashCan />

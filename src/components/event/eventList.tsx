@@ -1,14 +1,14 @@
-import EventCluster from "./eventCluster"
-import getCategories from "@utils/getCategories"
-import getListOffset from "@utils/getListOffset"
-import LastFetch, { fetchEvents } from "@utils/fetch"
-import Seperator from "./seperator"
-import Space, { ErrorMessage } from "@components/shared/utils"
-import { setEvents, setLastFetch } from "@redux/event"
-import { RefreshControl, ScrollView } from "react-native-gesture-handler"
-import { useState, useCallback, JSX } from "react"
-import { useDispatch, useSelector } from "react-redux"
-import { View } from "react-native"
+import EventCluster from './eventCluster'
+import getCategories from '@utils/getCategories'
+import getListOffset from '@utils/getListOffset'
+import LastFetch, { fetchEvents } from '@utils/fetch'
+import Seperator from './seperator'
+import Space, { ErrorMessage } from '@components/shared/utils'
+import { setEvents, setLastFetch } from '@redux/event'
+import { RefreshControl, ScrollView } from 'react-native-gesture-handler'
+import { useState, useCallback, JSX } from 'react'
+import { useDispatch, useSelector } from 'react-redux'
+import { View } from 'react-native'
 
 type ContentProps = {
     usedIndexes: number[]
@@ -60,7 +60,7 @@ export default function EventList(): JSX.Element {
         )
     }
 
-    return <ErrorMessage argument={!events ? "wifi" : "nomatch"} screen="event" />
+    return <ErrorMessage argument={!events ? 'wifi' : 'nomatch'} screen='event' />
 }
 
 function Content({ usedIndexes }: ContentProps) {

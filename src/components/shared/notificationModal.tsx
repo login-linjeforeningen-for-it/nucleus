@@ -1,17 +1,15 @@
-import GS from "@styles/globalStyles"
-import { BlurView } from "expo-blur"
-import { Navigation } from "@/interfaces"
-import { View, Text, Platform, TouchableOpacity } from "react-native"
-import { useNavigation } from "@react-navigation/native"
-import { useSelector } from "react-redux"
-import { RootStackProps } from "@type/screenTypes"
+import GS from '@styles/globalStyles'
+import { BlurView } from 'expo-blur'
+import { View, Text, Platform, TouchableOpacity } from 'react-native'
+import { useNavigation } from '@react-navigation/native'
+import { useSelector } from 'react-redux'
 import { JSX } from 'react'
-import { resolveNotificationTarget } from "@utils/notification/list"
+import { resolveNotificationTarget } from '@utils/notification/list'
 
 export default function NotificationModal({ route: { params } }: RootStackProps<'NotificationModal'>): JSX.Element {
     const { theme } = useSelector((state: ReduxState) => state.theme)
     const navigation: Navigation = useNavigation()
-    const isIOS = Platform.OS === "ios"
+    const isIOS = Platform.OS === 'ios'
     const item = {
         title: typeof params.title === 'string' ? params.title : '',
         body: typeof params.body === 'string' ? params.body : '',
@@ -29,16 +27,16 @@ export default function NotificationModal({ route: { params } }: RootStackProps<
         }
 
         if (target?.kind === 'event') {
-            navigation.navigate("SpecificEventScreen", { eventID: target.eventID })
+            navigation.navigate('SpecificEventScreen', { eventID: target.eventID })
             return
         }
 
         if (target?.kind === 'ad') {
-            navigation.navigate("SpecificAdScreen", { adID: target.adID })
+            navigation.navigate('SpecificAdScreen', { adID: target.adID })
             return
         }
 
-        navigation.navigate("NotificationScreen")
+        navigation.navigate('NotificationScreen')
     }
 
     return (
@@ -58,7 +56,7 @@ export default function NotificationModal({ route: { params } }: RootStackProps<
                 }}
                 onPress={handleOpen}
             >
-                <View testID="NotificationModal">
+                <View testID='NotificationModal'>
                     <Text style={{
                         ...GS.notificationDropdownTitle,
                         color: theme.textColor

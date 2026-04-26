@@ -1,9 +1,9 @@
-import { createSlice } from "@reduxjs/toolkit"
+import { createSlice } from '@reduxjs/toolkit'
 
 // Declares Language Slice
 export const LangSlice = createSlice({
     // Slice name
-    name: "lang",
+    name: 'lang',
     // Initial state
     initialState: {
         // true is Norwegian, false is English

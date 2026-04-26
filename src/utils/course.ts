@@ -1,8 +1,8 @@
-import config from "../constants"
+import config from '../constants'
 
 function normalizeCourseList(raw: unknown): CourseAsList[] {
     if (!Array.isArray(raw)) {
-        throw new Error("Invalid course list response")
+        throw new Error('Invalid course list response')
     }
 
     return raw.map((course) => {
@@ -54,7 +54,7 @@ function normalizeCourse(raw: unknown): Course {
     }
 }
 
-// Fetches courses from server, different url based on location, therefore the 
+// Fetches courses from server, different url based on location, therefore the
 // location parameter to ensure all requests are successful
 export async function getCourses(): Promise<CourseAsList[] | string> {
     try {
@@ -98,5 +98,41 @@ export async function getCourse(id: number): Promise<Course | string> {
     } catch (error) {
         const err = error as Error
         return err.message
+    }
+}
+
+export async function updateCourseNotes(id: number, notes: string, token: string | null): Promise<CourseNotesUpdateResult> {
+    if (!token) {
+        return { ok: false, error: 'Missing access token' }
+    }
+
+    if (!notes.trim()) {
+        return { ok: false, error: 'Notes cannot be empty' }
+    }
+
+    try {
+        const response = await fetch(`${config.studentbee_api_url}/course/${id}/notes`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify({ notes }),
+        })
+
+        if (!response.ok) {
+            const text = await response.text()
+
+            try {
+                const parsed = JSON.parse(text) as { error?: string }
+                return { ok: false, error: parsed.error || 'Failed to update notes' }
+            } catch {
+                return { ok: false, error: text || 'Failed to update notes' }
+            }
+        }
+
+        return { ok: true }
+    } catch (error) {
+        return { ok: false, error: (error as Error).message }
     }
 }

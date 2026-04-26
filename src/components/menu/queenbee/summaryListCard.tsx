@@ -1,8 +1,8 @@
-import Space from "@/components/shared/utils"
-import Text from "@components/shared/text"
-import T from "@styles/text"
-import { JSX } from "react"
-import { View } from "react-native"
+import Space from '@/components/shared/utils'
+import Text from '@components/shared/text'
+import T from '@styles/text'
+import { JSX } from 'react'
+import { View } from 'react-native'
 
 type Item = {
     title: string

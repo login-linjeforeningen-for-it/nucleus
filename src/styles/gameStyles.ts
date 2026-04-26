@@ -1,4 +1,4 @@
-import { StyleSheet } from "react-native"
+import { StyleSheet } from 'react-native'
 
 export const GM = StyleSheet.create({
     terning: {
@@ -6,28 +6,28 @@ export const GM = StyleSheet.create({
         height: 200,
         top: 100,
         left: '25%',
-        resizeMode: "contain"
+        resizeMode: 'contain'
     },
     questions: {
         width: 180,
         height: 135,
         top: 55,
         left: '27%',
-        resizeMode: "contain"
+        resizeMode: 'contain'
     },
     neverhaveiever: {
         width: 130,
         height: 130,
         top: 57,
         left: '34%',
-        resizeMode: "contain"
+        resizeMode: 'contain'
     },
     okredflagdealbreaker: {
         width: 180,
         height: 160,
         top: 85,
         left: '27.5%',
-        resizeMode: "contain",
+        resizeMode: 'contain',
     }
 })
 

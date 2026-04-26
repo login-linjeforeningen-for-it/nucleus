@@ -1,4 +1,4 @@
-import config from "@/constants"
+import config from '@/constants'
 
 /**
  * Function for checking when the API was last fetched successfully.
@@ -35,8 +35,8 @@ export async function fetchEventDetails(id: number): Promise<GetEventProps> {
 }
 
 /**
- * Fetches data from API, formats the response, sets the cache, updates the 
- * events on the screen, catches any errors and fetches localstorage, and 
+ * Fetches data from API, formats the response, sets the cache, updates the
+ * events on the screen, catches any errors and fetches localstorage, and
  * handles errors.
  */
 export async function fetchEvents(): Promise<GetEventProps[]> {
@@ -56,8 +56,8 @@ export async function fetchEvents(): Promise<GetEventProps[]> {
 }
 
 /**
- * Fetches data from API, formats the response, sets the cache, updates the 
- * events on the screen, catches any errors and fetches localstorage, and 
+ * Fetches data from API, formats the response, sets the cache, updates the
+ * events on the screen, catches any errors and fetches localstorage, and
  * handles errors.
  */
 export async function fetchAds(): Promise<GetJobProps[]> {
@@ -86,16 +86,16 @@ export async function fetchAdDetails(adID: number): Promise<GetJobProps | null> 
     try {
         const response = await fetch(`${config.api}/jobs/${adID}`)
         if (!response.ok) {
-            throw new Error("Failed to fetch ad details from API")
+            throw new Error('Failed to fetch ad details from API')
         }
 
         // Dev
         // const response = await fetch(`${testapi}jobs/${ad.id}`)
         const adDetails = await response.json()
-        return adDetails && typeof adDetails === "object" && typeof adDetails.id === "number"
+        return adDetails && typeof adDetails === 'object' && typeof adDetails.id === 'number'
             ? adDetails as GetJobProps
             : null
-    } catch (error) {
+    } catch {
         return null
     }
 }

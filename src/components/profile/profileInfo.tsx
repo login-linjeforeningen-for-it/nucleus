@@ -1,11 +1,11 @@
-import { Image, View, Text, TouchableOpacity } from "react-native"
-import ChangeInfoCard from "@/components/profile/changeInfoCard"
-import Cluster from "@/components/shared/cluster"
-import CS from "@styles/clusterStyles"
-import PS from "@styles/profileStyles"
-import { useState } from "react"
-import T from "@styles/text"
-import { useSelector } from "react-redux"
+import { Image, View, Text, TouchableOpacity } from 'react-native'
+import ChangeInfoCard from '@/components/profile/changeInfoCard'
+import Cluster from '@/components/shared/cluster'
+import CS from '@styles/clusterStyles'
+import PS from '@styles/profileStyles'
+import { useState } from 'react'
+import T from '@styles/text'
+import { useSelector } from 'react-redux'
 
 type ProfileInfoProps = {
     profile: ProfileProps
@@ -30,8 +30,8 @@ export default function ProfileInfo({ profile }: ProfileInfoProps) {
     const profileInfoKeys = Object.keys(profileInfo)
     const { lang } = useSelector((state: ReduxState) => state.lang)
 
-    const typeNO = ["Studieretning", "Studieår", "Epost", "Preferanser", "Allergier"]
-    const typeEN = ["Degree", "Study year", "Mail", "Preferences", "Allergies"]
+    const typeNO = ['Studieretning', 'Studieår', 'Epost', 'Preferanser', 'Allergier']
+    const typeEN = ['Degree', 'Study year', 'Mail', 'Preferences', 'Allergies']
     const type = lang ? typeNO : typeEN
 
     /**
@@ -82,15 +82,15 @@ export default function ProfileInfo({ profile }: ProfileInfoProps) {
 }
 
 function ProfileInfoContent({ type, index, profile, selectedIndex }:
-    ProfileInfoContentProps) {
+ProfileInfoContentProps) {
     const { theme } = useSelector((state: ReduxState) => state.theme)
     const value = Object.values(profile)[index]
     const normalizedValue = Array.isArray(value)
-        ? value.filter(Boolean).join(", ")
+        ? value.filter(Boolean).join(', ')
         : value
-    const displayValue = typeof normalizedValue === "string" || typeof normalizedValue === "number"
+    const displayValue = typeof normalizedValue === 'string' || typeof normalizedValue === 'number'
         ? String(normalizedValue)
-        : ""
+        : ''
 
     return (
         <Cluster noColor={true} marginHorizontal={12}>
@@ -104,18 +104,18 @@ function ProfileInfoContent({ type, index, profile, selectedIndex }:
                     <View style={{ ...CS.twinLeft, top: 6.75, left: -20 }}>
                         <Text style={{
                             ...T.text15,
-                            textAlign: "right",
+                            textAlign: 'right',
                             color: theme.oppositeTextColor
                         }}>
-                            {displayValue || "—"}
+                            {displayValue || '—'}
                         </Text>
                     </View>
                     <View style={CS.twinRight}>
                         <Image
                             style={PS.editImage}
                             source={selectedIndex === index
-                                ? require("@assets/icons/pencil-orange.png")
-                                : require("@assets/icons/pencil777.png")}
+                                ? require('@assets/icons/pencil-orange.png')
+                                : require('@assets/icons/pencil777.png')}
                         />
                     </View>
                 </View>
