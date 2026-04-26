@@ -74,8 +74,9 @@ import { AutoUpdateState, DESKTOP_APP_VERSION, fetchAppUpdateManifest, hasNewerD
 import type { BrowserTarget } from './lib/inAppBrowser'
 import { openInAppBrowser } from './lib/inAppBrowser'
 import './styles.css'
+import enText from '../../public/text/en.json'
 
-type PageKey = 'dashboard' | 'events' | 'announcements' | 'albums' | 'albumImages' | 'jobs' | 'organizations' | 'locations' | 'rules' | 'alerts' | 'honey' | 'partners' | 'music' | 'status' | 'nucleusAdmin' | 'nucleusDocs' | 'internal' | 'loadbalancing' | 'databases' | 'dbRestore' | 'monitoring' | 'services' | 'serviceDetail' | 'traffic' | 'trafficRecords' | 'trafficMap' | 'backups' | 'vulnerabilities' | 'logs' | 'ai' | 'settings'
+type PageKey = 'dashboard' | 'events' | 'announcements' | 'albums' | 'albumImages' | 'jobs' | 'organizations' | 'locations' | 'rules' | 'alerts' | 'honey' | 'partners' | 'fund' | 'games' | 'pwned' | 'music' | 'status' | 'nucleusAdmin' | 'nucleusDocs' | 'internal' | 'loadbalancing' | 'databases' | 'dbRestore' | 'monitoring' | 'services' | 'serviceDetail' | 'traffic' | 'trafficRecords' | 'trafficMap' | 'backups' | 'vulnerabilities' | 'logs' | 'ai' | 'settings'
 type ThemePreference = 'light' | 'dark' | 'system'
 
 type NavItem = { key: PageKey; label: string; icon: React.ComponentType<{ size?: number }> }
@@ -127,6 +128,9 @@ const menu: NavItem[] = [
   { key: 'alerts', label: 'Alerts', icon: AlertCircle },
   { key: 'honey', label: 'Honey', icon: Sparkles },
   { key: 'partners', label: 'For Companies', icon: Handshake },
+  { key: 'fund', label: 'Login Fund', icon: Scale },
+  { key: 'games', label: 'Games', icon: Sparkles },
+  { key: 'pwned', label: 'Pwned', icon: ShieldAlert },
   { key: 'music', label: 'Music', icon: Music2 },
   { key: 'status', label: 'Status', icon: Monitor },
   { key: 'nucleusAdmin', label: 'Nucleus', icon: Bell },
@@ -746,6 +750,9 @@ function PageRouter({ page, data, updateState }: { page: PageKey; data: Dashboar
     case 'alerts': return <AlertsPage data={data} />
     case 'honey': return <HoneyPage data={data} />
     case 'partners': return <PartnersPage data={data} />
+    case 'fund': return <FundPage data={data} />
+    case 'games': return <GamesPage data={data} />
+    case 'pwned': return <PwnedPage />
     case 'music': return <MusicPage data={data} />
     case 'status': return <StatusPage data={data} />
     case 'nucleusAdmin': return <NucleusAdminPage data={data} />
@@ -853,6 +860,9 @@ function pageMeta(page: PageKey, data: DashboardData | null) {
     alerts: { title: 'Alerts', kicker: `${data?.alerts.length ?? 0} loaded`, description: 'Queenbee alert banners and page-level notices from Workerbee.', icon: AlertCircle },
     honey: { title: 'Honey', kicker: `${data?.honey.length ?? 0} loaded`, description: 'Structured Login/Queenbee text content from the Workerbee honey store.', icon: Sparkles },
     partners: { title: 'For Companies', kicker: data?.companiesText ? 'Beehive text' : 'Loading', description: 'Company presentation and sponsor information from login.no.', icon: Handshake },
+    fund: { title: 'Login Fund', kicker: data?.fund.holdings ? formatCurrency(data.fund.holdings.totalBase) : 'Public', description: 'Native fund holdings, history, support guidance, and board shortcuts.', icon: Scale },
+    games: { title: 'Games', kicker: `${data?.games.length ?? 0} decks`, description: 'Native overview of Login party games and community decks from App API.', icon: Sparkles },
+    pwned: { title: 'Pwned', kicker: 'Lock screen', description: 'The classic Login reminder to lock your screen, now inside desktop too.', icon: ShieldAlert },
     music: { title: 'Music', kicker: data?.music ? `${formatNumber(data.music.stats.total_songs)} plays` : 'TekKom Bot', description: 'Live public listening stats from login.no/music.', icon: Music2 },
     status: { title: 'Status', kicker: `${data?.statusServices.length ?? 0} monitored`, description: 'Live Beekeeper monitoring data.', icon: Monitor },
     nucleusAdmin: { title: 'Nucleus', kicker: 'Notifications', description: 'Queenbee notification scheduling, resend, history, and Nucleus documentation shortcuts.', icon: Bell },
@@ -1573,6 +1583,142 @@ function dateInputValue(value: unknown) {
 
 function PartnersPage({ data }: { data: DashboardData }) {
   return <PagePanel title="For Companies" status={data.health['companies-text']}><CompaniesContent data={data} /></PagePanel>
+}
+
+function FundPage({ data }: { data: DashboardData }) {
+  const fundText = enText.fund
+  const holdings = data.fund.holdings
+  const history = data.fund.history
+  const points = history?.points || []
+  const first = points[0]?.totalBase
+  const last = points[points.length - 1]?.totalBase
+  const delta = typeof first === 'number' && typeof last === 'number' ? last - first : null
+  const status = combinedStatus(data.health, ['fund-holdings', 'fund-history'])
+
+  return (
+    <PagePanel title="Login Fund" status={status}>
+      <div className="queenbee-grid">
+        <article className="music-stat-card">
+          <span>{fundText.holdings.title}</span>
+          <strong>{holdings ? formatCurrency(holdings.totalBase) : 'Unavailable'}</strong>
+          <small>{holdings?.updatedAt ? `${fundText.holdings.updated} ${new Date(holdings.updatedAt).toLocaleString('no-NO')}` : 'Public fund endpoint'}</small>
+        </article>
+        <article className="music-stat-card">
+          <span>{fundText.holdings.change}</span>
+          <strong>{delta === null ? 'No history' : formatSignedCurrency(delta)}</strong>
+          <small>{points.length ? `${points.length} points in the last month` : fundText.holdings.empty}</small>
+        </article>
+        <article className="queenbee-card">
+          <Scale size={18} />
+          <h3>{fundText.support.title}</h3>
+          <p>{fundText.support.intro}</p>
+          <span>{fundText.support.period}</span>
+        </article>
+      </div>
+      <section className="docs-card">
+        <h3>{fundText.holdings.history}</h3>
+        {points.length ? <FundSparkline points={points} /> : <EmptyState icon={<Scale />} label={fundText.holdings.empty} />}
+      </section>
+      <div className="queenbee-grid">
+        {fundText.sections.map((section) => (
+          <article className="queenbee-card" key={section.title}>
+            <FileText size={18} />
+            <h3>{section.title}</h3>
+            <p>{section.body}</p>
+            <span>Login Fund</span>
+          </article>
+        ))}
+        <button className="queenbee-card" onClick={() => openInAppBrowser('mailto:fondet@login.no')}>
+          <SendHorizontal size={18} />
+          <h3>Apply or ask</h3>
+          <p>{fundText.support.apply}</p>
+          <span>fondet@login.no</span>
+        </button>
+      </div>
+    </PagePanel>
+  )
+}
+
+function FundSparkline({ points }: { points: NonNullable<DashboardData['fund']['history']>['points'] }) {
+  const width = 720
+  const height = 150
+  const values = points.map((point) => point.totalBase)
+  const min = Math.min(...values)
+  const max = Math.max(...values)
+  const spread = max - min || 1
+  const coordinates = points.map((point, index) => {
+    const x = points.length === 1 ? width / 2 : (index / (points.length - 1)) * width
+    const y = 16 + ((max - point.totalBase) / spread) * (height - 32)
+    return `${x},${y}`
+  }).join(' ')
+
+  return (
+    <svg className="fund-sparkline" viewBox={`0 0 ${width} ${height}`} role="img" aria-label="Fund holdings history">
+      <defs>
+        <linearGradient id="fundLine" x1="0" x2="1" y1="0" y2="0">
+          <stop offset="0%" stopColor="#f58b45" />
+          <stop offset="100%" stopColor="#ffd0a8" />
+        </linearGradient>
+      </defs>
+      <polyline points={coordinates} fill="none" stroke="url(#fundLine)" strokeWidth="5" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  )
+}
+
+function GamesPage({ data }: { data: DashboardData }) {
+  const gamesText = enText.games
+  return (
+    <PagePanel title="Games" status={data.health.games}>
+      <div className="queenbee-grid">
+        <article className="queenbee-card">
+          <Sparkles size={18} />
+          <h3>{gamesText.diceTitle}</h3>
+          <p>{gamesText.diceBody}</p>
+          <span>{gamesText.featured}</span>
+        </article>
+        {data.games.map((game) => (
+          <article className="queenbee-card" key={game.id}>
+            <Sparkles size={18} />
+            <h3>{game.name}</h3>
+            <p>{game.description_en || game.description_no || gamesText.communityDeck}</p>
+            <span>{game.endpoint || gamesText.tapToOpen}</span>
+          </article>
+        ))}
+        {data.health.games === 'live' && !data.games.length ? <EmptyState icon={<Sparkles />} label="No games returned from App API." /> : null}
+      </div>
+      <div className="editor-toolbar">
+        <button onClick={() => openInAppBrowser('https://login.no/app')}>Open Nucleus app <ExternalLink size={14} /></button>
+        <button onClick={() => openInAppBrowser('https://app.login.no/api/games')}>Inspect App API <ExternalLink size={14} /></button>
+      </div>
+    </PagePanel>
+  )
+}
+
+function PwnedPage() {
+  const pwnedText = enText.pwned
+  const memes = pwnedText.pwned
+  const [secondsElapsed, setSecondsElapsed] = useState(1)
+  const [memeIndex, setMemeIndex] = useState(() => Math.floor(Math.random() * memes.length))
+  const meme = memes[memeIndex] || memes[0]
+
+  useEffect(() => {
+    const startedAt = Date.now()
+    const timer = window.setInterval(() => {
+      setSecondsElapsed(Math.max(1, Math.floor((Date.now() - startedAt) / 1000)))
+    }, 1000)
+    return () => window.clearInterval(timer)
+  }, [])
+
+  return (
+    <PagePanel title="Pwned" status="live">
+      <section className="docs-card pwned-card">
+        <h3>{meme.text}</h3>
+        <img src={`https://cdn.login.no/img/pwned/${meme.image}`} alt="" />
+        <p>{pwnedText.text.replace('{time}', `${secondsElapsed} ${secondsElapsed === 1 ? pwnedText.second : pwnedText.seconds}`)}</p>
+        <button onClick={() => setMemeIndex((current) => (current + 1) % memes.length)}>{pwnedText.shuffle}</button>
+      </section>
+    </PagePanel>
+  )
 }
 
 function MusicPage({ data }: { data: DashboardData }) {
@@ -2836,6 +2982,8 @@ function openSource(item: RecentAddition) { const source = item.source || ''; if
 function displayName(item: Partial<NamedItem | AlbumItem>) { return item.name_en || item.name_no || item.name || `#${item.id}` }
 function stringValue(value: unknown) { return Array.isArray(value) ? value.filter(Boolean).join(' / ') : typeof value === 'string' ? value : '' }
 function formatNumber(value?: number | string) { const number = typeof value === 'string' ? Number(value) : value; return typeof number === 'number' && Number.isFinite(number) ? Intl.NumberFormat('en-US', { notation: number > 99999 ? 'compact' : 'standard' }).format(number) : '0' }
+function formatCurrency(value?: number) { return typeof value === 'number' && Number.isFinite(value) ? Intl.NumberFormat('nb-NO', { style: 'currency', currency: 'NOK', maximumFractionDigits: 0 }).format(value) : 'NOK 0' }
+function formatSignedCurrency(value: number) { const formatted = formatCurrency(Math.abs(value)); return `${value >= 0 ? '+' : '-'}${formatted}` }
 function formatPercent(value?: number) { return typeof value === 'number' && Number.isFinite(value) ? `${Math.round(value * (value <= 1 ? 100 : 1))}%` : '0%' }
 function jobTitle(job: JobItem) { return job.title_en || job.title_no || job.title || job.name_en || job.name_no || `Job #${job.id}` }
 function jobMeta(job: JobItem) { const organization = job.organization ? displayName(job.organization as NamedItem) : job.organizations?.map((item) => displayName(item as NamedItem)).filter(Boolean).join(', '); const deadline = job.deadline ? `Deadline ${formatDate(job.deadline)}` : formatDate(job.updated_at || job.created_at); return organization ? `${organization} · ${deadline}` : deadline }

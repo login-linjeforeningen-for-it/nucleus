@@ -1683,6 +1683,35 @@ button { font: inherit; }
   font-weight: 800;
 }
 
+.fund-sparkline {
+  width: 100%;
+  min-height: 150px;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  background:
+    linear-gradient(180deg, rgba(245, 139, 69, 0.12), transparent),
+    var(--panel-soft);
+  padding: 12px;
+}
+
+.pwned-card {
+  justify-items: center;
+  text-align: center;
+}
+
+.pwned-card img {
+  width: min(100%, 620px);
+  max-height: 420px;
+  object-fit: contain;
+  border: 1px solid var(--line);
+  border-radius: 24px;
+  background: var(--panel-soft);
+}
+
+.pwned-card button {
+  justify-self: center;
+}
+
 .traffic-map-panel {
   border: 1px solid var(--line);
   border-radius: 16px;

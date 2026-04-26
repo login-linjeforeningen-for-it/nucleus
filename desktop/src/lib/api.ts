@@ -367,6 +367,29 @@ export type BackupItem = {
   error?: string
 }
 
+export type FundHoldingsTotal = {
+  totalBase: number
+  currency?: string
+  updatedAt?: number
+}
+
+export type FundHoldingsHistory = {
+  points: Array<{
+    date: string
+    totalBase: number
+  }>
+  currency?: string
+  updatedAt?: number
+}
+
+export type GameItem = {
+  id: number | string
+  name: string
+  endpoint?: string
+  description_no?: string
+  description_en?: string
+}
+
 export type DashboardData = {
   counts: DashboardCounts
   categories: CategoryStat[]
@@ -382,6 +405,11 @@ export type DashboardData = {
   honey: HoneyItem[]
   companiesText: CompaniesText | null
   music: MusicActivity | null
+  fund: {
+    holdings: FundHoldingsTotal | null
+    history: FundHoldingsHistory | null
+  }
+  games: GameItem[]
   announcements: AnnouncementItem[]
   statusServices: StatusService[]
   internal: InternalOverview | null
@@ -410,6 +438,7 @@ const WORKERBEE = import.meta.env.VITE_WORKERBEE_API ?? 'https://workerbee.login
 const BEEKEEPER = import.meta.env.VITE_BEEKEEPER_API ?? 'https://beekeeper.login.no/api'
 const BOT = import.meta.env.VITE_BOT_API ?? 'https://bot.login.no/api'
 const APP_API = import.meta.env.VITE_APP_API ?? 'https://app.login.no/api'
+const LOGIN = import.meta.env.VITE_LOGIN_URL ?? 'https://login.no'
 const BEEKEEPER_TOKEN = import.meta.env.VITE_BEEKEEPER_TOKEN
 const QUEENBEE_TOKEN_KEY = 'login-desktop.queenbee-token'
 const APP_API_TOKEN_KEY = 'login-desktop.app-api-token'
@@ -607,6 +636,9 @@ export async function loadDashboardData(): Promise<DashboardData> {
     honeyPayload,
     companiesText,
     music,
+    fundHoldings,
+    fundHistory,
+    games,
     sites,
     databases,
     traffic,
@@ -635,6 +667,9 @@ export async function loadDashboardData(): Promise<DashboardData> {
     safe('honey', () => requestJson<WorkerbeeResponse<HoneyItem, 'honeys'>>(`${WORKERBEE}/text/beehive?limit=24&offset=0`), health),
     safe('companies-text', () => requestJson<CompaniesText>(`${WORKERBEE}/text/beehive/companies/en`), health),
     safe('music', () => requestJson<MusicActivity>(`${BOT}/activity`, 7500), health),
+    safe('fund-holdings', () => requestJson<FundHoldingsTotal>(`${LOGIN}/api/fund/holdings`, 7500), health),
+    safe('fund-history', () => requestJson<FundHoldingsHistory>(`${LOGIN}/api/fund/holdings/history?range=1m`, 7500), health),
+    safe('games', () => requestJson<GameItem[]>(`${APP_API}/games`, 7500), health),
     safe('sites', () => requestJson<QueenbeeSite[]>(`${BEEKEEPER}/sites`), health),
     safe('db', () => requestJson<unknown>(`${BEEKEEPER}/db`, 7000), health),
     safe('traffic', () => requestJson<TrafficMetrics>(`${BEEKEEPER}/traffic/metrics`, 7000), health),
@@ -671,6 +706,11 @@ export async function loadDashboardData(): Promise<DashboardData> {
     honey: readRows(honeyPayload, 'honeys'),
     companiesText,
     music,
+    fund: {
+      holdings: fundHoldings && typeof fundHoldings.totalBase === 'number' ? fundHoldings : null,
+      history: fundHistory && Array.isArray(fundHistory.points) ? fundHistory : null,
+    },
+    games: Array.isArray(games) ? games : [],
     announcements: readRows(announcementsPayload, 'announcements'),
     statusServices: Array.isArray(statusServices) ? statusServices : [],
     internal,
