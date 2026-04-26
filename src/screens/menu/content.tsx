@@ -6,6 +6,7 @@ import Swipe from '@components/nav/swipe'
 import Text from '@components/shared/text'
 import GS from '@styles/globalStyles'
 import T from '@styles/text'
+import { cleanMarkdown, filterByContentQuery, formatContentDate, formatLocationDetails } from '@utils/content'
 import { fetchLocations, fetchOrganizations, fetchRules } from '@utils/fetch'
 import { JSX, useEffect, useMemo, useState } from 'react'
 import { Image, RefreshControl, ScrollView, TextInput, TouchableOpacity, View } from 'react-native'
@@ -44,14 +45,13 @@ export default function ContentScreen({ navigation }: MenuProps<'ContentScreen'>
         { key: 'organizations' as const, label: labels.organizations, count: counts.organizations },
     ], [counts, labels])
 
-    const normalizedQuery = query.trim().toLowerCase()
-    const visibleRules = useMemo(() => rules.filter((rule) => matchesQuery([
+    const visibleRules = useMemo(() => filterByContentQuery(rules, query, (rule) => [
         rule.name_no,
         rule.name_en,
         rule.description_no,
         rule.description_en,
-    ], normalizedQuery)), [normalizedQuery, rules])
-    const visibleLocations = useMemo(() => locations.filter((location) => matchesQuery([
+    ]), [query, rules])
+    const visibleLocations = useMemo(() => filterByContentQuery(locations, query, (location) => [
         location.name_no,
         location.name_en,
         location.type,
@@ -61,8 +61,8 @@ export default function ContentScreen({ navigation }: MenuProps<'ContentScreen'>
         location.mazemap_campus_id,
         location.mazemap_poi_id,
         location.url,
-    ], normalizedQuery)), [locations, normalizedQuery])
-    const visibleOrganizations = useMemo(() => organizations.filter((organization) => matchesQuery([
+    ]), [locations, query])
+    const visibleOrganizations = useMemo(() => filterByContentQuery(organizations, query, (organization) => [
         organization.name_no,
         organization.name_en,
         organization.description_no,
@@ -71,7 +71,7 @@ export default function ContentScreen({ navigation }: MenuProps<'ContentScreen'>
         organization.link_linkedin,
         organization.link_facebook,
         organization.link_instagram,
-    ], normalizedQuery)), [normalizedQuery, organizations])
+    ]), [organizations, query])
 
     async function load() {
         setRefreshing(true)
@@ -174,7 +174,7 @@ export default function ContentScreen({ navigation }: MenuProps<'ContentScreen'>
                         <ContentCard
                             key={rule.id}
                             title={lang ? rule.name_no : rule.name_en}
-                            subtitle={`#${rule.id} · ${labels.updated} ${formatDate(rule.updated_at)}`}
+                            subtitle={`#${rule.id} · ${labels.updated} ${formatContentDate(rule.updated_at)}`}
                             body={lang ? rule.description_no : rule.description_en}
                         />
                     ))}
@@ -183,7 +183,7 @@ export default function ContentScreen({ navigation }: MenuProps<'ContentScreen'>
                         <ContentCard
                             key={location.id}
                             title={lang ? location.name_no : location.name_en}
-                            subtitle={`#${location.id} · ${location.type} · ${labels.updated} ${formatDate(location.updated_at)}`}
+                            subtitle={`#${location.id} · ${location.type} · ${labels.updated} ${formatContentDate(location.updated_at)}`}
                             body={formatLocationDetails(location, labels.locationFallback)}
                         />
                     ))}
@@ -303,7 +303,7 @@ function OrganizationCard({
                         </Text>
                         <Space height={4} />
                         <Text style={{ ...T.text12, color: theme.oppositeTextColor }}>
-                            #{organization.id} · {updatedLabel} {formatDate(organization.updated_at)}
+                            #{organization.id} · {updatedLabel} {formatContentDate(organization.updated_at)}
                         </Text>
                         <Space height={8} />
                         <Text style={{ ...T.text15, color: theme.oppositeTextColor }} numberOfLines={5}>
@@ -327,45 +327,4 @@ function EmptyContent({ label }: { label: string }) {
             </View>
         </Cluster>
     )
-}
-
-function cleanMarkdown(value: string) {
-    return value
-        .replace(/\r\n/g, '\n')
-        .replace(/\*\*/g, '')
-        .trim()
-}
-
-function matchesQuery(values: unknown[], query: string) {
-    if (!query) {
-        return true
-    }
-
-    return values.some((value) => String(value || '').toLowerCase().includes(query))
-}
-
-function formatLocationDetails(location: WorkerbeeLocation, fallback: string) {
-    const details = [
-        location.address_street,
-        location.address_postcode,
-        location.city_name,
-        location.mazemap_campus_id ? `campus ${location.mazemap_campus_id}` : '',
-        location.mazemap_poi_id ? `poi ${location.mazemap_poi_id}` : '',
-        location.url,
-    ].filter(Boolean)
-
-    return details.length ? details.join(' · ') : fallback
-}
-
-function formatDate(value: string) {
-    const date = new Date(value)
-    if (Number.isNaN(date.valueOf())) {
-        return value
-    }
-
-    return new Intl.DateTimeFormat('nb-NO', {
-        day: '2-digit',
-        month: 'short',
-        year: 'numeric',
-    }).format(date)
 }
