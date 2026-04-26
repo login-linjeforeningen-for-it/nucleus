@@ -37,12 +37,18 @@ const linking: LinkingOptions<RootStackParamList> = {
                             ProfileScreen: 'profile',
                             AboutScreen: 'about',
                             BusinessScreen: 'companies',
-                            AiScreen: 'ai',
+                            AiScreen: {
+                                path: 'ai',
+                                alias: ['internal/ai'],
+                            },
                             SearchScreen: {
                                 path: 'search',
                                 alias: ['s'],
                             },
-                            StatusScreen: 'status',
+                            StatusScreen: {
+                                path: 'status',
+                                alias: ['internal/status', 'internal/monitoring'],
+                            },
                             MusicScreen: 'music',
                             AlbumsScreen: 'albums',
                             FundScreen: 'fund',
@@ -56,7 +62,17 @@ const linking: LinkingOptions<RootStackParamList> = {
                                 }
                             },
                             QueenbeeScreen: 'internal',
-                            VulnerabilitiesScreen: 'internal/vulnerabilities'
+                            LoadBalancingScreen: 'internal/loadbalancing',
+                            TrafficScreen: 'internal/traffic',
+                            TrafficRecordsScreen: 'internal/traffic/records',
+                            TrafficMapScreen: 'internal/traffic/map',
+                            ContentScreen: 'internal/content',
+                            DatabaseScreen: {
+                                path: 'internal/databases',
+                                alias: ['internal/db'],
+                            },
+                            VulnerabilitiesScreen: 'internal/vulnerabilities',
+                            LogsScreen: 'internal/logs'
                         }
                     }
                 }

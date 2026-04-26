@@ -16,6 +16,7 @@ const publicUniversalLinkPaths = [
     '/verv',
     '/policy',
     '/pwned',
+    '/internal',
 ]
 
 export default ({ config }: ConfigContext): ExpoConfig => ({

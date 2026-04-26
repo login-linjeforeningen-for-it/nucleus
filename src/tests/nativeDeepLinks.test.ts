@@ -16,6 +16,7 @@ const publicPaths = [
     '/verv',
     '/policy',
     '/pwned',
+    '/internal',
 ]
 
 describe('native deep-link configuration', () => {
