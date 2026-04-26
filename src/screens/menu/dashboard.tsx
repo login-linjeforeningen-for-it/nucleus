@@ -64,19 +64,7 @@ export default function DashboardScreen(): JSX.Element {
                                 <View style={{ padding: 12 }}>
                                     <Text style={{ ...T.text20, color: theme.textColor }}>Top categories</Text>
                                     <Space height={8} />
-                                    {data.categories.slice(0, 6).map((item) => (
-                                        <View
-                                            key={item.id}
-                                            style={{
-                                                flexDirection: 'row',
-                                                justifyContent: 'space-between',
-                                                marginBottom: 8,
-                                            }}
-                                        >
-                                            <Text style={{ ...T.text15, color: theme.textColor }}>{item.name_en}</Text>
-                                            <Text style={{ ...T.text15, color: theme.textColor }}>{item.event_count}</Text>
-                                        </View>
-                                    ))}
+                                    <CategoryList categories={data.categories.slice(0, 6)} />
                                 </View>
                             </Cluster>
                             <Space height={10} />
@@ -110,11 +98,66 @@ function Metric({ label, value }: { label: string, value: number }) {
             borderWidth: 1,
             borderColor: '#ffffff18',
             borderRadius: 14,
+            backgroundColor: theme.contrast,
             padding: 12,
         }}>
             <Text style={{ ...T.text15, color: theme.oppositeTextColor }}>{label}</Text>
             <Space height={4} />
             <Text style={{ ...T.text25, color: theme.textColor }}>{value}</Text>
+        </View>
+    )
+}
+
+function CategoryList({ categories }: { categories: NativeDashboardSummary['categories'] }) {
+    const { theme } = useSelector((state: ReduxState) => state.theme)
+
+    return (
+        <View style={{
+            borderWidth: 1,
+            borderColor: '#ffffff18',
+            borderRadius: 14,
+            backgroundColor: theme.contrast,
+            overflow: 'hidden',
+        }}>
+            {categories.map((item, index) => (
+                <CategoryRow
+                    key={item.id}
+                    label={item.name_en}
+                    value={item.event_count}
+                    showDivider={index !== categories.length - 1}
+                />
+            ))}
+        </View>
+    )
+}
+
+function CategoryRow({
+    label,
+    value,
+    showDivider,
+}: {
+    label: string
+    value: number
+    showDivider: boolean
+}) {
+    const { theme } = useSelector((state: ReduxState) => state.theme)
+
+    return (
+        <View style={{
+            flexDirection: 'row',
+            justifyContent: 'space-between',
+            gap: 12,
+            borderBottomWidth: showDivider ? 1 : 0,
+            borderBottomColor: '#ffffff12',
+            paddingHorizontal: 12,
+            paddingVertical: 10,
+        }}>
+            <Text style={{ ...T.text15, color: theme.textColor, flex: 1 }}>
+                {label}
+            </Text>
+            <Text style={{ ...T.text15, color: theme.textColor }}>
+                {value}
+            </Text>
         </View>
     )
 }

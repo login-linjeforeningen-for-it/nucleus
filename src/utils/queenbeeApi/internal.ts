@@ -2,35 +2,19 @@ import config from '@/constants'
 import { isObject, requestApi } from './request'
 
 export async function getInternalDashboard(): Promise<System> {
-    const payload = await requestApi<unknown>(config.beekeeper_api_url, '/dashboard/internal')
-    const dashboard = isObject(payload) ? payload : {}
-    const information = isObject(dashboard.information) ? dashboard.information : {}
-    const runtime = isObject(dashboard.runtime) ? dashboard.runtime : {}
-    const systemInfo = isObject(information.system) ? information.system : {}
-    const metrics = isObject(runtime.metrics) ? runtime.metrics : {}
-    const metricsSystem = isObject(metrics.system) ? metrics.system : {}
-    const docker = isObject(runtime.docker) ? runtime.docker : {}
-    const containers = Number(
-        docker.count
-        ?? systemInfo.containers
-        ?? (Array.isArray(docker.containers) ? docker.containers.length : 0)
-    )
+    const [payload, dockerPayload] = await Promise.all([
+        requestApi<unknown>(config.beekeeper_api_url, '/dashboard/internal'),
+        requestApi<unknown>(config.beekeeper_api_url, '/docker').catch(() => null),
+    ])
 
-    return {
-        ram: typeof systemInfo.ram === 'string' ? systemInfo.ram : `${formatBytes(Number(metricsSystem.memory || 0))}`,
-        processes: Number(systemInfo.processes ?? metricsSystem.processes ?? 0),
-        disk: typeof systemInfo.disk === 'string' ? systemInfo.disk : String(metricsSystem.disk ?? 'Unavailable'),
-        load: typeof systemInfo.load === 'string'
-            ? systemInfo.load
-            : Array.isArray(metricsSystem.load)
-                ? metricsSystem.load.join(', ')
-                : 'Unavailable',
-        containers: Number.isFinite(containers) ? containers : 0,
-    }
+    return buildSystem(payload, dockerPayload)
 }
 
 export async function getInternalOverview(): Promise<NativeInternalOverview> {
-    const payload = await requestApi<unknown>(config.beekeeper_api_url, '/dashboard/internal')
+    const [payload, dockerPayload] = await Promise.all([
+        requestApi<unknown>(config.beekeeper_api_url, '/dashboard/internal'),
+        requestApi<unknown>(config.beekeeper_api_url, '/docker').catch(() => null),
+    ])
     const dashboard = isObject(payload) ? payload : {}
     const statistics = isObject(dashboard.statistics) ? dashboard.statistics : {}
     const runtime = isObject(dashboard.runtime) ? dashboard.runtime : {}
@@ -42,10 +26,38 @@ export async function getInternalOverview(): Promise<NativeInternalOverview> {
         ?? null
 
     return {
-        system: await getInternalDashboard(),
+        system: buildSystem(payload, dockerPayload),
         requestsToday: Number(statistics.requestsToday || 0),
         databaseCount,
         databaseOverview,
+    }
+}
+
+function buildSystem(payload: unknown, dockerPayload: unknown): System {
+    const dashboard = isObject(payload) ? payload : {}
+    const information = isObject(dashboard.information) ? dashboard.information : {}
+    const runtime = isObject(dashboard.runtime) ? dashboard.runtime : {}
+    const systemInfo = isObject(information.system) ? information.system : {}
+    const metrics = isObject(runtime.metrics) ? runtime.metrics : {}
+    const metricsSystem = isObject(metrics.system) ? metrics.system : {}
+    const runtimeDocker = isObject(runtime.docker) ? runtime.docker : {}
+    const docker = isObject(dockerPayload) ? dockerPayload : runtimeDocker
+    const dockerContainers = Array.isArray(docker.containers) ? docker.containers.length : null
+    const containers = readNumber(docker.count)
+        ?? readNumber(systemInfo.containers)
+        ?? dockerContainers
+        ?? 0
+
+    return {
+        ram: typeof systemInfo.ram === 'string' ? systemInfo.ram : `${formatBytes(Number(metricsSystem.memory || 0))}`,
+        processes: Number(systemInfo.processes ?? metricsSystem.processes ?? 0),
+        disk: typeof systemInfo.disk === 'string' ? systemInfo.disk : String(metricsSystem.disk ?? 'Unavailable'),
+        load: typeof systemInfo.load === 'string'
+            ? systemInfo.load
+            : Array.isArray(metricsSystem.load)
+                ? metricsSystem.load.join(', ')
+                : 'Unavailable',
+        containers,
     }
 }
 
