@@ -107,7 +107,17 @@ describe('auth deep-link flow', () => {
         await startLogin('queenbee')
 
         expect(Linking.openURL).toHaveBeenCalledWith(
-            'https://app.login.no/api/auth/login?redirect_uri=exp%2Blogin%3A%2F%2Fauth&target=queenbee'
+            'https://app.login.no/api/auth/login?redirect_uri=login%3A%2F%2Fauth&target=queenbee'
+        )
+    })
+
+    it('keeps Expo Go auth redirects intact', async () => {
+        ;(ExpoLinking.createURL as any).mockReturnValueOnce('exp://127.0.0.1:19000/--/auth')
+
+        await startLogin('queenbee')
+
+        expect(Linking.openURL).toHaveBeenCalledWith(
+            'https://app.login.no/api/auth/login?redirect_uri=exp%3A%2F%2F127.0.0.1%3A19000%2F--%2Fauth&target=queenbee'
         )
     })
 

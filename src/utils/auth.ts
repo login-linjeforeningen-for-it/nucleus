@@ -72,8 +72,13 @@ export function registerAuthListener() {
     })
 }
 
-export async function startLogin(target = 'app') {
+function createNativeAuthRedirectUri() {
     const redirectUri = ExpoLinking.createURL('auth')
+    return redirectUri.replace(/^exp\+([a-z][a-z0-9+.-]*:\/\/.*)$/i, '$1')
+}
+
+export async function startLogin(target = 'app') {
+    const redirectUri = createNativeAuthRedirectUri()
     const loginUrl = `${config.app_api_url}/auth/login`
         + `?redirect_uri=${encodeURIComponent(redirectUri)}`
         + `&target=${encodeURIComponent(target)}`
