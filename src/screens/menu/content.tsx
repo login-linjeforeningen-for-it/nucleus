@@ -8,7 +8,7 @@ import GS from '@styles/globalStyles'
 import T from '@styles/text'
 import { fetchLocations, fetchOrganizations, fetchRules } from '@utils/fetch'
 import { JSX, useEffect, useMemo, useState } from 'react'
-import { Image, RefreshControl, ScrollView, TouchableOpacity, View } from 'react-native'
+import { Image, RefreshControl, ScrollView, TextInput, TouchableOpacity, View } from 'react-native'
 import { useSelector } from 'react-redux'
 
 type ContentTab = 'rules' | 'locations' | 'organizations'
@@ -21,6 +21,7 @@ export default function ContentScreen({ navigation }: MenuProps<'ContentScreen'>
     const [locations, setLocations] = useState<WorkerbeeLocation[]>([])
     const [organizations, setOrganizations] = useState<WorkerbeeOrganization[]>([])
     const [counts, setCounts] = useState({ rules: 0, locations: 0, organizations: 0 })
+    const [query, setQuery] = useState('')
     const [refreshing, setRefreshing] = useState(false)
     const [error, setError] = useState('')
     const labels = useMemo(() => ({
@@ -31,6 +32,7 @@ export default function ContentScreen({ navigation }: MenuProps<'ContentScreen'>
         rules: lang ? 'Regler' : 'Rules',
         locations: lang ? 'Steder' : 'Locations',
         organizations: lang ? 'Organisasjoner' : 'Organizations',
+        search: lang ? 'Søk i innhold...' : 'Search content...',
         updated: lang ? 'Oppdatert' : 'Updated',
         empty: lang ? 'Ingen treff å vise.' : 'No rows to show.',
         locationFallback: lang ? 'Ingen ekstra stedsdetaljer' : 'No additional location details',
@@ -41,6 +43,35 @@ export default function ContentScreen({ navigation }: MenuProps<'ContentScreen'>
         { key: 'locations' as const, label: labels.locations, count: counts.locations },
         { key: 'organizations' as const, label: labels.organizations, count: counts.organizations },
     ], [counts, labels])
+
+    const normalizedQuery = query.trim().toLowerCase()
+    const visibleRules = useMemo(() => rules.filter((rule) => matchesQuery([
+        rule.name_no,
+        rule.name_en,
+        rule.description_no,
+        rule.description_en,
+    ], normalizedQuery)), [normalizedQuery, rules])
+    const visibleLocations = useMemo(() => locations.filter((location) => matchesQuery([
+        location.name_no,
+        location.name_en,
+        location.type,
+        location.address_street,
+        location.address_postcode,
+        location.city_name,
+        location.mazemap_campus_id,
+        location.mazemap_poi_id,
+        location.url,
+    ], normalizedQuery)), [locations, normalizedQuery])
+    const visibleOrganizations = useMemo(() => organizations.filter((organization) => matchesQuery([
+        organization.name_no,
+        organization.name_en,
+        organization.description_no,
+        organization.description_en,
+        organization.link_homepage,
+        organization.link_linkedin,
+        organization.link_facebook,
+        organization.link_instagram,
+    ], normalizedQuery)), [normalizedQuery, organizations])
 
     async function load() {
         setRefreshing(true)
@@ -116,11 +147,30 @@ export default function ContentScreen({ navigation }: MenuProps<'ContentScreen'>
                                     />
                                 ))}
                             </View>
+                            <Space height={12} />
+                            <TextInput
+                                value={query}
+                                onChangeText={setQuery}
+                                placeholder={labels.search}
+                                placeholderTextColor={theme.oppositeTextColor}
+                                autoCapitalize='none'
+                                autoCorrect={false}
+                                style={{
+                                    borderRadius: 16,
+                                    borderWidth: 1,
+                                    borderColor: '#ffffff18',
+                                    backgroundColor: theme.contrast,
+                                    color: theme.textColor,
+                                    paddingHorizontal: 12,
+                                    paddingVertical: 10,
+                                    fontSize: T.text15.fontSize,
+                                }}
+                            />
                         </View>
                     </Cluster>
 
                     <Space height={10} />
-                    {activeTab === 'rules' && rules.map((rule) => (
+                    {activeTab === 'rules' && visibleRules.map((rule) => (
                         <ContentCard
                             key={rule.id}
                             title={lang ? rule.name_no : rule.name_en}
@@ -128,8 +178,8 @@ export default function ContentScreen({ navigation }: MenuProps<'ContentScreen'>
                             body={lang ? rule.description_no : rule.description_en}
                         />
                     ))}
-                    {activeTab === 'rules' && !rules.length && <EmptyContent label={labels.empty} />}
-                    {activeTab === 'locations' && locations.map((location) => (
+                    {activeTab === 'rules' && !visibleRules.length && <EmptyContent label={labels.empty} />}
+                    {activeTab === 'locations' && visibleLocations.map((location) => (
                         <ContentCard
                             key={location.id}
                             title={lang ? location.name_no : location.name_en}
@@ -137,8 +187,8 @@ export default function ContentScreen({ navigation }: MenuProps<'ContentScreen'>
                             body={formatLocationDetails(location, labels.locationFallback)}
                         />
                     ))}
-                    {activeTab === 'locations' && !locations.length && <EmptyContent label={labels.empty} />}
-                    {activeTab === 'organizations' && organizations.map((organization) => (
+                    {activeTab === 'locations' && !visibleLocations.length && <EmptyContent label={labels.empty} />}
+                    {activeTab === 'organizations' && visibleOrganizations.map((organization) => (
                         <OrganizationCard
                             key={organization.id}
                             organization={organization}
@@ -146,7 +196,7 @@ export default function ContentScreen({ navigation }: MenuProps<'ContentScreen'>
                             updatedLabel={labels.updated}
                         />
                     ))}
-                    {activeTab === 'organizations' && !organizations.length && <EmptyContent label={labels.empty} />}
+                    {activeTab === 'organizations' && !visibleOrganizations.length && <EmptyContent label={labels.empty} />}
                 </ScrollView>
             </View>
         </Swipe>
@@ -284,6 +334,14 @@ function cleanMarkdown(value: string) {
         .replace(/\r\n/g, '\n')
         .replace(/\*\*/g, '')
         .trim()
+}
+
+function matchesQuery(values: unknown[], query: string) {
+    if (!query) {
+        return true
+    }
+
+    return values.some((value) => String(value || '').toLowerCase().includes(query))
 }
 
 function formatLocationDetails(location: WorkerbeeLocation, fallback: string) {
