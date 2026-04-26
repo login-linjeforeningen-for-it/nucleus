@@ -253,6 +253,43 @@ export async function fetchHoneyList(service: string, limit = 20): Promise<GetHo
     }
 }
 
+export async function fetchAnnouncements(limit = 20): Promise<GetAnnouncementsProps> {
+    try {
+        const params = new URLSearchParams({
+            limit: String(limit),
+            includePlaceholders: 'true',
+        })
+        const response = await fetch(`${config.tekkom_bot_api_url}/announcements?${params.toString()}`, {
+            headers: {
+                btg: 'tekkom-bot',
+            },
+        })
+        if (!response.ok) {
+            throw new Error('Failed to fetch announcements')
+        }
+
+        const data = await response.json()
+        const announcements = Array.isArray(data)
+            ? data
+            : Array.isArray(data?.announcements)
+                ? data.announcements
+                : []
+        const embeddedCount = announcements
+            .map((announcement: BotAnnouncement) => Number(announcement?.total_count))
+            .find((count: number) => Number.isFinite(count) && count >= announcements.length)
+        const totalCount = typeof data?.total_count === 'number'
+            ? data.total_count
+            : embeddedCount ?? announcements.length
+
+        return {
+            announcements,
+            total_count: totalCount,
+        }
+    } catch {
+        return { announcements: [], total_count: 0 }
+    }
+}
+
 /**
  * Checks how long its been since a date object
  *

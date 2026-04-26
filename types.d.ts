@@ -650,6 +650,7 @@ type MenuRoutes =
     | 'TrafficRecordsScreen'
     | 'TrafficMapScreen'
     | 'ContentScreen'
+    | 'AnnouncementsScreen'
     | 'NucleusDocumentationScreen'
     | 'HoneyScreen'
     | 'DatabaseScreen'
@@ -690,6 +691,7 @@ type MenuStackParamList = {
     TrafficRecordsScreen: undefined
     TrafficMapScreen: undefined
     ContentScreen: undefined
+    AnnouncementsScreen: undefined
     NucleusDocumentationScreen: undefined
     HoneyScreen: undefined
     DatabaseScreen: undefined
@@ -765,6 +767,27 @@ type GetOrganizationProps = Organization & {
 
 type GetJobsProps = {
     jobs: GetJobProps[]
+    total_count: number
+}
+
+type BotAnnouncement = {
+    id: number | string
+    title?: string[]
+    description?: string[]
+    channel?: string
+    roles?: string[]
+    embed?: boolean
+    color?: string
+    interval?: string
+    time?: string | null
+    sent?: boolean
+    last_sent?: string | null
+    active?: boolean
+    total_count?: number | string
+}
+
+type GetAnnouncementsProps = {
+    announcements: BotAnnouncement[]
     total_count: number
 }
 

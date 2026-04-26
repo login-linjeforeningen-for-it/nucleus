@@ -2661,6 +2661,28 @@ button { font: inherit; }
   background: color-mix(in srgb, var(--accent) 14%, transparent);
 }
 
+.event-browser-controls {
+  display: grid;
+  grid-template-columns: minmax(220px, 1fr) repeat(3, minmax(110px, 0.35fr)) auto auto;
+  gap: 10px;
+  align-items: end;
+}
+
+.editor-field select {
+  width: 100%;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--panel-soft);
+  color: var(--text);
+  padding: 10px;
+  font: inherit;
+  font-size: 13px;
+}
+
+.event-browser-check {
+  min-width: 120px;
+}
+
 .spin {
   animation: spin 0.9s linear infinite;
 }
@@ -2910,7 +2932,8 @@ button { font: inherit; }
   }
 
   .media-upload-panel,
-  .editor-media-tools {
+  .editor-media-tools,
+  .event-browser-controls {
     grid-template-columns: 1fr;
   }
 

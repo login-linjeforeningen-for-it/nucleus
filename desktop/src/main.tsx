@@ -166,22 +166,36 @@ const editorConfigs = {
     fields: [
       { name: 'name_no', label: 'Name NO', required: true },
       { name: 'name_en', label: 'Name EN', required: true },
+      { name: 'informational_no', label: 'Informational NO' },
+      { name: 'informational_en', label: 'Informational EN' },
       { name: 'description_no', label: 'Description NO', type: 'textarea', required: true },
       { name: 'description_en', label: 'Description EN', type: 'textarea', required: true },
+      { name: 'time_type', label: 'Time type', required: true, placeholder: 'default, no_end, whole_day, tbd' },
       { name: 'time_start', label: 'Start time', type: 'datetime', required: true },
       { name: 'time_end', label: 'End time', type: 'datetime', required: true },
-      { name: 'time_publish', label: 'Publish time', type: 'datetime' },
+      { name: 'time_publish', label: 'Publish time', type: 'datetime', required: true },
+      { name: 'time_signup_release', label: 'Signup release', type: 'datetime' },
+      { name: 'time_signup_deadline', label: 'Signup deadline', type: 'datetime' },
       { name: 'category_id', label: 'Category ID', type: 'number', required: true },
       { name: 'location_id', label: 'Location ID', type: 'number' },
       { name: 'organization_id', label: 'Organization ID', type: 'number' },
       { name: 'rule_id', label: 'Rule ID', type: 'number' },
+      { name: 'audience_id', label: 'Audience ID', type: 'number' },
+      { name: 'parent_id', label: 'Parent event ID', type: 'number' },
       { name: 'capacity', label: 'Capacity', type: 'number' },
       { name: 'image_small', label: 'Small image' },
       { name: 'image_banner', label: 'Banner image' },
       { name: 'link_signup', label: 'Signup URL' },
+      { name: 'link_facebook', label: 'Facebook URL' },
+      { name: 'link_discord', label: 'Discord URL' },
+      { name: 'link_stream', label: 'Stream URL' },
+      { name: 'repeat_type', label: 'Repeat type', placeholder: 'weekly or biweekly (create only)' },
+      { name: 'repeat_until', label: 'Repeat until', type: 'datetime' },
       { name: 'visible', label: 'Visible', type: 'boolean' },
       { name: 'highlight', label: 'Highlight', type: 'boolean' },
       { name: 'digital', label: 'Digital', type: 'boolean' },
+      { name: 'canceled', label: 'Canceled', type: 'boolean' },
+      { name: 'is_full', label: 'Is full', type: 'boolean' },
     ],
     titleOf: (row) => stringValue(row.name_en) || stringValue(row.name_no) || `Event #${row.id}`,
     metaOf: (row) => formatDate(stringValue(row.time_start) || stringValue(row.updated_at)),
@@ -935,7 +949,61 @@ function EndpointStrip({ data }: { data: DashboardData }) {
 }
 
 function EventsPage({ data }: { data: DashboardData }) {
-  return <EditorPage data={data} config={editorConfigs.events} preview={<EventList events={data.events} status={data.health.events} />} />
+  const [query, setQuery] = useState('')
+  const [historical, setHistorical] = useState(false)
+  const [orderBy, setOrderBy] = useState('id')
+  const [sort, setSort] = useState<'asc' | 'desc'>('asc')
+  const [page, setPage] = useState(1)
+  const [protectedRows, setProtectedRows] = useState<EventItem[] | null>(null)
+  const [total, setTotal] = useState(data.counts.events)
+  const [message, setMessage] = useState('Public events loaded. Add a Queenbee token to query protected/historical rows.')
+  const [loading, setLoading] = useState(false)
+  const pageSize = 14
+  const rows = protectedRows || data.events
+  const eventData = { ...data, events: rows, counts: { ...data.counts, events: total || rows.length } }
+
+  async function loadProtectedEvents(event?: React.FormEvent) {
+    event?.preventDefault()
+    setLoading(true)
+    const offset = Math.max(0, page - 1) * pageSize
+    const params = new URLSearchParams({
+      limit: String(pageSize),
+      offset: String(offset),
+      order_by: orderBy,
+      sort,
+    })
+    if (query) params.set('search', query)
+    if (historical) params.set('historical', 'true')
+    try {
+      const result = await queenbeeRequest<{ events?: EventItem[]; total_count?: number }>({ service: 'workerbee', path: `events/protected?${params.toString()}`, method: 'GET', timeoutMs: 15000 })
+      const nextRows = Array.isArray(result.events) ? result.events : []
+      setProtectedRows(nextRows)
+      setTotal(typeof result.total_count === 'number' ? result.total_count : nextRows.length)
+      setMessage(`Loaded ${nextRows.length} protected event rows from offset ${offset}${historical ? ' including historical events' : ''}.`)
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : 'Unable to load protected events.')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  return (
+    <div className="stacked-page">
+      <section className="panel compact-panel">
+        <PanelTitle title="Event Browser" subtitle="Matches Queenbee search, historical, sort, and page controls" />
+        <form className="event-browser-controls" onSubmit={loadProtectedEvents}>
+          <label className="editor-field"><span>Search</span><input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search events" /></label>
+          <label className="editor-field"><span>Order by</span><select value={orderBy} onChange={(event) => setOrderBy(event.target.value)}><option value="id">id</option><option value="name_no">name_no</option><option value="name_en">name_en</option><option value="time_start">time_start</option><option value="updated_at">updated_at</option></select></label>
+          <label className="editor-field"><span>Sort</span><select value={sort} onChange={(event) => setSort(event.target.value as 'asc' | 'desc')}><option value="asc">asc</option><option value="desc">desc</option></select></label>
+          <label className="editor-field"><span>Page</span><input type="number" min="1" value={page} onChange={(event) => setPage(Math.max(1, Number(event.target.value) || 1))} /></label>
+          <label className="editor-check event-browser-check"><span>Historical</span><input type="checkbox" checked={historical} onChange={(event) => setHistorical(event.target.checked)} /></label>
+          <button type="submit" disabled={!hasQueenbeeToken() || loading}>{loading ? 'Loading...' : 'Load protected'}</button>
+        </form>
+        <p className="editor-message">{message}</p>
+      </section>
+      <EditorPage data={eventData} config={editorConfigs.events} preview={<EventList events={rows} status={data.health.events} />} />
+    </div>
+  )
 }
 
 function AnnouncementsPage({ data }: { data: DashboardData }) {
@@ -1126,7 +1194,19 @@ function EditorPage<T extends EditableRow>({ data, config, preview }: { data: Da
     event.preventDefault()
     const payload = buildEditorPayload(config.fields, new FormData(event.currentTarget))
     if (mode === 'update' && editing && config.service === 'bot') payload.id = editing.id
-    const target = mode === 'create' ? config.createPath : editing ? config.updatePath(editing.id) : config.createPath
+    let target = mode === 'create' ? config.createPath : editing ? config.updatePath(editing.id) : config.createPath
+    if (config.title === 'Events') {
+      payload.time_type ||= 'default'
+      const repeatType = stringValue(payload.repeat_type)
+      const repeatUntil = stringValue(payload.repeat_until)
+      delete payload.repeat_type
+      delete payload.repeat_until
+      if (mode === 'create' && repeatType) {
+        const params = new URLSearchParams({ repeat_type: repeatType })
+        if (repeatUntil) params.set('repeat_until', repeatUntil.slice(0, 10))
+        target = `${target}?${params.toString()}`
+      }
+    }
     const method = mode === 'create' ? 'POST' : 'PUT'
     const title = mode === 'create' ? `create a new ${config.title}` : `update ${editing ? config.titleOf(editing) : config.title}`
     if (!window.confirm(`Push this live Queenbee change now?\n\nAction: ${title}\nEndpoint: ${config.service}/${target}`)) return
@@ -1287,6 +1367,12 @@ function EditorInput({ field, row }: { field: EditorField; row: EditableRow | nu
   }
   if (field.type === 'textarea' || field.type === 'json') {
     return <label className="editor-field">{label}<textarea name={field.name} required={field.required} placeholder={field.placeholder} defaultValue={field.type === 'json' ? jsonEditorValue(value) : stringValue(value)} /></label>
+  }
+  if (field.name === 'time_type') {
+    return <label className="editor-field">{label}<select name={field.name} required={field.required} defaultValue={stringValue(value) || 'default'}><option value="default">default</option><option value="no_end">no_end</option><option value="whole_day">whole_day</option><option value="tbd">tbd</option></select></label>
+  }
+  if (field.name === 'repeat_type') {
+    return <label className="editor-field">{label}<select name={field.name} defaultValue=""><option value="">none</option><option value="weekly">weekly</option><option value="biweekly">biweekly</option></select></label>
   }
   return <label className="editor-field">{label}<input name={field.name} type={field.type === 'number' ? 'number' : field.type === 'datetime' ? 'datetime-local' : 'text'} required={field.required} placeholder={field.placeholder} defaultValue={field.type === 'datetime' ? dateInputValue(value) : stringValue(value)} /></label>
 }

@@ -1,4 +1,5 @@
 import {
+    fetchAnnouncements,
     fetchLocations,
     fetchHoneyList,
     fetchHoneyServices,
@@ -70,6 +71,34 @@ describe('Workerbee content fetch helpers', () => {
         })
     })
 
+    it('normalizes bot announcement array payloads', async () => {
+        global.fetch = jest.fn(async () => ({
+            ok: true,
+            json: async () => ([
+                {
+                    id: 9,
+                    title: ['TekKom Mote'],
+                    channel: '1032029092448575498',
+                    total_count: '12',
+                },
+            ]),
+        })) as any
+
+        await expect(fetchAnnouncements()).resolves.toEqual({
+            announcements: [{
+                id: 9,
+                title: ['TekKom Mote'],
+                channel: '1032029092448575498',
+                total_count: '12',
+            }],
+            total_count: 12,
+        })
+        expect(global.fetch).toHaveBeenCalledWith(
+            expect.stringContaining('/announcements?'),
+            expect.objectContaining({ headers: { btg: 'tekkom-bot' } }),
+        )
+    })
+
     it('returns empty collections when endpoint shapes drift', async () => {
         global.fetch = jest.fn(async () => ({
             ok: true,
@@ -79,6 +108,7 @@ describe('Workerbee content fetch helpers', () => {
         await expect(fetchRules()).resolves.toEqual({ rules: [], total_count: 0 })
         await expect(fetchLocations()).resolves.toEqual({ locations: [], total_count: 0 })
         await expect(fetchOrganizations()).resolves.toEqual({ organizations: [], total_count: 0 })
+        await expect(fetchAnnouncements()).resolves.toEqual({ announcements: [], total_count: 0 })
     })
 
     it('returns empty collections when requests fail', async () => {
@@ -92,5 +122,6 @@ describe('Workerbee content fetch helpers', () => {
         await expect(fetchOrganizations()).resolves.toEqual({ organizations: [], total_count: 0 })
         await expect(fetchHoneyServices()).resolves.toEqual([])
         await expect(fetchHoneyList('beehive')).resolves.toEqual({ honeys: [], total_count: 0 })
+        await expect(fetchAnnouncements()).resolves.toEqual({ announcements: [], total_count: 0 })
     })
 })
