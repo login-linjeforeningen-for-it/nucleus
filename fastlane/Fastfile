@@ -1,0 +1,54 @@
+require 'base64'
+
+default_platform(:ios)
+
+platform :ios do
+  lane :release do
+    api_key = app_store_connect_api_key(
+      key_id: ENV.fetch('ASC_KEY_ID'),
+      issuer_id: ENV.fetch('ASC_ISSUER_ID'),
+      key_content: Base64.decode64(ENV.fetch('ASC_PRIVATE_KEY_BASE64')),
+      is_key_content_base64: false
+    )
+
+    cocoapods(
+      podfile: 'ios/Podfile'
+    )
+
+    build_app(
+      workspace: 'ios/Login.xcworkspace',
+      scheme: 'Login',
+      configuration: 'Release',
+      export_method: 'app-store',
+      export_options: {
+        signingStyle: 'automatic',
+        teamID: ENV.fetch('APPLE_TEAM_ID')
+      },
+      xcargs: '-allowProvisioningUpdates'
+    )
+
+    upload_to_app_store(
+      api_key: api_key,
+      skip_metadata: true,
+      skip_screenshots: true,
+      submit_for_review: false
+    )
+  end
+end
+
+platform :android do
+  lane :release do
+    gradle(
+      task: 'bundle',
+      build_type: 'Release',
+      project_dir: 'android'
+    )
+
+    upload_to_play_store(
+      json_key: 'google-play-service-account.json',
+      package_name: 'com.login.Login',
+      aab: 'android/app/build/outputs/bundle/release/app-release.aab',
+      track: ENV.fetch('GOOGLE_PLAY_TRACK', 'production')
+    )
+  end
+end

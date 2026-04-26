@@ -18,11 +18,16 @@ jobs:
       - macOS
       - tekkommacmini
       - nucleus-release
-    timeout-minutes: 120
+    timeout-minutes: 180
     env:
-      EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+      ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
+      ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
+      ASC_PRIVATE_KEY_BASE64: ${{ secrets.ASC_PRIVATE_KEY_BASE64 }}
+      APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+      GOOGLE_PLAY_SERVICE_ACCOUNT_JSON_BASE64: ${{ secrets.GOOGLE_PLAY_SERVICE_ACCOUNT_JSON_BASE64 }}
       GOOGLE_SERVICES_JSON_BASE64: ${{ secrets.GOOGLE_SERVICES_JSON_BASE64 }}
       GOOGLE_SERVICES_PLIST_BASE64: ${{ secrets.GOOGLE_SERVICES_PLIST_BASE64 }}
+      GOOGLE_PLAY_TRACK: production
       CI: '1'
     steps:
       - name: Checkout
@@ -34,21 +39,33 @@ jobs:
           node-version: 25.8.1
           cache: npm
 
-      - name: Setup Expo and EAS
-        uses: expo/expo-github-action@v8
+      - name: Setup Java
+        uses: actions/setup-java@v4
         with:
-          token: ${{ secrets.EXPO_TOKEN }}
-          eas-version: latest
-          packager: npm
+          distribution: temurin
+          java-version: '21'
+
+      - name: Setup Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          bundler-cache: true
 
       - name: Install dependencies
         run: npm ci
 
-      - name: Preflight release environment
-        run: node scripts/ci/verify-store-release-env.mjs --strict
+      - name: Preflight direct store release
+        run: node scripts/ci/verify-direct-store-release-env.mjs --strict
 
       - name: Test project
         run: npm test -- --runInBand
 
+      - name: Write release credentials
+        run: node scripts/ci/write-direct-store-credentials.mjs
+
+      - name: Generate native projects
+        run: npx expo prebuild --non-interactive --clean
+
       - name: Build and submit to Apple and Google
-        run: eas build --platform all --profile production --non-interactive --auto-submit
+        run: |
+          bundle exec fastlane ios release
+          bundle exec fastlane android release
