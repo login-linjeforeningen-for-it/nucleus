@@ -1,5 +1,17 @@
 import { ExpoConfig, ConfigContext } from '@expo/config'
 
+const publicUniversalLinkPaths = [
+    '/events',
+    '/career',
+    '/about',
+    '/companies',
+    '/albums',
+    '/fund',
+    '/verv',
+    '/policy',
+    '/pwned',
+]
+
 export default ({ config }: ConfigContext): ExpoConfig => ({
     ...config,
     owner: "loginapp",
@@ -52,6 +64,10 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
         supportsTablet: true,
         bundleIdentifier: "com.eirikhanasand.Login",
         buildNumber: config.ios?.buildNumber,
+        associatedDomains: [
+            "applinks:login.no",
+            "applinks:www.login.no",
+        ],
         infoPlist: {
             ITSAppUsesNonExemptEncryption: false,
             UIBackgroundModes: [
@@ -73,6 +89,28 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
             "PUSH_NOTIFICATIONS",
             "READ_CALENDAR",
             "WRITE_CALENDAR"
+        ],
+        intentFilters: [
+            {
+                action: "VIEW",
+                autoVerify: true,
+                data: publicUniversalLinkPaths.flatMap((pathPrefix) => [
+                    {
+                        scheme: "https",
+                        host: "login.no",
+                        pathPrefix,
+                    },
+                    {
+                        scheme: "https",
+                        host: "www.login.no",
+                        pathPrefix,
+                    },
+                ]),
+                category: [
+                    "BROWSABLE",
+                    "DEFAULT"
+                ]
+            }
         ],
         softwareKeyboardLayoutMode: "pan"
     },
