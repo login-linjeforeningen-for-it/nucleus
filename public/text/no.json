@@ -17,6 +17,8 @@
         "SearchScreen": "Søk",
         "StatusScreen": "Status",
         "MusicScreen": "Musikk",
+        "AlbumsScreen": "Albumer",
+        "SpecificAlbumScreen": "Album",
         "DashboardScreen": "Dashboard",
         "LoadBalancingScreen": "Lastbalansering",
         "DatabaseScreen": "Databaser",
@@ -59,6 +61,18 @@
             "listener": "lytter",
             "listeners": "lyttere"
         }
+    },
+    "albums": {
+        "intro": "Bla gjennom bilder fra Login-arrangementer og studentlivet.",
+        "privacyNotice": "Vennligst respekter personvernet til alle på bildene. Send mail til pr@login.no dersom du ønsker at noen av bildene skal fjernes.",
+        "failedToLoad": "Kunne ikke laste albumer",
+        "failedToLoadAlbum": "Kunne ikke laste album",
+        "images": "bilder",
+        "image": "bilde",
+        "empty": "Fant ingen albumer.",
+        "event": "Arrangement",
+        "openEvent": "Åpne arrangement",
+        "updated": "Oppdatert"
     },
     "status": {
         "intro": "Se om Login sine tjenester er friske akkurat nå, og hvordan de har oppført seg i det siste.",

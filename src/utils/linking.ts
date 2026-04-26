@@ -36,6 +36,13 @@ const linking: LinkingOptions<RootStackParamList> = {
                         screens: {
                             AboutScreen: 'about',
                             BusinessScreen: 'companies',
+                            AlbumsScreen: 'albums',
+                            SpecificAlbumScreen: {
+                                path: 'albums/:albumID',
+                                parse: {
+                                    albumID: Number
+                                }
+                            },
                             QueenbeeScreen: 'internal',
                             VulnerabilitiesScreen: 'internal/vulnerabilities'
                         }

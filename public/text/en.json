@@ -17,6 +17,8 @@
         "SearchScreen": "Search",
         "StatusScreen": "Status",
         "MusicScreen": "Music",
+        "AlbumsScreen": "Albums",
+        "SpecificAlbumScreen": "Album",
         "DashboardScreen": "Dashboard",
         "LoadBalancingScreen": "Load balancing",
         "DatabaseScreen": "Databases",
@@ -59,6 +61,18 @@
             "listener": "listener",
             "listeners": "listeners"
         }
+    },
+    "albums": {
+        "intro": "Browse photos from Login events and student life.",
+        "privacyNotice": "Please respect the privacy of everyone photographed. Send an email to pr@login.no if you want any of the images removed.",
+        "failedToLoad": "Failed to load albums",
+        "failedToLoadAlbum": "Failed to load album",
+        "images": "images",
+        "image": "image",
+        "empty": "No albums found.",
+        "event": "Event",
+        "openEvent": "Open event",
+        "updated": "Updated"
     },
     "status": {
         "intro": "See whether Login's services are healthy right now, and how they have behaved over the latest checks.",

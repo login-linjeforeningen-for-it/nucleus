@@ -70,6 +70,33 @@ type GetEventsProps = {
     total_count: number
 }
 
+type GetAlbumEventProps = {
+    id: number
+    name_no: string
+    name_en: string
+    time_start: string | null
+    time_end: string | null
+}
+
+type GetAlbumProps = {
+    id: number
+    name_no: string
+    name_en: string
+    description_no: string
+    description_en: string
+    year: number
+    created_at: string
+    updated_at: string
+    images: string[] | null
+    image_count: number
+    event: GetAlbumEventProps | null
+}
+
+type GetAlbumsProps = {
+    albums: GetAlbumProps[]
+    total_count: number
+}
+
 type System = {
     ram: string
     processes: number
@@ -520,6 +547,8 @@ type MenuRoutes =
     | 'SearchScreen'
     | 'StatusScreen'
     | 'MusicScreen'
+    | 'AlbumsScreen'
+    | 'SpecificAlbumScreen'
     | 'DashboardScreen'
     | 'LoadBalancingScreen'
     | 'TrafficScreen'
@@ -551,6 +580,8 @@ type MenuStackParamList = {
     SearchScreen: undefined
     StatusScreen: undefined
     MusicScreen: undefined
+    AlbumsScreen: undefined
+    SpecificAlbumScreen: { albumID: number }
     DashboardScreen: undefined
     LoadBalancingScreen: undefined
     TrafficScreen: undefined

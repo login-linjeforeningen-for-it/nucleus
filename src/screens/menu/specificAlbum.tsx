@@ -1,0 +1,216 @@
+import Cluster from '@/components/shared/cluster'
+import Space from '@/components/shared/utils'
+import config from '@/constants'
+import Swipe from '@components/nav/swipe'
+import Text from '@components/shared/text'
+import GS from '@styles/globalStyles'
+import T from '@styles/text'
+import { fetchAlbumDetails } from '@utils/fetch'
+import { BottomTabNavigationProp } from '@react-navigation/bottom-tabs'
+import { JSX, useEffect, useState } from 'react'
+import { Dimensions, Image, RefreshControl, ScrollView, TouchableOpacity, View } from 'react-native'
+import { useSelector } from 'react-redux'
+
+export default function SpecificAlbumScreen({
+    navigation,
+    route,
+}: MenuProps<'SpecificAlbumScreen'>): JSX.Element {
+    const { theme } = useSelector((state: ReduxState) => state.theme)
+    const { lang } = useSelector((state: ReduxState) => state.lang)
+    const text = lang ? require('@text/no.json').albums : require('@text/en.json').albums
+    const [album, setAlbum] = useState<GetAlbumProps | null>(null)
+    const [refreshing, setRefreshing] = useState(false)
+    const [error, setError] = useState('')
+
+    async function load() {
+        setRefreshing(true)
+        try {
+            const nextAlbum = await fetchAlbumDetails(route.params.albumID)
+            if (!nextAlbum) {
+                throw new Error(text.failedToLoadAlbum)
+            }
+            setAlbum(nextAlbum)
+            setError('')
+        } catch (loadError) {
+            setError(loadError instanceof Error ? loadError.message : text.failedToLoadAlbum)
+        } finally {
+            setRefreshing(false)
+        }
+    }
+
+    useEffect(() => {
+        void load()
+    }, [route.params.albumID])
+
+    const title = album ? (lang ? album.name_no : album.name_en) : ''
+    const description = album ? (lang ? album.description_no : album.description_en) : ''
+
+    return (
+        <Swipe left='AlbumsScreen'>
+            <View style={{ flex: 1, backgroundColor: theme.darker }}>
+                <ScrollView
+                    refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => void load()} />}
+                    style={GS.content}
+                    contentContainerStyle={{ paddingHorizontal: 12, paddingBottom: 90 }}
+                    showsVerticalScrollIndicator={false}
+                >
+                    <Space height={Dimensions.get('window').height / 8} />
+                    {error ? (
+                        <Cluster>
+                            <View style={{ padding: 12 }}>
+                                <Text style={{ ...T.text15, color: '#ff8b8b' }}>{error}</Text>
+                            </View>
+                        </Cluster>
+                    ) : null}
+
+                    {album ? (
+                        <>
+                            <Cluster>
+                                <View style={{ padding: 12 }}>
+                                    <Text style={{ ...T.text25, color: theme.textColor }}>
+                                        {title}
+                                    </Text>
+                                    <Space height={8} />
+                                    <Text style={{ ...T.text15, color: theme.oppositeTextColor }}>
+                                        {formatAlbumDate(album.event?.time_start)}
+                                        {description}
+                                    </Text>
+                                    <Space height={12} />
+                                    <View style={{ flexDirection: 'row', gap: 8, flexWrap: 'wrap' }}>
+                                        <Pill label={String(album.year)} />
+                                        <Pill label={`${album.image_count || album.images?.length || 0} ${text.images}`} />
+                                        <Pill label={`${text.updated} ${formatShortDate(album.updated_at)}`} />
+                                    </View>
+                                    {album.event ? (
+                                        <>
+                                            <Space height={12} />
+                                            <TouchableOpacity
+                                                onPress={() => {
+                                                    const tabNavigation = navigation
+                                                        .getParent<BottomTabNavigationProp<TabBarParamList>>()
+                                                    if (album.event?.id) {
+                                                        tabNavigation?.navigate('EventNav', {
+                                                            screen: 'SpecificEventScreen',
+                                                            params: { eventID: album.event.id },
+                                                        })
+                                                    }
+                                                }}
+                                                activeOpacity={0.88}
+                                            >
+                                                <View style={{
+                                                    borderRadius: 16,
+                                                    borderWidth: 1,
+                                                    borderColor: theme.orangeTransparentBorder,
+                                                    backgroundColor: theme.orangeTransparent,
+                                                    padding: 12,
+                                                }}>
+                                                    <Text style={{ ...T.text12, color: theme.oppositeTextColor }}>
+                                                        {text.event}
+                                                    </Text>
+                                                    <Space height={4} />
+                                                    <Text style={{ ...T.text15, color: theme.textColor }}>
+                                                        {lang ? album.event.name_no : album.event.name_en}
+                                                    </Text>
+                                                </View>
+                                            </TouchableOpacity>
+                                        </>
+                                    ) : null}
+                                </View>
+                            </Cluster>
+
+                            <Space height={10} />
+                            <AlbumImageGrid album={album} title={title} />
+                        </>
+                    ) : null}
+                </ScrollView>
+            </View>
+        </Swipe>
+    )
+}
+
+function AlbumImageGrid({ album, title }: { album: GetAlbumProps, title: string }) {
+    const { theme } = useSelector((state: ReduxState) => state.theme)
+    const images = Array.isArray(album.images) ? album.images : []
+
+    if (!images.length) {
+        return (
+            <Cluster>
+                <View style={{ padding: 12 }}>
+                    <Text style={{ ...T.text15, color: theme.oppositeTextColor }}>No images</Text>
+                </View>
+            </Cluster>
+        )
+    }
+
+    return (
+        <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 10 }}>
+            {images.map((image, index) => (
+                <View
+                    key={image}
+                    style={{
+                        width: '48%',
+                        aspectRatio: 1,
+                        borderRadius: 18,
+                        overflow: 'hidden',
+                        backgroundColor: theme.contrast,
+                        borderWidth: 1,
+                        borderColor: '#ffffff14',
+                    }}
+                >
+                    <Image
+                        source={{ uri: `${config.cdn}/albums/${album.id}/${image}`, cache: 'force-cache' }}
+                        accessibilityLabel={`${title} ${index + 1}`}
+                        style={{ width: '100%', height: '100%' }}
+                    />
+                </View>
+            ))}
+        </View>
+    )
+}
+
+function Pill({ label }: { label: string }) {
+    const { theme } = useSelector((state: ReduxState) => state.theme)
+
+    return (
+        <View style={{
+            borderRadius: 999,
+            borderWidth: 1,
+            borderColor: theme.orangeTransparentBorder,
+            backgroundColor: theme.orangeTransparent,
+            paddingHorizontal: 10,
+            paddingVertical: 5,
+        }}>
+            <Text style={{ ...T.text12, color: theme.textColor }}>{label}</Text>
+        </View>
+    )
+}
+
+function formatAlbumDate(value?: string | null) {
+    if (!value) {
+        return ''
+    }
+
+    const date = new Date(value)
+    if (Number.isNaN(date.valueOf())) {
+        return ''
+    }
+
+    return `${new Intl.DateTimeFormat('nb-NO', {
+        day: '2-digit',
+        month: 'long',
+        year: 'numeric',
+    }).format(date)} - `
+}
+
+function formatShortDate(value: string) {
+    const date = new Date(value)
+    if (Number.isNaN(date.valueOf())) {
+        return value
+    }
+
+    return new Intl.DateTimeFormat('nb-NO', {
+        day: '2-digit',
+        month: 'short',
+        year: 'numeric',
+    }).format(date)
+}

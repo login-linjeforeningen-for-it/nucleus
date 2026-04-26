@@ -56,6 +56,11 @@
             "id": 11,
             "nav": "MusicScreen",
             "title": "Music"
+        },
+        {
+            "id": 12,
+            "nav": "AlbumsScreen",
+            "title": "Albums"
         }
     ],
     "version": "Version ",

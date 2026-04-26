@@ -47,6 +47,7 @@ import CourseScreen from '@screens/menu/course/index'
 import SearchScreen from '@screens/menu/search'
 import StatusScreen from '@screens/menu/status'
 import MusicScreen from '@screens/menu/music'
+import AlbumsScreen from '@screens/menu/albums'
 import DashboardScreen from '@screens/menu/dashboard'
 import LoadBalancingScreen from '@screens/menu/loadBalancing'
 import DatabaseScreen from '@screens/menu/database'
@@ -57,6 +58,7 @@ import TrafficRecordsScreen from '@screens/menu/trafficRecords'
 import TrafficMapScreen from '@screens/menu/trafficMap'
 import SpecificEventScreen from '@screens/event/specificEvent'
 import SpecificAdScreen from '@screens/ads/specificAd'
+import SpecificAlbumScreen from '@screens/menu/specificAlbum'
 import SpecificCourseScreen from '@screens/menu/course/specificCourse'
 import SpecificGameScreen from '@screens/menu/games/specificGame'
 import DiceScreen from '@screens/menu/games/dice'
@@ -133,6 +135,8 @@ function Menu() {
             <MenuStack.Screen name='SearchScreen' component={SearchScreen} />
             <MenuStack.Screen name='StatusScreen' component={StatusScreen} />
             <MenuStack.Screen name='MusicScreen' component={MusicScreen} />
+            <MenuStack.Screen name='AlbumsScreen' component={AlbumsScreen} />
+            <MenuStack.Screen name='SpecificAlbumScreen' component={SpecificAlbumScreen} />
             <MenuStack.Screen name='DashboardScreen' component={DashboardScreen} />
             <MenuStack.Screen name='LoadBalancingScreen' component={LoadBalancingScreen} />
             <MenuStack.Screen name='TrafficScreen' component={TrafficScreen} />

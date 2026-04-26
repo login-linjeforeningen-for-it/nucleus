@@ -51,6 +51,7 @@ export default function MenuScreen({ navigation }: MenuProps<'MenuScreen'>): JSX
         StatusScreen: lang ? 'Driftsstatus for Login sine tjenester' : 'Operational status for Login\'s services',
         SearchScreen: lang ? 'Søk og åpne direkte fra appen' : 'Search and open directly from the app',
         MusicScreen: lang ? 'Live musikkstatistikk fra Login' : 'Live music statistics from Login',
+        AlbumsScreen: lang ? 'Bilder fra arrangementer og Login-liv' : 'Photos from events and Login life',
     }), [lang])
 
     function toggleFeedback() {
