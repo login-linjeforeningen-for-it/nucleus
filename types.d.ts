@@ -628,6 +628,7 @@ type MenuRoutes =
     | 'FundScreen'
     | 'VervScreen'
     | 'PolicyScreen'
+    | 'PwnedScreen'
     | 'DashboardScreen'
     | 'LoadBalancingScreen'
     | 'TrafficScreen'
@@ -665,6 +666,7 @@ type MenuStackParamList = {
     FundScreen: undefined
     VervScreen: undefined
     PolicyScreen: undefined
+    PwnedScreen: undefined
     DashboardScreen: undefined
     LoadBalancingScreen: undefined
     TrafficScreen: undefined

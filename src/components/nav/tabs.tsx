@@ -51,6 +51,7 @@ import AlbumsScreen from '@screens/menu/albums'
 import FundScreen from '@screens/menu/fund'
 import VervScreen from '@screens/menu/verv'
 import PolicyScreen from '@screens/menu/policy'
+import PwnedScreen from '@screens/menu/pwned'
 import DashboardScreen from '@screens/menu/dashboard'
 import LoadBalancingScreen from '@screens/menu/loadBalancing'
 import DatabaseScreen from '@screens/menu/database'
@@ -144,6 +145,7 @@ function Menu() {
             <MenuStack.Screen name='FundScreen' component={FundScreen} />
             <MenuStack.Screen name='VervScreen' component={VervScreen} />
             <MenuStack.Screen name='PolicyScreen' component={PolicyScreen} />
+            <MenuStack.Screen name='PwnedScreen' component={PwnedScreen} />
             <MenuStack.Screen name='DashboardScreen' component={DashboardScreen} />
             <MenuStack.Screen name='LoadBalancingScreen' component={LoadBalancingScreen} />
             <MenuStack.Screen name='TrafficScreen' component={TrafficScreen} />

@@ -76,6 +76,11 @@
             "id": 15,
             "nav": "PolicyScreen",
             "title": "Personvern"
+        },
+        {
+            "id": 16,
+            "nav": "PwnedScreen",
+            "title": "Pwned"
         }
     ],
     "version": "Versjon ",

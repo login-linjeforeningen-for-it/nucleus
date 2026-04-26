@@ -55,6 +55,7 @@ export default function MenuScreen({ navigation }: MenuProps<'MenuScreen'>): JSX
         FundScreen: lang ? 'Fondet, søknader og beholdning' : 'The fund, applications, and holdings',
         VervScreen: lang ? 'Komiteer, verv og søknad' : 'Committees, roles, and applications',
         PolicyScreen: lang ? 'Personvern og app-policy' : 'Privacy and app policy',
+        PwnedScreen: lang ? 'Lås skjermen, ellers...' : 'Lock your screen, or else...',
     }), [lang])
 
     function toggleFeedback() {

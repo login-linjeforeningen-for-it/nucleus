@@ -22,6 +22,7 @@
         "FundScreen": "Login Fund",
         "VervScreen": "Verv",
         "PolicyScreen": "Privacy Policy",
+        "PwnedScreen": "Pwned",
         "DashboardScreen": "Dashboard",
         "LoadBalancingScreen": "Load balancing",
         "DatabaseScreen": "Databases",
@@ -256,6 +257,28 @@
             }
         ],
         "download": "By downloading, installing, or using the Login app, you accept this Privacy Policy. If you disagree with any part of it, please refrain from using the app."
+    },
+    "pwned": {
+        "title": "Pwned",
+        "intro": "A gentle reminder from Login: lock your screen before someone else makes your point for you.",
+        "text": "It has been {time} since you've been pwned",
+        "second": "second",
+        "seconds": "seconds",
+        "shuffle": "Shuffle meme",
+        "pwned": [
+            { "text": "You after we deleted your assignment while your pc was unlocked", "image": "oblig.png" },
+            { "text": "Cafeteria prices when you forget to lock the screen", "image": "sit_math.jpg" },
+            { "text": "You after leaving the screen unlocked", "image": "sit_peas.jpg" },
+            { "text": "Your PC after being left unlocked all day", "image": "laptop_smoking.gif" },
+            { "text": "Your PC after your classmates installed a bitcoin miner while you were in the bathroom", "image": "pc_fire.gif" },
+            { "text": "The entire Login lounge watching as your screen is unlocked", "image": "cat_shocked.gif" },
+            { "text": "You trying to turn back time after leaving the screen unlocked", "image": "cat_clock.gif" },
+            { "text": "Me watching my life fall apart after I forgot to lock my screen", "image": "house_fire.gif" },
+            { "text": "I'm just a chill guy, I don't bother locking my screen", "image": "chill_guy.gif" },
+            { "text": "Y U NO LOCK YOUR SCREEN", "image": "y-u-no.jpg" },
+            { "text": "Yeah, if you could go ahead and lock your screen next time, that'd be great.", "image": "lumbergh.jpg" },
+            { "text": "Disappointed cat is disappointed you left your screen unlocked.", "image": "disappointed-cat.png.jpeg" }
+        ]
     },
     "status": {
         "intro": "See whether Login's services are healthy right now, and how they have behaved over the latest checks.",

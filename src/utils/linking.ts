@@ -40,6 +40,7 @@ const linking: LinkingOptions<RootStackParamList> = {
                             FundScreen: 'fund',
                             VervScreen: 'verv',
                             PolicyScreen: 'policy',
+                            PwnedScreen: 'pwned',
                             SpecificAlbumScreen: {
                                 path: 'albums/:albumID',
                                 parse: {

@@ -22,6 +22,7 @@
         "FundScreen": "Logins Fond",
         "VervScreen": "Verv",
         "PolicyScreen": "Personvern",
+        "PwnedScreen": "Pwned",
         "DashboardScreen": "Dashboard",
         "LoadBalancingScreen": "Lastbalansering",
         "DatabaseScreen": "Databaser",
@@ -256,6 +257,28 @@
             }
         ],
         "download": "By downloading, installing, or using the Login app, you accept this Privacy Policy. If you disagree with any part of it, please refrain from using the app."
+    },
+    "pwned": {
+        "title": "Pwned",
+        "intro": "En vennlig påminnelse fra Login: lås skjermen før noen andre gjør poenget for deg.",
+        "text": "Det har gått {time} siden du ble pwned",
+        "second": "sekund",
+        "seconds": "sekunder",
+        "shuffle": "Bytt meme",
+        "pwned": [
+            { "text": "Deg etter at vi sletta obligen din mens pcen din var ulåst", "image": "oblig.png" },
+            { "text": "Kantineprisene når du glemmer å låse skjermen", "image": "sit_math.jpg" },
+            { "text": "Deg etter å ha forlatt skjermen ulåst", "image": "sit_peas.jpg" },
+            { "text": "PC-en din etter å ha vært ulåst hele dagen", "image": "laptop_smoking.gif" },
+            { "text": "PC-en din etter at klassekameratene dine installerte en bitcoin-miner mens du var på do", "image": "pc_fire.gif" },
+            { "text": "Hele Login loungen mens skjermen din er ulåst", "image": "cat_shocked.gif" },
+            { "text": "Deg som prøver å skru tilbake tiden etter å ha latt skjermen stå ulåst", "image": "cat_clock.gif" },
+            { "text": "Meg som ser livet falle fra hverandre etter at jeg glemte å låse skjermen", "image": "house_fire.gif" },
+            { "text": "Jeg er bare en chill fyr, jeg bryr meg ikke om å låse skjermen", "image": "chill_guy.gif" },
+            { "text": "Y U NO LOCK YOUR SCREEN", "image": "y-u-no.jpg" },
+            { "text": "Ja, hvis du bare kunne låst skjermen neste gang, så hadde det vært flott.", "image": "lumbergh.jpg" },
+            { "text": "Katten er skuffet over at du lot skjermen stå ulåst.", "image": "disappointed-cat.png.jpeg" }
+        ]
     },
     "status": {
         "intro": "Se om Login sine tjenester er friske akkurat nå, og hvordan de har oppført seg i det siste.",
