@@ -7,8 +7,16 @@ import { useMemo } from 'react'
 import { Image, Linking, TouchableOpacity, View } from 'react-native'
 import Svg, { Circle, Polyline } from 'react-native-svg'
 import { useSelector } from 'react-redux'
-import { formatCurrency, formatSignedCurrency, InfoLine } from './fundPrimitives'
-import { FundBoardMember, FundBoardText, FundSection, FundSupportText, HoldingsCardProps } from './fundTypes'
+import {
+    formatCurrency,
+    formatSignedCurrency,
+    FundBoardMember,
+    FundBoardText,
+    FundSection,
+    FundSupportText,
+    HoldingsCardProps,
+    InfoLine,
+} from './fundContent'
 
 export function FundSupportCard({ text, lang }: { text: FundSupportText, lang: boolean }) {
     const { theme } = useSelector((state: ReduxState) => state.theme)

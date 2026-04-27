@@ -1,7 +1,7 @@
 import Cluster from '@/components/shared/cluster'
 import Space from '@/components/shared/utils'
 import { BoardCard, FundSupportCard, HoldingsCard, SectionCard } from '@/components/menu/fund/fundCards'
-import { FundSection } from '@/components/menu/fund/fundTypes'
+import { FundSection } from '@/components/menu/fund/fundContent'
 import Swipe from '@components/nav/swipe'
 import Text from '@components/shared/text'
 import TopRefreshIndicator from '@components/shared/topRefreshIndicator'
