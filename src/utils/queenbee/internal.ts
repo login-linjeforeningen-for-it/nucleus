@@ -21,8 +21,8 @@ export async function getInternalOverview(): Promise<NativeInternalOverview> {
     const databaseOverview = isObject(runtime.databaseOverview)
         ? runtime.databaseOverview as GetDatabaseOverview
         : null
-    const databaseCount = readNumber(statistics.databases)
-        ?? readNumber(databaseOverview?.databaseCount)
+    const databaseCount = readNumber(databaseOverview?.databaseCount)
+        ?? readNumber(statistics.databases)
         ?? null
 
     return {
@@ -62,16 +62,12 @@ function buildSystem(payload: unknown, dockerPayload: unknown): System {
 }
 
 export async function getDatabaseOverview(): Promise<GetDatabaseOverview> {
-    return await requestApi<GetDatabaseOverview>(config.internal_api_url, '/db')
+    return await requestApi<GetDatabaseOverview>(config.beekeeper_api_url, '/db')
 }
 
 export async function getDatabaseContainerCount(): Promise<number> {
-    const payload = await requestApi<unknown>(config.internal_api_url, '/databases')
-    if (!isObject(payload)) {
-        return 0
-    }
-
-    return readNumber(payload.count) ?? readNumber(payload.databaseCount) ?? 0
+    const payload = await getDatabaseOverview()
+    return readNumber(payload.databaseCount) ?? 0
 }
 
 export async function listDatabaseBackups(): Promise<NativeDatabaseBackup[]> {
@@ -113,7 +109,21 @@ export async function restoreDatabaseBackup(body: {
 }
 
 export async function getVulnerabilitiesOverview(): Promise<GetVulnerabilities> {
-    return await requestApi<GetVulnerabilities>(config.beekeeper_api_url, '/vulnerabilities')
+    const payload = await requestApi<unknown>(config.beekeeper_api_url, '/vulnerabilities')
+    if (!isVulnerabilityPayload(payload)) {
+        throw new Error('The vulnerability API returned an unexpected response.')
+    }
+
+    return payload
+}
+
+export async function getScoutOverview(): Promise<ScoutOverview> {
+    const payload = await requestApi<unknown>(config.beekeeper_api_url, '/scout')
+    if (!isScoutPayload(payload)) {
+        throw new Error('The scout API returned an unexpected response.')
+    }
+
+    return payload
 }
 
 export async function triggerVulnerabilityScan(): Promise<{ message: string, status: GetVulnerabilities['scanStatus'] }> {
@@ -174,4 +184,15 @@ function isDatabaseBackupFile(value: unknown): value is NativeDatabaseBackupFile
     return isObject(value)
         && typeof value.service === 'string'
         && typeof value.file === 'string'
+}
+
+function isVulnerabilityPayload(value: unknown): value is GetVulnerabilities {
+    return isObject(value)
+        && Array.isArray(value.images)
+        && isObject(value.scanStatus)
+}
+
+function isScoutPayload(value: unknown): value is ScoutOverview {
+    return isObject(value)
+        && isObject(value.projects)
 }

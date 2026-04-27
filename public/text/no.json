@@ -31,8 +31,16 @@
         "TrafficScreen": "Trafikk",
         "TrafficRecordsScreen": "Trafikklogger",
         "TrafficMapScreen": "Trafikkart",
+        "ContentScreen": "Innhold",
+        "AnnouncementsScreen": "Kunngjøringer",
+        "AlertsScreen": "Varsler",
         "NucleusDocumentationScreen": "Nucleus docs",
-        "HoneyScreen": "Honey"
+        "HoneyScreen": "Honey",
+        "DatabaseBackupsScreen": "Database backups",
+        "SpecificAdScreen": "Jobbannonse",
+        "SpecificCourseScreen": "Emne",
+        "SpecificGameScreen": "Spill",
+        "DiceScreen": "Terning"
     },
     "search": {
         "intro": "Søk fra appen og se animasjonen før den åpnes.",
@@ -69,7 +77,7 @@
         }
     },
     "albums": {
-        "intro": "Bla gjennom bilder fra Login-arrangementer og studentlivet.",
+        "intro": "Bla gjennom bilder fra arrangementer.",
         "privacyNotice": "Vennligst respekter personvernet til alle på bildene. Send mail til pr@login.no dersom du ønsker at noen av bildene skal fjernes.",
         "failedToLoad": "Kunne ikke laste albumer",
         "failedToLoadAlbum": "Kunne ikke laste album",
@@ -262,7 +270,7 @@
     },
     "pwned": {
         "title": "Pwned",
-        "intro": "En vennlig påminnelse fra Login: lås skjermen før noen andre gjør poenget for deg.",
+        "intro": "Lås skjermen din, ellers...",
         "text": "Det har gått {time} siden du ble pwned",
         "second": "sekund",
         "seconds": "sekunder",

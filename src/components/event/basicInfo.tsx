@@ -57,41 +57,45 @@ export default function BasicInfo() {
                 <Category />
                 <View style={ES.specificEventInfoView}>
                     <Text style={{ ...T.specificEventInfo, color: theme.textColor }}>{text.host}</Text>
-                    <Text style={{ ...T.specificEventInfoContent, color: theme.textColor }}>
-                        {host}
-                        {event && 'link_stream' in event && ' - '}
-                        {event && 'link_stream' in event && (
+                    <View style={{ flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center' }}>
+                        <Text style={{ ...T.specificEventInfoContent, color: theme.textColor }}>
+                            {host}
+                        </Text>
+                        {event && 'link_stream' in event && <Text style={{ ...T.text20, color: theme.textColor }}> - </Text>}
+                        {event && 'link_stream' in event ? (
                             <TextLink
                                 style={{ ...T.text20, color: theme.orange, top: 3 }}
                                 text='Stream'
                                 url={event.link_stream!}
                             />
-                        )}
-                        {event && 'link_discord' in event && ' - '}
-                        {event && 'link_discord' in event && (
+                        ) : null}
+                        {event && 'link_discord' in event && <Text style={{ ...T.text20, color: theme.textColor }}> - </Text>}
+                        {event && 'link_discord' in event ? (
                             <TextLink
                                 style={{ ...T.text20, color: theme.orange, top: 3 }}
                                 text='Discord'
                                 url={event.link_discord!}
                             />
-                        )}
-                        {event && 'link_facebook' in event && ' - '}
-                        {event && 'link_facebook' in event && (
+                        ) : null}
+                        {event && 'link_facebook' in event && <Text style={{ ...T.text20, color: theme.textColor }}> - </Text>}
+                        {event && 'link_facebook' in event ? (
                             <TextLink
                                 style={{ ...T.text20, color: theme.orange, top: 3 }}
                                 text='Facebook'
                                 url={event.link_facebook!}
                             />
-                        )}
-                        {event && 'organization' in event && event.organization?.link_homepage && ' - '}
-                        {event && 'organization' in event && event.organization?.link_homepage && (
+                        ) : null}
+                        {event && 'organization' in event && event.organization?.link_homepage
+                            ? <Text style={{ ...T.text20, color: theme.textColor }}> - </Text>
+                            : null}
+                        {event && 'organization' in event && event.organization?.link_homepage ? (
                             <TextLink
                                 style={{ ...T.text20, color: theme.orange, top: 3 }}
                                 text={text.more}
                                 url={event.organization?.link_homepage}
                             />
-                        )}
-                    </Text>
+                        ) : null}
+                    </View>
                 </View>
                 <>{info && <InfoBlock text={info} />}</>
             </Skeleton>
@@ -115,8 +119,7 @@ function Start() {
                 {start}
             </Text>
             <Text style={{ ...T.specificEventInfo, color: theme.textColor }}>
-                {event.time_start[11]}{event.time_start[12]}:
-                {event.time_start[14]}{event.time_start[15]}
+                {`${event.time_start[11]}${event.time_start[12]}:${event.time_start[14]}${event.time_start[15]}`}
             </Text>
         </View>
     )
@@ -163,7 +166,7 @@ function Location() {
             top: -5
         }}>
             <Text style={{ ...T.specificEventInfo, color: theme.textColor }}>
-                {text}{location || 'TBA!'}
+                {`${text}${location || 'TBA!'}`}
                 <Map />
             </Text>
         </View>

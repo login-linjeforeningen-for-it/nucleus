@@ -4,11 +4,12 @@ import GS from '@styles/globalStyles'
 import { useSelector } from 'react-redux'
 import T from '@styles/text'
 import Swipe from '@components/nav/swipe'
-import { RefreshControl, ScrollView } from 'react-native-gesture-handler'
+import TopRefreshIndicator from '@components/shared/topRefreshIndicator'
+import { ScrollView } from 'react-native-gesture-handler'
 import CourseError from '@components/course/courseError'
 import { getCourses } from '@utils/course'
 import { JSX, useCallback, useEffect, useState } from 'react'
-import { View, Image, TouchableOpacity, Dimensions, Text, Platform } from 'react-native'
+import { View, Image, TouchableOpacity, Dimensions, RefreshControl, Text } from 'react-native'
 import { StackNavigationProp } from '@react-navigation/stack'
 
 type CourseListProps = {
@@ -20,16 +21,18 @@ export default function CourseScreen({ navigation }: MenuProps<'CourseScreen'>):
     const [courses, setCourses] = useState<string | CourseAsList[]>([])
     const { theme } = useSelector((state: ReduxState) => state.theme )
     const [refresh, setRefresh] = useState(false)
-    const height = Dimensions.get('window').height
 
     const onRefresh = useCallback(async () => {
         setRefresh(true)
-        const courses = await getCourses()
-        if (courses) {
-            setCourses(courses)
+        try {
+            const courses = await getCourses()
+            if (courses) {
+                setCourses(courses)
+            }
+        } finally {
             setRefresh(false)
         }
-    }, [refresh])
+    }, [])
 
     useEffect(() => {
         (async () => {
@@ -41,18 +44,24 @@ export default function CourseScreen({ navigation }: MenuProps<'CourseScreen'>):
         })()
     }, [])
 
-    const extraHeight = Platform.OS === 'ios' ? 0 : height > 800 && height < 900 ? 20 : 10
-
     return (
         <Swipe left='MenuScreen'>
             <View style={{...GS.content, backgroundColor: theme.darker}}>
-                <Space height={Dimensions.get('window').height / 8.1 + extraHeight} />
                 <ScrollView
                     showsVerticalScrollIndicator={false}
                     scrollEventThrottle={100}
+                    style={{ paddingTop: 100 }}
+                    refreshControl={
+                        <RefreshControl
+                            refreshing={refresh}
+                            onRefresh={onRefresh}
+                            tintColor={theme.orange}
+                            colors={[theme.orange]}
+                            progressViewOffset={0}
+                        />
+                    }
                 >
                     {typeof courses === 'string' && <CourseError text={courses} />}
-                    <RefreshControl refreshing={refresh} onRefresh={onRefresh} />
                     {typeof courses !== 'string' && courses.map((course: CourseAsList) =>
                         <CourseList
                             key={course.id}
@@ -62,6 +71,7 @@ export default function CourseScreen({ navigation }: MenuProps<'CourseScreen'>):
                     )}
                     <Space height={Dimensions.get('window').height / 8.5} />
                 </ScrollView>
+                <TopRefreshIndicator refreshing={refresh} theme={theme} top={112} />
             </View>
         </Swipe>
     )
@@ -99,7 +109,7 @@ function CourseList({ course, navigation }: CourseListProps): JSX.Element {
                             color: theme.oppositeTextColor,
                             marginTop: 2,
                         }}>
-                            {course.count} {lang ? 'spørsmål' : 'questions'}
+                            {`${course.count} ${lang ? 'spørsmål' : 'questions'}`}
                         </Text>
                     </View>
                     <View style={{

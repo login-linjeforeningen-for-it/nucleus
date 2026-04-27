@@ -32,7 +32,7 @@ export default function MenuScreen({ navigation }: MenuProps<'MenuScreen'>): JSX
     const { theme } = useSelector((state: ReduxState) => state.theme)
     const events = useSelector((state: ReduxState) => state.event.events)
     const ads = useSelector((state: ReduxState) => state.ad.ads)
-    const { name, image, degree, schoolyear } = useSelector((state: ReduxState) => state.profile)
+    const { name, picture, email } = useSelector((state: ReduxState) => state.profile)
     const text: Setting = lang ? no as Setting : en as Setting
     const versionLabel = `${(text as any).version}${nativeApplicationVersion}`
     const dispatch = useDispatch()
@@ -51,7 +51,7 @@ export default function MenuScreen({ navigation }: MenuProps<'MenuScreen'>): JSX
         StatusScreen: lang ? 'Driftsstatus for Login sine tjenester' : 'Operational status for Login\'s services',
         SearchScreen: lang ? 'Søk og åpne direkte fra appen' : 'Search and open directly from the app',
         MusicScreen: lang ? 'Live musikkstatistikk fra Login' : 'Live music statistics from Login',
-        AlbumsScreen: lang ? 'Bilder fra arrangementer og Login-liv' : 'Photos from events and Login life',
+        AlbumsScreen: lang ? 'Bilder fra diverse arrangementer' : 'Photos from various events',
         FundScreen: lang ? 'Fondet, søknader og beholdning' : 'The fund, applications, and holdings',
         VervScreen: lang ? 'Komiteer, verv og søknad' : 'Committees, roles, and applications',
         PolicyScreen: lang ? 'Personvern og app-policy' : 'Privacy and app policy',
@@ -121,9 +121,9 @@ export default function MenuScreen({ navigation }: MenuProps<'MenuScreen'>): JSX
                                     alignItems: 'center',
                                     justifyContent: 'center',
                                 }}>
-                                    {image ? (
+                                    {picture ? (
                                         <Image
-                                            source={{ uri: image }}
+                                            source={{ uri: picture }}
                                             style={{ width: 64, height: 64, resizeMode: 'cover' }}
                                         />
                                     ) : (
@@ -136,8 +136,7 @@ export default function MenuScreen({ navigation }: MenuProps<'MenuScreen'>): JSX
                                     </Text>
                                     <Text style={{ ...T.text15, color: theme.oppositeTextColor }}>
                                         {login
-                                            ? [schoolyear, degree].filter(Boolean).join(' · ')
-                                                || (lang ? 'Konto og personlige verktøy' : 'Account, and personal tools')
+                                            ? email || (lang ? 'Konto og personlige verktøy' : 'Account, and personal tools')
                                             : (lang ? 'Innlogging og kontoverktøy' : 'Sign-in and account tools')}
                                     </Text>
                                 </View>

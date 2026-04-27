@@ -8,20 +8,18 @@ import { JSX } from 'react'
 import { Dimensions, ScrollView, TouchableOpacity, View } from 'react-native'
 import { useDispatch, useSelector } from 'react-redux'
 import { clearSession } from '@redux/loginStatus'
-import { setID, setMail, setName } from '@redux/profile'
-import { startLogin } from '@utils/auth'
+import { clearProfile } from '@redux/profile'
+import { startLogin } from '@utils/auth/auth'
 
 export default function LoginScreen({ navigation }: MenuProps<'LoginScreen'>): JSX.Element {
     const dispatch = useDispatch()
     const { theme } = useSelector((state: ReduxState) => state.theme)
     const { login, groups } = useSelector((state: ReduxState) => state.login)
-    const { name, mail } = useSelector((state: ReduxState) => state.profile)
+    const { name, email } = useSelector((state: ReduxState) => state.profile)
 
     function handleLogout() {
         dispatch(clearSession())
-        dispatch(setID(null))
-        dispatch(setName(null))
-        dispatch(setMail(null))
+        dispatch(clearProfile())
     }
 
     return (
@@ -41,8 +39,8 @@ export default function LoginScreen({ navigation }: MenuProps<'LoginScreen'>): J
                             <Space height={8} />
                             <Text style={{ ...T.centered15, color: theme.oppositeTextColor }}>
                                 {login
-                                    ? `${name || 'Unknown user'} · ${mail || 'No email'}`
-                                    : 'Sign in to unlock your profile, Queenbee tools, and internal workflows. '
+                                    ? `${name || 'Unknown user'} · ${email || 'No email'}`
+                                    : 'Sign in to view your profile and Queenbee. '
                                         + 'Login AI is open for everyone.'}
                             </Text>
                         </View>

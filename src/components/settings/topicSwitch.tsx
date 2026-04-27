@@ -63,7 +63,7 @@ function TopicSwitch({ topic, textNo, textEn }: TopicSwitchProps): JSX.Element {
                         borderRadius: 99,
                         backgroundColor: theme.orange,
                         marginRight: 10,
-                        opacity: 0.22,
+                        opacity: 0.3,
                     }} />
                     <View style={{
                         flex: 1,

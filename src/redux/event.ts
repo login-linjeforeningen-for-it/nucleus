@@ -25,11 +25,8 @@ type filterBothProps = {
     input: string
 }
 
-// Declares the event slice
 export const EventSlice = createSlice({
-    // Names the slice as "event"
     name: 'event',
-    // Initial state of the slice
     initialState: {
         events: [] as GetEventProps[],
         eventName: '',
@@ -47,7 +44,6 @@ export const EventSlice = createSlice({
         downloadState: '',
         tag: { title: '', body: '' },
     },
-    // Declares reducers
     reducers: {
         // Sets the event array
         setEvents(state, action) {

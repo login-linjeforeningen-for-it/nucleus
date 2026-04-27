@@ -1,6 +1,6 @@
 import Swipe from '@components/nav/swipe'
 import { ReactNode } from 'react'
-import { ColorValue, Dimensions, View } from 'react-native'
+import { ColorValue, View } from 'react-native'
 import { useSelector } from 'react-redux'
 import GS from '@styles/globalStyles'
 import Space from './utils'
@@ -27,7 +27,7 @@ export default function Parent({ children, left, right, paddingHorizontal, color
                 style={{ ...GS.content, paddingHorizontal: paddingHorizontal || 12 }}
             >
                 <View style={{ ...GS.content, paddingHorizontal: paddingHorizontal || 12 }}>
-                    <Space height={Dimensions.get('window').height / 8} />
+                    <Space height={10} />
                     {children}
                 </View>
             </LinearGradient>

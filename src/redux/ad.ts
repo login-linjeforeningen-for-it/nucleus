@@ -25,11 +25,8 @@ type filterBothProps = {
     input: string
 }
 
-// Declares the ad slice
 export const AdSlice = createSlice({
-    // Names the slice as "ad"
     name: 'ad',
-    // Initial state of the slice
     initialState: {
         ads: [] as GetJobProps[],
         adName: '',
@@ -44,7 +41,6 @@ export const AdSlice = createSlice({
         input: '',
         downloadState: '',
     },
-    // Declares reducers
     reducers: {
         // Sets the ad array
         setAds(state, action) {

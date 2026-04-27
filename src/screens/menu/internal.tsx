@@ -10,7 +10,7 @@ import Text from '@components/shared/text'
 import ManageTopics from '@components/notification/manageTopics'
 import TopicManager from '@utils/notification/topicManager'
 import { JSX } from 'react'
-import { startLogin } from '@utils/auth'
+import { startLogin } from '@utils/auth/auth'
 
 export default function InternalScreen({ navigation }: MenuProps<'InternalScreen'>): JSX.Element {
     const { theme } = useSelector((state: ReduxState) => state.theme)

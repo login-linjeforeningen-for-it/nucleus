@@ -2,17 +2,19 @@ import { useDispatch, useSelector } from 'react-redux'
 import AdCluster from './adCluster'
 import { ErrorMessage } from '@components/shared/utils'
 import Space from '@/components/shared/utils'
+import TopRefreshIndicator from '@components/shared/topRefreshIndicator'
 import { JSX, useCallback, useState } from 'react'
 import LastFetch, { fetchAdDetails, fetchAds } from '@utils/fetch'
 import { setAds, setLastFetch } from '@redux/ad'
-import { RefreshControl, ScrollView } from 'react-native-gesture-handler'
-import getListOffset from '@utils/getListOffset'
+import { RefreshControl, ScrollView, View } from 'react-native'
+import getListOffset from '@utils/general/getListOffset'
 
 /**
  * Displays the ad list
  */
 export default function AdList(): JSX.Element {
     const { ads, search, renderedAds, skills, clickedAds } = useSelector((state: ReduxState) => state.ad)
+    const { theme } = useSelector((state: ReduxState) => state.theme)
     const [refresh, setRefresh] = useState(false)
     const dispatch = useDispatch()
 
@@ -34,12 +36,12 @@ export default function AdList(): JSX.Element {
 
     const onRefresh = useCallback(async () => {
         setRefresh(true)
-        const details = await getDetails()
-
-        if (details) {
+        try {
+            await getDetails()
+        } finally {
             setRefresh(false)
         }
-    }, [refresh])
+    }, [])
 
     // Copies renderedEvents because it's read only
     const adList: GetJobProps[] = [...renderedAds]
@@ -52,17 +54,26 @@ export default function AdList(): JSX.Element {
 
     if (renderedAds.length > 0) {
         return (
-            <>
+            <View style={{ flex: 1 }}>
                 <ScrollView
                     style={{ paddingTop: offset }}
                     showsVerticalScrollIndicator={false}
                     scrollEventThrottle={100}
+                    refreshControl={
+                        <RefreshControl
+                            refreshing={refresh}
+                            onRefresh={onRefresh}
+                            tintColor={theme.orange}
+                            colors={[theme.orange]}
+                            progressViewOffset={0}
+                        />
+                    }
                 >
-                    <RefreshControl refreshing={refresh} onRefresh={onRefresh} />
                     {adList.map((ad, index) => <AdCluster index={index} ad={ad} key={index} />)}
                     <Space height={offset} />
                 </ScrollView>
-            </>
+                <TopRefreshIndicator refreshing={refresh} theme={theme} top={112} />
+            </View>
         )
     }
 

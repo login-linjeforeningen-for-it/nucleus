@@ -1,9 +1,9 @@
 import * as ExpoLinking from 'expo-linking'
-import { Linking } from 'react-native'
+import { Linking, Platform } from 'react-native'
 import config from '@/constants'
 import store from '@redux/store'
 import { setSession } from '@redux/loginStatus'
-import { setID, setMail, setName } from '@redux/profile'
+import { setProfile } from '@redux/profile'
 
 type AuthSession = {
     accessToken: string
@@ -44,9 +44,12 @@ function applyAuthSession(session: AuthSession) {
         groups: session.groups,
         target: session.target
     }))
-    store.dispatch(setID(session.id))
-    store.dispatch(setName(session.name))
-    store.dispatch(setMail(session.email))
+    store.dispatch(setProfile({
+        id: session.id,
+        name: session.name,
+        email: session.email,
+        groups: session.groups,
+    }))
 }
 
 export function handleAuthUrl(url: string) {
@@ -73,6 +76,10 @@ export function registerAuthListener() {
 }
 
 function createNativeAuthRedirectUri() {
+    if (Platform.OS !== 'web') {
+        return 'login://auth'
+    }
+
     const redirectUri = ExpoLinking.createURL('auth')
     return redirectUri.replace(/^exp\+([a-z][a-z0-9+.-]*:\/\/.*)$/i, '$1')
 }

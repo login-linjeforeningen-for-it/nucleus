@@ -1,20 +1,14 @@
 import { createSlice } from '@reduxjs/toolkit'
 
-// Declares Login status slice
 export const LoginSlice = createSlice({
-    // Slice name
     name: 'login',
-    // Initial state
     initialState: {
-        // true is logged in, false is logged out
         login: false,
         token: null as string | null,
         groups: [] as string[],
         target: null as string | null
     },
-    // Declares slice reducer
     reducers: {
-        // Function to change login status
         changeLoginStatus(state) {
             state.login = !state.login
         },
@@ -33,8 +27,6 @@ export const LoginSlice = createSlice({
     }
 })
 
-// Exports change login status function
 export const { changeLoginStatus, setSession, clearSession } = LoginSlice.actions
 
-// Exports the login status slice
 export default LoginSlice.reducer

@@ -3,7 +3,7 @@
     "owner": "loginapp",
     "slug": "Login",
     "scheme": "login",
-    "version": "2.5.3",
+    "version": "2.8.0",
     "orientation": "portrait",
     "icon": "./public/assets/logo/icon.png",
     "userInterfaceStyle": "dark",
@@ -110,7 +110,7 @@
       "softwareKeyboardLayoutMode": "pan"
     },
     "web": {
-      "favicon": "./public/assets/logo/favicon.ico"
+      "favicon": "./public/assets/logo/icon.png"
     },
     "extra": {
       "eas": {

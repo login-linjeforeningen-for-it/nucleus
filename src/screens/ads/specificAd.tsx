@@ -1,5 +1,4 @@
-import { View, Dimensions, Text } from 'react-native'
-import { RefreshControl, ScrollView } from 'react-native-gesture-handler'
+import { View, Dimensions, RefreshControl, ScrollView, Text } from 'react-native'
 import Cluster from '@/components/shared/cluster'
 import AS from '@styles/adStyles'
 import { useDispatch, useSelector } from 'react-redux'
@@ -8,6 +7,7 @@ import Swipe from '@components/nav/swipe'
 import Space from '@/components/shared/utils'
 import T from '@styles/text'
 import SpecificAdSections from '@/components/ads/specificAdSections'
+import TopRefreshIndicator from '@components/shared/topRefreshIndicator'
 import { setAdName } from '@redux/ad'
 import { fetchAdDetails } from '@utils/fetch'
 import { AdContext } from '@utils/contextProvider'
@@ -49,12 +49,12 @@ export default function SpecificAdScreen({ route: { params: { adID } } }: AdScre
     // Handels the refresh of the page
     const onRefresh = useCallback(async () => {
         setRefresh(true)
-        const details = await getDetails()
-
-        if (details) {
+        try {
+            await getDetails()
+        } finally {
             setRefresh(false)
         }
-    }, [refresh])
+    }, [])
 
     return (
         <AdContext.Provider value={ad}>
@@ -68,7 +68,15 @@ export default function SpecificAdScreen({ route: { params: { adID } } }: AdScre
                         }}
                         showsVerticalScrollIndicator={false}
                         scrollEventThrottle={100}
-                        refreshControl={<RefreshControl refreshing={refresh} onRefresh={onRefresh} />}
+                        refreshControl={
+                            <RefreshControl
+                                refreshing={refresh}
+                                onRefresh={onRefresh}
+                                tintColor={theme.orange}
+                                colors={[theme.orange]}
+                                progressViewOffset={0}
+                            />
+                        }
                     >
                         {error ? (
                             <Cluster>
@@ -80,6 +88,7 @@ export default function SpecificAdScreen({ route: { params: { adID } } }: AdScre
                         {ad?.id ? <SpecificAdSections ad={ad} /> : null}
                         <Space height={22} />
                     </ScrollView>
+                    <TopRefreshIndicator refreshing={refresh} theme={theme} top={112} />
                 </View>
             </Swipe>
         </AdContext.Provider>

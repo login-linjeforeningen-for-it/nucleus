@@ -32,13 +32,13 @@ export default function SpecificEventImage() {
                     style={{ alignSelf: 'center', marginTop: 8 }}
                     width={(Dimensions.get('window').width) / 1.2}
                     height={Dimensions.get('window').width / 3}
-                    uri={`${config.cdn}/events/${url}`}
+                    uri={`${config.cdn}/img/events/${url}`}
                 />
             )
         } else if (url.includes('.png')) {
             return <Image
                 style={ES.specificEventImage}
-                source={{ uri: `${config.cdn}/events/${url}` }}
+                source={{ uri: `${config.cdn}/img/events/${url}` }}
             />
         } else {
             return (

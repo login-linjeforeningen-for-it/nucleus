@@ -2,6 +2,7 @@ import Cluster from '@/components/shared/cluster'
 import Space from '@/components/shared/utils'
 import Swipe from '@components/nav/swipe'
 import Text from '@components/shared/text'
+import TopRefreshIndicator from '@components/shared/topRefreshIndicator'
 import GS from '@styles/globalStyles'
 import T from '@styles/text'
 import { getDashboardSummary } from '@utils/discoveryApi'
@@ -35,7 +36,15 @@ export default function DashboardScreen(): JSX.Element {
         <Swipe left='MenuScreen'>
             <View style={{ flex: 1, backgroundColor: theme.darker }}>
                 <ScrollView
-                    refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => void load()} />}
+                    refreshControl={
+                        <RefreshControl
+                            refreshing={refreshing}
+                            onRefresh={() => void load()}
+                            tintColor={theme.orange}
+                            colors={[theme.orange]}
+                            progressViewOffset={0}
+                        />
+                    }
                     style={GS.content}
                     contentContainerStyle={{ paddingBottom: 80 }}
                 >
@@ -84,6 +93,7 @@ export default function DashboardScreen(): JSX.Element {
                         </>
                     ) : null}
                 </ScrollView>
+                <TopRefreshIndicator refreshing={refreshing} theme={theme} top={112} />
             </View>
         </Swipe>
     )

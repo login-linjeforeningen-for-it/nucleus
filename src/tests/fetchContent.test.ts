@@ -1,5 +1,7 @@
 import {
     fetchAlerts,
+    fetchAnnouncementChannels,
+    fetchAnnouncementRoles,
     fetchAnnouncements,
     fetchLocations,
     fetchHoneyList,
@@ -97,6 +99,53 @@ describe('Workerbee content fetch helpers', () => {
         expect(global.fetch).toHaveBeenCalledWith(
             expect.stringContaining('/announcements?'),
             expect.objectContaining({ headers: { btg: 'tekkom-bot' } }),
+        )
+    })
+
+    it('normalizes protected bot role and channel metadata payloads', async () => {
+        global.fetch = jest.fn(async (url: string) => ({
+            ok: true,
+            json: async () => {
+                if (url.includes('/roles')) {
+                    return {
+                        roles: [{
+                            roleID: '940879337383673866',
+                            label: 'TekKom',
+                            color: 16680760,
+                        }],
+                    }
+                }
+
+                return {
+                    channels: [{
+                        channelID: '1032029092448575498',
+                        label: 'tekkom',
+                        guildID: 'login',
+                    }],
+                }
+            },
+        })) as any
+
+        await expect(fetchAnnouncementRoles('token')).resolves.toEqual([{
+            id: '940879337383673866',
+            name: 'TekKom',
+            color: '#fe8738',
+        }])
+        await expect(fetchAnnouncementChannels('token')).resolves.toEqual([{
+            category: undefined,
+            guildId: 'login',
+            guildName: undefined,
+            id: '1032029092448575498',
+            name: 'tekkom',
+        }])
+        expect(global.fetch).toHaveBeenCalledWith(
+            expect.stringContaining('/roles'),
+            expect.objectContaining({
+                headers: {
+                    Authorization: 'Bearer token',
+                    btg: 'tekkom-bot',
+                },
+            }),
         )
     })
 

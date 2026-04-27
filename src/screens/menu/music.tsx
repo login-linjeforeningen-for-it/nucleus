@@ -3,6 +3,7 @@ import Space from '@/components/shared/utils'
 import SongList from '@components/music/songList'
 import Swipe from '@components/nav/swipe'
 import Text from '@components/shared/text'
+import TopRefreshIndicator from '@components/shared/topRefreshIndicator'
 import GS from '@styles/globalStyles'
 import T from '@styles/text'
 import { getSafeMusicActivity } from '@utils/discoveryApi'
@@ -39,9 +40,17 @@ export default function MusicScreen(): JSX.Element {
         <Swipe left='MenuScreen'>
             <View style={{ flex: 1, backgroundColor: theme.darker }}>
                 <ScrollView
-                    refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => void load()} />}
+                    refreshControl={
+                        <RefreshControl
+                            refreshing={refreshing}
+                            onRefresh={() => void load()}
+                            tintColor={theme.orange}
+                            colors={[theme.orange]}
+                            progressViewOffset={0}
+                        />
+                    }
                     style={GS.content}
-                    contentContainerStyle={{ paddingHorizontal: 12, paddingBottom: 80 }}
+                    contentContainerStyle={{ paddingBottom: 80 }}
                     showsVerticalScrollIndicator={false}
                 >
                     <Space height={Dimensions.get('window').height / 8} />
@@ -92,6 +101,7 @@ export default function MusicScreen(): JSX.Element {
                         </>
                     ) : null}
                 </ScrollView>
+                <TopRefreshIndicator refreshing={refreshing} theme={theme} top={112} />
             </View>
         </Swipe>
     )

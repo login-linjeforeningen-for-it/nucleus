@@ -329,6 +329,37 @@ type GetVulnerabilities = {
     scanStatus: DockerScoutScanStatus
 }
 
+type ScoutProjectFinding = {
+    repository: string
+    folder: string
+    summary: string
+    vulnerabilities: {
+        info?: number
+        low?: number
+        moderate?: number
+        medium?: number
+        high?: number
+        critical?: number
+    }
+}
+
+type ScoutOverview = {
+    updatedAt: string | null
+    projectRoot: string
+    projects: {
+        enabled: boolean
+        intervalMinutes: number
+        lastStartedAt: string | null
+        lastFinishedAt: string | null
+        lastSuccessAt: string | null
+        lastError: string | null
+        result: {
+            repositories: string[]
+            findings: ScoutProjectFinding[]
+        } | null
+    }
+}
+
 type LogEntry = {
     fingerprint: string
     raw: string
@@ -575,7 +606,7 @@ type CourseNotesUpdateResult = {
     error?: string
 }
 
-type AuthentikProfile = {
+type Profile = {
     id: string
     name: string | null
     email: string | null
@@ -604,11 +635,19 @@ type AuthentikProfile = {
     }
 }
 
-type Navigation = import('@react-navigation/bottom-tabs').BottomTabNavigationProp<
-    import('@react-navigation/native').ParamListBase,
-    string,
-    string
->
+type AppNavigationParamList =
+    RootStackParamList
+    & TabBarParamList
+    & EventStackParamList
+    & AdStackParamList
+    & MenuStackParamList
+    & {
+        Events: undefined
+    }
+
+type AppNavigationRoute = keyof AppNavigationParamList
+
+type Navigation = import('@react-navigation/native').NavigationProp<AppNavigationParamList>
 
 type NotificationScreenProps = {
     back: string
@@ -810,6 +849,20 @@ type BotAnnouncement = {
     total_count?: number | string
 }
 
+type BotRole = {
+    color: string
+    id: string
+    name: string
+}
+
+type BotChannel = {
+    category?: string
+    guildId?: string
+    guildName?: string
+    id: string
+    name: string
+}
+
 type GetAnnouncementsProps = {
     announcements: BotAnnouncement[]
     total_count: number
@@ -946,7 +999,7 @@ type ReduxState = {
         calendarID: string
     }
     notification: NotificationProps
-    profile: ProfileProps
+    profile: Profile
     event: {
         events: GetEventProps[]
         eventName: string
@@ -983,9 +1036,6 @@ type ReduxState = {
         downloadState: Date
     }
 }
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-type ProfileProps = any
 
 type CategoryProps =
     'tekkom'
@@ -1271,4 +1321,12 @@ type OkRedFlagDealBreaker = {
     title_no: string
     title_en: string
     categories: string[]
+}
+
+type ProfileField = {
+    title: string
+    text: string
+    copyValue?: string
+    verified?: boolean
+    wrapEvery?: number
 }

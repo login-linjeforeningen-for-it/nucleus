@@ -1,7 +1,7 @@
 import Cluster from '@/components/shared/cluster'
 import Space from '@/components/shared/utils'
 import config from '@/constants'
-import Swipe from '@components/nav/swipe'
+import Swipe, { useSwipeNavigationLock } from '@components/nav/swipe'
 import Text from '@components/shared/text'
 import GS from '@styles/globalStyles'
 import T from '@styles/text'
@@ -42,7 +42,7 @@ export default function VervScreen(): JSX.Element {
             <View style={{ flex: 1, backgroundColor: theme.darker }}>
                 <ScrollView
                     style={GS.content}
-                    contentContainerStyle={{ paddingHorizontal: 12, paddingBottom: 90 }}
+                    contentContainerStyle={{ paddingBottom: 90 }}
                     showsVerticalScrollIndicator={false}
                 >
                     <Space height={Dimensions.get('window').height / 8} />
@@ -98,7 +98,7 @@ export default function VervScreen(): JSX.Element {
                                     paddingVertical: 11,
                                     alignSelf: 'flex-start',
                                 }}>
-                                    <Text style={{ ...T.text15, color: '#16120f', fontWeight: '700' }}>
+                                    <Text style={{ ...T.text15, color: theme.textColor, fontWeight: '600' }}>
                                         {text.apply.action}
                                     </Text>
                                 </View>
@@ -113,10 +113,21 @@ export default function VervScreen(): JSX.Element {
 
 function PhotoRail({ photos }: { photos: VervPhoto[] }) {
     const { theme } = useSelector((state: ReduxState) => state.theme)
+    const swipeNavigation = useSwipeNavigationLock()
 
     return (
-        <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-            <View style={{ flexDirection: 'row', gap: 10 }}>
+        <View
+            onTouchStart={swipeNavigation.lock}
+            onTouchEnd={swipeNavigation.unlock}
+            onTouchCancel={swipeNavigation.unlock}
+        >
+            <ScrollView
+                horizontal
+                directionalLockEnabled
+                nestedScrollEnabled
+                showsHorizontalScrollIndicator={false}
+                contentContainerStyle={{ flexDirection: 'row', gap: 10 }}
+            >
                 {photos.map((photo) => (
                     <View
                         key={photo.image}
@@ -130,7 +141,7 @@ function PhotoRail({ photos }: { photos: VervPhoto[] }) {
                         }}
                     >
                         <Image
-                            source={{ uri: `${config.cdn}/imagecarousel/${photo.image}`, cache: 'force-cache' }}
+                            source={{ uri: `${config.cdn}/img/imagecarousel/${photo.image}`, cache: 'force-cache' }}
                             style={{ width: '100%', height: 150 }}
                         />
                         <View style={{ padding: 12 }}>
@@ -142,8 +153,8 @@ function PhotoRail({ photos }: { photos: VervPhoto[] }) {
                         </View>
                     </View>
                 ))}
-            </View>
-        </ScrollView>
+            </ScrollView>
+        </View>
     )
 }
 
@@ -244,7 +255,7 @@ function CommitteeCard({
                     <Text style={{ ...T.text15, color: theme.textColor }}>{leader?.name || committee.title}</Text>
                     <Space height={2} />
                     <Text style={{ ...T.text12, color: theme.oppositeTextColor }}>
-                        {leaderTitle}{leader?.discord ? ` · ${leader.discord}` : ''}
+                        {`${leaderTitle}${leader?.discord ? ` · ${leader.discord}` : ''}`}
                     </Text>
                 </View>
             </View>

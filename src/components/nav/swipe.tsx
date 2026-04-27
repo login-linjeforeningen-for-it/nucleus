@@ -1,4 +1,4 @@
-import { ReactNode, useRef } from 'react'
+import { createContext, ReactNode, useContext, useMemo, useRef } from 'react'
 import { useNavigation } from '@react-navigation/native'
 import {
     PanResponder,
@@ -14,17 +14,44 @@ type SwipeProps = {
     right?: string
 }
 
+type SwipeNavigationLock = {
+    lock: () => void
+    unlock: () => void
+}
+
+const SwipeNavigationLockContext = createContext<SwipeNavigationLock>({
+    lock: () => undefined,
+    unlock: () => undefined,
+})
+
+export function useSwipeNavigationLock() {
+    return useContext(SwipeNavigationLockContext)
+}
+
 const SWIPE_VELOCITY_THRESHOLD = Platform.OS === 'ios' ? 0.2 : 0.32
 const SWIPE_DIRECTION_RATIO = Platform.OS === 'ios' ? 0.25 : 0.45
 
 export default function Swipe({ children, left, right }: SwipeProps) {
     const navigation = useNavigation()
+    const nestedHorizontalGestureCount = useRef(0)
+    const swipeLock = useMemo(() => ({
+        lock: () => {
+            nestedHorizontalGestureCount.current += 1
+        },
+        unlock: () => {
+            nestedHorizontalGestureCount.current = Math.max(0, nestedHorizontalGestureCount.current - 1)
+        },
+    }), [])
 
     const panResponder = useRef(
         PanResponder.create({
             onStartShouldSetPanResponder: () => false,
 
             onMoveShouldSetPanResponder: (_, gesture) => {
+                if (nestedHorizontalGestureCount.current > 0) {
+                    return false
+                }
+
                 const { dx, dy } = gesture
 
                 const absX = Math.abs(dx)
@@ -53,8 +80,10 @@ export default function Swipe({ children, left, right }: SwipeProps) {
     ).current
 
     return (
-        <View style={{ flex: 1 }} {...panResponder.panHandlers}>
-            {children}
-        </View>
+        <SwipeNavigationLockContext.Provider value={swipeLock}>
+            <View style={{ flex: 1 }} {...panResponder.panHandlers}>
+                {children}
+            </View>
+        </SwipeNavigationLockContext.Provider>
     )
 }

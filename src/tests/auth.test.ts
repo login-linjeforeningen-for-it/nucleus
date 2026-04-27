@@ -8,7 +8,10 @@ jest.mock('expo-linking', () => ({
 jest.mock('react-native', () => ({
     Linking: {
         openURL: jest.fn(),
-    }
+    },
+    Platform: {
+        OS: 'ios',
+    },
 }))
 
 const dispatch = jest.fn()
@@ -33,26 +36,20 @@ jest.mock('@redux/loginStatus', () => ({
 }))
 
 jest.mock('@redux/profile', () => ({
-    setID: jest.fn((payload: unknown) => ({
-        type: 'profile/setID',
-        payload,
-    })),
-    setName: jest.fn((payload: unknown) => ({
-        type: 'profile/setName',
-        payload,
-    })),
-    setMail: jest.fn((payload: unknown) => ({
-        type: 'profile/setMail',
+    setProfile: jest.fn((payload: unknown) => ({
+        type: 'profile/setProfile',
         payload,
     })),
 }))
 
 import * as ExpoLinking from 'expo-linking'
 import { Linking } from 'react-native'
-import { handleAuthUrl, openAuthenticatedDestination, parseAuthUrl, startLogin } from '@/utils/auth'
+import { handleAuthUrl, openAuthenticatedDestination, parseAuthUrl, startLogin } from '@utils/auth/auth'
 
 describe('auth deep-link flow', () => {
     beforeEach(() => {
+        const { Platform } = jest.requireMock('react-native')
+        Platform.OS = 'ios'
         dispatch.mockClear()
         jest.clearAllMocks()
     })
@@ -92,7 +89,7 @@ describe('auth deep-link flow', () => {
         })
 
         expect(handleAuthUrl('login://auth')).toBe(true)
-        expect(dispatch).toHaveBeenCalledTimes(4)
+        expect(dispatch).toHaveBeenCalledTimes(2)
         expect(dispatch).toHaveBeenNthCalledWith(1, {
             type: 'login/setSession',
             payload: {
@@ -101,9 +98,18 @@ describe('auth deep-link flow', () => {
                 target: 'internal',
             }
         })
+        expect(dispatch).toHaveBeenNthCalledWith(2, {
+            type: 'profile/setProfile',
+            payload: {
+                id: '42',
+                name: 'Eirik',
+                email: 'eirik@login.no',
+                groups: ['queenbee', 'tekkom'],
+            }
+        })
     })
 
-    it('starts a native app login handoff', async () => {
+    it('starts a native app login handoff with the registered app scheme', async () => {
         await startLogin('queenbee')
 
         expect(Linking.openURL).toHaveBeenCalledWith(
@@ -111,13 +117,26 @@ describe('auth deep-link flow', () => {
         )
     })
 
-    it('keeps Expo Go auth redirects intact', async () => {
+    it('keeps Expo Go auth redirects intact on web', async () => {
+        const { Platform } = jest.requireMock('react-native')
+        Platform.OS = 'web'
         ;(ExpoLinking.createURL as any).mockReturnValueOnce('exp://127.0.0.1:19000/--/auth')
 
         await startLogin('queenbee')
 
         expect(Linking.openURL).toHaveBeenCalledWith(
             'https://app.login.no/api/auth/login?redirect_uri=exp%3A%2F%2F127.0.0.1%3A19000%2F--%2Fauth&target=queenbee'
+        )
+    })
+
+    it('normalizes Expo dev-client auth redirects on web', async () => {
+        const { Platform } = jest.requireMock('react-native')
+        Platform.OS = 'web'
+
+        await startLogin('queenbee')
+
+        expect(Linking.openURL).toHaveBeenCalledWith(
+            'https://app.login.no/api/auth/login?redirect_uri=login%3A%2F%2Fauth&target=queenbee'
         )
     })
 

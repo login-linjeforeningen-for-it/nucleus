@@ -43,7 +43,7 @@ export default function PwnedScreen(): JSX.Element {
             <View style={{ flex: 1, backgroundColor: theme.darker }}>
                 <ScrollView
                     style={GS.content}
-                    contentContainerStyle={{ paddingHorizontal: 12, paddingBottom: 90 }}
+                    contentContainerStyle={{ paddingBottom: 90 }}
                     showsVerticalScrollIndicator={false}
                 >
                     <Space height={Dimensions.get('window').height / 8} />
@@ -65,13 +65,12 @@ export default function PwnedScreen(): JSX.Element {
                                     </Text>
                                     <Space height={14} />
                                     <Image
-                                        source={{ uri: `${config.cdn}/pwned/${meme.image}`, cache: 'force-cache' }}
+                                        source={{ uri: `${config.cdn}/img/pwned/${meme.image}`, cache: 'force-cache' }}
                                         resizeMode='contain'
                                         style={{
                                             width: '100%',
                                             height: 330,
-                                            borderRadius: 22,
-                                            backgroundColor: theme.contrast,
+                                            borderRadius: 22
                                         }}
                                     />
                                 </>
@@ -84,7 +83,7 @@ export default function PwnedScreen(): JSX.Element {
                             <Text style={{ ...T.text15, color: theme.oppositeTextColor, textAlign: 'center' }}>
                                 {text.text.replace('{time}', `${secondsElapsed} ${secondsLabel}`)}
                             </Text>
-                            <Space height={12} />
+                            <Space height={20} />
                             <TouchableOpacity onPress={shuffleMeme} activeOpacity={0.88}>
                                 <View style={{
                                     borderRadius: 999,
@@ -92,7 +91,7 @@ export default function PwnedScreen(): JSX.Element {
                                     paddingHorizontal: 16,
                                     paddingVertical: 11,
                                 }}>
-                                    <Text style={{ ...T.text15, color: '#16120f', fontWeight: '700' }}>
+                                    <Text style={{ ...T.text15, color: theme.textColor, fontWeight: '600' }}>
                                         {text.shuffle}
                                     </Text>
                                 </View>

@@ -2,6 +2,7 @@ import Space from '@/components/shared/utils'
 import InternalNavMenu from '@components/menu/queenbee/internalNavMenu'
 import Swipe from '@components/nav/swipe'
 import Text from '@components/shared/text'
+import TopRefreshIndicator from '@components/shared/topRefreshIndicator'
 import GS from '@styles/globalStyles'
 import T from '@styles/text'
 import { JSX, useEffect, useState } from 'react'
@@ -9,7 +10,6 @@ import { Alert, Dimensions, RefreshControl, ScrollView, View } from 'react-nativ
 import { useSelector } from 'react-redux'
 import {
     NotificationForm,
-    ServiceDetails,
     ServiceForm,
     ServiceRow,
 } from './status/statusComponents'
@@ -46,7 +46,15 @@ export default function StatusScreen({ navigation }: MenuProps<'StatusScreen'>):
             <View style={{ flex: 1, backgroundColor: theme.darker }}>
                 <InternalNavMenu activeRoute='StatusScreen' navigation={navigation} />
                 <ScrollView
-                    refreshControl={<RefreshControl refreshing={status.refreshing} onRefresh={() => void status.load()} />}
+                    refreshControl={
+                        <RefreshControl
+                            refreshing={status.refreshing}
+                            onRefresh={() => void status.load()}
+                            tintColor={theme.orange}
+                            colors={[theme.orange]}
+                            progressViewOffset={0}
+                        />
+                    }
                     style={GS.content}
                     contentContainerStyle={{ paddingBottom: 80 }}
                     keyboardShouldPersistTaps='handled'
@@ -118,20 +126,13 @@ export default function StatusScreen({ navigation }: MenuProps<'StatusScreen'>):
                             <Space height={10} />
                         </>
                     )}
-                    {status.selectedService && !status.editing && (
-                        <>
-                            <ServiceDetails
-                                service={status.selectedService}
-                                onEdit={() => void status.beginEdit(status.selectedService!)}
-                            />
-                            <Space height={10} />
-                        </>
-                    )}
                     {status.services.map((service) => (
                         <View key={service.id}>
                             <ServiceRow
                                 service={service}
                                 selected={status.selectedService?.id === service.id}
+                                showDetails={!status.editing && status.selectedService?.id === service.id}
+                                onClose={status.closeServiceDetails}
                                 onPress={() => status.selectService(service)}
                                 onEdit={() => void status.beginEdit(service)}
                             />
@@ -139,6 +140,7 @@ export default function StatusScreen({ navigation }: MenuProps<'StatusScreen'>):
                         </View>
                     ))}
                 </ScrollView>
+                <TopRefreshIndicator refreshing={status.refreshing} theme={theme} top={112} />
             </View>
         </Swipe>
     )

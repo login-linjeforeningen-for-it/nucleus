@@ -3,6 +3,7 @@ import Space from '@/components/shared/utils'
 import config from '@/constants'
 import Swipe from '@components/nav/swipe'
 import Text from '@components/shared/text'
+import TopRefreshIndicator from '@components/shared/topRefreshIndicator'
 import GS from '@styles/globalStyles'
 import T from '@styles/text'
 import { fetchFundHoldings, fetchFundHoldingsHistory } from '@utils/fetch'
@@ -50,9 +51,17 @@ export default function FundScreen(): JSX.Element {
         <Swipe left='MenuScreen'>
             <View style={{ flex: 1, backgroundColor: theme.darker }}>
                 <ScrollView
-                    refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => void load()} />}
+                    refreshControl={
+                        <RefreshControl
+                            refreshing={refreshing}
+                            onRefresh={() => void load()}
+                            tintColor={theme.orange}
+                            colors={[theme.orange]}
+                            progressViewOffset={0}
+                        />
+                    }
                     style={GS.content}
-                    contentContainerStyle={{ paddingHorizontal: 12, paddingBottom: 90 }}
+                    contentContainerStyle={{ paddingBottom: 90 }}
                     showsVerticalScrollIndicator={false}
                 >
                     <Space height={Dimensions.get('window').height / 8} />
@@ -89,7 +98,7 @@ export default function FundScreen(): JSX.Element {
                                     paddingVertical: 10,
                                     alignSelf: 'flex-start',
                                 }}>
-                                    <Text style={{ ...T.text15, color: '#16120f', fontWeight: '700' }}>
+                                    <Text style={{ ...T.text15, color: theme.textColor, fontWeight: '600' }}>
                                         fondet@login.no
                                     </Text>
                                 </View>
@@ -105,6 +114,7 @@ export default function FundScreen(): JSX.Element {
                     <Space height={10} />
                     <BoardCard text={text.board} />
                 </ScrollView>
+                <TopRefreshIndicator refreshing={refreshing} theme={theme} top={112} />
             </View>
         </Swipe>
     )
@@ -143,7 +153,7 @@ function HoldingsCard({
                     <>
                         <Space height={4} />
                         <Text style={{ ...T.text12, color: theme.oppositeTextColor }}>
-                            {text.updated}: {new Date(holdings.updatedAt).toLocaleTimeString('nb-NO')}
+                            {`${text.updated}: ${new Date(holdings.updatedAt).toLocaleTimeString('nb-NO')}`}
                         </Text>
                     </>
                 ) : null}
@@ -155,7 +165,7 @@ function HoldingsCard({
                         <HistoryLine points={points} />
                         <Space height={8} />
                         <Text style={{ ...T.text15, color: theme.oppositeTextColor }}>
-                            {text.change}: {delta === null ? '...' : formatSignedCurrency(delta)}
+                            {`${text.change}: ${delta === null ? '...' : formatSignedCurrency(delta)}`}
                         </Text>
                     </>
                 ) : (
@@ -250,7 +260,7 @@ function BoardCard({
                 <Text style={{ ...T.text20, color: theme.textColor }}>{text.title}</Text>
                 <Space height={8} />
                 <Image
-                    source={{ uri: `${config.cdn}/fund/group.jpg`, cache: 'force-cache' }}
+                    source={{ uri: `${config.cdn}/img/fund/group.jpg`, cache: 'force-cache' }}
                     style={{
                         width: '100%',
                         height: 190,
@@ -297,7 +307,7 @@ function BoardMember({ member }: { member: FundBoardMember }) {
             }}>
                 {member.image ? (
                     <Image
-                        source={{ uri: `${config.cdn}/fund/${member.image}`, cache: 'force-cache' }}
+                        source={{ uri: `${config.cdn}/img/fund/${member.image}`, cache: 'force-cache' }}
                         style={{ width: 48, height: 48 }}
                     />
                 ) : (
@@ -308,7 +318,7 @@ function BoardMember({ member }: { member: FundBoardMember }) {
                 <Text style={{ ...T.text15, color: theme.textColor }}>{name}</Text>
                 <Space height={2} />
                 <Text style={{ ...T.text12, color: theme.oppositeTextColor }}>
-                    {member.title}{member.discord ? ` · ${member.discord}` : ''}
+                    {`${member.title}${member.discord ? ` · ${member.discord}` : ''}`}
                 </Text>
             </View>
         </View>

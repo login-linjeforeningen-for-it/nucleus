@@ -36,8 +36,7 @@ export default function CategorySquare({ color, startDate, endDate }: CategorySq
             alignItems: 'center',
         }}>
             <Text style={{ ...T.text20, color: theme.textColor }}>
-                {startDay}
-                {multiday && '-' + endDay}
+                {`${startDay}${multiday ? `-${endDay}` : ''}`}
             </Text>
             {startMonth !== null && <Month month={startMonth} color={theme.textColor} />}
         </View>)

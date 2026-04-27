@@ -8,7 +8,7 @@ import {
     listAiConversations,
     selectBestNativeClient,
     switchAiConversationClient,
-} from '@utils/queenbeeApi'
+} from '@utils/queenbee/api'
 import { useEffect, useMemo, useRef, useState } from 'react'
 
 type NativeChatSession = {

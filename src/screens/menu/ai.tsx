@@ -17,7 +17,7 @@ import {
 } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useSelector } from 'react-redux'
-import useAiChat from './ai/useAiChat'
+import useAiChat from '@components/ai/chat'
 
 export default function AiScreen({ navigation }: MenuProps<'AiScreen'>): JSX.Element {
     const { theme } = useSelector((state: ReduxState) => state.theme)
@@ -69,10 +69,11 @@ export default function AiScreen({ navigation }: MenuProps<'AiScreen'>): JSX.Ele
                         <Text style={{
                             ...T.text20,
                             color: theme.orange,
-                            fontSize: 24,
+                            fontSize: 30,
                             lineHeight: 24,
-                            fontWeight: '700',
-                            marginTop: Platform.OS === 'ios' ? -1 : -3,
+                            fontWeight: '600',
+                            marginTop: 7,
+                            marginLeft: 1
                         }}>
                             ≡
                         </Text>
@@ -85,11 +86,10 @@ export default function AiScreen({ navigation }: MenuProps<'AiScreen'>): JSX.Ele
     return (
         <Swipe left='MenuScreen'>
             <KeyboardAvoidingView
-                style={{ flex: 1, backgroundColor: theme.darker }}
+                style={{ flex: 1, backgroundColor: theme.darker, paddingTop: 100 }}
                 behavior={Platform.OS === 'ios' ? 'padding' : undefined}
             >
                 <View style={{ ...GS.content, flex: 1, paddingBottom: 0 }}>
-                    <Space height={Dimensions.get('window').height / 8} />
                     {ai.activeClient ? (
                         <View style={{
                             flexDirection: 'row',
@@ -174,7 +174,7 @@ export default function AiScreen({ navigation }: MenuProps<'AiScreen'>): JSX.Ele
                                             {client.name}
                                         </Text>
                                         <Text style={{ ...T.text12, color: theme.oppositeTextColor }}>
-                                            {Math.round(client.model.tps || 0)} tps
+                                            {`${Math.round(client.model.tps || 0)} tps`}
                                         </Text>
                                     </Pressable>
                                 )
@@ -215,7 +215,7 @@ export default function AiScreen({ navigation }: MenuProps<'AiScreen'>): JSX.Ele
                         position: 'absolute',
                         left: 12,
                         right: 12,
-                        bottom: 84 + insets.bottom,
+                        bottom: 160 + insets.bottom,
                     }}>
                         <AiComposer
                             value={ai.input}

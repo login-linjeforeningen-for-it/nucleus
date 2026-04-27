@@ -3,9 +3,10 @@ import Space from '@/components/shared/utils'
 import InternalNavMenu from '@components/menu/queenbee/internalNavMenu'
 import Swipe from '@components/nav/swipe'
 import Text from '@components/shared/text'
+import TopRefreshIndicator from '@components/shared/topRefreshIndicator'
 import GS from '@styles/globalStyles'
 import T from '@styles/text'
-import { getLoadBalancingSites, setPrimaryLoadBalancingSite } from '@utils/queenbeeApi'
+import { getLoadBalancingSites, setPrimaryLoadBalancingSite } from '@utils/queenbee/api'
 import { JSX, useEffect, useMemo, useState } from 'react'
 import { RefreshControl, ScrollView, TouchableOpacity, View } from 'react-native'
 import { useSelector } from 'react-redux'
@@ -56,7 +57,15 @@ export default function LoadBalancingScreen({ navigation }: MenuProps<'LoadBalan
             <View style={{ flex: 1, backgroundColor: theme.darker }}>
                 <InternalNavMenu activeRoute='LoadBalancingScreen' navigation={navigation} />
                 <ScrollView
-                    refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => void load()} />}
+                    refreshControl={
+                        <RefreshControl
+                            refreshing={refreshing}
+                            onRefresh={() => void load()}
+                            tintColor={theme.orange}
+                            colors={[theme.orange]}
+                            progressViewOffset={0}
+                        />
+                    }
                     style={GS.content}
                     contentContainerStyle={{ paddingHorizontal: 4, paddingBottom: 80 }}
                     showsVerticalScrollIndicator={false}
@@ -101,8 +110,9 @@ export default function LoadBalancingScreen({ navigation }: MenuProps<'LoadBalan
                                     <Text style={{ ...T.text15, color: theme.oppositeTextColor }}>{site.ip}</Text>
                                     <Space height={8} />
                                     <Text style={{ ...T.text12, color: theme.oppositeTextColor }}>
-                                        {site.primary ? 'Primary' : 'Secondary'} · {site.operational ? 'Operational' : 'Down'}
-                                        {site.maintenance ? ' · Maintenance' : ''}
+                                        {`${site.primary ? 'Primary' : 'Secondary'} · ${
+                                            site.operational ? 'Operational' : 'Down'
+                                        }${site.maintenance ? ' · Maintenance' : ''}`}
                                     </Text>
                                     {!!site.note && (
                                         <>
@@ -137,6 +147,7 @@ export default function LoadBalancingScreen({ navigation }: MenuProps<'LoadBalan
                         </View>
                     ))}
                 </ScrollView>
+                <TopRefreshIndicator refreshing={refreshing} theme={theme} top={112} />
             </View>
         </Swipe>
     )

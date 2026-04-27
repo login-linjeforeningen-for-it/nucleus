@@ -18,7 +18,7 @@ import {
     ImageSourcePropType,
 } from 'react-native'
 import RenderDescription from './adDescription'
-import capitalizeFirstLetter from '@utils/capitalizeFirstLetter'
+import capitalizeFirstLetter from '@utils/general/capitalizeFirstLetter'
 import validFileType from '@utils/validFileType'
 import config from '@/constants'
 
@@ -78,7 +78,7 @@ export function AdBanner({ url }: { url: string | null }) {
         }
 
         const sourceUrl = validFileType(url) && !url.startsWith('http')
-            ? `${config.cdn}/jobs/${url}`
+            ? `${config.cdn}/img/jobs/${url}`
             : url
 
         if (!sourceUrl) {
@@ -99,14 +99,14 @@ export function AdBanner({ url }: { url: string | null }) {
             style={{ alignSelf: 'center', backgroundColor: 'white' }}
             width={(Dimensions.get('window').width) / 1.2}
             height={Dimensions.get('window').width / 3}
-            uri={`${config.cdn}/jobs/${url}`}
+            uri={`${config.cdn}/img/img/jobs/${url}`}
         />
     }
 
     if (validFileType(url) && !url.startsWith('http')) {
         return <Image
             style={{ ...AS.adBanner, aspectRatio: ratio, borderRadius: 18 }}
-            source={{ uri: `${config.cdn}/jobs/${url}`, cache: 'force-cache' }}
+            source={{ uri: `${config.cdn}/img/jobs/${url}`, cache: 'force-cache' }}
         />
     }
 
@@ -121,7 +121,7 @@ export function AdBanner({ url }: { url: string | null }) {
 
     return <Image
         style={{ ...AS.adBanner, aspectRatio: ratio, borderRadius: 18 }}
-        source={{ uri: `${config.cdn}/jobs/adbanner.png`, cache: 'force-cache' }}
+        source={{ uri: `${config.cdn}/img/jobs/adbanner.png`, cache: 'force-cache' }}
     />
 }
 
@@ -277,7 +277,7 @@ export function AdTitle({ ad }: { ad: GetJobProps }) {
                 style={{ alignSelf: 'center', backgroundColor: 'white', marginTop: 12 }}
                 width={90}
                 height={60}
-                uri={`${config.cdn}/organizations/${logo}`}
+                uri={`${config.cdn}/img/organizations/${logo}`}
             />
         }
 
@@ -285,7 +285,7 @@ export function AdTitle({ ad }: { ad: GetJobProps }) {
         if (validFileType(logo) && !logo?.startsWith('http')) {
             return <Image
                 style={AS.adBannerSmall}
-                source={{ uri: `${config.cdn}/organizations/${logo}` }}
+                source={{ uri: `${config.cdn}/img/organizations/${logo}` }}
             />
         }
 
@@ -299,7 +299,7 @@ export function AdTitle({ ad }: { ad: GetJobProps }) {
             <View style={AS.adClusterImage}>
                 <Image
                     style={AS.adBannerSmall}
-                    source={{ uri: `${config.cdn}/ads/adcompany.png` }}
+                    source={{ uri: `${config.cdn}/img/ads/adcompany.png` }}
                 />
             </View>
         )
@@ -342,14 +342,14 @@ export function AdUpdateInfo({ ad }: { ad: GetJobProps | undefined }) {
                     marginBottom: 5,
                     color: theme.oppositeTextColor
                 }}>
-                    {text[0]} {updated}.
+                    {`${text[0]} ${updated}.`}
                 </Text>}
                 {!didUpdate && <Text style={{ ...T.contact, ...T.text12, color: theme.oppositeTextColor }}>
-                    {text[1]} {created}.
+                    {`${text[1]} ${created}.`}
                 </Text>}
             </Skeleton>
             <Text style={{ ...T.contact, ...T.text12, marginTop: 5, color: theme.oppositeTextColor }}>
-                Ad ID: {ad?.id}
+                {`Ad ID: ${ad?.id || ''}`}
             </Text>
         </View>
     )

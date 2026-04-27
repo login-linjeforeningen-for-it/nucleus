@@ -1,11 +1,11 @@
 import Cluster from '@/components/shared/cluster'
 import Space from '@/components/shared/utils'
 import Swipe from '@components/nav/swipe'
+import TopRefreshIndicator from '@components/shared/topRefreshIndicator'
 import { getGames } from '@utils/game'
 import { JSX, useCallback, useEffect, useMemo, useState } from 'react'
 import { useSelector } from 'react-redux'
 import {
-    Dimensions,
     Image,
     RefreshControl,
     ScrollView,
@@ -65,8 +65,6 @@ export default function GameScreen({ navigation }: MenuProps<'GameScreen'>): JSX
         ? require('@text/no.json').games
         : require('@text/en.json').games
 
-    const headerOffset = Dimensions.get('window').height / 8.2
-
     const listedGames = useMemo(
         () => typeof games === 'string' ? [] : games,
         [games]
@@ -91,14 +89,15 @@ export default function GameScreen({ navigation }: MenuProps<'GameScreen'>): JSX
                 <ScrollView
                     showsVerticalScrollIndicator={false}
                     contentContainerStyle={{
-                        paddingTop: headerOffset,
-                        paddingBottom: 120,
+                        paddingTop: 100, paddingBottom: 120,
                     }}
                     refreshControl={
                         <RefreshControl
                             refreshing={refreshing}
                             onRefresh={onRefresh}
                             tintColor={theme.orange}
+                            colors={[theme.orange]}
+                            progressViewOffset={0}
                         />
                     }
                 >
@@ -147,6 +146,7 @@ export default function GameScreen({ navigation }: MenuProps<'GameScreen'>): JSX
                         ))
                     )}
                 </ScrollView>
+                <TopRefreshIndicator refreshing={refreshing} theme={theme} top={112} />
             </View>
         </Swipe>
     )

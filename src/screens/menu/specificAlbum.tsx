@@ -3,6 +3,7 @@ import Space from '@/components/shared/utils'
 import config from '@/constants'
 import Swipe from '@components/nav/swipe'
 import Text from '@components/shared/text'
+import TopRefreshIndicator from '@components/shared/topRefreshIndicator'
 import GS from '@styles/globalStyles'
 import T from '@styles/text'
 import { fetchAlbumDetails } from '@utils/fetch'
@@ -49,7 +50,15 @@ export default function SpecificAlbumScreen({
         <Swipe left='AlbumsScreen'>
             <View style={{ flex: 1, backgroundColor: theme.darker }}>
                 <ScrollView
-                    refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => void load()} />}
+                    refreshControl={
+                        <RefreshControl
+                            refreshing={refreshing}
+                            onRefresh={() => void load()}
+                            tintColor={theme.orange}
+                            colors={[theme.orange]}
+                            progressViewOffset={0}
+                        />
+                    }
                     style={GS.content}
                     contentContainerStyle={{ paddingHorizontal: 12, paddingBottom: 90 }}
                     showsVerticalScrollIndicator={false}
@@ -72,8 +81,7 @@ export default function SpecificAlbumScreen({
                                     </Text>
                                     <Space height={8} />
                                     <Text style={{ ...T.text15, color: theme.oppositeTextColor }}>
-                                        {formatAlbumDate(album.event?.time_start)}
-                                        {description}
+                                        {`${formatAlbumDate(album.event?.time_start)}${description}`}
                                     </Text>
                                     <Space height={12} />
                                     <View style={{ flexDirection: 'row', gap: 8, flexWrap: 'wrap' }}>
@@ -123,6 +131,7 @@ export default function SpecificAlbumScreen({
                         </>
                     ) : null}
                 </ScrollView>
+                <TopRefreshIndicator refreshing={refreshing} theme={theme} top={112} />
             </View>
         </Swipe>
     )

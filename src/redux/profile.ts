@@ -1,69 +1,57 @@
-import { createSlice } from '@reduxjs/toolkit'
+import { PayloadAction, createSlice } from '@reduxjs/toolkit'
 
-// Declares Profile Slice
-export const ProfileSlice = createSlice({
-    // Slice name
-    name: 'profile',
-    // Initial state
-    initialState: {
-        id: null,
-        ban: null,
-        joinedevents: null,
+type ProfilePatch = Partial<Profile> & {
+    authentik?: Partial<Profile['authentik']>
+}
+
+const initialState: Profile = {
+    id: '',
+    name: null,
+    email: null,
+    username: null,
+    preferredUsername: null,
+    nickname: null,
+    givenName: null,
+    familyName: null,
+    emailVerified: false,
+    picture: null,
+    groups: [],
+    authentik: {
+        available: false,
+        pk: null,
+        uid: null,
+        username: null,
         name: null,
-        allergies: null,
-        preferences: null,
-        mail: null,
-        schoolyear: null,
-        degree: null,
-        image: null
-    },
-    // Declares slice reducer
+        email: null,
+        isActive: null,
+        lastLogin: null,
+        dateJoined: null,
+        path: null,
+        type: null,
+        groups: [],
+        attributes: {}
+    }
+}
+
+export const ProfileSlice = createSlice({
+    name: 'profile',
+    initialState,
     reducers: {
-        setID(state, action) {
-            state.id = action.payload
+        setProfile(state, action: PayloadAction<ProfilePatch>) {
+            const { authentik, ...profile } = action.payload
+
+            Object.assign(state, profile)
+
+            if (authentik) {
+                Object.assign(state.authentik, authentik)
+            }
         },
-        setName(state, action) {
-            state.name = action.payload
+        clearProfile() {
+            return initialState
         },
-        setAllergies(state, action) {
-            state.allergies = action.payload
-        },
-        setPreferences(state, action) {
-            state.preferences = action.payload
-        },
-        setMail(state, action) {
-            state.mail = action.payload
-        },
-        setBan(state, action) {
-            state.ban = action.payload
-        },
-        setJoinedevents(state, action) {
-            state.joinedevents = action.payload
-        },
-        setSchoolyear(state, action) {
-            state.schoolyear = action.payload
-        },
-        setDegree(state, action) {
-            state.degree = action.payload
-        },
-        setImage(state, action) {
-            state.image = action.payload
-        }
     }
 })
 
-// Exports redurcers
-export const {
-    setID,
-    setName,
-    setAllergies,
-    setPreferences,
-    setMail,
-    setJoinedevents,
-    setSchoolyear,
-    setDegree,
-    setImage
-} = ProfileSlice.actions
+export const { clearProfile, setProfile } = ProfileSlice.actions
 
-// Exports the profile slice
 export default ProfileSlice.reducer

@@ -5,7 +5,7 @@ import Text from '@components/shared/text'
 import GS from '@styles/globalStyles'
 import T from '@styles/text'
 import { buildSearchEngineUrl, decodeSearchAnimationToken } from '@utils/discoveryApi'
-import Clipboard from '@react-native-clipboard/clipboard'
+import { copyToClipboard } from '@utils/general/clipboard'
 import { JSX, useEffect, useMemo, useRef, useState } from 'react'
 import { Alert, Animated, Dimensions, Easing, Linking, TextInput, TouchableOpacity, View } from 'react-native'
 import { useSelector } from 'react-redux'
@@ -76,7 +76,7 @@ export default function SearchScreen({ route }: MenuProps<'SearchScreen'>): JSX.
             return
         }
 
-        Clipboard.setString(link)
+        copyToClipboard(link)
         Alert.alert(text.copiedTitle, text.copiedBody)
     }
 

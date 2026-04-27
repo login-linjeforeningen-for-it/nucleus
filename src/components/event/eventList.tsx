@@ -1,14 +1,14 @@
 import EventCluster from './eventCluster'
-import getCategories from '@utils/getCategories'
-import getListOffset from '@utils/getListOffset'
+import getCategories from '@utils/general/getCategories'
 import LastFetch, { fetchEvents } from '@utils/fetch'
 import Seperator from './seperator'
 import Space, { ErrorMessage } from '@components/shared/utils'
+import TopRefreshIndicator from '@components/shared/topRefreshIndicator'
 import { setEvents, setLastFetch } from '@redux/event'
-import { RefreshControl, ScrollView } from 'react-native-gesture-handler'
 import { useState, useCallback, JSX } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
-import { View } from 'react-native'
+import { RefreshControl, ScrollView, View } from 'react-native'
+import getListOffset from '@utils/general/getListOffset'
 
 type ContentProps = {
     usedIndexes: number[]
@@ -20,6 +20,7 @@ type ContentProps = {
 export default function EventList(): JSX.Element {
     const { events, renderedEvents, search, categories, clickedEvents } = useSelector((state: ReduxState) => state.event)
     const { lang } = useSelector((state: ReduxState) => state.lang)
+    const { theme } = useSelector((state: ReduxState) => state.theme)
     const [refresh, setRefresh] = useState(false)
     const dispatch = useDispatch()
 
@@ -34,11 +35,12 @@ export default function EventList(): JSX.Element {
 
     const onRefresh = useCallback(async () => {
         setRefresh(true)
-        const details = await getDetails()
-        if (details) {
+        try {
+            await getDetails()
+        } finally {
             setRefresh(false)
         }
-    }, [refresh])
+    }, [])
 
     const cat = getCategories({ lang, categories })
 
@@ -46,17 +48,26 @@ export default function EventList(): JSX.Element {
         const usedIndexes: number[] = []
 
         return (
-            <>
+            <View style={{ flex: 1 }}>
                 <ScrollView
                     style={{ paddingTop: getListOffset({ search, categories: cat, clickedEvents }) }}
                     showsVerticalScrollIndicator={false}
                     scrollEventThrottle={100}
+                    refreshControl={
+                        <RefreshControl
+                            refreshing={refresh}
+                            onRefresh={onRefresh}
+                            tintColor={theme.orange}
+                            colors={[theme.orange]}
+                            progressViewOffset={0}
+                        />
+                    }
                 >
-                    <RefreshControl refreshing={refresh} onRefresh={onRefresh} />
                     <Content usedIndexes={usedIndexes} />
                     <Space height={getListOffset({ search, categories: cat, clickedEvents, bottom: true })} />
                 </ScrollView>
-            </>
+                <TopRefreshIndicator refreshing={refresh} theme={theme} top={112} />
+            </View>
         )
     }
 

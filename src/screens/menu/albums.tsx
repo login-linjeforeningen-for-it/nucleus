@@ -3,14 +3,13 @@ import Space from '@/components/shared/utils'
 import config from '@/constants'
 import Swipe from '@components/nav/swipe'
 import Text from '@components/shared/text'
+import TopRefreshIndicator from '@components/shared/topRefreshIndicator'
 import GS from '@styles/globalStyles'
 import T from '@styles/text'
 import { fetchAlbums } from '@utils/fetch'
 import { JSX, useEffect, useState } from 'react'
 import { Dimensions, Image, RefreshControl, ScrollView, TouchableOpacity, View } from 'react-native'
 import { useSelector } from 'react-redux'
-
-const ALBUM_LIMIT = 12
 
 export default function AlbumsScreen({ navigation }: MenuProps<'AlbumsScreen'>): JSX.Element {
     const { theme } = useSelector((state: ReduxState) => state.theme)
@@ -25,7 +24,7 @@ export default function AlbumsScreen({ navigation }: MenuProps<'AlbumsScreen'>):
     async function load() {
         setRefreshing(true)
         try {
-            const nextAlbums = await fetchAlbums(ALBUM_LIMIT, 0)
+            const nextAlbums = await fetchAlbums()
             setAlbums(nextAlbums.albums)
             setTotalCount(nextAlbums.total_count)
             setError('')
@@ -44,9 +43,17 @@ export default function AlbumsScreen({ navigation }: MenuProps<'AlbumsScreen'>):
         <Swipe left='MenuScreen'>
             <View style={{ flex: 1, backgroundColor: theme.darker }}>
                 <ScrollView
-                    refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => void load()} />}
+                    refreshControl={
+                        <RefreshControl
+                            refreshing={refreshing}
+                            onRefresh={() => void load()}
+                            tintColor={theme.orange}
+                            colors={[theme.orange]}
+                            progressViewOffset={0}
+                        />
+                    }
                     style={GS.content}
-                    contentContainerStyle={{ paddingHorizontal: 12, paddingBottom: 90 }}
+                    contentContainerStyle={{ paddingBottom: 90 }}
                     showsVerticalScrollIndicator={false}
                 >
                     <Space height={Dimensions.get('window').height / 8} />
@@ -97,11 +104,12 @@ export default function AlbumsScreen({ navigation }: MenuProps<'AlbumsScreen'>):
                         <>
                             <Space height={6} />
                             <Text style={{ ...T.text12, color: theme.oppositeTextColor, textAlign: 'center' }}>
-                                {albums.length} / {totalCount}
+                                {`${albums.length} / ${totalCount}`}
                             </Text>
                         </>
                     ) : null}
                 </ScrollView>
+                <TopRefreshIndicator refreshing={refreshing} theme={theme} top={112} />
             </View>
         </Swipe>
     )

@@ -3,30 +3,24 @@ import Space from '@/components/shared/utils'
 import QueenbeeGate from '@components/menu/queenbee/gate'
 import InternalNavMenu from '@components/menu/queenbee/internalNavMenu'
 import SummaryListCard from '@components/menu/queenbee/summaryListCard'
+import TopRefreshIndicator from '@components/shared/topRefreshIndicator'
 import GS from '@styles/globalStyles'
 import T from '@styles/text'
 import Swipe from '@components/nav/swipe'
 import Text from '@components/shared/text'
 import { JSX, useEffect, useMemo, useState } from 'react'
-import {
-    ActivityIndicator,
-    Dimensions,
-    Pressable,
-    RefreshControl,
-    ScrollView,
-    View
-} from 'react-native'
+import { Dimensions, Pressable, RefreshControl, ScrollView, View } from 'react-native'
 import Svg, { Circle, Line, Path, Polyline, Rect } from 'react-native-svg'
 import { useSelector } from 'react-redux'
 import { getDashboardSummary } from '@utils/discoveryApi'
 import {
-    getDatabaseContainerCount,
     getDatabaseOverview,
     getInternalOverview,
     getLoadBalancingSites,
+    getScoutOverview,
     getVulnerabilitiesOverview,
-} from '@utils/queenbeeApi'
-import { startLogin } from '@utils/auth'
+} from '@utils/queenbee/api'
+import { startLogin } from '@utils/auth/auth'
 
 export default function QueenbeeScreen({ navigation }: MenuProps<'QueenbeeScreen'>): JSX.Element {
     const { theme } = useSelector((state: ReduxState) => state.theme)
@@ -35,8 +29,8 @@ export default function QueenbeeScreen({ navigation }: MenuProps<'QueenbeeScreen
     const [internalOverview, setInternalOverview] = useState<NativeInternalOverview | null>(null)
     const [sites, setSites] = useState<{ name: string, primary: boolean, operational: boolean, maintenance: boolean }[]>([])
     const [databaseOverview, setDatabaseOverview] = useState<GetDatabaseOverview | null>(null)
-    const [databaseFallbackCount, setDatabaseFallbackCount] = useState<number | null>(null)
-    const [vulnerabilities, setVulnerabilities] = useState<unknown>(null)
+    const [vulnerabilities, setVulnerabilities] = useState<GetVulnerabilities | null>(null)
+    const [scoutOverview, setScoutOverview] = useState<ScoutOverview | null>(null)
     const [loading, setLoading] = useState(false)
     const [error, setError] = useState<string | null>(null)
 
@@ -53,35 +47,27 @@ export default function QueenbeeScreen({ navigation }: MenuProps<'QueenbeeScreen
     }, [login, hasQueenbee])
 
     async function refresh() {
-        try {
-            setLoading(true)
-            setError(null)
-            const [
-                dashboardPayload,
-                systemPayload,
-                sitesPayload,
-                databasePayload,
-                databaseCountPayload,
-                vulnerabilityPayload,
-            ] = await Promise.all([
-                getDashboardSummary().catch(() => null),
-                getInternalOverview().catch(() => null),
-                getLoadBalancingSites().catch(() => []),
-                getDatabaseOverview().catch(() => null),
-                getDatabaseContainerCount().catch(() => null),
-                getVulnerabilitiesOverview().catch(() => null),
-            ])
-            setDashboard(dashboardPayload)
-            setInternalOverview(systemPayload)
-            setSites(sitesPayload)
-            setDatabaseOverview(databasePayload)
-            setDatabaseFallbackCount(databaseCountPayload)
-            setVulnerabilities(vulnerabilityPayload)
-        } catch (err) {
-            setError(err instanceof Error ? err.message : 'Failed to load Queenbee.')
-        } finally {
+        setLoading(true)
+        setError(null)
+
+        const errors: string[] = []
+        let pending = 6
+        const finishRequest = () => {
+            pending -= 1
+            if (pending > 0) {
+                return
+            }
+
+            setError(errors.length ? errors.join(' ') : null)
             setLoading(false)
         }
+
+        void loadDashboardPart(getDashboardSummary, setDashboard, errors, finishRequest)
+        void loadDashboardPart(getInternalOverview, setInternalOverview, errors, finishRequest)
+        void loadDashboardPart(getLoadBalancingSites, setSites, errors, finishRequest)
+        void loadDashboardPart(getDatabaseOverview, setDatabaseOverview, errors, finishRequest)
+        void loadDashboardPart(getVulnerabilitiesOverview, setVulnerabilities, errors, finishRequest)
+        void loadDashboardPart(getScoutOverview, setScoutOverview, errors, finishRequest)
     }
 
     const primarySite = useMemo(() => sites.find(site => site.primary) || null, [sites])
@@ -90,11 +76,11 @@ export default function QueenbeeScreen({ navigation }: MenuProps<'QueenbeeScreen
         databaseOverview,
         internalOverview?.databaseOverview,
         internalOverview?.databaseCount,
-        databaseFallbackCount,
-    ), [databaseFallbackCount, databaseOverview, internalOverview])
-    const vulnerabilityTotals = useMemo(() => getVulnerabilityTotals(
+    ), [databaseOverview, internalOverview])
+    const vulnerabilitySummary = useMemo(() => getVulnerabilitySummary(
         vulnerabilities,
-    ), [vulnerabilities])
+        scoutOverview,
+    ), [scoutOverview, vulnerabilities])
 
     if (!login) {
         return (
@@ -140,11 +126,18 @@ export default function QueenbeeScreen({ navigation }: MenuProps<'QueenbeeScreen
                 <InternalNavMenu activeRoute='QueenbeeScreen' navigation={navigation} />
                 <ScrollView
                     style={GS.content}
-                    refreshControl={<RefreshControl refreshing={loading} onRefresh={() => void refresh()} />}
+                    refreshControl={
+                        <RefreshControl
+                            refreshing={loading}
+                            onRefresh={() => void refresh()}
+                            tintColor={theme.orange}
+                            colors={[theme.orange]}
+                            progressViewOffset={0}
+                        />
+                    }
                     contentContainerStyle={{ paddingBottom: 40 }}
                 >
                     <Space height={Dimensions.get('window').height / 8} />
-                    {loading && <ActivityIndicator color={theme.orange} />}
                     {error && <Text style={{ ...T.centered15, color: 'red' }}>{error}</Text>}
 
                     <OperationsSnapshot
@@ -154,8 +147,7 @@ export default function QueenbeeScreen({ navigation }: MenuProps<'QueenbeeScreen
                         healthySites={healthySites}
                         sitesLength={sites.length}
                         databaseCount={databaseCount}
-                        vulnerabilityCount={vulnerabilityTotals.findings}
-                        vulnerabilityImages={vulnerabilityTotals.images}
+                        vulnerabilityValue={vulnerabilitySummary}
                         onOpenStatus={() => navigation.navigate('StatusScreen')}
                         onOpenTraffic={() => navigation.navigate('TrafficScreen')}
                         onOpenDatabases={() => navigation.navigate('DatabaseScreen')}
@@ -166,6 +158,7 @@ export default function QueenbeeScreen({ navigation }: MenuProps<'QueenbeeScreen
                     <SummaryListCard title='Database clusters' items={clusterItems} theme={theme} />
                     <Space height={30} />
                 </ScrollView>
+                <TopRefreshIndicator refreshing={loading} theme={theme} top={112} />
             </View>
         </Swipe>
     )
@@ -178,8 +171,7 @@ function OperationsSnapshot({
     healthySites,
     sitesLength,
     databaseCount,
-    vulnerabilityCount,
-    vulnerabilityImages,
+    vulnerabilityValue,
     onOpenStatus,
     onOpenTraffic,
     onOpenDatabases,
@@ -191,8 +183,7 @@ function OperationsSnapshot({
     healthySites: number
     sitesLength: number
     databaseCount: number | null
-    vulnerabilityCount: number | null
-    vulnerabilityImages: number | null
+    vulnerabilityValue: string | null
     onOpenStatus: () => void
     onOpenTraffic: () => void
     onOpenDatabases: () => void
@@ -204,15 +195,15 @@ function OperationsSnapshot({
                 <View style={{ flexDirection: 'row', gap: 10, flexWrap: 'wrap' }}>
                     <SnapshotPill
                         icon='server'
-                        label='Status'
-                        value={system ? `${system.containers} containers` : 'Unavailable'}
+                        label='Containers'
+                        value={system ? system.containers : 'Unavailable'}
                         onPress={onOpenStatus}
                     />
                     <SnapshotPill
                         icon='activity'
-                        label='Traffic'
+                        label='Requests today'
                         value={requestsToday !== null
-                            ? `${requestsToday} requests today`
+                            ? requestsToday
                             : primarySite
                                 ? `${primarySite.name} · ${healthySites}/${sitesLength} healthy`
                                 : 'Unavailable'}
@@ -221,15 +212,13 @@ function OperationsSnapshot({
                     <SnapshotPill
                         icon='database'
                         label='Databases'
-                        value={databaseCount !== null ? `${databaseCount} databases` : 'Unavailable'}
+                        value={databaseCount !== null ? databaseCount : 'Unavailable'}
                         onPress={onOpenDatabases}
                     />
                     <SnapshotPill
                         icon='shield'
                         label='Vulnerabilities'
-                        value={vulnerabilityImages !== null && vulnerabilityCount !== null
-                            ? `${vulnerabilityImages} images · ${vulnerabilityCount} findings`
-                            : 'Unavailable'}
+                        value={vulnerabilityValue || 'Unavailable'}
                         onPress={onOpenVulnerabilities}
                     />
                 </View>
@@ -246,7 +235,7 @@ function SnapshotPill({
 }: {
     icon: QueenbeeIconName
     label: string
-    value: string
+    value: string | number
     onPress: () => void
 }) {
     const { theme } = useSelector((state: ReduxState) => state.theme)
@@ -283,24 +272,26 @@ function getDatabaseCount(...sources: unknown[]) {
 }
 
 function getDatabaseCountsFromSource(source: unknown): (number | null)[] {
-    const record = unwrapRecord(source, ['data', 'result', 'databaseOverview'])
-    if (!record) {
+    const records = findRecords(source)
+    if (!records.length) {
         return [readNumber(source)]
     }
 
-    const clusters = toArray(record.clusters)
-    const clusterTotal = clusters.reduce<number>(
-        (sum, cluster) => sum + getClusterDatabaseCount(cluster),
-        0
-    )
-    const databases = toArray(record.databases)
+    return records.flatMap((record) => {
+        const clusters = toArray(record.clusters)
+        const clusterTotal = clusters.reduce<number>(
+            (sum, cluster) => sum + getClusterDatabaseCount(cluster),
+            0
+        )
+        const databases = toArray(record.databases)
 
-    return [
-        readNumber(record.databaseCount),
-        readNumber(record.count),
-        databases.length ? databases.length : null,
-        clusterTotal || null,
-    ]
+        return [
+            readNumber(record.databaseCount),
+            readNumber(record.count),
+            databases.length ? databases.length : null,
+            clusterTotal || null,
+        ]
+    })
 }
 
 function getClusterDatabaseCount(cluster: unknown) {
@@ -315,74 +306,68 @@ function getClusterDatabaseCount(cluster: unknown) {
     )
 }
 
-function getVulnerabilityTotals(...sources: unknown[]) {
-    const totals = sources.map(getVulnerabilityTotalsFromSource)
-    const availableTotals = totals.filter((total): total is { images: number, findings: number } => total !== null)
-    if (!availableTotals.length) {
+function getVulnerabilitySummary(dockerSource: GetVulnerabilities | null, scoutSource: ScoutOverview | null) {
+    const dockerFindings = getDockerVulnerabilityFindings(dockerSource)
+    const scoutFindings = getScoutVulnerabilityFindings(scoutSource)
+    const findings = scoutFindings.findings ?? dockerFindings.findings
+    if (findings === null) {
+        return null
+    }
+
+    if (
+        scoutFindings.projects !== null
+        && scoutFindings.findings !== null
+        && (scoutFindings.projects > 0 || scoutFindings.findings > 0)
+    ) {
+        return `${scoutFindings.projects} projects · ${findings} findings`
+    }
+
+    return `${dockerFindings.images ?? 0} images · ${findings} findings`
+}
+
+function getDockerVulnerabilityFindings(source: GetVulnerabilities | null) {
+    if (!source || !Array.isArray(source.images)) {
         return { images: null, findings: null }
     }
 
-    const images = Math.max(...availableTotals.map(total => total.images), 0)
-    const findings = Math.max(...availableTotals.map(total => total.findings), 0)
+    const images = readNumber(source.imageCount) ?? source.images.length
+    const findings = source.images.reduce(
+        (sum, image) => sum + (readNumber(image.totalVulnerabilities) ?? 0),
+        0
+    )
 
     return { images, findings }
 }
 
-function getVulnerabilityTotalsFromSource(source: unknown) {
-    const record = findVulnerabilityReportRecord(source)
-
-    if (!record) {
-        return null
+function getScoutVulnerabilityFindings(source: ScoutOverview | null) {
+    const projectFindings = source?.projects.result?.findings
+    if (!Array.isArray(projectFindings)) {
+        return { projects: null, findings: null }
     }
 
-    const images = toArray(record.images)
-    const findings = images.reduce<number>((sum, image) => {
-        const imageRecord = toRecord(image)
-        if (!imageRecord) {
-            return sum
-        }
-
-        const detailCount = Math.max(
-            toArray(imageRecord.vulnerabilities).length,
-            toArray(imageRecord.findings).length,
-            toArray(imageRecord.cves).length,
-        )
-        const severity = toRecord(imageRecord.severity)
-        const severityCount = Object.values(severity || {}).reduce<number>(
-            (severitySum, value) => severitySum + (typeof value === 'number' ? value : 0),
-            0
-        )
-
-        return sum + Math.max(
-            readNumber(imageRecord.totalVulnerabilities) || 0,
-            readNumber(imageRecord.total) || 0,
-            detailCount,
-            severityCount
-        )
-    }, 0)
-    const topLevelFindings = Math.max(
-        readNumber(record.totalVulnerabilities) || 0,
-        readNumber(record.totalFindings) || 0,
-        readNumber(record.findings) || 0,
-        toArray(record.vulnerabilities).length,
+    const findings = projectFindings.reduce(
+        (sum, finding) => sum + getScoutFindingCount(finding),
+        0
     )
-    const scanStatus = toRecord(record.scanStatus)
 
-    return {
-        images: Math.max(
-            readNumber(record.imageCount) || 0,
-            readNumber(record.totalImages) || 0,
-            readNumber(scanStatus?.totalImages) || 0,
-            images.length
-        ),
-        findings: Math.max(findings, topLevelFindings),
-    }
+    return { projects: projectFindings.length, findings }
 }
 
-function findVulnerabilityReportRecord(source: unknown) {
+function getScoutFindingCount(finding: ScoutProjectFinding) {
+    const vulnerabilities = finding.vulnerabilities
+
+    return (readNumber(vulnerabilities.critical) ?? 0)
+        + (readNumber(vulnerabilities.high) ?? 0)
+        + (readNumber(vulnerabilities.moderate) ?? 0)
+        + (readNumber(vulnerabilities.medium) ?? 0)
+        + (readNumber(vulnerabilities.low) ?? 0)
+        + (readNumber(vulnerabilities.info) ?? 0)
+}
+
+function findRecords(source: unknown) {
     const queue = [source]
     const visited = new Set<unknown>()
-    let fallback: Record<string, unknown> | null = null
+    const records: Record<string, unknown>[] = []
 
     while (queue.length) {
         const current = queue.shift()
@@ -392,17 +377,7 @@ function findVulnerabilityReportRecord(source: unknown) {
         }
 
         visited.add(record)
-        if ('images' in record || 'imageCount' in record) {
-            return record
-        }
-
-        if (!fallback && (
-            'totalVulnerabilities' in record
-            || 'totalFindings' in record
-            || 'vulnerabilities' in record
-        )) {
-            fallback = record
-        }
+        records.push(record)
 
         for (const value of Object.values(record)) {
             if (toRecord(value)) {
@@ -411,23 +386,7 @@ function findVulnerabilityReportRecord(source: unknown) {
         }
     }
 
-    return fallback
-}
-
-function unwrapRecord(source: unknown, keys: string[]): Record<string, unknown> | null {
-    const record = toRecord(source)
-    if (!record) {
-        return null
-    }
-
-    for (const key of keys) {
-        const nested = toRecord(record[key])
-        if (nested) {
-            return nested
-        }
-    }
-
-    return record
+    return records
 }
 
 function toRecord(value: unknown): Record<string, unknown> | null {
@@ -448,6 +407,21 @@ function toArray(value: unknown): unknown[] {
 function readNumber(value: unknown): number | null {
     const nextValue = Number(value)
     return Number.isFinite(nextValue) ? nextValue : null
+}
+
+async function loadDashboardPart<T>(
+    request: () => Promise<T>,
+    update: (value: T) => void,
+    errors: string[],
+    finishRequest: () => void
+) {
+    try {
+        update(await request())
+    } catch (error) {
+        errors.push(error instanceof Error ? error.message : 'Failed to load Queenbee data.')
+    } finally {
+        finishRequest()
+    }
 }
 
 function DashboardSummary({ data }: { data: NativeDashboardSummary | null }) {

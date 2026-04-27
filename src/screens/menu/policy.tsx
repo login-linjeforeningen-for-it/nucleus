@@ -24,7 +24,7 @@ export default function PolicyScreen(): JSX.Element {
             <View style={{ flex: 1, backgroundColor: theme.darker }}>
                 <ScrollView
                     style={GS.content}
-                    contentContainerStyle={{ paddingHorizontal: 12, paddingBottom: 90 }}
+                    contentContainerStyle={{ paddingBottom: 90 }}
                     showsVerticalScrollIndicator={false}
                 >
                     <Space height={Dimensions.get('window').height / 8} />
@@ -59,7 +59,7 @@ export default function PolicyScreen(): JSX.Element {
                                     paddingVertical: 11,
                                     alignSelf: 'flex-start',
                                 }}>
-                                    <Text style={{ ...T.text15, color: '#16120f', fontWeight: '700' }}>
+                                    <Text style={{ ...T.text15, color: theme.textColor, fontWeight: '600' }}>
                                         kontakt@login.no
                                     </Text>
                                 </View>

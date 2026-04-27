@@ -3,11 +3,11 @@ import Space from '@/components/shared/utils'
 import Swipe from '@components/nav/swipe'
 import Text from '@components/shared/text'
 import ProfileInfo from '@/components/profile/profileInfo'
-import Profile from '@/components/profile/profile'
+import ProfileCard from '@/components/profile/profile'
 import { clearSession } from '@redux/loginStatus'
-import { setID, setMail, setName } from '@redux/profile'
-import { startLogin } from '@utils/auth'
-import { fetchAuthentikProfile, formatProfileDate } from '@utils/authProfile'
+import { clearProfile, setProfile } from '@redux/profile'
+import { startLogin } from '@utils/auth/auth'
+import { fetchProfile, formatProfileDate } from '@utils/auth/profile'
 import { JSX, useEffect, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { ScrollView } from 'react-native-gesture-handler'
@@ -15,6 +15,10 @@ import Svg, { LinearGradient, Rect, Stop } from 'react-native-svg'
 import { Dimensions, TouchableOpacity, View } from 'react-native'
 import PS from '@styles/profileStyles'
 import T from '@styles/text'
+import normalizeGroup from '@utils/normalizeGroup'
+import toField from '@utils/toField'
+import formatValue from '@utils/formatValue'
+import { Field } from '@components/profile/field'
 
 type ScrollProps = {
     nativeEvent: {
@@ -25,47 +29,32 @@ type ScrollProps = {
 }
 
 export default function ProfileScreen({ navigation }: MenuProps<'ProfileScreen'>): JSX.Element {
-    const { theme, value } = useSelector((state: ReduxState) => state.theme)
+    const { theme } = useSelector((state: ReduxState) => state.theme)
     const { login, groups, token } = useSelector((state: ReduxState) => state.login)
     const { lang } = useSelector((state: ReduxState) => state.lang)
-    const { ban, name, allergies, preferences, mail, schoolyear, degree, image }
-        = useSelector((state: ReduxState) => state.profile)
+    const profile = useSelector((state: ReduxState) => state.profile)
     const dispatch = useDispatch()
-
-    const profile = {
-        allergies,
-        ban,
-        degree,
-        id: null,
-        image,
-        joinedevents: null,
-        mail,
-        name: name || (lang ? 'Profil' : 'Profile'),
-        preferences,
-        schoolyear
-    }
-
-    const profileInfo = { degree, schoolyear, mail, preferences, allergies }
+    const [showDetails, setShowDetails] = useState(false)
     const [scrollPosition, setScrollPosition] = useState(0)
-    const [authentikProfile, setAuthentikProfile] = useState<AuthentikProfile | null>(null)
     const [authentikError, setAuthentikError] = useState<string | null>(null)
     const [authentikLoading, setAuthentikLoading] = useState(false)
+    const detailFields = buildDetailFields(profile, lang)
+    const screenHeight = Dimensions.get('window').height
 
     useEffect(() => {
         let active = true
 
         if (!login || !token) {
-            setAuthentikProfile(null)
             setAuthentikError(null)
             setAuthentikLoading(false)
             return
         }
 
         setAuthentikLoading(true)
-        fetchAuthentikProfile(token)
+        fetchProfile(token)
             .then((nextProfile) => {
                 if (active) {
-                    setAuthentikProfile(nextProfile)
+                    dispatch(setProfile(nextProfile))
                     setAuthentikError(null)
                 }
             })
@@ -83,7 +72,7 @@ export default function ProfileScreen({ navigation }: MenuProps<'ProfileScreen'>
         return () => {
             active = false
         }
-    }, [login, token])
+    }, [dispatch, login, token])
 
     function handleScroll(event: ScrollProps) {
         setScrollPosition(-event.nativeEvent.contentOffset.y)
@@ -91,146 +80,177 @@ export default function ProfileScreen({ navigation }: MenuProps<'ProfileScreen'>
 
     function handleLogout() {
         dispatch(clearSession())
-        dispatch(setID(null))
-        dispatch(setName(null))
-        dispatch(setMail(null))
+        dispatch(clearProfile())
     }
+
 
     return (
         <Swipe left='MenuScreen'>
-            <View>
-                <View style={{ ...PS.content, backgroundColor: theme.darker }}>
-                    <View style={{
-                        ...PS.profileView,
-                        backgroundColor: theme.orange,
-                        opacity: Math.max(0, Math.min(scrollPosition / 220, 0.14)),
-                        transform: [{ translateY: Math.min(scrollPosition * 0.18, 18) }]
-                    }} />
-                    <ScrollView
-                        scrollEventThrottle={100}
-                        onScroll={handleScroll}
-                        showsVerticalScrollIndicator={false}
-                    >
-                        <Svg style={{
-                            ...PS.profileGradientBackground,
-                            transform: [{ translateY: Math.min(scrollPosition * 0.12, 16) }]
-                        }}>
-                            <LinearGradient
-                                id='gradient'
-                                x1='0%'
-                                y1='0%'
-                                x2='0%'
-                                y2={0.72}
-                            >
-                                <Stop offset='28%' stopColor={theme.orange} />
-                                <Stop
-                                    offset={value === 1 ? '96%' : '100%'}
-                                    stopColor={theme.darker}
-                                />
-                            </LinearGradient>
-                            <Rect
-                                x='0'
-                                y={value === 1 ? 65 : 0}
-                                width='100%'
-                                height='100%'
-                                fill='url(#gradient)'
+            <View style={{ ...PS.content, backgroundColor: theme.darker }}>
+                <View style={{
+                    ...PS.profileView,
+                    backgroundColor: theme.orange,
+                    opacity: Math.max(0, Math.min(scrollPosition / 220, 0.14)),
+                    transform: [{ translateY: Math.min(scrollPosition * 0.18, 18) }]
+                }} />
+                <ScrollView
+                    scrollEventThrottle={100}
+                    onScroll={handleScroll}
+                    showsVerticalScrollIndicator={false}
+                >
+                    <Svg style={{
+                        height: screenHeight / 2,
+                        left: 0,
+                        position: 'absolute',
+                        right: 0,
+                        top: 0,
+                        width: '100%'
+                    }}>
+                        <LinearGradient
+                            id='profileGradient'
+                            x1='0%'
+                            y1='0%'
+                            x2='0%'
+                            y2='100%'
+                        >
+                            <Stop offset='0%' stopColor={theme.orange} />
+                            <Stop
+                                offset='100%'
+                                stopColor={theme.darker}
                             />
-                        </Svg>
-                        <Space height={Dimensions.get('window').height / 8} />
-                        <Profile profile={profile} />
-                        <Space height={40} />
-                        {login && <ProfileInfo profile={profileInfo} />}
-                        <Space height={20} />
-                        <View style={{ paddingHorizontal: 12 }}>
-                            <TouchableOpacity onPress={() => navigation.navigate('AiScreen')}>
-                                <View style={{
-                                    borderRadius: 18,
-                                    borderWidth: 1,
-                                    borderColor: theme.orangeTransparent,
-                                    backgroundColor: theme.orangeTransparentBorder,
-                                    padding: 14
-                                }}>
-                                    <Text style={{ ...T.centered20, color: theme.textColor }}>
-                                        {lang ? 'Åpne Login AI' : 'Open Login AI'}
-                                    </Text>
-                                </View>
-                            </TouchableOpacity>
+                        </LinearGradient>
+                        <Rect
+                            x='0'
+                            y='0'
+                            width='100%'
+                            height='100%'
+                            fill='url(#profileGradient)'
+                        />
+                    </Svg>
+                    <Space height={screenHeight / 8} />
+                    <ProfileCard profile={login ? profile : null} />
+                    <Space height={40} />
+                    {login && <ProfileInfo profile={profile} />}
+                    <Space height={20} />
+                    <View style={{ paddingHorizontal: 12 }}>
+                        <TouchableOpacity onPress={() => navigation.navigate('AiScreen')}>
+                            <View style={{
+                                borderRadius: 18,
+                                borderWidth: 1,
+                                borderColor: theme.orangeTransparent,
+                                backgroundColor: theme.orangeTransparentBorder,
+                                padding: 14
+                            }}>
+                                <Text style={{ ...T.centered20, color: theme.textColor }}>
+                                    {lang ? 'Åpne Login AI' : 'Open Login AI'}
+                                </Text>
+                            </View>
+                        </TouchableOpacity>
+                        <Space height={12} />
+                        {login && <TouchableOpacity
+                            onPress={() => login ? navigation.navigate('QueenbeeScreen') : startLogin('queenbee')}
+                        >
+                            <View style={{
+                                borderRadius: 18,
+                                borderWidth: 1,
+                                borderColor: '#ffffff12',
+                                backgroundColor: theme.contrast,
+                                padding: 14
+                            }}>
+                                <Text style={{ ...T.centered20, color: theme.textColor }}>
+                                    {lang ? 'Åpne Queenbee' : 'Open Queenbee'}
+                                </Text>
+                            </View>
+                        </TouchableOpacity>}
+                    </View>
+                    {!login ? (
+                        <>
                             <Space height={12} />
-                            <TouchableOpacity
-                                onPress={() => login ? navigation.navigate('QueenbeeScreen') : startLogin('queenbee')}
-                            >
-                                <View style={{
-                                    borderRadius: 18,
-                                    borderWidth: 1,
-                                    borderColor: '#ffffff12',
-                                    backgroundColor: theme.contrast,
-                                    padding: 14
-                                }}>
-                                    <Text style={{ ...T.centered20, color: theme.textColor }}>
-                                        {login
-                                            ? (lang ? 'Åpne Queenbee' : 'Open Queenbee')
-                                            : (lang ? 'Logg inn for Queenbee' : 'Sign in for Queenbee')}
-                                    </Text>
-                                </View>
-                            </TouchableOpacity>
-                        </View>
-                        {!login ? (
-                            <>
-                                <Space height={12} />
-                                <View style={{ paddingHorizontal: 12 }}>
-                                    <TouchableOpacity onPress={() => startLogin('queenbee')}>
-                                        <View style={{
-                                            borderRadius: 18,
-                                            borderWidth: 1,
-                                            borderColor: '#ffffff12',
-                                            backgroundColor: theme.contrast,
-                                            padding: 14
-                                        }}>
-                                            <Text style={{ ...T.centered20, color: theme.textColor }}>
-                                                {lang ? 'Logg inn' : 'Sign in'}
-                                            </Text>
-                                        </View>
-                                    </TouchableOpacity>
-                                </View>
-                            </>
-                        ) : (
-                            <>
-                                <Space height={20} />
-                                <AuthentikDetailsCard
-                                    profile={authentikProfile}
-                                    fallbackGroups={groups}
-                                    loading={authentikLoading}
-                                    error={authentikError}
-                                    lang={lang}
+                            <View style={{ paddingHorizontal: 12 }}>
+                                <TouchableOpacity onPress={() => startLogin('queenbee')}>
+                                    <View style={{
+                                        borderRadius: 18,
+                                        borderWidth: 1,
+                                        borderColor: '#ffffff12',
+                                        backgroundColor: theme.contrast,
+                                        padding: 14
+                                    }}>
+                                        <Text style={{ ...T.centered20, color: theme.textColor }}>
+                                            {lang ? 'Logg inn' : 'Sign in'}
+                                        </Text>
+                                    </View>
+                                </TouchableOpacity>
+                            </View>
+                        </>
+                    ) : (
+                        <>
+                            <Space height={20} />
+                            <AuthentikDetailsCard
+                                profile={profile}
+                                fallbackGroups={groups}
+                                loading={authentikLoading}
+                                error={authentikError}
+                                lang={lang}
+                            />
+                            <Space height={12} />
+                            <View style={{ paddingHorizontal: 12 }}>
+                                <TouchableOpacity onPress={handleLogout}>
+                                    <View style={{
+                                        borderRadius: 18,
+                                        borderWidth: 1,
+                                        borderColor: '#ffffff12',
+                                        backgroundColor: theme.contrast,
+                                        padding: 14
+                                    }}>
+                                        <Text style={{ ...T.centered20, color: theme.textColor }}>
+                                            {lang ? 'Logg ut' : 'Log out'}
+                                        </Text>
+                                    </View>
+                                </TouchableOpacity>
+                            </View>
+                        </>
+                    )}
+                    <TouchableOpacity
+                        onPress={() => setShowDetails((current) => !current)}
+                        style={{ paddingLeft: 24, paddingVertical: 16 }}
+                    >
+                        <Text style={{ ...T.text15, color: theme.oppositeTextColor, opacity: 0.55 }}>
+                            {showDetails
+                                ? (lang ? 'Skjul detaljer' : 'Hide details')
+                                : (lang ? 'Detaljer' : 'Details')}
+                        </Text>
+                    </TouchableOpacity>
+                    {showDetails ? (
+                        <View style={{
+                            borderTopColor: '#ffffff12',
+                            borderTopWidth: 1,
+                            gap: 12,
+                            paddingTop: 12,
+                            paddingHorizontal: 24,
+                            width: '100%'
+                        }}>
+                            {detailFields.map((field) => (
+                                <Field
+                                    key={field.title}
+                                    title={field.title}
+                                    theme={theme}
+                                    text={field.text}
+                                    copyValue={field.copyValue}
+                                    verified={field.verified}
+                                    wrapEvery={field.wrapEvery}
                                 />
-                                <Space height={12} />
-                                <View style={{ paddingHorizontal: 12 }}>
-                                    <TouchableOpacity onPress={handleLogout}>
-                                        <View style={{
-                                            borderRadius: 18,
-                                            borderWidth: 1,
-                                            borderColor: '#ffffff12',
-                                            backgroundColor: theme.contrast,
-                                            padding: 14
-                                        }}>
-                                            <Text style={{ ...T.centered20, color: theme.textColor }}>
-                                                {lang ? 'Tøm lokal økt' : 'Clear local session'}
-                                            </Text>
-                                        </View>
-                                    </TouchableOpacity>
-                                </View>
-                            </>
-                        )}
-                        <Space height={Dimensions.get('window').height / 3} />
-                    </ScrollView>
-                </View>
+                            ))}
+                        </View>
+                    ) : null}
+                    <Space height={screenHeight / 3} />
+                </ScrollView>
             </View>
         </Swipe>
     )
 }
 
 type AuthentikDetailsCardProps = {
-    profile: AuthentikProfile | null
+    profile: Profile | null
     fallbackGroups: string[]
     loading: boolean
     error: string | null
@@ -245,42 +265,26 @@ function AuthentikDetailsCard({
     lang
 }: AuthentikDetailsCardProps) {
     const { theme } = useSelector((state: ReduxState) => state.theme)
-    const locale = lang ? 'nb-NO' : 'en-GB'
-    const groups = profile?.groups?.length ? profile.groups : fallbackGroups
-    const joined = formatProfileDate(profile?.authentik.dateJoined || null, locale)
-    const lastLogin = formatProfileDate(profile?.authentik.lastLogin || null, locale)
-    const fields = [
-        profile?.username ? [lang ? 'Brukernavn' : 'Username', profile.username] : null,
-        profile?.email ? [lang ? 'E-post' : 'Email', profile.email] : null,
-        typeof profile?.emailVerified === 'boolean'
-            ? [lang ? 'E-post verifisert' : 'Email verified', profile.emailVerified ? (lang ? 'Ja' : 'Yes') : 'No']
-            : null,
-        joined ? [lang ? 'Opprettet' : 'Created', joined] : null,
-        lastLogin ? [lang ? 'Sist innlogget' : 'Last login', lastLogin] : null,
-        typeof profile?.authentik.isActive === 'boolean'
-            ? [lang ? 'Status' : 'Status', profile.authentik.isActive ? 'Active' : 'Inactive']
-            : null,
-        profile?.authentik.uid ? ['UID', profile.authentik.uid] : null,
-        profile?.authentik.type ? [lang ? 'Type' : 'Type', profile.authentik.type] : null,
-    ].filter((field): field is string[] => Boolean(field))
+    const groups = collectGroups(profile, fallbackGroups)
+    const isUnauthorized = error?.toLowerCase() === 'unauthorized'
+    const visibleError = isUnauthorized ? null : error
 
     return (
         <Cluster>
             <View style={{ padding: 16, gap: 12 }}>
                 <View>
                     <Text style={{ ...T.text20, color: theme.textColor }}>
-                        {lang ? 'Authentik-identitet' : 'Authentik identity'}
-                    </Text>
-                    <Space height={4} />
-                    <Text style={{ ...T.text15, color: theme.oppositeTextColor }}>
-                        {loading
-                            ? (lang ? 'Henter profilinformasjon ...' : 'Loading profile details ...')
-                            : (lang ? 'Innloggingsdetaljer fra Login-kontoen din.' : 'Login account details from your identity profile.')}
+                        {lang ? 'Roller' : 'Roles'}
                     </Text>
                 </View>
-                {error ? (
+                {loading ? (
+                    <Text style={{ ...T.text15, color: theme.oppositeTextColor }}>
+                        {lang ? 'Henter roller ...' : 'Loading roles ...'}
+                    </Text>
+                ) : null}
+                {visibleError ? (
                     <Text style={{ ...T.text15, color: theme.orange }}>
-                        {error}
+                        {visibleError}
                     </Text>
                 ) : null}
                 {groups.length ? (
@@ -308,29 +312,83 @@ function AuthentikDetailsCard({
                         {lang ? 'Ingen grupper rapportert' : 'No groups reported'}
                     </Text>
                 )}
-                {fields.map(([label, fieldValue]) => (
-                    <View
-                        key={label}
-                        style={{
-                            flexDirection: 'row',
-                            justifyContent: 'space-between',
-                            gap: 14
-                        }}
-                    >
-                        <Text style={{ ...T.text15, color: theme.oppositeTextColor }}>
-                            {label}
-                        </Text>
-                        <Text style={{
-                            ...T.text15,
-                            color: theme.textColor,
-                            flex: 1,
-                            textAlign: 'right'
-                        }}>
-                            {fieldValue}
-                        </Text>
-                    </View>
-                ))}
             </View>
         </Cluster>
     )
+}
+
+function collectGroups(profile: Profile | null, fallbackGroups: string[]) {
+    const groups = [
+        ...(profile?.groups || []),
+        ...fallbackGroups,
+    ]
+
+    return [...new Set(groups.filter(Boolean))]
+}
+
+function buildDetailFields(profile: Profile | null, lang: boolean): ProfileField[] {
+    if (!profile) {
+        return []
+    }
+
+    const locale = lang ? 'nb-NO' : 'en-GB'
+    const auth = profile?.authentik || {}
+    const fields: Array<ProfileField | null> = [
+        toCopyField(lang, 'ID', profile.id, { wrapEvery: 6 }),
+        toCopyField(lang, 'Name', profile.name),
+        toCopyField(lang, 'Email', profile.email || auth.email, { verified: profile.emailVerified === true }),
+        toCopyField(lang, 'Email verified', profile.emailVerified),
+        toCopyField(lang, 'Username', profile.username || auth.username),
+        toCopyField(lang, 'Preferred username', profile.preferredUsername),
+        toCopyField(lang, 'Nickname', profile.nickname),
+        toCopyField(lang, 'Given name', profile.givenName),
+        toCopyField(lang, 'Family name', profile.familyName),
+        toCopyField(lang, 'Picture', profile.picture),
+        toCopyField(lang, 'Groups', profile.groups.join(', ')),
+        toCopyField(lang, 'Authentik available', auth.available),
+        toCopyField(lang, 'Authentik PK', auth.pk),
+        toCopyField(lang, 'UID', auth.uid, { wrapEvery: 6 }),
+        toCopyField(lang, 'Authentik username', auth.username),
+        toCopyField(lang, 'Authentik name', auth.name),
+        toCopyField(lang, 'Authentik email', auth.email),
+        toCopyField(lang, 'Active', auth.isActive),
+        toCopyField(lang, 'Last login', formatProfileDate(auth.lastLogin || null, locale)),
+        toCopyField(lang, 'Date joined', formatProfileDate(auth.dateJoined || null, locale)),
+        toCopyField(lang, 'Type', auth.type),
+        toCopyField(lang, 'Path', auth.path),
+        toCopyField(lang, 'Authentik groups', auth.groups?.map(normalizeGroup).filter(Boolean).join(', ')),
+        ...getProfileAttributes(profile).map((attribute) => toCopyField(lang, attribute.key, attribute.value)),
+    ]
+
+    return fields.filter((field): field is ProfileField => Boolean(field))
+}
+
+function toCopyField(
+    lang: boolean,
+    title: string,
+    value: unknown,
+    options: Pick<ProfileField, 'verified' | 'wrapEvery'> = {}
+): ProfileField | null {
+    const field = toField(lang, title, value, options)
+
+    if (!field) {
+        return null
+    }
+
+    return { ...field, copyValue: formatValue(value, lang) || field.text }
+}
+
+function getProfileAttributes(profile: Profile | null) {
+    const attributes = profile?.authentik?.attributes
+
+    if (!attributes) {
+        return []
+    }
+
+    return Object.entries(attributes)
+        .filter(([, value]) => value !== null && value !== undefined && String(value).length > 0)
+        .map(([key, value]) => ({
+            key,
+            value: Array.isArray(value) ? value.join(', ') : String(value),
+        }))
 }

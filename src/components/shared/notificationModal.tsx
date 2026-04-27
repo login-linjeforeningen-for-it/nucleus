@@ -1,14 +1,14 @@
 import GS from '@styles/globalStyles'
 import { BlurView } from 'expo-blur'
 import { View, Text, Platform, TouchableOpacity } from 'react-native'
-import { useNavigation } from '@react-navigation/native'
+import { NavigationProp, useNavigation } from '@react-navigation/native'
 import { useSelector } from 'react-redux'
 import { JSX } from 'react'
 import { resolveNotificationTarget } from '@utils/notification/list'
 
 export default function NotificationModal({ route: { params } }: RootStackProps<'NotificationModal'>): JSX.Element {
     const { theme } = useSelector((state: ReduxState) => state.theme)
-    const navigation: Navigation = useNavigation()
+    const navigation = useNavigation<NavigationProp<AppNavigationParamList>>()
     const isIOS = Platform.OS === 'ios'
     const item = {
         title: typeof params.title === 'string' ? params.title : '',

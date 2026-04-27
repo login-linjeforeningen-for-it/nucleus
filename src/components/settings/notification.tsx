@@ -12,19 +12,16 @@ type NotificationProps = {
  * Function for displaying a notification switch
  *
  * @param {string} category Category the switch should control
- * @param {string} topicID Topic the user interacted with
+ * @param {string} skip Whether to skip subscribing
  * @returns Notification switch component
  */
 export default function Notification({ category, skip }: NotificationProps) {
     // Fetches states
     const notification = useSelector((state: ReduxState) => state.notification)
     const { lang } = useSelector((state: ReduxState) => state.lang)
-    const { theme, isDark } = useSelector((state: ReduxState) => state.theme)
+    const { theme } = useSelector((state: ReduxState) => state.theme)
     const dispatch = useDispatch()
-    const inactiveThumbColor = isDark ? '#2F241C' : '#47352A'
-    const inactiveTrackColor = isDark ? theme.trackBackgroundColor : '#1A1A1A'
     const activeThumbColor = theme.orange
-    const activeTrackColor = isDark ? 'rgba(253, 135, 56, 0.22)' : 'rgba(253, 135, 56, 0.18)'
 
     if (!skip) {
         topic({ lang, notification, dispatch })
@@ -33,12 +30,12 @@ export default function Notification({ category, skip }: NotificationProps) {
     return (
         <View>
             <Switch
-                trackColor={{ false: inactiveTrackColor, true: activeTrackColor }}
+                trackColor={{ false: theme.trackColor, true: theme.trackColor }}
                 thumbColor={notification[category][0]
                     ? activeThumbColor
-                    : inactiveThumbColor
+                    : theme.trackBackgroundColor
                 }
-                ios_backgroundColor={inactiveTrackColor}
+                ios_backgroundColor={'black'}
                 onValueChange={(value) => {
                     dispatch(changeNotificationState({ value, category }))
                 }}

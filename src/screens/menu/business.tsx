@@ -21,14 +21,12 @@ export default function BusinessScreen(): JSX.Element {
 
     return (
         <Swipe left='MenuScreen'>
-            <View>
-                <View style={{ ...GS.content, backgroundColor: theme.darker }}>
-                    <ScrollView showsVerticalScrollIndicator={false}>
-                        <Space height={Dimensions.get('window').height / 8.1 + extraHeight} />
-                        <Content />
-                        <Space height={Dimensions.get('window').height / 7} />
-                    </ScrollView>
-                </View>
+            <View style={{ ...GS.content, backgroundColor: theme.darker }}>
+                <ScrollView showsVerticalScrollIndicator={false}>
+                    <Space height={Dimensions.get('window').height / 8.1 + extraHeight} />
+                    <Content />
+                    <Space height={Dimensions.get('window').height / 10} />
+                </ScrollView>
             </View>
         </Swipe>
     )

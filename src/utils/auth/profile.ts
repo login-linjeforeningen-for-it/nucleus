@@ -1,6 +1,6 @@
 import config from '@/constants'
 
-export async function fetchAuthentikProfile(token: string) {
+export async function fetchProfile(token: string): Promise<Profile> {
     const response = await fetch(`${config.app_api_url}/auth/me`, {
         headers: {
             Authorization: `Bearer ${token}`,
@@ -11,10 +11,10 @@ export async function fetchAuthentikProfile(token: string) {
     const data = parseJson(raw)
 
     if (!response.ok) {
-        throw new Error(getErrorMessage(data) || 'Could not load Authentik profile.')
+        throw new Error(getErrorMessage(data) || 'Could not load profile.')
     }
 
-    return data as AuthentikProfile
+    return data as Profile
 }
 
 export function formatProfileDate(value: string | null, locale: string) {

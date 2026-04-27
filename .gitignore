@@ -12,6 +12,9 @@ ios
 # Expo
 .expo/
 web-build/
+dist-*-check/
+dist-ios-check/
+dist-android-check/
 
 # Native
 *.orig.*

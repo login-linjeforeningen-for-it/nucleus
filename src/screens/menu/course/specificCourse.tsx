@@ -1,10 +1,11 @@
 import { useDispatch, useSelector } from 'react-redux'
 import Parent from '@components/shared/parent'
 import ReadOnly from '@components/course/readonly'
+import TopRefreshIndicator from '@components/shared/topRefreshIndicator'
 import { setLocalTitle } from '@redux/misc'
 import { getCourse } from '@utils/course'
 import { JSX, useCallback, useEffect, useState } from 'react'
-import { Dimensions, Platform, RefreshControl, Text, View } from 'react-native'
+import { RefreshControl, Text, View } from 'react-native'
 import Swipeable from '@components/course/swipeable'
 import { ScrollView } from 'react-native-gesture-handler'
 import T from '@styles/text'
@@ -16,7 +17,6 @@ export default function SpecificCourseScreen({ route }: MenuProps<'SpecificCours
     const [course, setCourse] = useState<Course | string>('')
     const [clicked, setClicked] = useState<number[]>([])
     const dispatch = useDispatch()
-    const height = Dimensions.get('window').height
 
     if (route.params.code !== localTitle?.title) {
         dispatch(setLocalTitle({ title: route.params.code, screen: 'SpecificCourseScreen' }))
@@ -39,42 +39,32 @@ export default function SpecificCourseScreen({ route }: MenuProps<'SpecificCours
 
     const onRefresh = useCallback(async () => {
         setRefresh(true)
-        const course = await fetchCourse()
-
-        if (course) {
-            setClicked([])
+        try {
+            const course = await fetchCourse()
+            if (course) {
+                setClicked([])
+            }
+        } finally {
             setRefresh(false)
         }
-    }, [refresh])
-
-    function paddingtop() {
-        if (height <= 592) {
-            return 20
-        }
-
-        if (height > 592 && height < 700) {
-            return 20
-        }
-
-        if (height > 700 && height < 800) {
-            return 17.5
-        }
-
-        if (height > 800 && height < 900) {
-            return 40
-        }
-
-        return undefined
-    }
+    }, [])
 
     return (
         <Parent paddingHorizontal={-1}>
             <ScrollView
                 showsVerticalScrollIndicator={false}
                 scrollEventThrottle={100}
-                style={{ paddingVertical: 10, bottom: 10, paddingTop: Platform.OS === 'ios' ? undefined : paddingtop() }}
+                style={{ paddingVertical: 10, bottom: 10, paddingTop: 100 }}
+                refreshControl={
+                    <RefreshControl
+                        refreshing={refresh}
+                        onRefresh={onRefresh}
+                        tintColor={theme.orange}
+                        colors={[theme.orange]}
+                        progressViewOffset={0}
+                    />
+                }
             >
-                <RefreshControl refreshing={refresh} onRefresh={onRefresh} />
                 {typeof course === 'string'
                     ? <Text style={{ ...T.text18, color: theme.textColor }}>{course}</Text>
                     : course.cards.length ? <Swipeable
@@ -87,6 +77,7 @@ export default function SpecificCourseScreen({ route }: MenuProps<'SpecificCours
                     />
                 }
             </ScrollView>
+            <TopRefreshIndicator refreshing={refresh} theme={theme} top={112} />
         </Parent>
     )
 }

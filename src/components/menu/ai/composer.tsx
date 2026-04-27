@@ -29,7 +29,6 @@ export default function AiComposer({ value, onChangeText, onSend, theme, placeho
                     backgroundColor: theme.contrast,
                     color: theme.textColor,
                     paddingHorizontal: 14,
-                    paddingVertical: 12,
                     minHeight: 48,
                     paddingRight: canSend ? 52 : 14,
                 }}

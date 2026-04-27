@@ -6,7 +6,7 @@ import {
     listMonitoringServices,
     listServiceNotifications,
     updateMonitoringService,
-} from '@utils/queenbeeApi'
+} from '@utils/queenbee/api'
 import { useMemo, useState } from 'react'
 import { emptyNotificationForm, emptyStatusForm, getStatusFormError, statusServiceToForm } from './statusUtils'
 
@@ -63,7 +63,13 @@ export default function useStatusServices(failedToLoadText: string) {
     }
 
     function selectService(service: NativeMonitoringService) {
-        setSelected(service)
+        setSelected((current) => current?.id === service.id ? null : service)
+        setEditing(null)
+        setForm(emptyStatusForm)
+    }
+
+    function closeServiceDetails() {
+        setSelected(null)
         setEditing(null)
         setForm(emptyStatusForm)
     }
@@ -144,6 +150,7 @@ export default function useStatusServices(failedToLoadText: string) {
         beginCreate,
         beginEdit,
         cancelNotification,
+        closeServiceDetails,
         cancelEdit,
         editing,
         error,

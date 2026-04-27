@@ -1,4 +1,3 @@
-import Clipboard from '@react-native-clipboard/clipboard'
 import {
     Text as RNText,
     TouchableOpacity,
@@ -7,9 +6,11 @@ import {
     TextProps as RNTextProps,
     Alert
 } from 'react-native'
+import { isValidElement, ReactElement, ReactNode } from 'react'
+import { copyToClipboard } from '@utils/general/clipboard'
 
 type TextProps = {
-    children: string | number | object
+    children: ReactNode
     style: StyleProp<TextStyle>
     copyable?: boolean
     warning?: string[]
@@ -25,31 +26,22 @@ type TextProps = {
  * @returns
  */
 export default function Text({ children, style, copyable, warning, numberOfLines }: TextProps) {
-    let text = ''
-
-    if (typeof children != 'string') {
-        if (typeof children == 'object') {
-            text = JSON.stringify(children)
-        }
-
-        if (typeof children == 'number') {
-            text = children.toString()
-        }
-
-        if (Array.isArray(children)) {
-            text = children.join()
-        }
-    } else {
-        text = children
-    }
+    const hasReactChildren = isValidElement(children) || (
+        Array.isArray(children) && children.some(child => isValidElement(child))
+    )
+    const text = renderableText(children)
 
     if (!copyable) {
-        return <RNText style={style} numberOfLines={numberOfLines}>{text}</RNText>
+        return (
+            <RNText style={style} numberOfLines={numberOfLines}>
+                {hasReactChildren ? children : text}
+            </RNText>
+        )
     }
 
     // Copies the text to clipboard
     function handleCopy(selectedText: string) {
-        Clipboard.setString(selectedText)
+        copyToClipboard(selectedText)
 
         if (warning) {
             Alert.alert(warning[0], warning[1])
@@ -61,4 +53,46 @@ export default function Text({ children, style, copyable, warning, numberOfLines
             <RNText style={style} numberOfLines={numberOfLines}>{text}</RNText>
         </TouchableOpacity>
     )
+}
+
+function renderableText(children: ReactNode): string {
+    if (children === null || children === undefined || typeof children === 'boolean') {
+        return ''
+    }
+
+    if (typeof children === 'string' || typeof children === 'number') {
+        return children.toString()
+    }
+
+    if (Array.isArray(children)) {
+        return children.map(child => renderableText(child)).join('')
+    }
+
+    if (isValidElement(children)) {
+        const element = children as ReactElement<{ children?: ReactNode }>
+
+        return renderableText(element.props.children)
+    }
+
+    if (typeof children === 'object') {
+        return safeStringify(children)
+    }
+
+    return String(children)
+}
+
+function safeStringify(value: object): string {
+    const seen = new WeakSet<object>()
+
+    return JSON.stringify(value, (_key, nestedValue) => {
+        if (typeof nestedValue === 'object' && nestedValue !== null) {
+            if (seen.has(nestedValue)) {
+                return '[Circular]'
+            }
+
+            seen.add(nestedValue)
+        }
+
+        return nestedValue
+    }) ?? ''
 }

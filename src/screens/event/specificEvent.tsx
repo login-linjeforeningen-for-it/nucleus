@@ -2,10 +2,10 @@ import Space from '@/components/shared/utils'
 import { useCallback, useState, useEffect, JSX } from 'react'
 import { useSelector } from 'react-redux'
 import ES from '@styles/eventStyles'
-import { Dimensions, Platform, View, Text } from 'react-native'
-import { RefreshControl, ScrollView } from 'react-native-gesture-handler'
+import { Dimensions, Platform, RefreshControl, ScrollView, View, Text } from 'react-native'
 import Swipe from '@components/nav/swipe'
 import Cluster from '@components/shared/cluster'
+import TopRefreshIndicator from '@components/shared/topRefreshIndicator'
 import T from '@styles/text'
 import SpecificEventSections from '@components/event/specificEventSections'
 import { useDispatch } from 'react-redux'
@@ -28,6 +28,7 @@ export default function SpecificEventScreen({
     const height = Dimensions.get('window').height
     const [event, setEvent] = useState({} as GetEventProps)
     const [error, setError] = useState('')
+    const refreshColor = theme.orange || '#fd8738'
 
     /**
      * Sets the title of the screen in the header
@@ -58,12 +59,12 @@ export default function SpecificEventScreen({
 
     const onRefresh = useCallback(async () => {
         setRefresh(true)
-        const details = await getDetails()
-
-        if (details) {
+        try {
+            await getDetails()
+        } finally {
             setRefresh(false)
         }
-    }, [refresh])
+    }, [])
 
     return (
         <EventContext.Provider value={event}>
@@ -76,11 +77,21 @@ export default function SpecificEventScreen({
                     <ScrollView
                         showsVerticalScrollIndicator={false}
                         scrollEventThrottle={100}
-                        refreshControl={<RefreshControl refreshing={refresh} onRefresh={onRefresh} />}
+                        refreshControl={
+                            <RefreshControl
+                                refreshing={refresh}
+                                onRefresh={onRefresh}
+                                tintColor={refreshColor}
+                                colors={[refreshColor]}
+                                progressBackgroundColor={theme.darker || theme.background}
+                                titleColor={refreshColor}
+                                progressViewOffset={0}
+                            />
+                        }
                     >
                         <Space height={10} />
                         {error ? (
-                            <Cluster marginHorizontal={12}>
+                            <Cluster marginHorizontal={0}>
                                 <View style={{ padding: 14 }}>
                                     <Text style={{ ...T.text15, color: '#ff8b8b' }}>{error}</Text>
                                 </View>
@@ -89,6 +100,7 @@ export default function SpecificEventScreen({
                         {event?.id ? <SpecificEventSections event={event} /> : null}
                         <Space height={Dimensions.get('window').height / (Platform.OS === 'ios' ? 3 : 2.75)} />
                     </ScrollView>
+                    <TopRefreshIndicator color={refreshColor} refreshing={refresh} theme={theme} top={112} />
                 </View>
             </Swipe>
         </EventContext.Provider>

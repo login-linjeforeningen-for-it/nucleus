@@ -5,7 +5,7 @@ import InternalNavMenu from '@components/menu/queenbee/internalNavMenu'
 import Text from '@components/shared/text'
 import GS from '@styles/globalStyles'
 import T from '@styles/text'
-import Clipboard from '@react-native-clipboard/clipboard'
+import { copyToClipboard } from '@utils/general/clipboard'
 import { JSX, useMemo } from 'react'
 import { Alert, ScrollView, TouchableOpacity, View } from 'react-native'
 import { useSelector } from 'react-redux'
@@ -48,9 +48,8 @@ export default function NucleusDocumentationScreen({ navigation }: MenuProps<'Nu
     const { theme } = useSelector((state: ReduxState) => state.theme)
     const { lang } = useSelector((state: ReduxState) => state.lang)
     const labels = useMemo(() => ({
-        title: lang ? 'Varslingsdokumentasjon' : 'Notification documentation',
         intro: lang
-            ? 'Varslinger er kraftige og skal brukes med samme varsomhet som @everyone i Discord.'
+            ? 'Varslinger er inntrengende og skal brukes med samme varsomhet som @everyone i Discord.'
             : 'Push notifications are powerful and should be used with the same care as @everyone in Discord.',
         topics: lang ? 'Topics' : 'Topics',
         intervals: lang ? 'Intervaller' : 'Intervals',
@@ -64,7 +63,7 @@ export default function NucleusDocumentationScreen({ navigation }: MenuProps<'Nu
     }), [lang])
 
     function copyCommand(command: string) {
-        Clipboard.setString(command)
+        copyToClipboard(command)
         Alert.alert(labels.copiedTitle, labels.copiedBody)
     }
 
@@ -80,8 +79,6 @@ export default function NucleusDocumentationScreen({ navigation }: MenuProps<'Nu
                     <Space height={90} />
                     <Cluster>
                         <View style={{ padding: 14 }}>
-                            <Text style={{ ...T.text25, color: theme.textColor }}>{labels.title}</Text>
-                            <Space height={8} />
                             <Text style={{ ...T.text15, color: theme.oppositeTextColor }}>{labels.intro}</Text>
                         </View>
                     </Cluster>

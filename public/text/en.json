@@ -31,8 +31,16 @@
         "TrafficScreen": "Traffic",
         "TrafficRecordsScreen": "Traffic records",
         "TrafficMapScreen": "Traffic map",
+        "ContentScreen": "Content",
+        "AnnouncementsScreen": "Announcements",
+        "AlertsScreen": "Alerts",
         "NucleusDocumentationScreen": "Nucleus docs",
-        "HoneyScreen": "Honey"
+        "HoneyScreen": "Honey",
+        "DatabaseBackupsScreen": "Database backups",
+        "SpecificAdScreen": "Job ad",
+        "SpecificCourseScreen": "Course",
+        "SpecificGameScreen": "Game",
+        "DiceScreen": "Dice"
     },
     "search": {
         "intro": "Search from the app and preview the motion before it opens.",
@@ -69,7 +77,7 @@
         }
     },
     "albums": {
-        "intro": "Browse photos from Login events and student life.",
+        "intro": "Browse photos from events.",
         "privacyNotice": "Please respect the privacy of everyone photographed. Send an email to pr@login.no if you want any of the images removed.",
         "failedToLoad": "Failed to load albums",
         "failedToLoadAlbum": "Failed to load album",

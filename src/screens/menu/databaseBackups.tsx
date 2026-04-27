@@ -3,6 +3,7 @@ import Space from '@/components/shared/utils'
 import InternalNavMenu from '@components/menu/queenbee/internalNavMenu'
 import Swipe from '@components/nav/swipe'
 import Text from '@components/shared/text'
+import TopRefreshIndicator from '@components/shared/topRefreshIndicator'
 import GS from '@styles/globalStyles'
 import T from '@styles/text'
 import { filterByContentQuery, formatContentDate } from '@utils/content'
@@ -11,7 +12,7 @@ import {
     listDatabaseBackups,
     restoreDatabaseBackup,
     triggerDatabaseBackup,
-} from '@utils/queenbeeApi'
+} from '@utils/queenbee/api'
 import { JSX, useEffect, useMemo, useState } from 'react'
 import { Alert, RefreshControl, ScrollView, TextInput, TouchableOpacity, View } from 'react-native'
 import { useSelector } from 'react-redux'
@@ -111,7 +112,15 @@ export default function DatabaseBackupsScreen({ navigation }: MenuProps<'Databas
             <View style={{ flex: 1, backgroundColor: theme.darker }}>
                 <InternalNavMenu activeRoute='DatabaseBackupsScreen' navigation={navigation} />
                 <ScrollView
-                    refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => void load()} />}
+                    refreshControl={
+                        <RefreshControl
+                            refreshing={refreshing}
+                            onRefresh={() => void load()}
+                            tintColor={theme.orange}
+                            colors={[theme.orange]}
+                            progressViewOffset={0}
+                        />
+                    }
                     style={GS.content}
                     contentContainerStyle={{ paddingHorizontal: 4, paddingBottom: 90 }}
                     keyboardShouldPersistTaps='handled'
@@ -175,8 +184,7 @@ export default function DatabaseBackupsScreen({ navigation }: MenuProps<'Databas
                                     borderColor: '#ffffff18',
                                     backgroundColor: theme.contrast,
                                     color: theme.textColor,
-                                    paddingHorizontal: 12,
-                                    paddingVertical: 10,
+                                    padding: 10,
                                     fontSize: T.text15.fontSize,
                                 }}
                             />
@@ -198,6 +206,7 @@ export default function DatabaseBackupsScreen({ navigation }: MenuProps<'Databas
                         ))
                         : <EmptyCard label='No backup files found.' />)}
                 </ScrollView>
+                <TopRefreshIndicator refreshing={refreshing} theme={theme} top={112} />
             </View>
         </Swipe>
     )
@@ -216,18 +225,20 @@ function BackupCard({ backup }: { backup: NativeDatabaseBackup }) {
                             <Text style={{ ...T.text20, color: theme.textColor }}>{backup.name}</Text>
                             <Space height={4} />
                             <Text style={{ ...T.text12, color: theme.oppositeTextColor }}>
-                                ID: {backup.id.slice(0, 12)}
+                                {`ID: ${backup.id.slice(0, 12)}`}
                             </Text>
                         </View>
                         <StatusPill label={backup.status} active={healthy} />
                     </View>
                     <Space height={10} />
                     <Text style={{ ...T.text12, color: theme.oppositeTextColor }}>
-                        Last: {backup.lastBackup ? formatContentDate(backup.lastBackup) : 'Never'} · Next: {backup.nextBackup || '-'}
+                        {`Last: ${backup.lastBackup ? formatContentDate(backup.lastBackup) : 'Never'} · Next: ${
+                            backup.nextBackup || '-'
+                        }`}
                     </Text>
                     <Space height={4} />
                     <Text style={{ ...T.text12, color: theme.oppositeTextColor }}>
-                        DB: {backup.dbSize || '-'} · Storage: {backup.totalStorage || '-'}
+                        {`DB: ${backup.dbSize || '-'} · Storage: ${backup.totalStorage || '-'}`}
                     </Text>
                     {!!backup.error && (
                         <>
@@ -264,7 +275,9 @@ function BackupFileCard({
                     </Text>
                     <Space height={8} />
                     <Text style={{ ...T.text12, color: theme.oppositeTextColor }}>
-                        {file.location || 'unknown'} · {file.size || '-'} · {file.mtime ? formatContentDate(file.mtime) : '-'}
+                        {`${file.location || 'unknown'} · ${file.size || '-'} · ${
+                            file.mtime ? formatContentDate(file.mtime) : '-'
+                        }`}
                     </Text>
                     <Space height={10} />
                     <TouchableOpacity onPress={onRestore} disabled={disabled} activeOpacity={0.88}>

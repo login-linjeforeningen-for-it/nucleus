@@ -17,10 +17,8 @@ import {
     Text,
     View,
     TouchableOpacity,
-    Dimensions,
     StyleProp,
     ViewStyle,
-    Platform,
 } from 'react-native'
 import { ScrollView } from 'react-native-gesture-handler'
 import Swipe from '@components/nav/swipe'
@@ -80,34 +78,11 @@ export default function AboutScreen(): JSX.Element {
     const [committee, setCommittee] = useState(0)
     const text = lang ? no : en
     const info = text.committeeSection.info
-    const height = Dimensions.get('window').height
-    const extraHeight = Platform.OS === 'ios' ? 0 : height > 800 && height < 900 ? 10 : 0
-
-    function getOffset() {
-        if (Platform.OS === 'ios') {
-            return 6
-        }
-
-        if (height <= 700) {
-            return 5
-        }
-
-        if (height > 700 && height <= 800) {
-            return 6
-        }
-
-        if (height > 800 && height < 900) {
-            return 12
-        }
-
-        return 7
-    }
 
     return (
         <Swipe left='MenuScreen'>
-            <View style={{ flex: 1, backgroundColor: theme.darker }}>
+            <View style={{ flex: 1, backgroundColor: theme.darker, paddingTop: 100 }}>
                 <ScrollView style={GS.content} showsVerticalScrollIndicator={false}>
-                    <Space height={Dimensions.get('window').height / 8.1 + extraHeight} />
                     <Cluster>
                         <Text style={{ ...T.bold40, color: theme.textColor }}>
                             {text.title}
@@ -200,23 +175,24 @@ export default function AboutScreen(): JSX.Element {
                         }}>
                             {text.publicDocs.title}
                         </Text>
-                        <View>
+                        <View style={{ flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center' }}>
                             <Text style={{
                                 ...T.paragraph,
                                 color: theme.textColor
                             }}>
                                 {text.publicDocs.body}
-                                <TextLink
-                                    url={config.wiki_url}
-                                    text={text.publicDocs.wiki}
-                                />.
                             </Text>
+                            <TextLink
+                                url={config.wiki_url}
+                                text={text.publicDocs.wiki}
+                            />
+                            <Text style={{ ...T.paragraph, color: theme.textColor }}>.</Text>
                         </View>
                         <Social />
                         <Space height={8} />
                         <Copyright />
                     </Cluster>
-                    <Space height={Dimensions.get('window').height / getOffset()} />
+                    <Space height={100} />
                 </ScrollView>
             </View>
         </Swipe>

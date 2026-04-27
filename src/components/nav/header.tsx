@@ -7,11 +7,11 @@
  */
 import GS from '@styles/globalStyles'
 import GM from '@styles/gameStyles'
-import getHeight from '@utils/getHeight'
-import getCategories from '@utils/getCategories'
+import getHeight from '@utils/general/getHeight'
+import getCategories from '@utils/general/getCategories'
 import { PropsWithChildren, ReactNode, useMemo } from 'react'
 import { BlurView } from 'expo-blur'
-import { Dimensions, Platform, View, Text, StatusBar, Pressable } from 'react-native'
+import { Dimensions, Platform, View, Text, StatusBar, Pressable, StyleSheet } from 'react-native'
 import { HeaderProps } from '@/interfaces'
 import { useSelector } from 'react-redux'
 import { useRoute } from '@react-navigation/native'
@@ -42,6 +42,12 @@ export default function Header({ options, route, navigation }: HeaderProps): Rea
         'TrafficScreen',
         'TrafficRecordsScreen',
         'TrafficMapScreen',
+        'ContentScreen',
+        'AnnouncementsScreen',
+        'AlertsScreen',
+        'NucleusDocumentationScreen',
+        'HoneyScreen',
+        'DatabaseBackupsScreen',
     ]
 
     const title = useMemo(() => {
@@ -68,10 +74,6 @@ export default function Header({ options, route, navigation }: HeaderProps): Rea
             : require('@text/en.json').screens[route.name])
     }, [SAS, SES, adName, eventName, lang, localTitle?.screen, localTitle?.title, options.title, route.name])
 
-    if (route.name === 'ProfileScreen') {
-        return <></>
-    }
-
     function handlePress() {
         if (tag?.title) {
             dispatch(setTag({ title: '', body: '' }))
@@ -94,11 +96,12 @@ export default function Header({ options, route, navigation }: HeaderProps): Rea
                                 width: 42,
                                 height: 42,
                                 borderRadius: 21,
+                                overflow: 'hidden',
                                 borderWidth: 1,
                                 borderColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.08)',
                                 backgroundColor: pressed
                                     ? (isDark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.05)')
-                                    : (isDark ? 'rgba(255,255,255,0.07)' : 'rgba(255,255,255,0.46)'),
+                                    : 'transparent',
                                 alignItems: 'center',
                                 justifyContent: 'center',
                                 shadowColor: '#000',
@@ -108,6 +111,7 @@ export default function Header({ options, route, navigation }: HeaderProps): Rea
                                 elevation: 3,
                             })}
                         >
+                            <HeaderGlassBackground borderRadius={21} />
                             <Text style={{
                                 color: theme.orange,
                                 fontSize: 26,
@@ -121,27 +125,33 @@ export default function Header({ options, route, navigation }: HeaderProps): Rea
                         </Pressable>
                     }
                 </View>
-                {!exceptions.includes(route.name) && <Text style={{
-                    ...GS.headerTitle,
-                    color: theme.textColor,
-                    width: 260,
-                    textAlign: 'center',
-                    top: title?.length > 30 ? Platform.OS === 'ios' ? 4 : -6 : undefined,
-                    fontWeight: '700',
-                    letterSpacing: 0.2,
-                    textShadowColor: isDark ? 'rgba(0,0,0,0.16)' : 'rgba(255,255,255,0.12)',
-                    textShadowOffset: { width: 0, height: 1 },
-                    textShadowRadius: 6,
-                    backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(255,255,255,0.42)',
-                    borderRadius: 16,
-                    overflow: 'hidden',
-                    paddingHorizontal: 14,
-                    paddingVertical: 8,
-                    borderWidth: 1,
-                    borderColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(255,255,255,0.28)',
-                }}>
-                    {title}
-                </Text>}
+                {!exceptions.includes(route.name) && (
+                    <View style={{
+                        width: 260,
+                        alignSelf: 'center',
+                        top: title?.length > 30 ? Platform.OS === 'ios' ? 4 : -6 : undefined,
+                        borderRadius: 16,
+                        overflow: 'hidden',
+                        borderWidth: 1,
+                        borderColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(255,255,255,0.28)',
+                    }}>
+                        <HeaderGlassBackground borderRadius={16} />
+                        <Text style={{
+                            ...GS.headerTitle,
+                            color: theme.textColor,
+                            textAlign: 'center',
+                            fontWeight: '700',
+                            letterSpacing: 0.2,
+                            textShadowColor: isDark ? 'rgba(0,0,0,0.16)' : 'rgba(255,255,255,0.12)',
+                            textShadowOffset: { width: 0, height: 1 },
+                            textShadowRadius: 6,
+                            paddingHorizontal: 14,
+                            paddingVertical: 8,
+                        }}>
+                            {title}
+                        </Text>
+                    </View>
+                )}
                 <View style={GS.innerHeaderViewTwo}>
                     {options.headerComponents?.right?.map((node, index) => (
                         <View style={aiPositionedRightRoutes.includes(route.name)
@@ -165,15 +175,11 @@ export default function Header({ options, route, navigation }: HeaderProps): Rea
 
 // Wraps the content in blur
 function BlurWrapper(props: PropsWithChildren) {
-    const { theme } = useSelector((state: ReduxState) => state.theme)
     const { lang } = useSelector((state: ReduxState) => state.lang)
     const event = useSelector((state: ReduxState) => state.event)
     const ad = useSelector((state: ReduxState) => state.ad)
     const route = useRoute()
     const exceptions = ['SpecificGameScreen']
-    const backgroundColor = !exceptions.includes(route.name)
-        ? theme.transparentAndroid
-        : 'none'
 
     const defaultHeight =
         Dimensions.get('window').height * 8 // Base decrementor for both platforms
@@ -215,14 +221,12 @@ function BlurWrapper(props: PropsWithChildren) {
     return (
         <>
             {!exceptions.includes(route.name) && <BlurView
-                style={{ height }}
                 blurMethod='dimezisBlurView'
                 intensity={Platform.OS === 'ios' ? 30 : 20}
             />}
             <View style={{
                 ...GS.blurBackgroundView,
                 height,
-                backgroundColor
             }}>
                 {Object.keys(route.params || {}).includes('gameID') && <Image
                     style={gameImages[gameID + 1].style}
@@ -234,6 +238,25 @@ function BlurWrapper(props: PropsWithChildren) {
                 />}
                 {props.children}
             </View>
+        </>
+    )
+}
+
+function HeaderGlassBackground({ borderRadius }: { borderRadius: number }) {
+    const { theme, isDark } = useSelector((state: ReduxState) => state.theme)
+
+    return (
+        <>
+            <BlurView
+                style={StyleSheet.absoluteFill}
+                blurMethod='dimezisBlurView'
+                intensity={Platform.OS === 'ios' ? 35 : 24}
+            />
+            <View style={{
+                ...StyleSheet.absoluteFillObject,
+                borderRadius,
+                backgroundColor: isDark ? 'rgba(255,255,255,0.07)' : theme.transparentAndroid,
+            }} />
         </>
     )
 }
@@ -251,5 +274,7 @@ function getCompactHeaderTitle({
         return fallback
     }
 
-    return normalized.length > MAX_COMPACT_HEADER_TITLE_LENGTH ? fallback : normalized
+    return normalized.length > MAX_COMPACT_HEADER_TITLE_LENGTH
+        ? fallback
+        : normalized
 }

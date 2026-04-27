@@ -1,15 +1,19 @@
 import { PersistGate } from 'redux-persist/integration/react'
 import { persistStore } from 'redux-persist'
-import { AppRegistry } from 'react-native'
+import { AppRegistry, LogBox } from 'react-native'
 import { Provider } from 'react-redux'
 import Navigator from '@nav/tabs'
 import store from '@redux/store'
 import ForceUpdate from '@components/menu/forceUpdate'
 import { requestNotificationPermission } from '@utils/notification/notificationSetup'
 import { useEffect } from 'react'
-import { hydrateAuthFromInitialUrl, registerAuthListener } from '@utils/auth'
+import { hydrateAuthFromInitialUrl, registerAuthListener } from '@utils/auth/auth'
 
 const persistor = persistStore(store)
+
+LogBox.ignoreLogs([
+    'InteractionManager has been deprecated and will be removed in a future release.',
+])
 
 /**
  * **Function for running the entire Login app**

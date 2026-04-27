@@ -7,7 +7,7 @@ import { JSX } from 'react'
 
 type SmallProfileProps = {
     navigation: Navigation
-    profile: ProfileProps
+    profile: Profile
     login: boolean
 }
 
@@ -17,8 +17,7 @@ type SmallProfileProps = {
  * @param {string} category    Category of the event, Format: "CATEGORY"
  * @returns                     Small circle of the categories color
  */
-export default function SmallProfile({ navigation, profile, login }:
-SmallProfileProps): JSX.Element {  // SVG showing the color of the category
+export default function SmallProfile({ navigation, profile, login }: SmallProfileProps): JSX.Element {
 
     const { theme, isDark } = useSelector((state: ReduxState) => state.theme)
     const { lang } = useSelector((state: ReduxState) => state.lang)
@@ -35,8 +34,8 @@ SmallProfileProps): JSX.Element {  // SVG showing the color of the category
                     <View style={PS.smallProfileImageView}>
                         <Image
                             style={PS.smallProfileImage}
-                            source={profile.image
-                                ? { uri: profile.image }
+                            source={profile.picture
+                                ? { uri: profile.picture }
                                 : isDark
                                     ? require('@assets/icons/loginperson-white.png')
                                     : require('@assets/icons/loginperson-black.png')}

@@ -75,7 +75,7 @@ function ListFooter({ index }: ListFooterProps): JSX.Element {
                 ...T.contact,
                 color: theme.oppositeTextColor
             }}>
-                {lang ? 'Oppdatert kl:' : 'Updated:'} {lastFetch}.
+                {`${lang ? 'Oppdatert kl:' : 'Updated:'} ${lastFetch}.`}
             </Text>}
             {index === renderedEvents.length - 1 &&
                 <Space height={Dimensions.get('window').height / 7} />}

@@ -8,7 +8,7 @@ const config = {
     facebook_url: 'https://facebook.com/LogNTNU',
     instagram_url: 'https://www.instagram.com/login_linjeforening/',
     discord_url: 'https://discord.com/invite/login-ntnu',
-    cdn: 'https://cdn.login.no/img',
+    cdn: 'https://cdn.login.no',
     portrait_url: 'https://cdn.login.no/img/board/portraits/2026',
     mail_url: 'kontakt@login.no',
     mailto_url: 'mailto:kontakt@login.no',

@@ -4,6 +4,7 @@ import config from '@/constants'
 import InternalNavMenu from '@components/menu/queenbee/internalNavMenu'
 import Swipe from '@components/nav/swipe'
 import Text from '@components/shared/text'
+import TopRefreshIndicator from '@components/shared/topRefreshIndicator'
 import GS from '@styles/globalStyles'
 import T from '@styles/text'
 import { cleanMarkdown, filterByContentQuery, formatContentDate, formatLocationDetails } from '@utils/content'
@@ -28,10 +29,6 @@ export default function ContentScreen({ navigation }: MenuProps<'ContentScreen'>
     const [refreshing, setRefreshing] = useState(false)
     const [error, setError] = useState('')
     const labels = useMemo(() => ({
-        title: lang ? 'Innhold' : 'Content',
-        intro: lang
-            ? 'Native oversikt over Workerbee-regler, steder og organisasjoner.'
-            : 'Native overview for Workerbee rules, locations, and organizations.',
         rules: lang ? 'Regler' : 'Rules',
         locations: lang ? 'Steder' : 'Locations',
         organizations: lang ? 'Organisasjoner' : 'Organizations',
@@ -119,21 +116,19 @@ export default function ContentScreen({ navigation }: MenuProps<'ContentScreen'>
             <View style={{ flex: 1, backgroundColor: theme.darker }}>
                 <InternalNavMenu activeRoute='ContentScreen' navigation={navigation} />
                 <ScrollView
-                    refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => void load()} />}
+                    refreshControl={
+                        <RefreshControl
+                            refreshing={refreshing}
+                            onRefresh={() => void load()}
+                            tintColor={theme.orange}
+                            colors={[theme.orange]}
+                            progressViewOffset={0}
+                        />
+                    }
                     style={GS.content}
-                    contentContainerStyle={{ paddingHorizontal: 4, paddingBottom: 80 }}
+                    contentContainerStyle={{ paddingTop: 90, paddingHorizontal: 4, paddingBottom: 80 }}
                     showsVerticalScrollIndicator={false}
                 >
-                    <Space height={90} />
-                    <Cluster>
-                        <View style={{ padding: 12 }}>
-                            <Text style={{ ...T.text25, color: theme.textColor }}>{labels.title}</Text>
-                            <Space height={6} />
-                            <Text style={{ ...T.text15, color: theme.oppositeTextColor }}>
-                                {labels.intro}
-                            </Text>
-                        </View>
-                    </Cluster>
 
                     {!!error && (
                         <>
@@ -180,7 +175,7 @@ export default function ContentScreen({ navigation }: MenuProps<'ContentScreen'>
                             />
                             <Space height={10} />
                             <Text style={{ ...T.text12, color: theme.oppositeTextColor }}>
-                                {labels.showing} {loadedTotal} / {availableTotal}
+                                {`${labels.showing} ${loadedTotal} / ${availableTotal}`}
                             </Text>
                         </View>
                     </Cluster>
@@ -223,6 +218,7 @@ export default function ContentScreen({ navigation }: MenuProps<'ContentScreen'>
                         </>
                     )}
                 </ScrollView>
+                <TopRefreshIndicator refreshing={refreshing} theme={theme} top={112} />
             </View>
         </Swipe>
     )
@@ -293,19 +289,42 @@ function ContentCard({
 
     return (
         <>
-            <Cluster>
-                <View style={{ padding: 12 }}>
+            <Cluster style={{
+                borderWidth: 1,
+                borderColor: theme.greyTransparentBorder,
+                backgroundColor: theme.greyTransparent,
+                borderRadius: 18,
+            }}>
+                <View style={{
+                    padding: 14,
+                    borderLeftWidth: 2,
+                    borderLeftColor: theme.orangeTransparentBorderHighlighted,
+                }}>
                     <Text style={{ ...T.text20, color: theme.textColor }}>{title}</Text>
                     <Space height={4} />
-                    <Text style={{ ...T.text12, color: theme.oppositeTextColor }}>{subtitle}</Text>
+                    <SubtitleLine subtitle={subtitle} />
                     <Space height={8} />
-                    <Text style={{ ...T.text15, color: theme.oppositeTextColor }}>
+                    <Text style={{ ...T.text15, color: theme.oppositeTextColor, lineHeight: 21 }}>
                         {cleanMarkdown(body)}
                     </Text>
                 </View>
             </Cluster>
             <Space height={10} />
         </>
+    )
+}
+
+function SubtitleLine({ subtitle }: { subtitle: string }) {
+    const { theme } = useSelector((state: ReduxState) => state.theme)
+    const [idPart, ...rest] = subtitle.split(' · ')
+
+    return (
+        <Text style={{ ...T.text12, color: theme.oppositeTextColor }}>
+            <Text style={{ ...T.text12, color: theme.orange, fontWeight: '700' }}>
+                {idPart}
+            </Text>
+            {rest.length ? ` · ${rest.join(' · ')}` : ''}
+        </Text>
     )
 }
 
@@ -319,7 +338,7 @@ function OrganizationCard({
     updatedLabel: string
 }) {
     const { theme } = useSelector((state: ReduxState) => state.theme)
-    const logo = organization.logo ? `${config.cdn}/organizations/${organization.logo}` : ''
+    const logo = organization.logo ? `${config.cdn}/img/organizations/${organization.logo}` : ''
 
     return (
         <>
@@ -348,7 +367,7 @@ function OrganizationCard({
                         </Text>
                         <Space height={4} />
                         <Text style={{ ...T.text12, color: theme.oppositeTextColor }}>
-                            #{organization.id} · {updatedLabel} {formatContentDate(organization.updated_at)}
+                            {`#${organization.id} · ${updatedLabel} ${formatContentDate(organization.updated_at)}`}
                         </Text>
                         <Space height={8} />
                         <Text style={{ ...T.text15, color: theme.oppositeTextColor }} numberOfLines={5}>

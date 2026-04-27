@@ -1,6 +1,6 @@
-import Clipboard from '@react-native-clipboard/clipboard'
 import Text from '@components/shared/text'
 import T from '@styles/text'
+import { copyToClipboard } from '@utils/general/clipboard'
 import { JSX, useRef, useState } from 'react'
 import { Pressable, ScrollView, View } from 'react-native'
 
@@ -25,7 +25,7 @@ export default function AiMessageList({ session, theme, isLoggedIn, text }: Prop
     const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
     function copyMessage(messageId: string, content: string) {
-        Clipboard.setString(content)
+        copyToClipboard(content)
         setCopiedMessageId(messageId)
 
         if (timeoutRef.current) {

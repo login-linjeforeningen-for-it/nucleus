@@ -30,10 +30,8 @@ export default function SettingScreen(): JSX.Element {
 
     return (
         <Swipe left='MenuScreen'>
-            <View>
-                <View style={{ ...GS.content, backgroundColor: theme.darker }}>
-                    <Content />
-                </View>
+            <View style={{ ...GS.content, backgroundColor: theme.darker }}>
+                <Content />
             </View>
         </Swipe>
     )
@@ -123,7 +121,7 @@ function Content(): JSX.Element {
     const extraHeight = Platform.OS === 'ios' ? 0 : height > 800 && height < 900 ? 20 : 10
 
     return (
-        <ScrollView showsVerticalScrollIndicator={false}>
+        <ScrollView showsVerticalScrollIndicator={false} style={{ paddingHorizontal: 6 }}>
             <Space height={Dimensions.get('window').height / 8.1 + extraHeight} />
             <SettingRow
                 title={info[0].title}
@@ -150,11 +148,10 @@ function Content(): JSX.Element {
             <SwitchCluster obj={info[10]} category='FADDERUKA' />
             <SwitchCluster obj={info[11]} category='LOGIN' />
             <SwitchCluster obj={info[12]} category='ANNET' />
-
             <Space height={12} />
             <SectionHeader title={info[13].title} />
             <Reminders />
-            <Space height={Dimensions.get('window').height / (Platform.OS === 'ios' ? 6 : 7)} />
+            <Space height={Dimensions.get('window').height / (Platform.OS === 'ios' ? 9 : 7)} />
         </ScrollView>
     )
 }

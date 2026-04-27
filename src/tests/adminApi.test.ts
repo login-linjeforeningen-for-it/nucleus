@@ -22,7 +22,7 @@ import {
     listDatabaseBackupFiles,
     listDatabaseBackups,
     selectBestNativeClient,
-} from '@utils/queenbeeApi'
+} from '@utils/queenbee/api'
 import store from '@redux/store'
 
 describe('queenbeeApi AI helpers', () => {

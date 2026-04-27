@@ -1,7 +1,7 @@
 import Cluster from '@components/shared/cluster'
 import RenderDescription from '@components/ads/adDescription'
 import Space from '@components/shared/utils'
-import capitalizeFirstLetter from '@utils/capitalizeFirstLetter'
+import capitalizeFirstLetter from '@utils/general/capitalizeFirstLetter'
 import config from '@/constants'
 import LastFetch from '@/utils/fetch'
 import T from '@styles/text'
@@ -137,7 +137,7 @@ function resolveAssetUrl(url: string | null | undefined, folder: 'jobs' | 'organ
         return url
     }
 
-    return `${config.cdn}/${folder}/${url.replace(/^\/+/, '')}`
+    return `${config.cdn}/img/${folder}/${url.replace(/^\/+/, '')}`
 }
 
 function formatText(value: string | null | undefined) {

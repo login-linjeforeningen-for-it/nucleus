@@ -3,6 +3,7 @@ import Space from '@/components/shared/utils'
 import InternalNavMenu from '@components/menu/queenbee/internalNavMenu'
 import Swipe from '@components/nav/swipe'
 import Text from '@components/shared/text'
+import TopRefreshIndicator from '@components/shared/topRefreshIndicator'
 import GS from '@styles/globalStyles'
 import T from '@styles/text'
 import { filterByContentQuery, formatContentDate } from '@utils/content'
@@ -22,10 +23,6 @@ export default function AlertsScreen({ navigation }: MenuProps<'AlertsScreen'>):
     const [query, setQuery] = useState('')
     const [refreshing, setRefreshing] = useState(false)
     const labels = useMemo(() => ({
-        title: lang ? 'Varsler' : 'Alerts',
-        intro: lang
-            ? 'Native oversikt over Workerbee-sidevarsler brukt på Login-nettsidene.'
-            : 'Native overview for Workerbee page alerts used across Login websites.',
         search: lang ? 'Søk i varsler...' : 'Search alerts...',
         showing: lang ? 'Viser' : 'Showing',
         loadMore: lang ? 'Last inn mer' : 'Load more',
@@ -64,7 +61,15 @@ export default function AlertsScreen({ navigation }: MenuProps<'AlertsScreen'>):
             <View style={{ flex: 1, backgroundColor: theme.darker }}>
                 <InternalNavMenu activeRoute='AlertsScreen' navigation={navigation} />
                 <ScrollView
-                    refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => void load()} />}
+                    refreshControl={
+                        <RefreshControl
+                            refreshing={refreshing}
+                            onRefresh={() => void load()}
+                            tintColor={theme.orange}
+                            colors={[theme.orange]}
+                            progressViewOffset={0}
+                        />
+                    }
                     style={GS.content}
                     contentContainerStyle={{ paddingHorizontal: 4, paddingBottom: 90 }}
                     keyboardShouldPersistTaps='handled'
@@ -73,10 +78,6 @@ export default function AlertsScreen({ navigation }: MenuProps<'AlertsScreen'>):
                     <Space height={90} />
                     <Cluster>
                         <View style={{ padding: 14 }}>
-                            <Text style={{ ...T.text25, color: theme.textColor }}>{labels.title}</Text>
-                            <Space height={8} />
-                            <Text style={{ ...T.text15, color: theme.oppositeTextColor }}>{labels.intro}</Text>
-                            <Space height={12} />
                             <TextInput
                                 value={query}
                                 onChangeText={setQuery}
@@ -97,7 +98,7 @@ export default function AlertsScreen({ navigation }: MenuProps<'AlertsScreen'>):
                             />
                             <Space height={10} />
                             <Text style={{ ...T.text12, color: theme.oppositeTextColor }}>
-                                {labels.showing} {alerts.length} / {totalCount}
+                                {`${labels.showing} ${alerts.length} / ${totalCount}`}
                             </Text>
                         </View>
                     </Cluster>
@@ -132,6 +133,7 @@ export default function AlertsScreen({ navigation }: MenuProps<'AlertsScreen'>):
                         </TouchableOpacity>
                     )}
                 </ScrollView>
+                <TopRefreshIndicator refreshing={refreshing} theme={theme} top={112} />
             </View>
         </Swipe>
     )
@@ -169,13 +171,13 @@ function AlertCard({
                     )}
                     <Space height={10} />
                     <Text style={{ ...T.text12, color: theme.oppositeTextColor }}>
-                        #{alert.id} · {labels.service}: {alert.service || '-'} · {labels.page}: {alert.page || '-'}
+                        {`#${alert.id} · ${labels.service}: ${alert.service || '-'} · ${labels.page}: ${alert.page || '-'}`}
                     </Text>
                     {!!alert.updated_at && (
                         <>
                             <Space height={4} />
                             <Text style={{ ...T.text12, color: theme.oppositeTextColor }}>
-                                {labels.updated}: {formatContentDate(alert.updated_at)}
+                                {`${labels.updated}: ${formatContentDate(alert.updated_at)}`}
                             </Text>
                         </>
                     )}

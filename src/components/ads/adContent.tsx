@@ -3,7 +3,7 @@ import { Image, Platform, View, Text, Dimensions } from 'react-native'
 import { SvgUri } from 'react-native-svg'
 import React from 'react'
 import { useSelector } from 'react-redux'
-import capitalizeFirstLetter from '@utils/capitalizeFirstLetter'
+import capitalizeFirstLetter from '@utils/general/capitalizeFirstLetter'
 import config from '@/constants'
 
 type AdClusterLocationProps = {
@@ -187,7 +187,7 @@ function resolveOrganizationLogo(url: string | undefined) {
         return url
     }
 
-    return `${config.cdn}/organizations/${url.replace(/^\/+/, '')}`
+    return `${config.cdn}/img/organizations/${url.replace(/^\/+/, '')}`
 }
 
 function resolveJobBanner(url: string | undefined) {
@@ -199,5 +199,5 @@ function resolveJobBanner(url: string | undefined) {
         return url
     }
 
-    return `${config.cdn}/jobs/${url.replace(/^\/+/, '')}`
+    return `${config.cdn}/img/jobs/${url.replace(/^\/+/, '')}`
 }

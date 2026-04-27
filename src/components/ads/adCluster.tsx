@@ -141,7 +141,7 @@ export function ListFooter({ index }: ListFooterProps) {
                 ...T.contact,
                 color: theme.oppositeTextColor
             }}>
-                {lang ? 'Oppdatert kl:' : 'Updated:'} {lastFetch}.
+                {`${lang ? 'Oppdatert kl:' : 'Updated:'} ${lastFetch}.`}
             </Text>}
             {index === renderedAds.length - 1 &&
                 <Space height={Dimensions.get('window').height / 7} />}

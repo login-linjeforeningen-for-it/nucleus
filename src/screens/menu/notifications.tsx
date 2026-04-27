@@ -3,22 +3,24 @@ import Space from '@/components/shared/utils'
 import GS from '@styles/globalStyles'
 import React, { JSX, useCallback, useEffect, useRef, useState } from 'react'
 import { useSelector } from 'react-redux'
+import TopRefreshIndicator from '@components/shared/topRefreshIndicator'
 import {
     View,
     Text,
     Dimensions,
     TouchableOpacity,
     Platform,
-    Animated,
+    RefreshControl,
     TouchableHighlight
 } from 'react-native'
 import NS from '@styles/notificationStyles'
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import NotificationText from '@/components/notification/notificationText'
 import Swipe from '@components/nav/swipe'
-import { useNavigation } from '@react-navigation/native'
-import { RefreshControl, ScrollView } from 'react-native-gesture-handler'
-import { Swipeable } from 'react-native-gesture-handler'
+import { NavigationProp, useNavigation } from '@react-navigation/native'
+import { ScrollView } from 'react-native-gesture-handler'
+import Swipeable, { SwipeableMethods } from 'react-native-gesture-handler/ReanimatedSwipeable'
+import Animated, { SharedValue, useAnimatedStyle } from 'react-native-reanimated'
 import TrashCan from '@components/menu/navigation'
 import { NotificationSeperator } from '@components/event/seperator'
 import T from '@styles/text'
@@ -85,32 +87,39 @@ export default function NotificationScreen(): JSX.Element {
 
     return (
         <Swipe left='MenuScreen'>
-            <View>
-                <View style={{ ...GS.content, backgroundColor: theme.darker, paddingHorizontal: 0 }}>
-                    <Space height={Dimensions.get('window').height / 8.1} />
-                    <ScrollView
-                        showsVerticalScrollIndicator={false}
-                        scrollEventThrottle={100}
-                        style={{ minHeight: '100%', top: -5 }}
-                    >
-                        <RefreshControl refreshing={refresh} onRefresh={onRefresh} />
-                        {Array.isArray(list) && list.length
-                            ? (
-                                <List
-                                    list={list}
-                                    setList={setList}
-                                    hideOld={hideOld}
-                                    setHideOld={setHideOld}
-                                    readIndex={readIndex}
-                                />
-                            )
-                            : <Text style={{ ...NS.error, color: theme.oppositeTextColor }}>
-                                {lang
-                                    ? 'Ingen varslinger. Kom tilbake senere.'
-                                    : 'You have no notifications at this time. Check back later.'}
-                            </Text>}
-                    </ScrollView>
-                </View>
+            <View style={{ ...GS.content, backgroundColor: theme.darker, paddingHorizontal: 0 }}>
+                <Space height={Dimensions.get('window').height / 8.1} />
+                <ScrollView
+                    showsVerticalScrollIndicator={false}
+                    scrollEventThrottle={100}
+                    style={{ minHeight: '100%', top: -5 }}
+                    refreshControl={
+                        <RefreshControl
+                            refreshing={refresh}
+                            onRefresh={onRefresh}
+                            tintColor={theme.orange}
+                            colors={[theme.orange]}
+                            progressViewOffset={0}
+                        />
+                    }
+                >
+                    {Array.isArray(list) && list.length
+                        ? (
+                            <List
+                                list={list}
+                                setList={setList}
+                                hideOld={hideOld}
+                                setHideOld={setHideOld}
+                                readIndex={readIndex}
+                            />
+                        )
+                        : <Text style={{ ...NS.error, color: theme.oppositeTextColor }}>
+                            {lang
+                                ? 'Ingen varslinger. Kom tilbake senere.'
+                                : 'You have no notifications at this time. Check back later.'}
+                        </Text>}
+                </ScrollView>
+                <TopRefreshIndicator refreshing={refresh} theme={theme} top={112} />
             </View>
         </Swipe>
     )
@@ -120,9 +129,9 @@ function Notification({ item, list, id, setList, hideOld, setHideOld, readIndex 
     const { theme } = useSelector((state: ReduxState) => state.theme)
     const { lang } = useSelector((state: ReduxState) => state.lang)
     const [isSwiping, setIsSwiping] = useState<boolean>(false)
-    const navigation: Navigation = useNavigation()
+    const navigation = useNavigation<NavigationProp<AppNavigationParamList>>()
     const time = displayTime(item.time)
-    const swipeableRef = useRef<Swipeable | null>(null)
+    const swipeableRef = useRef<SwipeableMethods | null>(null)
 
     function navigateIfPossible() {
         const target = resolveNotificationTarget(item.data)
@@ -280,13 +289,12 @@ function findIndexOfFirstReadIfAny({ list, setReadIndex }: ReadListProps): void 
 }
 
 function DeleteAction({ dragX, onDelete }: {
-    dragX: Animated.AnimatedInterpolation<number>
+    dragX: SharedValue<number>
     onDelete: () => void
 }): JSX.Element {
-    const scale = dragX.interpolate({
-        inputRange: [-100, 0],
-        outputRange: [1, 0],
-        extrapolate: 'clamp',
+    const animatedStyle = useAnimatedStyle(() => {
+        const progress = Math.min(1, Math.max(0, Math.abs(dragX.value) / 100))
+        return { transform: [{ scale: progress }] }
     })
 
     return (
@@ -300,7 +308,7 @@ function DeleteAction({ dragX, onDelete }: {
                 justifyContent: 'flex-end',
                 height: '100%'
             }}>
-                <Animated.View style={{ transform: [{ scale }] }}>
+                <Animated.View style={animatedStyle}>
                     <TrashCan />
                 </Animated.View>
             </View>

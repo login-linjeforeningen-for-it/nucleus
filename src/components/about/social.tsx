@@ -185,7 +185,7 @@ export function Styret() {
         <View>
             <Image
                 style={{ ...GS.aboutImage }}
-                source={{ uri: `${config.cdn}/board/group/styret_2026.jpg`, cache: 'force-cache' }}
+                source={{ uri: `${config.cdn}/img/board/group/styret_2026.jpg`, cache: 'force-cache' }}
             />
             <CornerSquare corner={corner} type={true} />
         </View>

@@ -14,7 +14,7 @@ type TopMenuProps = {
     navigation: Navigation
     title: string
     screen: string
-    back?: string
+    back?: AppNavigationRoute
 }
 /**
  * Top Menu on every page
@@ -26,11 +26,11 @@ export default function TopMenu({ navigation, title, screen, back }: TopMenuProp
     const { theme, isDark } = useSelector((state: ReduxState) => state.theme)
 
     function goBack() {
-        navigation.navigate(back ? back : 'Events')
+        navigation.navigate((back ? back : 'Events') as never)
     }
 
     function eventPage() {
-        navigation.navigate('Events')
+        navigation.navigate('Events' as never)
     }
 
     return (

@@ -82,7 +82,7 @@ export default function SpecificGameScreen({ route }: MenuProps<'SpecificGameScr
                 showsVerticalScrollIndicator={false}
                 scrollEventThrottle={100}
                 scrollEnabled={false}
-                style={{ paddingTop: paddingtop() }}
+                style={{ marginTop: 100, paddingTop: paddingtop() }}
             >
                 {typeof game === 'string'
                     ? <Text style={{ ...T.text18, color: theme.textColor }}>{game}</Text>

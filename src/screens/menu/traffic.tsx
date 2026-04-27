@@ -2,15 +2,16 @@ import Space from '@/components/shared/utils'
 import InternalNavMenu from '@components/menu/queenbee/internalNavMenu'
 import Swipe from '@components/nav/swipe'
 import Text from '@components/shared/text'
+import TopRefreshIndicator from '@components/shared/topRefreshIndicator'
 import GS from '@styles/globalStyles'
 import T from '@styles/text'
 import {
     getTrafficDomains,
     getTrafficMetrics,
     getTrafficRecords,
-} from '@utils/queenbeeApi'
+} from '@utils/queenbee/api'
 import { JSX, useEffect, useState } from 'react'
-import { ActivityIndicator, Dimensions, RefreshControl, ScrollView, View } from 'react-native'
+import { Dimensions, RefreshControl, ScrollView, View } from 'react-native'
 import { useSelector } from 'react-redux'
 import { DomainPicker, MetricList, SummaryCard, TrafficRecordCard, TrafficTabs } from './traffic/shared'
 
@@ -59,7 +60,15 @@ export default function TrafficScreen({ navigation }: MenuProps<'TrafficScreen'>
             <View style={{ flex: 1, backgroundColor: theme.darker }}>
                 <InternalNavMenu activeRoute='TrafficScreen' navigation={navigation} />
                 <ScrollView
-                    refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => void load()} />}
+                    refreshControl={
+                        <RefreshControl
+                            refreshing={refreshing}
+                            onRefresh={() => void load()}
+                            tintColor={theme.orange}
+                            colors={[theme.orange]}
+                            progressViewOffset={0}
+                        />
+                    }
                     style={GS.content}
                     contentContainerStyle={{ paddingBottom: 80 }}
                     showsVerticalScrollIndicator={false}
@@ -76,7 +85,6 @@ export default function TrafficScreen({ navigation }: MenuProps<'TrafficScreen'>
                         }}
                     />
                     <Space height={12} />
-                    {refreshing && <ActivityIndicator color={theme.orange} />}
                     {!!error && <Text style={{ ...T.centered15, color: 'red' }}>{error}</Text>}
                     {metrics && (
                         <>
@@ -124,6 +132,7 @@ export default function TrafficScreen({ navigation }: MenuProps<'TrafficScreen'>
                         </>
                     )}
                 </ScrollView>
+                <TopRefreshIndicator refreshing={refreshing} theme={theme} top={112} />
             </View>
         </Swipe>
     )

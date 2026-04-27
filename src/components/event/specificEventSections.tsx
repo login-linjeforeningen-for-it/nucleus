@@ -147,7 +147,7 @@ function resolveEventImageUrl(url: string | null | undefined) {
         return url
     }
 
-    return `${config.cdn}/events/${url.replace(/^\/+/, '')}`
+    return `${config.cdn}/img/events/${url.replace(/^\/+/, '')}`
 }
 
 function formatText(value: string | null | undefined) {
@@ -249,7 +249,7 @@ function SectionCard({
     const { theme } = useSelector((state: ReduxState) => state.theme)
 
     return (
-        <Cluster marginHorizontal={12}>
+        <Cluster marginHorizontal={0}>
             <View style={{ padding: 14 }}>
                 <Text style={{ ...T.text18, color: theme.textColor, fontWeight: '700' }}>{title}</Text>
                 <Space height={10} />
@@ -336,7 +336,7 @@ function HeroMedia({ event }: SpecificEventSectionsProps) {
     const endDate = event.time_type === 'default' ? new Date(event.time_end) : undefined
 
     return (
-        <Cluster marginHorizontal={12}>
+        <Cluster marginHorizontal={0}>
             <View style={{ padding: 14 }}>
                 {bannerUrl ? (
                     bannerUrl.endsWith('.svg') ? (

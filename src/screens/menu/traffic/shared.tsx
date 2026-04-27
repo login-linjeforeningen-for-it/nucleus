@@ -1,6 +1,7 @@
 import Cluster from '@/components/shared/cluster'
 import Space from '@/components/shared/utils'
 import Text from '@components/shared/text'
+import { useSwipeNavigationLock } from '@components/nav/swipe'
 import T from '@styles/text'
 import { NavigationProp } from '@react-navigation/native'
 import { Dimensions, Pressable, ScrollView, View } from 'react-native'
@@ -41,11 +42,16 @@ export function DomainPicker({
     selectedDomain: string
     onSelect: (domain: string) => void
 }) {
+    const swipeNavigation = useSwipeNavigationLock()
+
     return (
         <ScrollView
             horizontal
             nestedScrollEnabled
             directionalLockEnabled
+            onTouchStart={swipeNavigation.lock}
+            onTouchEnd={swipeNavigation.unlock}
+            onTouchCancel={swipeNavigation.unlock}
             showsHorizontalScrollIndicator={false}
             style={{ width: '100%', maxHeight: 44 }}
             contentContainerStyle={{
@@ -159,7 +165,7 @@ export function TrafficRecordCard({ record }: { record: TrafficRecord }) {
             <View style={{ padding: 12 }}>
                 <View style={{ flexDirection: 'row', justifyContent: 'space-between', gap: 10 }}>
                     <Text style={{ ...T.text15, color: theme.textColor, flex: 1 }} numberOfLines={1}>
-                        {record.method} {record.path}
+                        {`${record.method} ${record.path}`}
                     </Text>
                     <StatusBadge status={record.status} />
                 </View>
@@ -168,7 +174,7 @@ export function TrafficRecordCard({ record }: { record: TrafficRecord }) {
                 <Space height={6} />
                 <View style={{ flexDirection: 'row', justifyContent: 'space-between', gap: 10 }}>
                     <Text style={{ ...T.text12, color: theme.oppositeTextColor }}>{formatTrafficTime(record.timestamp)}</Text>
-                    <Text style={{ ...T.text12, color: durationColor(record.request_time) }}>{record.request_time}ms</Text>
+                    <Text style={{ ...T.text12, color: durationColor(record.request_time) }}>{`${record.request_time}ms`}</Text>
                     <Text style={{ ...T.text12, color: theme.oppositeTextColor }}>{record.country_iso || '??'}</Text>
                 </View>
             </View>
