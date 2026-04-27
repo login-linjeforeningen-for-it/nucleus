@@ -18,7 +18,7 @@ import {
     ImageSourcePropType,
 } from 'react-native'
 import RenderDescription from './adDescription'
-import capitalizeFirstLetter from '@utils/general/capitalizeFirstLetter'
+import { capitalizeFirstLetter } from '@utils/general'
 import { validFileType } from '@utils/format/validation'
 import config from '@/constants'
 

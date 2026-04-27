@@ -1,6 +1,6 @@
 import RenderDescription from '@components/ads/adDescription'
 import Space from '@components/shared/utils'
-import capitalizeFirstLetter from '@utils/general/capitalizeFirstLetter'
+import { capitalizeFirstLetter } from '@utils/general'
 import SpecificAdHero from '@components/ads/specificAdHero'
 import { ActionLinkButton, DetailSectionCard, MetaChip } from '@components/shared/detailSections'
 import LastFetch from '@/utils/fetch'

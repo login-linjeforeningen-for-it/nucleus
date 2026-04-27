@@ -1,5 +1,5 @@
 import ES from '@styles/eventStyles'
-import getHeight from '@utils/general/getHeight'
+import { getHeight } from '@utils/general'
 import MS from '@styles/menuStyles'
 import T from '@styles/text'
 import { CheckBox, CheckedBox } from '@components/event/check'

@@ -5,7 +5,7 @@ import { resetTheme } from '@redux/theme'
 import { Alert, Platform } from 'react-native'
 import { getPermissionsAsync, requestPermissionsAsync } from 'expo-notifications'
 import { isDevice } from 'expo-device'
-import { configureNotificationChannel } from './getPushToken'
+import { configureNotificationChannel } from './subscribeToTopic'
 
 type initializeNotificationsProps = {
     shouldRun: boolean

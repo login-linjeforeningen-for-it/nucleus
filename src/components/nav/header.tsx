@@ -7,8 +7,7 @@
  */
 import GS from '@styles/globalStyles'
 import GM from '@styles/gameStyles'
-import getHeight from '@utils/general/getHeight'
-import getCategories from '@utils/general/getCategories'
+import { getCategories, getHeight } from '@utils/general'
 import { PropsWithChildren, ReactNode, useMemo, useState } from 'react'
 import { InternalNavMenuButton, InternalNavMenuDropdown, InternalNavRoute } from '@components/menu/queenbee/internalNavMenu'
 import { BlurView } from 'expo-blur'

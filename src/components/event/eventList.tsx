@@ -1,5 +1,5 @@
 import EventCluster from './eventCluster'
-import getCategories from '@utils/general/getCategories'
+import { getCategories } from '@utils/general'
 import LastFetch, { fetchEvents } from '@utils/fetch'
 import Seperator from './seperator'
 import Space, { ErrorMessage } from '@components/shared/utils'

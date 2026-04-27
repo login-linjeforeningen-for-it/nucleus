@@ -15,7 +15,7 @@ import {
     Availability,
     EventStatus,
 } from 'expo-calendar'
-import capitalizeFirstLetter from '@utils/general/capitalizeFirstLetter'
+import { capitalizeFirstLetter } from '@utils/general'
 import config from '@/constants'
 
 type handleDownloadProps = {

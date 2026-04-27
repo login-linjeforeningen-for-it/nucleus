@@ -1,5 +1,5 @@
-export { default } from './fetchers/date'
-export { timeSince } from './fetchers/date'
+import config from '@/constants'
+
 export {
     fetchAdDetails,
     fetchAds,
@@ -11,10 +11,49 @@ export {
     fetchOrganizations,
     fetchRules,
 } from './fetchers/publicContent'
-export { fetchFundHoldings, fetchFundHoldingsHistory } from './fetchers/fund'
 export { fetchAlerts, fetchHoneyList, fetchHoneyServices } from './fetchers/honey'
 export {
     fetchAnnouncementChannels,
     fetchAnnouncementRoles,
     fetchAnnouncements,
 } from './fetchers/announcements'
+
+export default function LastFetch(param?: string) {
+    const utc = param ? param : new Date().toISOString()
+    const time = new Date(utc)
+    const day = time.getDate().toString().padStart(2, '0')
+    const month = (time.getMonth() + 1).toString().padStart(2, '0')
+    const year = time.getFullYear()
+    const hour = time.getHours().toString().padStart(2, '0')
+    const minute = time.getMinutes().toString().padStart(2, '0')
+
+    return `${hour}:${minute}, ${day}/${month}, ${year}`
+}
+
+export function timeSince(downloadState: Date): number {
+    const now = new Date()
+    const before = new Date(downloadState)
+    return now.valueOf() - before.valueOf()
+}
+
+export async function fetchFundHoldings(): Promise<FundHoldingsTotal | null> {
+    try {
+        const response = await fetch(`${config.login}/api/fund/holdings`)
+        if (!response.ok) throw new Error('Failed to fetch fund holdings')
+        const data = await response.json()
+        return typeof data?.totalBase === 'number' ? data as FundHoldingsTotal : null
+    } catch {
+        return null
+    }
+}
+
+export async function fetchFundHoldingsHistory(range: FundHoldingsRange = '1m'): Promise<FundHoldingsHistory | null> {
+    try {
+        const response = await fetch(`${config.login}/api/fund/holdings/history?range=${range}`)
+        if (!response.ok) throw new Error('Failed to fetch fund holdings history')
+        const data = await response.json()
+        return Array.isArray(data?.points) ? data as FundHoldingsHistory : null
+    } catch {
+        return null
+    }
+}

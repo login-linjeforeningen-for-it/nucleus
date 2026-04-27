@@ -1,5 +1,5 @@
 import { Dimensions, Platform } from 'react-native'
-import getHeight from './getHeight'
+import { getHeight } from './index'
 
 type GetListOffsetProps = {
     search: boolean

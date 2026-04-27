@@ -3,8 +3,7 @@ import { useSelector } from 'react-redux'
 import { Dispatch, SetStateAction, useEffect, useState } from 'react'
 import { ScrollView } from 'react-native-gesture-handler'
 import Markdown from './markdown'
-import ThumbsUp from './thumbsUp'
-import ThumbsDown from './thumbsDown'
+import { ThumbsDown, ThumbsUp } from './voteIcons'
 import T from '@styles/text'
 
 type CourseContentProps = {

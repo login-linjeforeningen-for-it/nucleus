@@ -3,8 +3,8 @@ import { Image, Platform, View, Text, Dimensions } from 'react-native'
 import { SvgUri } from 'react-native-svg'
 import React from 'react'
 import { useSelector } from 'react-redux'
-import capitalizeFirstLetter from '@utils/general/capitalizeFirstLetter'
-import { resolveJobBanner, resolveOrganizationLogo } from './adAssets'
+import { capitalizeFirstLetter } from '@utils/general'
+import { resolveJobBanner, resolveOrganizationLogo } from './specificAdUtils'
 
 type AdClusterLocationProps = {
     ad: GetJobProps | undefined
