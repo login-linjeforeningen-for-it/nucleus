@@ -1,29 +1,5 @@
 import { createSlice } from '@reduxjs/toolkit'
-
-type FilterProps = {
-    input: string
-    ads: GetJobProps[]
-    clickedAds: GetJobProps[]
-    clickedSkills: string[]
-}
-
-type FilterTextProps = {
-    ads: GetJobProps[]
-    input: string
-}
-
-type FilterCategoriesProps = {
-    ads: GetJobProps[]
-    clickedAds: GetJobProps[]
-    clickedSkills: string[]
-}
-
-type filterBothProps = {
-    clickedSkills: string[]
-    clickedAds: GetJobProps[]
-    ads: GetJobProps[]
-    input: string
-}
+import { filterAds, setSkills } from './helpers/adFilters'
 
 export const AdSlice = createSlice({
     name: 'ad',
@@ -82,7 +58,7 @@ export const AdSlice = createSlice({
         // Sets the clicked skills inside of the filter
         setClickedSkills(state, action) {
             state.clickedSkills = action.payload
-            state.renderedAds = Filter({
+            state.renderedAds = filterAds({
                 input: state.input,
                 ads: state.ads,
                 clickedAds: state.clickedAds,
@@ -98,7 +74,7 @@ export const AdSlice = createSlice({
         // Sets the search input
         setInput(state, action) {
             state.input = action.payload
-            state.renderedAds = Filter({
+            state.renderedAds = filterAds({
                 input: state.input,
                 ads: state.ads,
                 clickedAds: state.clickedAds,
@@ -129,121 +105,3 @@ export const {
 
 // Exports the Ad slice itself
 export default AdSlice.reducer
-
-/**
- * Updates relevant skills to filter
- * @param clickedAds
- * @param ads
- */
-function setSkills(ads: GetJobProps[], clickedAds: GetJobProps[]) {
-    // Adds enrolled (Påmeldt) filter option if relevant, since no ad has this attribute naturally
-    const skills: Set<string> = new Set(clickedAds.length ? ['Påmeldt'] : [])
-
-    ads.forEach((ad) => {
-        if (ad.skills) {
-            ad.skills.forEach(skill => {
-                skills.add(skill)
-            })
-        }
-    })
-
-    return Array.from(skills)
-}
-
-// --- PARENT FILTER FUNCTION ---
-function Filter({ input, ads, clickedAds, clickedSkills }: FilterProps) {
-    // Filters both on input and clicked skills if both are provided
-    if (input.length && clickedSkills.length) {
-        return filterBoth({ clickedSkills, clickedAds, ads, input })
-        // Filters on text if only text is provided
-    } else if (input.length) {
-        return filterText({ ads, input })
-        // Filters on categories if only categories are provided
-    } else if (clickedSkills.length) {
-        return filterSkills({ ads, clickedAds, clickedSkills })
-    }
-
-    // Returns ads if there is nothing to be filtered
-    return ads
-}
-
-/**
- * Filters ads based on if they include the passed text, will include both
- * matches for the Norwegian and English title.
- * @param ads Ads to filter
- * @param input Text to filter based on
- * @returns Filtered ads
- */
-function filterText({ ads, input }: FilterTextProps) {
-    const textFiltered = ads.filter(ad =>
-        ad.title_no.toLowerCase().includes(input.toLowerCase())
-        || ad.title_en.toLowerCase().includes(input.toLowerCase())
-    )
-
-    return removeDuplicatesAndOld(ads, textFiltered)
-}
-
-/**
- * Filters ads based on of their skills is in the clickedSkills array
- * @param ads Ads to filter
- * @param clickedAds Ads clicked by the user
- * @param clickedSkills Skills clicked by the user
- * @returns Ads filtered by skills
- */
-function filterSkills({ ads, clickedAds, clickedSkills }: FilterCategoriesProps) {
-
-    // Checks if user is filtering by enrolled (PÅMELDT)
-    const clickedFound = clickedSkills.find((skill: string) => skill === 'Påmeldt')
-
-    // Filters based on category
-    const skillFiltered = ads.filter(ad => clickedSkills.some((skill: string) => ad.skills?.includes(skill)))
-
-    // Returns if the user is not enrolled to any ads
-    if (!clickedFound) {
-        return removeDuplicatesAndOld(ads, skillFiltered)
-    }
-
-    // Returns clickedAds if the user has only clicked this
-    if (clickedSkills.length < 2) {
-        return removeDuplicatesAndOld(ads, clickedAds)
-    }
-
-    // Combines skillFiltered and concatenatedArray and returns them without duplicates
-    return removeDuplicatesAndOld(ads, skillFiltered.concat(clickedAds))
-}
-
-/**
- * Filters ads based on both skills and text input
- * @param clickedSkills Skills clicked by the user
- * @param clickedAds Ads clicked by the user
- * @param ads Ads to filter
- * @param input
- * @returns Ads filtered by both skills and text
- */
-function filterBoth({ clickedSkills, clickedAds, ads, input }: filterBothProps) {
-    const categoryFiltered = filterSkills({ ads, clickedAds, clickedSkills })
-    const textFiltered = filterText({ ads: categoryFiltered, input })
-    return removeDuplicatesAndOld(ads, textFiltered)
-}
-
-/**
-* Function for removing old ads and duplicates
-*
-* @param APIads Ads from API
-* @param ads Ads to filter
-* @returns Filtered ads
-*/
-export function removeDuplicatesAndOld(APIads: GetJobProps[], ads:
-GetJobProps[]): GetJobProps[] {
-
-    // Removes old ads and preserves newer version of all ads
-    const realAds = APIads.filter(APIad =>
-        ads.some(ad => APIad.id === ad.id))
-
-    // Removes duplicates
-    const filteredAds = realAds.filter((ad, index) => {
-        return realAds.findIndex(obj => obj.id === ad.id) === index
-    })
-
-    return filteredAds
-}

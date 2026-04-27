@@ -1,6 +1,7 @@
 import Cluster from '@/components/shared/cluster'
 import Space from '@/components/shared/utils'
-import config from '@/constants'
+import { AlbumImageGrid, AlbumPill } from '@/components/menu/albums/albumCards'
+import { formatAlbumDate, formatShortDate } from '@/components/menu/albums/albumDates'
 import Swipe from '@components/nav/swipe'
 import Text from '@components/shared/text'
 import TopRefreshIndicator from '@components/shared/topRefreshIndicator'
@@ -9,7 +10,7 @@ import T from '@styles/text'
 import { fetchAlbumDetails } from '@utils/fetch'
 import { BottomTabNavigationProp } from '@react-navigation/bottom-tabs'
 import { JSX, useEffect, useState } from 'react'
-import { Dimensions, Image, RefreshControl, ScrollView, TouchableOpacity, View } from 'react-native'
+import { Dimensions, RefreshControl, ScrollView, TouchableOpacity, View } from 'react-native'
 import { useSelector } from 'react-redux'
 
 export default function SpecificAlbumScreen({
@@ -85,9 +86,9 @@ export default function SpecificAlbumScreen({
                                     </Text>
                                     <Space height={12} />
                                     <View style={{ flexDirection: 'row', gap: 8, flexWrap: 'wrap' }}>
-                                        <Pill label={String(album.year)} />
-                                        <Pill label={`${album.image_count || album.images?.length || 0} ${text.images}`} />
-                                        <Pill label={`${text.updated} ${formatShortDate(album.updated_at)}`} />
+                                        <AlbumPill label={String(album.year)} />
+                                        <AlbumPill label={`${album.image_count || album.images?.length || 0} ${text.images}`} />
+                                        <AlbumPill label={`${text.updated} ${formatShortDate(album.updated_at)}`} />
                                     </View>
                                     {album.event ? (
                                         <>
@@ -135,91 +136,4 @@ export default function SpecificAlbumScreen({
             </View>
         </Swipe>
     )
-}
-
-function AlbumImageGrid({ album, title }: { album: GetAlbumProps, title: string }) {
-    const { theme } = useSelector((state: ReduxState) => state.theme)
-    const images = Array.isArray(album.images) ? album.images : []
-
-    if (!images.length) {
-        return (
-            <Cluster>
-                <View style={{ padding: 12 }}>
-                    <Text style={{ ...T.text15, color: theme.oppositeTextColor }}>No images</Text>
-                </View>
-            </Cluster>
-        )
-    }
-
-    return (
-        <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 10 }}>
-            {images.map((image, index) => (
-                <View
-                    key={image}
-                    style={{
-                        width: '48%',
-                        aspectRatio: 1,
-                        borderRadius: 18,
-                        overflow: 'hidden',
-                        backgroundColor: theme.contrast,
-                        borderWidth: 1,
-                        borderColor: '#ffffff14',
-                    }}
-                >
-                    <Image
-                        source={{ uri: `${config.cdn}/albums/${album.id}/${image}`, cache: 'force-cache' }}
-                        accessibilityLabel={`${title} ${index + 1}`}
-                        style={{ width: '100%', height: '100%' }}
-                    />
-                </View>
-            ))}
-        </View>
-    )
-}
-
-function Pill({ label }: { label: string }) {
-    const { theme } = useSelector((state: ReduxState) => state.theme)
-
-    return (
-        <View style={{
-            borderRadius: 999,
-            borderWidth: 1,
-            borderColor: theme.orangeTransparentBorder,
-            backgroundColor: theme.orangeTransparent,
-            paddingHorizontal: 10,
-            paddingVertical: 5,
-        }}>
-            <Text style={{ ...T.text12, color: theme.textColor }}>{label}</Text>
-        </View>
-    )
-}
-
-function formatAlbumDate(value?: string | null) {
-    if (!value) {
-        return ''
-    }
-
-    const date = new Date(value)
-    if (Number.isNaN(date.valueOf())) {
-        return ''
-    }
-
-    return `${new Intl.DateTimeFormat('nb-NO', {
-        day: '2-digit',
-        month: 'long',
-        year: 'numeric',
-    }).format(date)} - `
-}
-
-function formatShortDate(value: string) {
-    const date = new Date(value)
-    if (Number.isNaN(date.valueOf())) {
-        return value
-    }
-
-    return new Intl.DateTimeFormat('nb-NO', {
-        day: '2-digit',
-        month: 'short',
-        year: 'numeric',
-    }).format(date)
 }

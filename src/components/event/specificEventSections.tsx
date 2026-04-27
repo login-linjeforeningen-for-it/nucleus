@@ -1,15 +1,13 @@
-import Cluster from '@components/shared/cluster'
 import Space from '@components/shared/utils'
 import DescriptionContent from '@components/event/descriptionContent'
 import Markdown from '@components/course/markdown'
-import CategorySquare from '@components/shared/category'
-import DefaultBanner from '@components/event/defaultBanner'
-import config from '@/constants'
+import SpecificEventHero from '@components/event/specificEventHero'
+import { ActionLinkButton, DetailSectionCard, MetaChip } from '@components/shared/detailSections'
 import LastFetch from '@utils/fetch'
 import T from '@styles/text'
-import { Dimensions, Image, Linking, Pressable, Text, View } from 'react-native'
-import { SvgUri } from 'react-native-svg'
+import { Text, View } from 'react-native'
 import { useSelector } from 'react-redux'
+import { formatCapacity, formatText, getMazemapUrl, getOrganizerName } from './specificEventUtils'
 
 type SpecificEventSectionsProps = {
     event: GetEventProps
@@ -43,9 +41,9 @@ export default function SpecificEventSections({ event }: SpecificEventSectionsPr
 
     return (
         <>
-            <HeroMedia event={event} />
+            <SpecificEventHero event={event} />
             <Space height={10} />
-            <SectionCard title={lang ? 'Oversikt' : 'Overview'}>
+            <DetailSectionCard title={lang ? 'Oversikt' : 'Overview'} flush>
                 <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 10 }}>
                     <MetaChip
                         label={lang ? 'Kategori' : 'Category'}
@@ -76,40 +74,40 @@ export default function SpecificEventSections({ event }: SpecificEventSectionsPr
                             : (lang ? 'Fysisk' : 'In person')}
                     />
                 </View>
-            </SectionCard>
+            </DetailSectionCard>
             {shortInfo ? (
                 <>
                     <Space height={10} />
-                    <SectionCard title={lang ? 'Kort fortalt' : 'In short'}>
+                    <DetailSectionCard title={lang ? 'Kort fortalt' : 'In short'} flush>
                         <Text style={{ ...T.paragraph, color: '#fff', lineHeight: 22 }}>
                             {shortInfo}
                         </Text>
-                    </SectionCard>
+                    </DetailSectionCard>
                 </>
             ) : null}
             {description ? (
                 <>
                     <Space height={10} />
-                    <SectionCard title={lang ? 'Beskrivelse' : 'Description'}>
+                    <DetailSectionCard title={lang ? 'Beskrivelse' : 'Description'} flush>
                         <DescriptionContent />
-                    </SectionCard>
+                    </DetailSectionCard>
                 </>
             ) : null}
             {rule ? (
                 <>
                     <Space height={10} />
-                    <SectionCard title={lang ? 'Regler' : 'Rules'}>
+                    <DetailSectionCard title={lang ? 'Regler' : 'Rules'} flush>
                         <Markdown fontSize={T.text15.fontSize} text={rule.replace(/\\n/g, '\n')} />
-                    </SectionCard>
+                    </DetailSectionCard>
                 </>
             ) : null}
             {links.length ? (
                 <>
                     <Space height={10} />
-                    <SectionCard title={lang ? 'Lenker' : 'Links'}>
+                    <DetailSectionCard title={lang ? 'Lenker' : 'Links'} flush>
                         <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 10 }}>
                             {links.map((item) => (
-                                <ActionButton
+                                <ActionLinkButton
                                     key={`${item.label}-${item.url}`}
                                     label={item.label}
                                     url={item.url}
@@ -117,11 +115,11 @@ export default function SpecificEventSections({ event }: SpecificEventSectionsPr
                                 />
                             ))}
                         </View>
-                    </SectionCard>
+                    </DetailSectionCard>
                 </>
             ) : null}
             <Space height={10} />
-            <SectionCard title={lang ? 'Publisering' : 'Publishing'}>
+            <DetailSectionCard title={lang ? 'Publisering' : 'Publishing'} flush>
                 <View style={{ gap: 8 }}>
                     <Text style={{ ...T.text12, color: '#c8c8c8' }}>
                         {(lang ? 'Publisert' : 'Published') + `: ${LastFetch(event.time_publish)}`}
@@ -133,267 +131,7 @@ export default function SpecificEventSections({ event }: SpecificEventSectionsPr
                         {`Event ID: ${event.id}`}
                     </Text>
                 </View>
-            </SectionCard>
+            </DetailSectionCard>
         </>
-    )
-}
-
-function resolveEventImageUrl(url: string | null | undefined) {
-    if (!url) {
-        return ''
-    }
-
-    if (url.startsWith('http://') || url.startsWith('https://')) {
-        return url
-    }
-
-    return `${config.cdn}/img/events/${url.replace(/^\/+/, '')}`
-}
-
-function formatText(value: string | null | undefined) {
-    return value ? value.replace(/\\n/g, '\n').trim() : ''
-}
-
-function formatEventDate(dateValue: string, lang: boolean) {
-    return new Intl.DateTimeFormat(lang ? 'nb-NO' : 'en-GB', {
-        weekday: 'short',
-        day: 'numeric',
-        month: 'short',
-    }).format(new Date(dateValue))
-}
-
-function formatEventTimeRange(start: string, end: string | null | undefined, lang: boolean) {
-    const startDate = new Date(start)
-    const endDate = end ? new Date(end) : null
-    const date = formatEventDate(start, lang)
-    const startTime = new Intl.DateTimeFormat(lang ? 'nb-NO' : 'en-GB', {
-        hour: '2-digit',
-        minute: '2-digit',
-    }).format(startDate)
-
-    if (!endDate || Number.isNaN(endDate.valueOf())) {
-        return `${date} • ${startTime}`
-    }
-
-    const endTime = new Intl.DateTimeFormat(lang ? 'nb-NO' : 'en-GB', {
-        hour: '2-digit',
-        minute: '2-digit',
-    }).format(endDate)
-
-    return `${date} • ${startTime} - ${endTime}`
-}
-
-function formatCapacity(event: GetEventProps, lang: boolean) {
-    if (!event.capacity) {
-        return lang ? 'Ingen grense' : 'No limit'
-    }
-
-    if (event.is_full) {
-        return lang ? `Fullt (${event.capacity})` : `Full (${event.capacity})`
-    }
-
-    return `${event.capacity}`
-}
-
-function getOrganizerName(event: GetEventProps, lang: boolean) {
-    switch (event.organization?.shortname) {
-        case 'board': return lang ? 'Styret' : 'The Board'
-        case 'tekkom': return 'TekKom'
-        case 'bedkom': return 'BedKom'
-        case 'satkom': return 'SATkom'
-        case 'evntkom': return 'EvntKom'
-        case 'ctfkom': return 'CTFkom'
-        case 's2g': return 'S2G'
-        case 'idi': return 'IDI'
-        default:
-            return event.organization
-                ? (lang
-                    ? event.organization.name_no || event.organization.name_en
-                    : event.organization.name_en || event.organization.name_no)
-                : (lang
-                    ? event.category.name_no || event.category.name_en
-                    : event.category.name_en || event.category.name_no)
-    }
-}
-
-function getMazemapUrl(event: GetEventProps) {
-    const location = event.location
-    const locationName = location?.name_no || location?.name_en || ''
-    const organizer = event.organization?.shortname || event.organization?.name_en || ''
-
-    if (!location || location.type !== 'mazemap') {
-        return ''
-    }
-
-    if (locationName === 'Orgkollektivet') {
-        return 'https://link.mazemap.com/tBlfH1oY'
-    }
-
-    if (organizer === 'HUSET') {
-        return 'https://link.mazemap.com/O1OdhRU4'
-    }
-
-    if (location.mazemap_campus_id == null || location.mazemap_poi_id == null) {
-        return ''
-    }
-
-    return 'https://use.mazemap.com/#v=1'
-        + `&campusid=${location.mazemap_campus_id}`
-        + `&sharepoitype=poi&sharepoi=${location.mazemap_poi_id}`
-}
-
-function SectionCard({
-    title,
-    children,
-}: React.PropsWithChildren<{ title: string }>) {
-    const { theme } = useSelector((state: ReduxState) => state.theme)
-
-    return (
-        <Cluster marginHorizontal={0}>
-            <View style={{ padding: 14 }}>
-                <Text style={{ ...T.text18, color: theme.textColor, fontWeight: '700' }}>{title}</Text>
-                <Space height={10} />
-                {children}
-            </View>
-        </Cluster>
-    )
-}
-
-function MetaChip({
-    label,
-    value,
-}: {
-    label: string
-    value: string
-}) {
-    const { theme } = useSelector((state: ReduxState) => state.theme)
-
-    return (
-        <View style={{
-            flexBasis: '47%',
-            flexGrow: 1,
-            borderRadius: 16,
-            borderWidth: 1,
-            borderColor: '#ffffff12',
-            backgroundColor: '#ffffff08',
-            padding: 12,
-        }}>
-            <Text style={{ ...T.text12, color: theme.oppositeTextColor, marginBottom: 4 }}>
-                {label}
-            </Text>
-            <Text style={{ ...T.text15, color: theme.textColor }}>
-                {value}
-            </Text>
-        </View>
-    )
-}
-
-function ActionButton({
-    label,
-    url,
-    highlight,
-}: {
-    label: string
-    url: string
-    highlight?: boolean
-}) {
-    const { theme } = useSelector((state: ReduxState) => state.theme)
-
-    return (
-        <Pressable
-            onPress={() => void Linking.openURL(url)}
-            style={{
-                flexGrow: 1,
-                minWidth: '30%',
-                borderRadius: 14,
-                borderWidth: 1,
-                borderColor: highlight ? theme.orange : '#ffffff14',
-                backgroundColor: highlight ? theme.orange : '#ffffff08',
-                paddingVertical: 10,
-                paddingHorizontal: 12,
-                alignItems: 'center',
-            }}
-        >
-            <Text style={{
-                ...T.text15,
-                color: highlight ? theme.textColor : theme.oppositeTextColor,
-                fontWeight: '600'
-            }}>
-                {label}
-            </Text>
-        </Pressable>
-    )
-}
-
-function HeroMedia({ event }: SpecificEventSectionsProps) {
-    const { lang } = useSelector((state: ReduxState) => state.lang)
-    const { theme } = useSelector((state: ReduxState) => state.theme)
-    const title = lang ? event.name_no || event.name_en : event.name_en || event.name_no
-    const subtitle = formatEventTimeRange(event.time_start, event.time_end, lang)
-    const bannerUrl = resolveEventImageUrl(event.image_banner || event.image_small)
-    const width = Dimensions.get('window').width - 24
-    const startDate = new Date(event.time_start)
-    const endDate = event.time_type === 'default' ? new Date(event.time_end) : undefined
-
-    return (
-        <Cluster marginHorizontal={0}>
-            <View style={{ padding: 14 }}>
-                {bannerUrl ? (
-                    bannerUrl.endsWith('.svg') ? (
-                        <View style={{
-                            borderRadius: 20,
-                            backgroundColor: '#fff',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            overflow: 'hidden',
-                            paddingVertical: 12,
-                            marginBottom: 14,
-                        }}>
-                            <SvgUri
-                                width={width - 28}
-                                height={(width - 28) / 2.4}
-                                uri={bannerUrl}
-                            />
-                        </View>
-                    ) : (
-                        <Image
-                            source={{ uri: bannerUrl, cache: 'force-cache' }}
-                            style={{
-                                width: '100%',
-                                aspectRatio: 2.2,
-                                borderRadius: 20,
-                                backgroundColor: '#101010',
-                                marginBottom: 14,
-                            }}
-                            resizeMode='cover'
-                        />
-                    )
-                ) : (
-                    <View style={{ marginBottom: 14 }}>
-                        <DefaultBanner
-                            category={event.category?.name_no || event.category?.name_en}
-                            color={event.category?.color}
-                            height={170}
-                            borderRadius={18}
-                        />
-                    </View>
-                )}
-                <View style={{ flexDirection: 'row', gap: 12, alignItems: 'center' }}>
-                    <CategorySquare
-                        color={event.category?.color}
-                        startDate={startDate}
-                        endDate={endDate}
-                    />
-                    <View style={{ flex: 1, minWidth: 0 }}>
-                        <Text style={{ ...T.text20, color: theme.textColor, fontWeight: '700', marginBottom: 4 }}>
-                            {title}
-                        </Text>
-                        <Text style={{ ...T.text12, color: theme.orange }}>
-                            {subtitle}
-                        </Text>
-                    </View>
-                </View>
-            </View>
-        </Cluster>
     )
 }

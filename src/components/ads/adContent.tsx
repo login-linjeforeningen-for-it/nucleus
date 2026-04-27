@@ -4,7 +4,7 @@ import { SvgUri } from 'react-native-svg'
 import React from 'react'
 import { useSelector } from 'react-redux'
 import capitalizeFirstLetter from '@utils/general/capitalizeFirstLetter'
-import config from '@/constants'
+import { resolveJobBanner, resolveOrganizationLogo } from './adAssets'
 
 type AdClusterLocationProps = {
     ad: GetJobProps | undefined
@@ -176,28 +176,4 @@ export function getAdClusterMeta(ad: GetJobProps | undefined, lang: boolean) {
         : ad?.organization?.name_en || ad?.organization?.name_no
 
     return [type, location, orgName].filter(Boolean).join(' · ')
-}
-
-function resolveOrganizationLogo(url: string | undefined) {
-    if (!url) {
-        return ''
-    }
-
-    if (url.startsWith('http://') || url.startsWith('https://')) {
-        return url
-    }
-
-    return `${config.cdn}/img/organizations/${url.replace(/^\/+/, '')}`
-}
-
-function resolveJobBanner(url: string | undefined) {
-    if (!url) {
-        return ''
-    }
-
-    if (url.startsWith('http://') || url.startsWith('https://')) {
-        return url
-    }
-
-    return `${config.cdn}/img/jobs/${url.replace(/^\/+/, '')}`
 }

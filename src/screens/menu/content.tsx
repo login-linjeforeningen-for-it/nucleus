@@ -1,15 +1,15 @@
 import Cluster from '@/components/shared/cluster'
 import Space from '@/components/shared/utils'
-import config from '@/constants'
+import { ContentCard, EmptyContent, LoadMoreButton, OrganizationCard, TabPill } from '@components/menu/content/contentCards'
 import Swipe from '@components/nav/swipe'
 import Text from '@components/shared/text'
 import TopRefreshIndicator from '@components/shared/topRefreshIndicator'
 import GS from '@styles/globalStyles'
 import T from '@styles/text'
-import { cleanMarkdown, filterByContentQuery, formatContentDate, formatLocationDetails } from '@utils/content'
+import { filterByContentQuery, formatContentDate, formatLocationDetails } from '@utils/content'
 import { fetchLocations, fetchOrganizations, fetchRules } from '@utils/fetch'
 import { JSX, useEffect, useMemo, useState } from 'react'
-import { Image, RefreshControl, ScrollView, TextInput, TouchableOpacity, View } from 'react-native'
+import { RefreshControl, ScrollView, TextInput, View } from 'react-native'
 import { useSelector } from 'react-redux'
 
 type ContentTab = 'rules' | 'locations' | 'organizations'
@@ -27,59 +27,10 @@ export default function ContentScreen(): JSX.Element {
     const [query, setQuery] = useState('')
     const [refreshing, setRefreshing] = useState(false)
     const [error, setError] = useState('')
-    const labels = useMemo(() => ({
-        rules: lang ? 'Regler' : 'Rules',
-        locations: lang ? 'Steder' : 'Locations',
-        organizations: lang ? 'Organisasjoner' : 'Organizations',
-        search: lang ? 'Søk i innhold...' : 'Search content...',
-        showing: lang ? 'Viser' : 'Showing',
-        loadMore: lang ? 'Last inn mer' : 'Load more',
-        updated: lang ? 'Oppdatert' : 'Updated',
-        empty: lang ? 'Ingen treff å vise.' : 'No rows to show.',
-        locationFallback: lang ? 'Ingen ekstra stedsdetaljer' : 'No additional location details',
-    }), [lang])
-
-    const tabs = useMemo(() => [
-        { key: 'rules' as const, label: labels.rules, count: counts.rules },
-        { key: 'locations' as const, label: labels.locations, count: counts.locations },
-        { key: 'organizations' as const, label: labels.organizations, count: counts.organizations },
-    ], [counts, labels])
-
-    const visibleRules = useMemo(() => filterByContentQuery(rules, query, (rule) => [
-        rule.name_no,
-        rule.name_en,
-        rule.description_no,
-        rule.description_en,
-    ]), [query, rules])
-    const visibleLocations = useMemo(() => filterByContentQuery(locations, query, (location) => [
-        location.name_no,
-        location.name_en,
-        location.type,
-        location.address_street,
-        location.address_postcode,
-        location.city_name,
-        location.mazemap_campus_id,
-        location.mazemap_poi_id,
-        location.url,
-    ]), [locations, query])
-    const visibleOrganizations = useMemo(() => filterByContentQuery(organizations, query, (organization) => [
-        organization.name_no,
-        organization.name_en,
-        organization.description_no,
-        organization.description_en,
-        organization.link_homepage,
-        organization.link_linkedin,
-        organization.link_facebook,
-        organization.link_instagram,
-    ]), [organizations, query])
-    const loadedCounts = {
-        rules: rules.length,
-        locations: locations.length,
-        organizations: organizations.length,
-    }
-    const loadedTotal = loadedCounts[activeTab]
-    const availableTotal = counts[activeTab]
-    const hasMore = loadedTotal < availableTotal
+    const labels = useContentLabels(lang)
+    const visible = useVisibleContent({ locations, organizations, query, rules })
+    const loadedCounts = { rules: rules.length, locations: locations.length, organizations: organizations.length }
+    const hasMore = loadedCounts[activeTab] < counts[activeTab]
 
     async function load() {
         setRefreshing(true)
@@ -89,15 +40,10 @@ export default function ContentScreen(): JSX.Element {
                 fetchLocations(limit),
                 fetchOrganizations(limit),
             ])
-
             setRules(nextRules.rules)
             setLocations(nextLocations.locations)
             setOrganizations(nextOrganizations.organizations)
-            setCounts({
-                rules: nextRules.total_count,
-                locations: nextLocations.total_count,
-                organizations: nextOrganizations.total_count,
-            })
+            setCounts({ rules: nextRules.total_count, locations: nextLocations.total_count, organizations: nextOrganizations.total_count })
             setError('')
         } catch (loadError) {
             setError(loadError instanceof Error ? loadError.message : 'Failed to load content')
@@ -114,107 +60,26 @@ export default function ContentScreen(): JSX.Element {
         <Swipe left='QueenbeeScreen'>
             <View style={{ flex: 1, backgroundColor: theme.darker }}>
                 <ScrollView
-                    refreshControl={
-                        <RefreshControl
-                            refreshing={refreshing}
-                            onRefresh={() => void load()}
-                            tintColor={theme.orange}
-                            colors={[theme.orange]}
-                            progressViewOffset={0}
-                        />
-                    }
+                    refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => void load()} tintColor={theme.orange} colors={[theme.orange]} progressViewOffset={0} />}
                     style={GS.content}
                     contentContainerStyle={{ paddingTop: 90, paddingHorizontal: 4, paddingBottom: 80 }}
                     showsVerticalScrollIndicator={false}
                 >
-
-                    {!!error && (
-                        <>
-                            <Space height={10} />
-                            <Cluster>
-                                <View style={{ padding: 12 }}>
-                                    <Text style={{ ...T.text15, color: '#ff8b8b' }}>{error}</Text>
-                                </View>
-                            </Cluster>
-                        </>
-                    )}
-
+                    {!!error && <ErrorBlock error={error} />}
                     <Space height={10} />
-                    <Cluster>
-                        <View style={{ padding: 12 }}>
-                            <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
-                                {tabs.map((tab) => (
-                                    <TabPill
-                                        key={tab.key}
-                                        label={`${tab.label} · ${tab.count}`}
-                                        active={tab.key === activeTab}
-                                        onPress={() => setActiveTab(tab.key)}
-                                    />
-                                ))}
-                            </View>
-                            <Space height={12} />
-                            <TextInput
-                                value={query}
-                                onChangeText={setQuery}
-                                placeholder={labels.search}
-                                placeholderTextColor={theme.oppositeTextColor}
-                                autoCapitalize='none'
-                                autoCorrect={false}
-                                style={{
-                                    borderRadius: 16,
-                                    borderWidth: 1,
-                                    borderColor: '#ffffff18',
-                                    backgroundColor: theme.contrast,
-                                    color: theme.textColor,
-                                    paddingHorizontal: 12,
-                                    paddingVertical: 10,
-                                    fontSize: T.text15.fontSize,
-                                }}
-                            />
-                            <Space height={10} />
-                            <Text style={{ ...T.text12, color: theme.oppositeTextColor }}>
-                                {`${labels.showing} ${loadedTotal} / ${availableTotal}`}
-                            </Text>
-                        </View>
-                    </Cluster>
-
+                    <ContentToolbar
+                        activeTab={activeTab}
+                        counts={counts}
+                        labels={labels}
+                        loaded={loadedCounts[activeTab]}
+                        query={query}
+                        setActiveTab={setActiveTab}
+                        setQuery={setQuery}
+                        total={counts[activeTab]}
+                    />
                     <Space height={10} />
-                    {activeTab === 'rules' && visibleRules.map((rule) => (
-                        <ContentCard
-                            key={rule.id}
-                            title={lang ? rule.name_no : rule.name_en}
-                            subtitle={`#${rule.id} · ${labels.updated} ${formatContentDate(rule.updated_at)}`}
-                            body={lang ? rule.description_no : rule.description_en}
-                        />
-                    ))}
-                    {activeTab === 'rules' && !visibleRules.length && <EmptyContent label={labels.empty} />}
-                    {activeTab === 'locations' && visibleLocations.map((location) => (
-                        <ContentCard
-                            key={location.id}
-                            title={lang ? location.name_no : location.name_en}
-                            subtitle={`#${location.id} · ${location.type} · ${labels.updated} ${formatContentDate(location.updated_at)}`}
-                            body={formatLocationDetails(location, labels.locationFallback)}
-                        />
-                    ))}
-                    {activeTab === 'locations' && !visibleLocations.length && <EmptyContent label={labels.empty} />}
-                    {activeTab === 'organizations' && visibleOrganizations.map((organization) => (
-                        <OrganizationCard
-                            key={organization.id}
-                            organization={organization}
-                            lang={lang}
-                            updatedLabel={labels.updated}
-                        />
-                    ))}
-                    {activeTab === 'organizations' && !visibleOrganizations.length && <EmptyContent label={labels.empty} />}
-                    {hasMore && (
-                        <>
-                            <LoadMoreButton
-                                label={labels.loadMore}
-                                onPress={() => setLimit((currentLimit) => currentLimit + CONTENT_PAGE_SIZE)}
-                            />
-                            <Space height={10} />
-                        </>
-                    )}
+                    <ContentResults activeTab={activeTab} labels={labels} lang={lang} visible={visible} />
+                    {hasMore && <><LoadMoreButton label={labels.loadMore} onPress={() => setLimit(current => current + CONTENT_PAGE_SIZE)} /><Space height={10} /></>}
                 </ScrollView>
                 <TopRefreshIndicator refreshing={refreshing} theme={theme} top={112} />
             </View>
@@ -222,171 +87,92 @@ export default function ContentScreen(): JSX.Element {
     )
 }
 
-function LoadMoreButton({ label, onPress }: { label: string; onPress: () => void }) {
-    const { theme } = useSelector((state: ReduxState) => state.theme)
-
-    return (
-        <TouchableOpacity onPress={onPress} activeOpacity={0.88}>
-            <Cluster>
-                <View style={{
-                    padding: 14,
-                    alignItems: 'center',
-                    borderWidth: 1,
-                    borderColor: theme.orangeTransparentBorderHighlighted,
-                    backgroundColor: theme.orangeTransparent,
-                }}>
-                    <Text style={{ ...T.text15, color: theme.textColor }}>{label}</Text>
-                </View>
-            </Cluster>
-        </TouchableOpacity>
-    )
+function useContentLabels(lang: boolean) {
+    return useMemo(() => ({
+        rules: lang ? 'Regler' : 'Rules',
+        locations: lang ? 'Steder' : 'Locations',
+        organizations: lang ? 'Organisasjoner' : 'Organizations',
+        search: lang ? 'Søk i innhold...' : 'Search content...',
+        showing: lang ? 'Viser' : 'Showing',
+        loadMore: lang ? 'Last inn mer' : 'Load more',
+        updated: lang ? 'Oppdatert' : 'Updated',
+        empty: lang ? 'Ingen treff å vise.' : 'No rows to show.',
+        locationFallback: lang ? 'Ingen ekstra stedsdetaljer' : 'No additional location details',
+    }), [lang])
 }
 
-function TabPill({
-    label,
-    active,
-    onPress,
-}: {
-    label: string
-    active: boolean
-    onPress: () => void
+function useVisibleContent({ locations, organizations, query, rules }: {
+    locations: WorkerbeeLocation[]
+    organizations: WorkerbeeOrganization[]
+    query: string
+    rules: WorkerbeeRule[]
+}) {
+    const visibleRules = useMemo(() => filterByContentQuery(rules, query, rule => [
+        rule.name_no, rule.name_en, rule.description_no, rule.description_en,
+    ]), [query, rules])
+    const visibleLocations = useMemo(() => filterByContentQuery(locations, query, location => [
+        location.name_no, location.name_en, location.type, location.address_street,
+        location.address_postcode, location.city_name, location.mazemap_campus_id, location.mazemap_poi_id, location.url,
+    ]), [locations, query])
+    const visibleOrganizations = useMemo(() => filterByContentQuery(organizations, query, organization => [
+        organization.name_no, organization.name_en, organization.description_no, organization.description_en,
+        organization.link_homepage, organization.link_linkedin, organization.link_facebook, organization.link_instagram,
+    ]), [organizations, query])
+
+    return { locations: visibleLocations, organizations: visibleOrganizations, rules: visibleRules }
+}
+
+function ContentToolbar({ activeTab, counts, labels, loaded, query, setActiveTab, setQuery, total }: {
+    activeTab: ContentTab
+    counts: Record<ContentTab, number>
+    labels: Record<string, string>
+    loaded: number
+    query: string
+    setActiveTab: (tab: ContentTab) => void
+    setQuery: (query: string) => void
+    total: number
 }) {
     const { theme } = useSelector((state: ReduxState) => state.theme)
-
-    return (
-        <TouchableOpacity onPress={onPress} activeOpacity={0.88}>
-            <View style={{
-                borderRadius: 999,
-                borderWidth: 1,
-                borderColor: active ? theme.orangeTransparentBorderHighlighted : '#ffffff18',
-                backgroundColor: active ? theme.orangeTransparentHighlighted : theme.contrast,
-                paddingHorizontal: 11,
-                paddingVertical: 7,
-            }}>
-                <Text style={{
-                    ...T.text12,
-                    color: active ? theme.textColor : theme.oppositeTextColor,
-                }}>
-                    {label}
-                </Text>
-            </View>
-        </TouchableOpacity>
-    )
-}
-
-function ContentCard({
-    title,
-    subtitle,
-    body,
-}: {
-    title: string
-    subtitle: string
-    body: string
-}) {
-    const { theme } = useSelector((state: ReduxState) => state.theme)
-
-    return (
-        <>
-            <Cluster style={{
-                borderWidth: 1,
-                borderColor: theme.greyTransparentBorder,
-                backgroundColor: theme.greyTransparent,
-                borderRadius: 18,
-            }}>
-                <View style={{
-                    padding: 14,
-                    borderLeftWidth: 2,
-                    borderLeftColor: theme.orangeTransparentBorderHighlighted,
-                }}>
-                    <Text style={{ ...T.text20, color: theme.textColor }}>{title}</Text>
-                    <Space height={4} />
-                    <SubtitleLine subtitle={subtitle} />
-                    <Space height={8} />
-                    <Text style={{ ...T.text15, color: theme.oppositeTextColor, lineHeight: 21 }}>
-                        {cleanMarkdown(body)}
-                    </Text>
-                </View>
-            </Cluster>
-            <Space height={10} />
-        </>
-    )
-}
-
-function SubtitleLine({ subtitle }: { subtitle: string }) {
-    const { theme } = useSelector((state: ReduxState) => state.theme)
-    const [idPart, ...rest] = subtitle.split(' · ')
-
-    return (
-        <Text style={{ ...T.text12, color: theme.oppositeTextColor }}>
-            <Text style={{ ...T.text12, color: theme.orange, fontWeight: '700' }}>
-                {idPart}
-            </Text>
-            {rest.length ? ` · ${rest.join(' · ')}` : ''}
-        </Text>
-    )
-}
-
-function OrganizationCard({
-    organization,
-    lang,
-    updatedLabel,
-}: {
-    organization: WorkerbeeOrganization
-    lang: boolean
-    updatedLabel: string
-}) {
-    const { theme } = useSelector((state: ReduxState) => state.theme)
-    const logo = organization.logo ? `${config.cdn}/img/organizations/${organization.logo}` : ''
-
-    return (
-        <>
-            <Cluster>
-                <View style={{ padding: 12, flexDirection: 'row', gap: 12 }}>
-                    <View style={{
-                        width: 54,
-                        height: 54,
-                        borderRadius: 16,
-                        overflow: 'hidden',
-                        backgroundColor: theme.contrast,
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                    }}>
-                        {logo ? (
-                            <Image source={{ uri: logo, cache: 'force-cache' }} style={{ width: 54, height: 54 }} />
-                        ) : (
-                            <Text style={{ ...T.text15, color: theme.orange }}>
-                                {(lang ? organization.name_no : organization.name_en).slice(0, 1)}
-                            </Text>
-                        )}
-                    </View>
-                    <View style={{ flex: 1 }}>
-                        <Text style={{ ...T.text20, color: theme.textColor }}>
-                            {lang ? organization.name_no : organization.name_en}
-                        </Text>
-                        <Space height={4} />
-                        <Text style={{ ...T.text12, color: theme.oppositeTextColor }}>
-                            {`#${organization.id} · ${updatedLabel} ${formatContentDate(organization.updated_at)}`}
-                        </Text>
-                        <Space height={8} />
-                        <Text style={{ ...T.text15, color: theme.oppositeTextColor }} numberOfLines={5}>
-                            {lang ? organization.description_no : organization.description_en}
-                        </Text>
-                    </View>
-                </View>
-            </Cluster>
-            <Space height={10} />
-        </>
-    )
-}
-
-function EmptyContent({ label }: { label: string }) {
-    const { theme } = useSelector((state: ReduxState) => state.theme)
+    const tabs = [
+        { key: 'rules' as const, label: labels.rules, count: counts.rules },
+        { key: 'locations' as const, label: labels.locations, count: counts.locations },
+        { key: 'organizations' as const, label: labels.organizations, count: counts.organizations },
+    ]
 
     return (
         <Cluster>
-            <View style={{ padding: 18, alignItems: 'center' }}>
-                <Text style={{ ...T.text15, color: theme.oppositeTextColor }}>{label}</Text>
+            <View style={{ padding: 12 }}>
+                <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
+                    {tabs.map(tab => <TabPill key={tab.key} label={`${tab.label} · ${tab.count}`} active={tab.key === activeTab} onPress={() => setActiveTab(tab.key)} />)}
+                </View>
+                <Space height={12} />
+                <TextInput value={query} onChangeText={setQuery} placeholder={labels.search} placeholderTextColor={theme.oppositeTextColor} autoCapitalize='none' autoCorrect={false} style={{
+                    borderRadius: 16, borderWidth: 1, borderColor: '#ffffff18', backgroundColor: theme.contrast, color: theme.textColor, paddingHorizontal: 12, paddingVertical: 10, fontSize: T.text15.fontSize,
+                }} />
+                <Space height={10} />
+                <Text style={{ ...T.text12, color: theme.oppositeTextColor }}>{`${labels.showing} ${loaded} / ${total}`}</Text>
             </View>
         </Cluster>
     )
+}
+
+function ContentResults({ activeTab, labels, lang, visible }: {
+    activeTab: ContentTab
+    labels: Record<string, string>
+    lang: boolean
+    visible: ReturnType<typeof useVisibleContent>
+}) {
+    if (activeTab === 'rules') {
+        return visible.rules.length ? visible.rules.map(rule => <ContentCard key={rule.id} title={lang ? rule.name_no : rule.name_en} subtitle={`#${rule.id} · ${labels.updated} ${formatContentDate(rule.updated_at)}`} body={lang ? rule.description_no : rule.description_en} />) : <EmptyContent label={labels.empty} />
+    }
+    if (activeTab === 'locations') {
+        return visible.locations.length ? visible.locations.map(location => <ContentCard key={location.id} title={lang ? location.name_no : location.name_en} subtitle={`#${location.id} · ${location.type} · ${labels.updated} ${formatContentDate(location.updated_at)}`} body={formatLocationDetails(location, labels.locationFallback)} />) : <EmptyContent label={labels.empty} />
+    }
+    return visible.organizations.length
+        ? visible.organizations.map(organization => <OrganizationCard key={organization.id} organization={organization} lang={lang} updatedLabel={labels.updated} />)
+        : <EmptyContent label={labels.empty} />
+}
+
+function ErrorBlock({ error }: { error: string }) {
+    return <><Space height={10} /><Cluster><View style={{ padding: 12 }}><Text style={{ ...T.text15, color: '#ff8b8b' }}>{error}</Text></View></Cluster></>
 }

@@ -1,5 +1,6 @@
 import Cluster from '@/components/shared/cluster'
 import Space from '@/components/shared/utils'
+import { SearchEngine, SearchInputCard } from '@/components/menu/search/searchControls'
 import Swipe from '@components/nav/swipe'
 import Text from '@components/shared/text'
 import GS from '@styles/globalStyles'
@@ -7,21 +8,8 @@ import T from '@styles/text'
 import { buildSearchEngineUrl, decodeSearchAnimationToken } from '@utils/discoveryApi'
 import { copyToClipboard } from '@utils/general/clipboard'
 import { JSX, useEffect, useMemo, useRef, useState } from 'react'
-import { Alert, Animated, Dimensions, Easing, Linking, TextInput, TouchableOpacity, View } from 'react-native'
+import { Alert, Animated, Dimensions, Easing, Linking, View } from 'react-native'
 import { useSelector } from 'react-redux'
-
-type Engine = 'brave' | 'google' | 'duckduckgo'
-
-function formatEngineLabel(value: Engine) {
-    switch (value) {
-        case 'duckduckgo':
-            return 'Duck Duck Go'
-        case 'google':
-            return 'Google'
-        default:
-            return 'Brave'
-    }
-}
 
 export default function SearchScreen({ route }: MenuProps<'SearchScreen'>): JSX.Element {
     const { theme } = useSelector((state: ReduxState) => state.theme)
@@ -29,7 +17,7 @@ export default function SearchScreen({ route }: MenuProps<'SearchScreen'>): JSX.
     const text = lang ? require('@text/no.json').search : require('@text/en.json').search
     const screenTitle = lang ? require('@text/no.json').screens.SearchScreen : require('@text/en.json').screens.SearchScreen
     const [query, setQuery] = useState('')
-    const [engine, setEngine] = useState<Engine>('brave')
+    const [engine, setEngine] = useState<SearchEngine>('brave')
     const [typedQuery, setTypedQuery] = useState('')
     const [stage, setStage] = useState<'idle' | 'typing' | 'opening'>('idle')
     const pulse = useRef(new Animated.Value(1)).current
@@ -80,7 +68,7 @@ export default function SearchScreen({ route }: MenuProps<'SearchScreen'>): JSX.
         Alert.alert(text.copiedTitle, text.copiedBody)
     }
 
-    function startPlayback(nextQuery: string, nextEngine: Engine) {
+    function startPlayback(nextQuery: string, nextEngine: SearchEngine) {
         const nextLink = buildSearchEngineUrl(nextQuery, nextEngine)
 
         if (!nextLink) {
@@ -158,90 +146,20 @@ export default function SearchScreen({ route }: MenuProps<'SearchScreen'>): JSX.
                         </View>
                     </Cluster>
                     <Space height={12} />
-                    <Cluster>
-                        <View style={{ padding: 12, gap: 12 }}>
-                            <TextInput
-                                value={query}
-                                onChangeText={setQuery}
-                                placeholder={text.placeholder}
-                                placeholderTextColor={theme.oppositeTextColor}
-                                style={{
-                                    color: theme.textColor,
-                                    borderWidth: 1,
-                                    borderColor: '#ffffff18',
-                                    borderRadius: 16,
-                                    backgroundColor: '#ffffff08',
-                                    paddingHorizontal: 14,
-                                    paddingVertical: 12,
-                                    fontSize: 16,
-                                }}
-                            />
-                            <View style={{
-                                flexDirection: 'row',
-                                gap: 8,
-                                flexWrap: 'wrap',
-                                justifyContent: 'center',
-                            }}>
-                                {(['brave', 'google', 'duckduckgo'] as Engine[]).map((value) => (
-                                    <TouchableOpacity key={value} onPress={() => setEngine(value)}>
-                                        <Cluster style={{
-                                            backgroundColor: value === engine
-                                                ? theme.orangeTransparentHighlighted
-                                                : theme.orangeTransparent,
-                                            borderWidth: 1,
-                                            borderColor: value === engine
-                                                ? theme.orangeTransparentBorderHighlighted
-                                                : theme.orangeTransparentBorder,
-                                        }}>
-                                            <View style={{ paddingHorizontal: 14, paddingVertical: 10 }}>
-                                                <Text style={{ ...T.text15, color: theme.textColor }}>
-                                                    {formatEngineLabel(value)}
-                                                </Text>
-                                            </View>
-                                        </Cluster>
-                                    </TouchableOpacity>
-                                ))}
-                            </View>
-                            <Animated.View style={{ transform: [{ scale: pulse }] }}>
-                                <Cluster style={{
-                                    borderWidth: 1,
-                                    borderColor: theme.orangeTransparentBorder,
-                                    backgroundColor: theme.orangeTransparent,
-                                }}>
-                                    <TouchableOpacity onPress={() => void openLink()}>
-                                        <View style={{ padding: 14 }}>
-                                            <Text style={{ ...T.centered20, color: theme.textColor }}>
-                                                {stage === 'typing'
-                                                    ? typedQuery || text.typingFallback
-                                                    : stage === 'opening'
-                                                        ? text.opening
-                                                        : text.openAnimation}
-                                            </Text>
-                                        </View>
-                                    </TouchableOpacity>
-                                </Cluster>
-                            </Animated.View>
-                            {!!link && (
-                                <TouchableOpacity onPress={() => void copyLink()}>
-                                    <Cluster style={{
-                                        borderWidth: 1,
-                                        borderColor: '#ffffff12',
-                                        backgroundColor: '#ffffff08',
-                                    }}>
-                                        <View style={{ padding: 12 }}>
-                                            <Text style={{ ...T.text12, color: theme.oppositeTextColor }}>
-                                                {text.tapToCopy}
-                                            </Text>
-                                            <Space height={4} />
-                                            <Text style={{ ...T.text15, color: theme.textColor }}>
-                                                {link}
-                                            </Text>
-                                        </View>
-                                    </Cluster>
-                                </TouchableOpacity>
-                            )}
-                        </View>
-                    </Cluster>
+                    <SearchInputCard
+                        query={query}
+                        engine={engine}
+                        link={link}
+                        text={text}
+                        theme={theme}
+                        pulse={pulse}
+                        stage={stage}
+                        typedQuery={typedQuery}
+                        onQuery={setQuery}
+                        onEngine={setEngine}
+                        onOpen={() => void openLink()}
+                        onCopy={() => void copyLink()}
+                    />
                 </View>
             </View>
         </Swipe>

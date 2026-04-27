@@ -1,6 +1,6 @@
 import Space from '@/components/shared/utils'
+import { AiConversationOverlay, AiModelPicker } from '@/components/menu/ai/aiOverlays'
 import AiComposer from '@components/menu/ai/composer'
-import AiConversationPicker from '@components/menu/ai/conversationPicker'
 import AiMessageList from '@components/menu/ai/messageList'
 import GS from '@styles/globalStyles'
 import T from '@styles/text'
@@ -9,7 +9,6 @@ import Text from '@components/shared/text'
 import { JSX, useEffect, useState } from 'react'
 import {
     ActivityIndicator,
-    Dimensions,
     KeyboardAvoidingView,
     Platform,
     Pressable,
@@ -130,86 +129,10 @@ export default function AiScreen({ navigation }: MenuProps<'AiScreen'>): JSX.Ele
                         <AiMessageList session={ai.session} theme={theme} isLoggedIn={login} text={text} />
                     </View>
                     {showModels ? (
-                        <View style={{
-                            position: 'absolute',
-                            top: Dimensions.get('window').height / 8 + 18,
-                            right: 12,
-                            left: 12,
-                            zIndex: 21,
-                            borderRadius: 22,
-                            backgroundColor: '#121112ee',
-                            borderWidth: 1,
-                            borderColor: 'rgba(255,255,255,0.08)',
-                            padding: 12,
-                            gap: 8,
-                        }}>
-                            {ai.clients.map((client) => {
-                                const isActive = ai.session?.clientName === client.name
-
-                                return (
-                                    <Pressable
-                                        key={client.name}
-                                        onPress={() => {
-                                            setShowModels(false)
-                                            void ai.changeModel(client.name)
-                                        }}
-                                        style={{
-                                            borderRadius: 16,
-                                            backgroundColor: isActive
-                                                ? theme.orangeTransparent
-                                                : theme.orangeTransparentHighlighted,
-                                            borderColor: isActive
-                                                ? theme.orangeTransparentBorder
-                                                : theme.orangeTransparentBorderHighlighted,
-                                            borderWidth: 1,
-                                            paddingHorizontal: 14,
-                                            paddingVertical: 10,
-                                        }}
-                                    >
-                                        <Text style={{
-                                            ...T.text15,
-                                            color: isActive ? theme.orange : theme.textColor,
-                                            fontWeight: isActive ? '700' : '500',
-                                        }}>
-                                            {client.name}
-                                        </Text>
-                                        <Text style={{ ...T.text12, color: theme.oppositeTextColor }}>
-                                            {`${Math.round(client.model.tps || 0)} tps`}
-                                        </Text>
-                                    </Pressable>
-                                )
-                            })}
-                        </View>
+                        <AiModelPicker ai={ai} theme={theme} onClose={() => setShowModels(false)} />
                     ) : null}
                     {showConversations ? (
-                        <View style={{
-                            position: 'absolute',
-                            top: Dimensions.get('window').height / 8 + 42,
-                            right: 12,
-                            left: 12,
-                            zIndex: 20,
-                            borderRadius: 22,
-                            backgroundColor: '#121112ee',
-                            borderWidth: 1,
-                            borderColor: 'rgba(255,255,255,0.08)',
-                            padding: 12,
-                        }}>
-                            <AiConversationPicker
-                                conversations={ai.conversations}
-                                activeConversationId={ai.session?.conversationId}
-                                theme={theme}
-                                onCreate={() => {
-                                    setShowConversations(false)
-                                    void ai.createNewConversation()
-                                }}
-                                onSelect={(conversationId) => {
-                                    setShowConversations(false)
-                                    void ai.openConversation(conversationId)
-                                }}
-                                currentConversationLabel={text.currentConversation}
-                                newConversationLabel={text.newConversation}
-                            />
-                        </View>
+                        <AiConversationOverlay ai={ai} theme={theme} text={text} onClose={() => setShowConversations(false)} />
                     ) : null}
                     <View style={{
                         position: 'absolute',

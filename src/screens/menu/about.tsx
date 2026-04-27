@@ -5,72 +5,15 @@ import GS from '@styles/globalStyles'
 import { useSelector } from 'react-redux'
 import en from '@text/menu/about/en.json'
 import no from '@text/menu/about/no.json'
-import React, { JSX, useState } from 'react'
+import { JSX, useState } from 'react'
 import T from '@styles/text'
-import Person, {
-    AllComitees,
-    Social,
-    Styret,
-    Copyright
-} from '@/components/about/social'
-import {
-    Text,
-    View,
-    TouchableOpacity,
-    StyleProp,
-    ViewStyle,
-} from 'react-native'
+import { Copyright, Social, Styret } from '@/components/about/social'
+import { CommitteeContent, CommitteePerson, CommitteeView } from '@/components/about/committee/committeeSection'
+import { Text, View } from 'react-native'
 import { ScrollView } from 'react-native-gesture-handler'
 import Swipe from '@components/nav/swipe'
-import { SvgXml } from 'react-native-svg'
-import prkomSVG from '@assets/committee/prkom/pr-icon.svg'
-import ctfkomSVG from '@assets/committee/ctfkom/ctfkom-icon.svg'
-import evntkomSVG from '@assets/committee/evntkom/evntkom-icon.svg'
-import satkomSVG from '@assets/committee/satkom/satkom-icon.svg'
-import bedkomSVG from '@assets/committee/bedkom/bedkom-icon.svg'
-import barkomSVG from '@assets/committee/barkom/barkom-icon.svg'
-import tekkomSVG from '@assets/committee/tekkom/tekkom-icon.svg'
-import styretSVG from '@assets/committee/styret/styret-icon.svg'
 import { TextLink } from '@components/shared/link'
 import config from '@/constants'
-
-type getCommitteeImageProps = {
-    style?: StyleProp<ViewStyle>
-    id: number
-    theme: string
-}
-
-type CommitteePersonProps = {
-    committee: number
-}
-
-type CommitteeViewProps = {
-    setCommittee: React.Dispatch<React.SetStateAction<number>>
-    committee: number
-}
-
-type CommitteeContentProps = {
-    index: number
-    relevantCommittee: CommitteeInfo
-}
-
-type CommitteeInfo = {
-    id: number
-    title: string
-    quote: string
-    description: string
-}
-
-const committeeImages = [
-    styretSVG,
-    evntkomSVG,
-    tekkomSVG,
-    prkomSVG,
-    ctfkomSVG,
-    satkomSVG,
-    bedkomSVG,
-    barkomSVG
-]
 
 export default function AboutScreen(): JSX.Element {
     const { lang } = useSelector((state: ReduxState) => state.lang)
@@ -196,141 +139,5 @@ export default function AboutScreen(): JSX.Element {
                 </ScrollView>
             </View>
         </Swipe>
-    )
-}
-
-function CommitteeImage({ id, theme, style }: getCommitteeImageProps) {
-    const colors: { [key: string]: string } = {
-        dark: '#ffffff',
-        gray: '#555555',
-        light: '#000000'
-    }
-
-    const barkomScaleStyle = id === 7
-        ? { transform: [{ scale: 1.05 }] }
-        : undefined
-
-    return (
-        <SvgXml
-            xml={committeeImages[id]}
-            color={colors[theme] || '#fd8738'}
-            style={[style, barkomScaleStyle]}
-        />
-    )
-}
-
-function CommitteePerson({ committee }: CommitteePersonProps) {
-    const committees = ['evntkom', 'tekkom', 'pr', 'ctf', 'eco', 'bedkom', 'barkom']
-
-    if (committees[committee - 1]) {
-        return <Person person={committees[committee - 1]} />
-    }
-
-    return <AllComitees />
-}
-
-function CommitteeView({ setCommittee, committee }: CommitteeViewProps) {
-    const numRows = 1
-    const numCols = Math.ceil(committeeImages.length / numRows)
-
-    const { theme, isDark } = useSelector((state: ReduxState) => state.theme)
-
-    const rows: string[][] = []
-    for (let i = 0; i < committeeImages.length; i += numCols) {
-        rows.push(committeeImages.slice(i, i + numCols))
-    }
-
-
-    return (
-        <View style={{
-            backgroundColor: theme.contrast,
-            borderRadius: 16,
-            paddingHorizontal: 10,
-            paddingVertical: 10,
-            marginBottom: 2,
-        }}>
-            <View style={{
-                display: 'flex',
-                aspectRatio: numCols / numRows,
-                justifyContent: 'space-between',
-            }}>
-                {rows.map((row, rowIndex) => (
-                    <View
-                        key={rowIndex}
-                        style={{
-                            display: 'flex',
-                            width: '100%',
-                            flexDirection: 'row',
-                            justifyContent: 'space-between',
-                            gap: 8,
-                        }}
-                    >
-                        {row.map((_, index) => {
-                            const itemId = rowIndex * numCols + index
-                            const isActive = committee == itemId
-
-                            return (
-                                <TouchableOpacity
-                                    key={index}
-                                    onPress={() => {
-                                        setCommittee(itemId)
-                                    }}
-                                    style={{
-                                        ...GS.committee,
-                                        backgroundColor: isActive ? 'rgba(253, 135, 56, 0.12)' : theme.darker,
-                                        flex: 1,
-                                        aspectRatio: 1,
-                                        justifyContent: 'center',
-                                        alignItems: 'center',
-                                        borderWidth: isActive ? 1 : 0,
-                                        borderColor: isActive ? theme.orange : 'transparent',
-                                    }}
-                                >
-                                    <CommitteeImage
-                                        id={itemId}
-                                        theme={isActive ? '' : isDark ? 'dark' : 'gray'}
-                                        style={{ width: '76%', aspectRatio: 1 }}
-                                    />
-                                </TouchableOpacity>
-                            )
-                        })}
-                    </View>
-                ))}
-            </View>
-        </View>
-    )
-}
-
-function CommitteeContent({ index, relevantCommittee }:
-CommitteeContentProps) {
-    const { theme, isDark } = useSelector((state: ReduxState) => state.theme)
-
-    return (
-        <View key={index}>
-            <Text style={{ ...T.text30, color: theme.textColor }}>
-                <CommitteeImage id={relevantCommittee.id} style={GS.small} theme={isDark ? 'dark' : 'gray'} />
-                {relevantCommittee.title}
-            </Text>
-
-            {relevantCommittee.quote.length > 0 &&
-                <>
-                    <Space height={10} />
-                    <Line width={5}>
-                        <Text style={{
-                            ...T.boldWithLine,
-                            color: theme.textColor
-                        }}>
-                            {relevantCommittee.quote}
-                        </Text>
-                    </Line>
-                    <Space height={10} />
-                </>
-            }
-
-            <Text style={{ ...T.paragraph, color: theme.textColor }}>
-                {relevantCommittee.description}
-            </Text>
-            <Space height={15} />
-        </View>
     )
 }
