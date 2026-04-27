@@ -1330,3 +1330,8 @@ type ProfileField = {
     verified?: boolean
     wrapEvery?: number
 }
+
+type SnapshotSummary = {
+    value: string
+    subvalue: string
+}
