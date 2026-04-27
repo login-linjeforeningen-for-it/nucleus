@@ -1,4 +1,4 @@
-import { updateCourseNotes } from '@utils/course'
+import { updateCourseNotes } from '@utils/course/course'
 
 describe('course notes mobile editing', () => {
     beforeEach(() => {

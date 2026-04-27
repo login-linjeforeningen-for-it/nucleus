@@ -1,5 +1,5 @@
 import { formatProfileDate } from '@utils/auth/profile'
-import toField from '@utils/toField'
+import toField from '@utils/format/toField'
 
 export default function buildSummaryFields(profile: Profile | null, lang: boolean): ProfileField[] {
     if (!profile) {

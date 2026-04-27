@@ -4,7 +4,7 @@ import { useDispatch, useSelector } from 'react-redux'
 import ES from '@styles/eventStyles'
 import T from '@styles/text'
 import { useContext } from 'react'
-import { EventContext } from '@utils/contextProvider'
+import { EventContext } from '@utils/app/contextProvider'
 
 export default function JoinButton() {
     const { theme } = useSelector((state: ReduxState) => state.theme)

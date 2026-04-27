@@ -1,5 +1,5 @@
 import { changeNotificationState } from '@redux/notifications'
-import topic from '@/utils/topic'
+import topic from '@/utils/notification/queue/topic'
 import { useSelector, useDispatch } from 'react-redux'
 import { View, Switch } from 'react-native'
 

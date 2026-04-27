@@ -73,7 +73,7 @@ const linking: LinkingOptions<RootStackParamList> = {
                             TrafficRecordsScreen: 'internal/traffic/records',
                             TrafficMapScreen: 'internal/traffic/map',
                             ContentScreen: {
-                                path: 'internal/content',
+                                path: 'internal/content/content',
                                 alias: ['rules', 'locations', 'organizations'],
                             },
                             AnnouncementsScreen: {

@@ -3,7 +3,7 @@ import { useSelector } from 'react-redux'
 import ES from '@styles/eventStyles'
 import T from '@styles/text'
 import config from '@/constants'
-import { EventContext } from '@utils/contextProvider'
+import { EventContext } from '@utils/app/contextProvider'
 import { useContext } from 'react'
 
 type handleLinkProps = {

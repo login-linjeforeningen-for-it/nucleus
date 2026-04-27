@@ -10,7 +10,7 @@ import TopRefreshIndicator from '@components/shared/topRefreshIndicator'
 import GS from '@styles/globalStyles'
 import T from '@styles/text'
 import { startLogin } from '@utils/auth/auth'
-import { getDashboardSummary } from '@utils/discoveryApi'
+import { getDashboardSummary } from '@utils/discovery/discoveryApi'
 import {
     getDatabaseOverview,
     getInternalOverview,

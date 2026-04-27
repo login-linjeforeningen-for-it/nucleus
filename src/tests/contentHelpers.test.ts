@@ -4,7 +4,7 @@ import {
     formatContentDate,
     formatLocationDetails,
     matchesContentQuery,
-} from '@utils/content'
+} from '@utils/content/content'
 
 describe('content helper behavior', () => {
     it('filters rows across localized fields and ignores casing/spacing', () => {

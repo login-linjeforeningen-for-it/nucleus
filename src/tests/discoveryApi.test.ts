@@ -4,7 +4,7 @@ import {
     buildSpotifyUrl,
     decodeSearchAnimationToken,
     getSafeMusicActivity,
-} from '@/utils/discoveryApi'
+} from '@/utils/discovery/discoveryApi'
 
 describe('discoveryApi music/search helpers', () => {
     beforeEach(() => {

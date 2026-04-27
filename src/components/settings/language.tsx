@@ -1,5 +1,5 @@
 import { View, Text, TouchableOpacity } from 'react-native'
-import topic from '@/utils/topic'
+import topic from '@/utils/notification/queue/topic'
 import { useSelector, useDispatch } from 'react-redux'
 import SS from '@styles/settingStyles'
 import { changeLang } from '@redux/lang'

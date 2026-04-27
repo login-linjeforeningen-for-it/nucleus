@@ -7,7 +7,7 @@ import T from '@styles/text'
 import { JSX } from 'react'
 import { useSelector } from 'react-redux'
 import { random } from '@/components/shared/utils'
-import personInfo from '@utils/personInfo'
+import personInfo from '@utils/people/personInfo'
 import {
     Image,
     ImageSourcePropType,

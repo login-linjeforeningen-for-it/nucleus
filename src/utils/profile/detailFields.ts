@@ -1,7 +1,7 @@
 import { formatProfileDate } from '@utils/auth/profile'
-import formatValue from '@utils/formatValue'
-import normalizeGroup from '@utils/normalizeGroup'
-import toField from '@utils/toField'
+import formatValue from '@utils/format/formatValue'
+import normalizeGroup from '@utils/format/normalizeGroup'
+import toField from '@utils/format/toField'
 
 export function buildDetailFields(profile: Profile | null, lang: boolean): ProfileField[] {
     if (!profile) {

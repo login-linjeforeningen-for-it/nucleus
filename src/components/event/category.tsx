@@ -3,7 +3,7 @@ import ES from '@styles/eventStyles'
 import { Text, View } from 'react-native'
 import { useSelector } from 'react-redux'
 import T from '@styles/text'
-import { EventContext } from '@utils/contextProvider'
+import { EventContext } from '@utils/app/contextProvider'
 import { useContext } from 'react'
 
 export default function Category() {

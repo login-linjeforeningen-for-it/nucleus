@@ -1,6 +1,6 @@
 import MS from '@styles/menuStyles'
 import { ImageSourcePropType, TouchableOpacity } from 'react-native'
-import handleDownload from '@/utils/calendar'
+import handleDownload from '@/utils/content/calendar'
 import { Image } from 'react-native'
 import { timeSince } from '@/utils/fetch'
 import { useSelector, useDispatch } from 'react-redux'

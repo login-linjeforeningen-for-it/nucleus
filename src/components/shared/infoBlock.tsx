@@ -2,7 +2,7 @@ import { Text, View } from 'react-native'
 import { SvgXml } from 'react-native-svg'
 import infoSvg from '@assets/icons/info.svg'
 import T from '@styles/text'
-import { EventContext } from '@utils/contextProvider'
+import { EventContext } from '@utils/app/contextProvider'
 import { useContext } from 'react'
 
 type InfoBlockProps = {

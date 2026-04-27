@@ -2,7 +2,7 @@ import * as Notifications from 'expo-notifications'
 import { useEffect } from 'react'
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import { configureNotificationChannel, getPushToken } from './getPushToken'
-import { navigationRef } from '@utils/navigationRef'
+import { navigationRef } from '@utils/app/navigationRef'
 import {
     parseNotificationList,
     resolveNotificationTarget,

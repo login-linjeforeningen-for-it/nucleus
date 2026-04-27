@@ -5,7 +5,7 @@ import { View } from 'react-native'
 import EventTime from './time'
 import Skeleton from '@components/shared/skeleton'
 import { useContext } from 'react'
-import { EventContext } from '@utils/contextProvider'
+import { EventContext } from '@utils/app/contextProvider'
 
 export default function Countdown() {
     const event = useContext(EventContext)

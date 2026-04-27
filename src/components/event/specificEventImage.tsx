@@ -6,8 +6,8 @@ import { Dimensions, Image, View } from 'react-native'
 import { SvgUri } from 'react-native-svg'
 import { useSelector } from 'react-redux'
 import { useContext, useEffect, useState } from 'react'
-import { EventContext } from '@utils/contextProvider'
-import imageExists from '@utils/imageExists'
+import { EventContext } from '@utils/app/contextProvider'
+import imageExists from '@utils/format/imageExists'
 
 export default function SpecificEventImage() {
     const event = useContext(EventContext)

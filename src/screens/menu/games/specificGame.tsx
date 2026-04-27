@@ -7,7 +7,7 @@ import {
     getQuestions,
     getNeverHaveIEver,
     getOkRedFlagDealbreaker
-} from '@utils/game'
+} from '@utils/games/game'
 import Swiper from '@components/games/swiper'
 import Filters from '@components/games/filters'
 import { ScrollView } from 'react-native-gesture-handler'

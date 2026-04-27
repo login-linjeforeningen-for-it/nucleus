@@ -3,7 +3,7 @@ import Space from '@/components/shared/utils'
 import config from '@/constants'
 import Text from '@components/shared/text'
 import T from '@styles/text'
-import { cleanMarkdown, formatContentDate } from '@utils/content'
+import { cleanMarkdown, formatContentDate } from '@utils/content/content'
 import { Image, TouchableOpacity, View } from 'react-native'
 import { useSelector } from 'react-redux'
 

@@ -1,6 +1,6 @@
 import Markdown from '@components/course/markdown'
 import Card from '@components/shared/card'
-import { EventContext } from '@utils/contextProvider'
+import { EventContext } from '@utils/app/contextProvider'
 import { useContext } from 'react'
 import { useSelector } from 'react-redux'
 import T from '@styles/text'

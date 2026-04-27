@@ -1,4 +1,4 @@
-import config from '../constants'
+import config from '@/constants'
 
 function normalizeCourseList(raw: unknown): CourseAsList[] {
     if (!Array.isArray(raw)) {
@@ -58,7 +58,7 @@ function normalizeCourse(raw: unknown): Course {
 // location parameter to ensure all requests are successful
 export async function getCourses(): Promise<CourseAsList[] | string> {
     try {
-        const response = await fetch(`${config.studentbee_api_url}/courses`, {
+        const response = await fetch(`${config.studentbee_api_url}/course/courses`, {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',

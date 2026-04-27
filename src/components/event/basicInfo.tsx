@@ -9,7 +9,7 @@ import { useSelector } from 'react-redux'
 import { TextLink } from '@components/shared/link'
 import InfoBlock from '@components/shared/infoBlock'
 import Skeleton from '@components/shared/skeleton'
-import { EventContext } from '@utils/contextProvider'
+import { EventContext } from '@utils/app/contextProvider'
 import { useContext } from 'react'
 
 export default function BasicInfo() {

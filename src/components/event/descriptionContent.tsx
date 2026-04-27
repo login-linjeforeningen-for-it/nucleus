@@ -2,7 +2,7 @@ import { useSelector } from 'react-redux'
 import Embed from '@components/event/embed'
 import { useContext, useMemo } from 'react'
 import Markdown from 'react-native-markdown-display'
-import { EventContext } from '@utils/contextProvider'
+import { EventContext } from '@utils/app/contextProvider'
 
 export default function Description() {
     const event = useContext(EventContext)

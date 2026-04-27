@@ -2,7 +2,7 @@ import Cluster from '@/components/shared/cluster'
 import Space from '@/components/shared/utils'
 import Swipe from '@components/nav/swipe'
 import TopRefreshIndicator from '@components/shared/topRefreshIndicator'
-import { getGames } from '@utils/game'
+import { getGames } from '@utils/games/game'
 import { JSX, useCallback, useEffect, useMemo, useState } from 'react'
 import { useSelector } from 'react-redux'
 import {

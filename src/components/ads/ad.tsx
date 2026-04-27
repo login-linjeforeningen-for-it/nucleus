@@ -19,7 +19,7 @@ import {
 } from 'react-native'
 import RenderDescription from './adDescription'
 import capitalizeFirstLetter from '@utils/general/capitalizeFirstLetter'
-import validFileType from '@utils/validFileType'
+import validFileType from '@utils/format/validFileType'
 import config from '@/constants'
 
 type ActiveSocialProps = {

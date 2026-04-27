@@ -3,7 +3,7 @@ jest.mock('expo-linking', () => ({
 }))
 
 import { getStateFromPath, NavigationState, PartialState } from '@react-navigation/native'
-import linking from '@utils/linking'
+import linking from '@utils/app/linking'
 
 const expectedRoutes = [
     ['events/42', 'SpecificEventScreen'],
@@ -23,7 +23,7 @@ const expectedRoutes = [
     ['internal/traffic', 'TrafficScreen'],
     ['internal/traffic/records', 'TrafficRecordsScreen'],
     ['internal/traffic/map', 'TrafficMapScreen'],
-    ['internal/content', 'ContentScreen'],
+    ['internal/content/content', 'ContentScreen'],
     ['rules', 'ContentScreen'],
     ['locations', 'ContentScreen'],
     ['organizations', 'ContentScreen'],

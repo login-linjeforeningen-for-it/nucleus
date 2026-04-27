@@ -3,7 +3,7 @@ import GS from '@styles/globalStyles'
 import { useSelector } from 'react-redux'
 import { setTag } from '@redux/event'
 import { useDispatch } from 'react-redux'
-import getTags from '@utils/getTags'
+import getTags from '@utils/format/getTags'
 import { useNavigation } from '@react-navigation/native'
 import { StackNavigationProp } from '@react-navigation/stack'
 

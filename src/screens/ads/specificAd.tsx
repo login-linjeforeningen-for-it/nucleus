@@ -10,7 +10,7 @@ import SpecificAdSections from '@/components/ads/specificAdSections'
 import TopRefreshIndicator from '@components/shared/topRefreshIndicator'
 import { setAdName } from '@redux/ad'
 import { fetchAdDetails } from '@utils/fetch'
-import { AdContext } from '@utils/contextProvider'
+import { AdContext } from '@utils/app/contextProvider'
 
 export default function SpecificAdScreen({ route: { params: { adID } } }: AdScreenProps<'SpecificAdScreen'>): JSX.Element {
     const { theme } = useSelector((state: ReduxState) => state.theme)

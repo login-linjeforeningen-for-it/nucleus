@@ -6,7 +6,7 @@ import InfoBlock from '@components/shared/infoBlock'
 import Space from '@components/shared/utils'
 import Text from '@components/shared/text'
 import T from '@styles/text'
-import { updateCourseNotes } from '@utils/course'
+import { updateCourseNotes } from '@utils/course/course'
 
 type ReadOnlyProps = {
     courseId: number

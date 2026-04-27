@@ -6,7 +6,7 @@ import Text from '@components/shared/text'
 import TopRefreshIndicator from '@components/shared/topRefreshIndicator'
 import GS from '@styles/globalStyles'
 import T from '@styles/text'
-import { filterByContentQuery } from '@utils/content'
+import { filterByContentQuery } from '@utils/content/content'
 import {
     listDatabaseBackupFiles,
     listDatabaseBackups,

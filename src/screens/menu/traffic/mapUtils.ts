@@ -1,4 +1,4 @@
-import { countryCentroids } from '@utils/geo'
+import { countryCentroids } from '@utils/traffic/geo'
 import mapData from '../../../../public/world.json'
 
 export type TrafficCountryPoint = {

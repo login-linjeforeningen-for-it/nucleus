@@ -2,7 +2,7 @@ import Cluster from '@components/shared/cluster'
 import Marquee from '@components/shared/marquee'
 import Space from '@components/shared/utils'
 import T from '@styles/text'
-import { buildSpotifyUrl } from '@utils/discoveryApi'
+import { buildSpotifyUrl } from '@utils/discovery/discoveryApi'
 import { Linking, Pressable, Image, Text, View } from 'react-native'
 import { useSelector } from 'react-redux'
 

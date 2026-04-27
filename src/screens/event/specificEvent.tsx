@@ -10,7 +10,7 @@ import T from '@styles/text'
 import SpecificEventSections from '@components/event/specificEventSections'
 import { useDispatch } from 'react-redux'
 import { fetchEventDetails } from '@utils/fetch'
-import { EventContext } from '@utils/contextProvider'
+import { EventContext } from '@utils/app/contextProvider'
 import { setEventName } from '@redux/event'
 
 /**

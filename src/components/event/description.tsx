@@ -5,7 +5,7 @@ import DescriptionContent from './descriptionContent'
 import { useSelector } from 'react-redux'
 import T from '@styles/text'
 import Skeleton from '@components/shared/skeleton'
-import { EventContext } from '@utils/contextProvider'
+import { EventContext } from '@utils/app/contextProvider'
 import { useContext } from 'react'
 
 export default function Description() {

@@ -21,6 +21,18 @@ import { useDispatch } from 'react-redux'
 import { setTag } from '@redux/event'
 
 const MAX_COMPACT_HEADER_TITLE_LENGTH = 37
+const HEADER_LEFT_SLOT_MARGIN = 18
+const HEADER_LEFT_SLOT_SIZE = 42
+
+const styles = StyleSheet.create({
+    leftSlot: {
+        marginLeft: HEADER_LEFT_SLOT_MARGIN,
+        width: HEADER_LEFT_SLOT_SIZE,
+        height: HEADER_LEFT_SLOT_SIZE,
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+})
 
 export default function Header({ options, route, navigation }: HeaderProps): ReactNode {
     const { theme, isDark } = useSelector((state: ReduxState) => state.theme)
@@ -127,14 +139,12 @@ export default function Header({ options, route, navigation }: HeaderProps): Rea
             <View style={{ ...GS.headerView, top: Dimensions.get('window').height / 17 }}>
                 <View style={GS.innerHeaderViewOne}>
                     {options.headerComponents?.left ? options.headerComponents?.left.map((node, index) =>
-                        <View style={GS.logo} key={index}>{node}</View>
+                        <View style={styles.leftSlot} key={index}>{node}</View>
                     ) :
                         <Pressable
                             onPress={handlePress}
                             style={({ pressed }) => ({
-                                marginLeft: 18,
-                                width: 42,
-                                height: 42,
+                                ...styles.leftSlot,
                                 borderRadius: 21,
                                 overflow: 'hidden',
                                 borderWidth: 1,

@@ -2,7 +2,7 @@ import Cluster from '@/components/shared/cluster'
 import Space from '@/components/shared/utils'
 import Text from '@components/shared/text'
 import T from '@styles/text'
-import { formatContentDate } from '@utils/content'
+import { formatContentDate } from '@utils/content/content'
 import { TouchableOpacity, View } from 'react-native'
 import { useSelector } from 'react-redux'
 
