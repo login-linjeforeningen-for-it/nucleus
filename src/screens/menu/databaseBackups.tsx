@@ -1,6 +1,5 @@
 import Cluster from '@/components/shared/cluster'
 import Space from '@/components/shared/utils'
-import InternalNavMenu from '@components/menu/queenbee/internalNavMenu'
 import Swipe from '@components/nav/swipe'
 import Text from '@components/shared/text'
 import TopRefreshIndicator from '@components/shared/topRefreshIndicator'
@@ -19,7 +18,7 @@ import { useSelector } from 'react-redux'
 
 type BackupTab = 'containers' | 'files'
 
-export default function DatabaseBackupsScreen({ navigation }: MenuProps<'DatabaseBackupsScreen'>): JSX.Element {
+export default function DatabaseBackupsScreen(): JSX.Element {
     const { theme } = useSelector((state: ReduxState) => state.theme)
     const [activeTab, setActiveTab] = useState<BackupTab>('containers')
     const [backups, setBackups] = useState<NativeDatabaseBackup[]>([])
@@ -110,7 +109,6 @@ export default function DatabaseBackupsScreen({ navigation }: MenuProps<'Databas
     return (
         <Swipe left='DatabaseScreen'>
             <View style={{ flex: 1, backgroundColor: theme.darker }}>
-                <InternalNavMenu activeRoute='DatabaseBackupsScreen' navigation={navigation} />
                 <ScrollView
                     refreshControl={
                         <RefreshControl

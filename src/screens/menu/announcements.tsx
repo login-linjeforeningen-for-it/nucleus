@@ -1,6 +1,5 @@
 import Cluster from '@/components/shared/cluster'
 import Space from '@/components/shared/utils'
-import InternalNavMenu from '@components/menu/queenbee/internalNavMenu'
 import Swipe from '@components/nav/swipe'
 import Text from '@components/shared/text'
 import TopRefreshIndicator from '@components/shared/topRefreshIndicator'
@@ -16,7 +15,7 @@ import { useSelector } from 'react-redux'
 
 const ANNOUNCEMENT_PAGE_SIZE = 20
 
-export default function AnnouncementsScreen({ navigation }: MenuProps<'AnnouncementsScreen'>): JSX.Element {
+export default function AnnouncementsScreen(): JSX.Element {
     const { theme } = useSelector((state: ReduxState) => state.theme)
     const { lang } = useSelector((state: ReduxState) => state.lang)
     const { token } = useSelector((state: ReduxState) => state.login)
@@ -77,7 +76,6 @@ export default function AnnouncementsScreen({ navigation }: MenuProps<'Announcem
     return (
         <Swipe left='QueenbeeScreen'>
             <View style={{ flex: 1, backgroundColor: theme.darker }}>
-                <InternalNavMenu activeRoute='AnnouncementsScreen' navigation={navigation} />
                 <ScrollView
                     refreshControl={
                         <RefreshControl

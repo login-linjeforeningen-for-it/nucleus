@@ -1,5 +1,4 @@
 import Space from '@/components/shared/utils'
-import InternalNavMenu from '@components/menu/queenbee/internalNavMenu'
 import Swipe from '@components/nav/swipe'
 import Text from '@components/shared/text'
 import TopRefreshIndicator from '@components/shared/topRefreshIndicator'
@@ -48,7 +47,6 @@ export default function TrafficRecordsScreen({ navigation }: MenuProps<'TrafficR
     return (
         <Swipe left='TrafficScreen'>
             <View style={{ flex: 1, backgroundColor: theme.darker }}>
-                <InternalNavMenu activeRoute='TrafficRecordsScreen' navigation={navigation} />
                 <ScrollView
                     refreshControl={
                         <RefreshControl

@@ -1,6 +1,5 @@
 import Cluster from '@/components/shared/cluster'
 import Space from '@/components/shared/utils'
-import InternalNavMenu from '@components/menu/queenbee/internalNavMenu'
 import Swipe from '@components/nav/swipe'
 import Text from '@components/shared/text'
 import TopRefreshIndicator from '@components/shared/topRefreshIndicator'
@@ -11,7 +10,7 @@ import { JSX, useEffect, useMemo, useState } from 'react'
 import { Dimensions, RefreshControl, ScrollView, TextInput, TouchableOpacity, View } from 'react-native'
 import { useSelector } from 'react-redux'
 
-export default function LogsScreen({ navigation }: MenuProps<'LogsScreen'>): JSX.Element {
+export default function LogsScreen(): JSX.Element {
     const { theme } = useSelector((state: ReduxState) => state.theme)
     const [data, setData] = useState<LogsPayload | null>(null)
     const [refreshing, setRefreshing] = useState(false)
@@ -46,7 +45,6 @@ export default function LogsScreen({ navigation }: MenuProps<'LogsScreen'>): JSX
     return (
         <Swipe left='QueenbeeScreen'>
             <View style={{ flex: 1, backgroundColor: theme.darker }}>
-                <InternalNavMenu activeRoute='LogsScreen' navigation={navigation} />
                 <ScrollView
                     refreshControl={
                         <RefreshControl

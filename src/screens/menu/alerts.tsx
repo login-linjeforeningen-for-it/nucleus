@@ -1,6 +1,5 @@
 import Cluster from '@/components/shared/cluster'
 import Space from '@/components/shared/utils'
-import InternalNavMenu from '@components/menu/queenbee/internalNavMenu'
 import Swipe from '@components/nav/swipe'
 import Text from '@components/shared/text'
 import TopRefreshIndicator from '@components/shared/topRefreshIndicator'
@@ -14,7 +13,7 @@ import { useSelector } from 'react-redux'
 
 const ALERT_PAGE_SIZE = 20
 
-export default function AlertsScreen({ navigation }: MenuProps<'AlertsScreen'>): JSX.Element {
+export default function AlertsScreen(): JSX.Element {
     const { theme } = useSelector((state: ReduxState) => state.theme)
     const { lang } = useSelector((state: ReduxState) => state.lang)
     const [alerts, setAlerts] = useState<WorkerbeeAlert[]>([])
@@ -59,7 +58,6 @@ export default function AlertsScreen({ navigation }: MenuProps<'AlertsScreen'>):
     return (
         <Swipe left='QueenbeeScreen'>
             <View style={{ flex: 1, backgroundColor: theme.darker }}>
-                <InternalNavMenu activeRoute='AlertsScreen' navigation={navigation} />
                 <ScrollView
                     refreshControl={
                         <RefreshControl

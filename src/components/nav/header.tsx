@@ -9,7 +9,8 @@ import GS from '@styles/globalStyles'
 import GM from '@styles/gameStyles'
 import getHeight from '@utils/general/getHeight'
 import getCategories from '@utils/general/getCategories'
-import { PropsWithChildren, ReactNode, useMemo } from 'react'
+import { PropsWithChildren, ReactNode, useMemo, useState } from 'react'
+import { InternalNavMenuButton, InternalNavMenuDropdown, InternalNavRoute } from '@components/menu/queenbee/internalNavMenu'
 import { BlurView } from 'expo-blur'
 import { Dimensions, Platform, View, Text, StatusBar, Pressable, StyleSheet } from 'react-native'
 import { HeaderProps } from '@/interfaces'
@@ -24,10 +25,12 @@ const MAX_COMPACT_HEADER_TITLE_LENGTH = 37
 export default function Header({ options, route, navigation }: HeaderProps): ReactNode {
     const { theme, isDark } = useSelector((state: ReduxState) => state.theme)
     const { lang } = useSelector((state: ReduxState) => state.lang)
+    const { login, groups } = useSelector((state: ReduxState) => state.login)
     const { localTitle } = useSelector((state: ReduxState) => state.misc)
     const { tag, eventName } = useSelector((state: ReduxState) => state.event)
     const { adName } = useSelector((state: ReduxState) => state.ad)
     const dispatch = useDispatch()
+    const [internalMenuOpen, setInternalMenuOpen] = useState(false)
     const SES = route.name === 'SpecificEventScreen'
     const SAS = route.name === 'SpecificAdScreen'
     const exceptions = ['SpecificGameScreen']
@@ -49,6 +52,38 @@ export default function Header({ options, route, navigation }: HeaderProps): Rea
         'HoneyScreen',
         'DatabaseBackupsScreen',
     ]
+    const internalDashboardRoutes = aiPositionedRightRoutes.filter(routeName => routeName !== 'AiScreen')
+    const hasQueenbeeAccess = login && groups.map((g) => g.toLowerCase()).includes('queenbee')
+    const compactActionRoutes = ['EventScreen', 'AdScreen']
+    const shouldCompactTitle = hasQueenbeeAccess && compactActionRoutes.includes(route.name)
+    const rightComponents = useMemo(() => {
+        const existing = options.headerComponents?.right?.filter(Boolean) || []
+        if (!hasQueenbeeAccess) {
+            return existing
+        }
+
+        const internalMenu = (
+            <InternalNavMenuButton
+                open={internalMenuOpen}
+                onPress={() => setInternalMenuOpen((current) => !current)}
+            />
+        )
+
+        return [internalMenu, ...existing]
+    }, [hasQueenbeeAccess, internalMenuOpen, options.headerComponents?.right, route.name])
+
+    function navigateInternalRoute(targetRoute: InternalNavRoute) {
+        setInternalMenuOpen(false)
+        const currentNavigation = navigation as any
+        const parentNavigation = currentNavigation.getParent?.()
+
+        if (parentNavigation && route.name !== targetRoute) {
+            parentNavigation.navigate('MenuNav', { screen: targetRoute })
+            return
+        }
+
+        currentNavigation.navigate(targetRoute)
+    }
 
     const title = useMemo(() => {
         if (route.name === localTitle?.screen && localTitle.title) {
@@ -77,6 +112,11 @@ export default function Header({ options, route, navigation }: HeaderProps): Rea
     function handlePress() {
         if (tag?.title) {
             dispatch(setTag({ title: '', body: '' }))
+        }
+
+        if (internalDashboardRoutes.includes(route.name) && route.name !== 'QueenbeeScreen') {
+            navigation.navigate('QueenbeeScreen' as never)
+            return
         }
 
         navigation.goBack()
@@ -127,7 +167,7 @@ export default function Header({ options, route, navigation }: HeaderProps): Rea
                 </View>
                 {!exceptions.includes(route.name) && (
                     <View style={{
-                        width: 260,
+                        width: shouldCompactTitle ? 210 : 260,
                         alignSelf: 'center',
                         top: title?.length > 30 ? Platform.OS === 'ios' ? 4 : -6 : undefined,
                         borderRadius: 16,
@@ -153,15 +193,15 @@ export default function Header({ options, route, navigation }: HeaderProps): Rea
                     </View>
                 )}
                 <View style={GS.innerHeaderViewTwo}>
-                    {options.headerComponents?.right?.map((node, index) => (
+                    {rightComponents.map((node, index) => (
                         <View style={aiPositionedRightRoutes.includes(route.name)
                             ? { marginRight: 0 }
                             : index === 1
                                 ? {
                                     ...GS.customMenuIcon,
-                                    width: Platform.OS === 'ios' ? 28 : 5,
-                                    left: Platform.OS === 'ios' ? 34 : 40
-                                } : { ...GS.customMenuIcon, left: 24 }} key={index}>{node}
+                                    width: 28,
+                                    left: 8
+                                } : { ...GS.customMenuIcon, left: 8 }} key={index}>{node}
                         </View>
                     ))}
                 </View>
@@ -169,6 +209,13 @@ export default function Header({ options, route, navigation }: HeaderProps): Rea
             {options.headerComponents?.bottom?.map((node, index) =>
                 <View key={index}>{node}</View>
             )}
+            {hasQueenbeeAccess ? (
+                <InternalNavMenuDropdown
+                    activeRoute={route.name}
+                    open={internalMenuOpen}
+                    onNavigate={navigateInternalRoute}
+                />
+            ) : null}
         </BlurWrapper>
     )
 }

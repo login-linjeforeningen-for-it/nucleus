@@ -1,5 +1,4 @@
 import Space from '@/components/shared/utils'
-import InternalNavMenu from '@components/menu/queenbee/internalNavMenu'
 import Swipe from '@components/nav/swipe'
 import Text from '@components/shared/text'
 import TopRefreshIndicator from '@components/shared/topRefreshIndicator'
@@ -15,7 +14,7 @@ import {
 } from './status/statusComponents'
 import useStatusServices from './status/useStatusServices'
 
-export default function StatusScreen({ navigation }: MenuProps<'StatusScreen'>): JSX.Element {
+export default function StatusScreen(): JSX.Element {
     const { theme } = useSelector((state: ReduxState) => state.theme)
     const { lang } = useSelector((state: ReduxState) => state.lang)
     const text = lang ? require('@text/no.json').status : require('@text/en.json').status
@@ -44,7 +43,6 @@ export default function StatusScreen({ navigation }: MenuProps<'StatusScreen'>):
     return (
         <Swipe left='QueenbeeScreen'>
             <View style={{ flex: 1, backgroundColor: theme.darker }}>
-                <InternalNavMenu activeRoute='StatusScreen' navigation={navigation} />
                 <ScrollView
                     refreshControl={
                         <RefreshControl

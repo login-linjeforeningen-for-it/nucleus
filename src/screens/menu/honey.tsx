@@ -1,6 +1,5 @@
 import Cluster from '@/components/shared/cluster'
 import Space from '@/components/shared/utils'
-import InternalNavMenu from '@components/menu/queenbee/internalNavMenu'
 import Swipe from '@components/nav/swipe'
 import Text from '@components/shared/text'
 import TopRefreshIndicator from '@components/shared/topRefreshIndicator'
@@ -13,7 +12,7 @@ import { useSelector } from 'react-redux'
 
 const HONEY_PAGE_SIZE = 20
 
-export default function HoneyScreen({ navigation }: MenuProps<'HoneyScreen'>): JSX.Element {
+export default function HoneyScreen(): JSX.Element {
     const { theme } = useSelector((state: ReduxState) => state.theme)
     const { lang } = useSelector((state: ReduxState) => state.lang)
     const [services, setServices] = useState<string[]>([])
@@ -56,7 +55,6 @@ export default function HoneyScreen({ navigation }: MenuProps<'HoneyScreen'>): J
     return (
         <Swipe left='QueenbeeScreen'>
             <View style={{ flex: 1, backgroundColor: theme.darker }}>
-                <InternalNavMenu activeRoute='HoneyScreen' navigation={navigation} />
                 <ScrollView
                     style={GS.content}
                     contentContainerStyle={{ paddingHorizontal: 4, paddingBottom: 90 }}

@@ -1,6 +1,5 @@
 import Cluster from '@/components/shared/cluster'
 import Space from '@/components/shared/utils'
-import InternalNavMenu from '@components/menu/queenbee/internalNavMenu'
 import Swipe from '@components/nav/swipe'
 import Text from '@components/shared/text'
 import TopRefreshIndicator from '@components/shared/topRefreshIndicator'
@@ -151,7 +150,6 @@ export default function TrafficMapScreen({ navigation }: MenuProps<'TrafficMapSc
     return (
         <Swipe left='TrafficRecordsScreen'>
             <View style={{ flex: 1, backgroundColor: theme.darker }}>
-                <InternalNavMenu activeRoute='TrafficMapScreen' navigation={navigation} />
                 <ScrollView
                     refreshControl={
                         <RefreshControl

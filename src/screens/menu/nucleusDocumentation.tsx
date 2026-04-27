@@ -1,7 +1,6 @@
 import Cluster from '@/components/shared/cluster'
 import Space from '@/components/shared/utils'
 import Swipe from '@components/nav/swipe'
-import InternalNavMenu from '@components/menu/queenbee/internalNavMenu'
 import Text from '@components/shared/text'
 import GS from '@styles/globalStyles'
 import T from '@styles/text'
@@ -44,7 +43,7 @@ const examples = [
     },
 ]
 
-export default function NucleusDocumentationScreen({ navigation }: MenuProps<'NucleusDocumentationScreen'>): JSX.Element {
+export default function NucleusDocumentationScreen(): JSX.Element {
     const { theme } = useSelector((state: ReduxState) => state.theme)
     const { lang } = useSelector((state: ReduxState) => state.lang)
     const labels = useMemo(() => ({
@@ -70,7 +69,6 @@ export default function NucleusDocumentationScreen({ navigation }: MenuProps<'Nu
     return (
         <Swipe left='QueenbeeScreen'>
             <View style={{ flex: 1, backgroundColor: theme.darker }}>
-                <InternalNavMenu activeRoute='NucleusDocumentationScreen' navigation={navigation} />
                 <ScrollView
                     style={GS.content}
                     contentContainerStyle={{ paddingHorizontal: 4, paddingBottom: 90 }}

@@ -1,14 +1,13 @@
 import Cluster from '@/components/shared/cluster'
 import Space from '@/components/shared/utils'
 import QueenbeeGate from '@components/menu/queenbee/gate'
-import InternalNavMenu from '@components/menu/queenbee/internalNavMenu'
 import SummaryListCard from '@components/menu/queenbee/summaryListCard'
 import TopRefreshIndicator from '@components/shared/topRefreshIndicator'
 import GS from '@styles/globalStyles'
 import T from '@styles/text'
 import Swipe from '@components/nav/swipe'
 import Text from '@components/shared/text'
-import { JSX, useEffect, useMemo, useState } from 'react'
+import { JSX, ReactNode, useEffect, useMemo, useState } from 'react'
 import { Dimensions, Pressable, RefreshControl, ScrollView, View } from 'react-native'
 import Svg, { Circle, Line, Path, Polyline, Rect } from 'react-native-svg'
 import { useSelector } from 'react-redux'
@@ -18,20 +17,24 @@ import {
     getInternalOverview,
     getLoadBalancingSites,
     getScoutOverview,
+    setPrimaryLoadBalancingSite,
     getVulnerabilitiesOverview,
 } from '@utils/queenbee/api'
 import { startLogin } from '@utils/auth/auth'
+import { ArrowLeftRight } from 'lucide-react-native'
 
 export default function QueenbeeScreen({ navigation }: MenuProps<'QueenbeeScreen'>): JSX.Element {
     const { theme } = useSelector((state: ReduxState) => state.theme)
     const { login, groups } = useSelector((state: ReduxState) => state.login)
     const [dashboard, setDashboard] = useState<NativeDashboardSummary | null>(null)
     const [internalOverview, setInternalOverview] = useState<NativeInternalOverview | null>(null)
-    const [sites, setSites] = useState<{ name: string, primary: boolean, operational: boolean, maintenance: boolean }[]>([])
+    const [sites, setSites] = useState<NativeLoadBalancingSite[]>([])
     const [databaseOverview, setDatabaseOverview] = useState<GetDatabaseOverview | null>(null)
     const [vulnerabilities, setVulnerabilities] = useState<GetVulnerabilities | null>(null)
     const [scoutOverview, setScoutOverview] = useState<ScoutOverview | null>(null)
     const [loading, setLoading] = useState(false)
+    const [failoverLoading, setFailoverLoading] = useState(false)
+    const [failoverState, setFailoverState] = useState<FailoverState>('idle')
     const [error, setError] = useState<string | null>(null)
 
     const hasQueenbee = useMemo(() =>
@@ -64,7 +67,7 @@ export default function QueenbeeScreen({ navigation }: MenuProps<'QueenbeeScreen
 
         void loadDashboardPart(getDashboardSummary, setDashboard, errors, finishRequest)
         void loadDashboardPart(getInternalOverview, setInternalOverview, errors, finishRequest)
-        void loadDashboardPart(getLoadBalancingSites, setSites, errors, finishRequest)
+        void loadDashboardPart(getLoadBalancingSites, updateSites, errors, finishRequest)
         void loadDashboardPart(getDatabaseOverview, setDatabaseOverview, errors, finishRequest)
         void loadDashboardPart(getVulnerabilitiesOverview, setVulnerabilities, errors, finishRequest)
         void loadDashboardPart(getScoutOverview, setScoutOverview, errors, finishRequest)
@@ -72,11 +75,14 @@ export default function QueenbeeScreen({ navigation }: MenuProps<'QueenbeeScreen
 
     const primarySite = useMemo(() => sites.find(site => site.primary) || null, [sites])
     const healthySites = useMemo(() => sites.filter(site => site.operational && !site.maintenance).length, [sites])
+    const failoverTarget = useMemo(() => sites.find(site => !site.primary && site.operational && !site.maintenance) || null, [sites])
+    const failoverTone = failoverState === 'failed' ? 'failed' : getFailoverTone(failoverTarget)
     const databaseCount = useMemo(() => getDatabaseCount(
         databaseOverview,
         internalOverview?.databaseOverview,
         internalOverview?.databaseCount,
     ), [databaseOverview, internalOverview])
+    const databaseSize = useMemo(() => getDatabaseSize(databaseOverview), [databaseOverview])
     const vulnerabilitySummary = useMemo(() => getVulnerabilitySummary(
         vulnerabilities,
         scoutOverview,
@@ -115,6 +121,31 @@ export default function QueenbeeScreen({ navigation }: MenuProps<'QueenbeeScreen
         body: `${site.operational ? 'Operational' : 'Down'}${site.maintenance ? ' · maintenance' : ''}`
     }))
 
+    function updateSites(nextSites: NativeLoadBalancingSite[]) {
+        setSites(nextSites)
+        setFailoverState('idle')
+    }
+
+    async function failoverPrimarySite() {
+        if (!failoverTarget || failoverLoading) {
+            setFailoverState('failed')
+            return
+        }
+
+        setFailoverLoading(true)
+        setFailoverState(getFailoverTone(failoverTarget))
+
+        try {
+            await setPrimaryLoadBalancingSite(failoverTarget.id)
+            updateSites(await getLoadBalancingSites())
+        } catch (failoverError) {
+            setFailoverState('failed')
+            setError(failoverError instanceof Error ? failoverError.message : 'Failed to switch primary site.')
+        } finally {
+            setFailoverLoading(false)
+        }
+    }
+
     const clusterItems = (databaseOverview?.clusters || []).map(cluster => ({
         title: cluster.name,
         body: `${getClusterDatabaseCount(cluster)} databases · ${cluster.activeQueries} active queries`
@@ -123,7 +154,6 @@ export default function QueenbeeScreen({ navigation }: MenuProps<'QueenbeeScreen
     return (
         <Swipe left='MenuScreen'>
             <View style={{ flex: 1, backgroundColor: theme.darker }}>
-                <InternalNavMenu activeRoute='QueenbeeScreen' navigation={navigation} />
                 <ScrollView
                     style={GS.content}
                     refreshControl={
@@ -142,16 +172,21 @@ export default function QueenbeeScreen({ navigation }: MenuProps<'QueenbeeScreen
 
                     <OperationsSnapshot
                         system={internalOverview?.system || null}
-                        requestsToday={internalOverview?.requestsToday ?? null}
+                        requestsToday={internalOverview?.requestsToday ?? 0}
                         primarySite={primarySite}
+                        failoverTarget={failoverTarget}
+                        failoverTone={failoverTone}
+                        failoverLoading={failoverLoading}
                         healthySites={healthySites}
                         sitesLength={sites.length}
                         databaseCount={databaseCount}
+                        databaseSize={databaseSize}
                         vulnerabilityValue={vulnerabilitySummary}
                         onOpenStatus={() => navigation.navigate('StatusScreen')}
                         onOpenTraffic={() => navigation.navigate('TrafficScreen')}
                         onOpenDatabases={() => navigation.navigate('DatabaseScreen')}
                         onOpenVulnerabilities={() => navigation.navigate('VulnerabilitiesScreen')}
+                        onFailover={() => failoverPrimarySite()}
                     />
                     <DashboardSummary data={dashboard} />
                     <SummaryListCard title='Traffic targets' items={siteItems} theme={theme} />
@@ -168,30 +203,59 @@ function OperationsSnapshot({
     system,
     requestsToday,
     primarySite,
+    failoverTarget,
+    failoverTone,
+    failoverLoading,
     healthySites,
     sitesLength,
     databaseCount,
+    databaseSize,
     vulnerabilityValue,
     onOpenStatus,
     onOpenTraffic,
     onOpenDatabases,
     onOpenVulnerabilities,
+    onFailover,
 }: {
     system: System | null
     requestsToday: number | null
-    primarySite: { name: string, primary: boolean, operational: boolean, maintenance: boolean } | null
+    primarySite: NativeLoadBalancingSite | null
+    failoverTarget: NativeLoadBalancingSite | null
+    failoverTone: FailoverState
+    failoverLoading: boolean
     healthySites: number
     sitesLength: number
     databaseCount: number | null
-    vulnerabilityValue: string | null
+    databaseSize: number | null
+    vulnerabilityValue: SnapshotSummary | null
     onOpenStatus: () => void
     onOpenTraffic: () => void
     onOpenDatabases: () => void
     onOpenVulnerabilities: () => void
+    onFailover: () => void
 }) {
+    const { theme } = useSelector((state: ReduxState) => state.theme)
+    const primarySiteColor = getPrimarySiteColor(primarySite, theme)
+
     return (
         <Cluster>
-            <View>
+            <View style={{ gap: 8 }}>
+                <SnapshotPill
+                    icon='shield'
+                    label='Primary site'
+                    value={primarySite ? primarySite.name : 'Unknown'}
+                    color={primarySiteColor}
+                    subvalue={failoverTarget ? `Failover target: ${failoverTarget.name}` : 'No healthy failover target'}
+                    action={
+                        <FailoverButton
+                            disabled={!failoverTarget || failoverLoading}
+                            loading={failoverLoading}
+                            tone={failoverTone}
+                            onPress={onFailover}
+                        />
+                    }
+                    onPress={onOpenStatus}
+                />
                 <View style={{ flexDirection: 'row', gap: 10, flexWrap: 'wrap' }}>
                     <SnapshotPill
                         icon='server'
@@ -213,12 +277,14 @@ function OperationsSnapshot({
                         icon='database'
                         label='Databases'
                         value={databaseCount !== null ? databaseCount : 'Unavailable'}
+                        subvalue={databaseSize !== null ? formatBytes(databaseSize) : null}
                         onPress={onOpenDatabases}
                     />
                     <SnapshotPill
                         icon='shield'
                         label='Vulnerabilities'
-                        value={vulnerabilityValue || 'Unavailable'}
+                        value={vulnerabilityValue?.value || 'Unavailable'}
+                        subvalue={vulnerabilityValue?.subvalue || null}
                         onPress={onOpenVulnerabilities}
                     />
                 </View>
@@ -231,11 +297,17 @@ function SnapshotPill({
     icon,
     label,
     value,
+    subvalue,
+    color,
+    action,
     onPress,
 }: {
     icon: QueenbeeIconName
     label: string
     value: string | number
+    subvalue?: string | null
+    color?: string
+    action?: ReactNode
     onPress: () => void
 }) {
     const { theme } = useSelector((state: ReduxState) => state.theme)
@@ -252,14 +324,114 @@ function SnapshotPill({
             })}
         >
             <View style={{ flexDirection: 'row', gap: 10, alignItems: 'center' }}>
-                <IconBadge name={icon} />
+                <IconBadge name={icon} color={color} />
                 <View style={{ flex: 1 }}>
                     <Text style={{ ...T.text12, color: theme.oppositeTextColor }}>{label}</Text>
                     <Space height={4} />
-                    <Text style={{ ...T.text15, color: theme.textColor }}>{value}</Text>
+                    <SnapshotValue value={value} subvalue={subvalue} theme={theme} />
                 </View>
+                {action}
             </View>
         </Pressable>
+    )
+}
+
+type FailoverState = 'idle' | 'primary' | 'secondary' | 'failed'
+
+function FailoverButton({
+    disabled,
+    loading,
+    tone,
+    onPress,
+}: {
+    disabled: boolean
+    loading: boolean
+    tone: FailoverState
+    onPress: () => void
+}) {
+    const { theme } = useSelector((state: ReduxState) => state.theme)
+    const color = getFailoverColor(tone, theme)
+
+    return (
+        <Pressable
+            disabled={disabled}
+            onPress={onPress}
+            style={({ pressed }) => ({
+                width: 40,
+                height: 40,
+                borderRadius: 20,
+                alignItems: 'center',
+                justifyContent: 'center',
+                borderWidth: 1,
+                borderColor: `${color}88`,
+                backgroundColor: pressed ? `${color}33` : `${color}1f`,
+                opacity: disabled && tone !== 'failed' ? 0.55 : 1,
+                transform: [{ rotate: loading ? '45deg' : '0deg' }],
+            })}
+        >
+            <ArrowLeftRight size={17} color={color} strokeWidth={2.4} />
+        </Pressable>
+    )
+}
+
+function getFailoverTone(site: NativeLoadBalancingSite | null): FailoverState {
+    if (!site) {
+        return 'failed'
+    }
+
+    return site.name.toLowerCase().includes('primary') ? 'primary' : 'secondary'
+}
+
+function getFailoverColor(tone: FailoverState, theme: Theme) {
+    if (tone === 'primary') {
+        return '#70e2a0'
+    }
+
+    if (tone === 'secondary') {
+        return '#facc15'
+    }
+
+    if (tone === 'failed') {
+        return '#ff8b8b'
+    }
+
+    return theme.orange
+}
+
+function getPrimarySiteColor(site: NativeLoadBalancingSite | null, theme: Theme) {
+    if (!site || !site.operational || site.maintenance) {
+        return '#ff8b8b'
+    }
+
+    return site.primary ? '#70e2a0' : theme.orange
+}
+
+function SnapshotValue({ value, subvalue, theme }: { value: string | number; subvalue?: string | null; theme: Theme }): ReactNode {
+    if (typeof value !== 'string' || !value.includes(' · ')) {
+        return (
+            <>
+                <Text style={{ ...T.text15, color: theme.textColor }}>{value}</Text>
+                {subvalue ? (
+                    <Text style={{ ...T.text12, color: theme.oppositeTextColor }}>
+                        {subvalue}
+                    </Text>
+                ) : null}
+            </>
+        )
+    }
+
+    const [primary, ...secondary] = value.split(' · ')
+    const secondaryLines = [...secondary, subvalue].filter(Boolean)
+
+    return (
+        <>
+            <Text style={{ ...T.text15, color: theme.textColor }}>{primary}</Text>
+            {secondaryLines.map((line) => (
+                <Text key={line} style={{ ...T.text12, color: theme.oppositeTextColor }}>
+                    {line}
+                </Text>
+            ))}
+        </>
     )
 }
 
@@ -269,6 +441,22 @@ function getDatabaseCount(...sources: unknown[]) {
         .filter((count): count is number => count !== null)
 
     return counts.length ? Math.max(...counts) : null
+}
+
+function getDatabaseSize(source: GetDatabaseOverview | null) {
+    return source ? readNumber(source.totalSizeBytes) : null
+}
+
+function formatBytes(bytes: number) {
+    if (!bytes) {
+        return '0 B'
+    }
+
+    const units = ['B', 'KB', 'MB', 'GB', 'TB']
+    const power = Math.min(Math.floor(Math.log(bytes) / Math.log(1024)), units.length - 1)
+    const value = bytes / Math.pow(1024, power)
+
+    return `${value.toFixed(power === 0 ? 0 : 1)} ${units[power]}`
 }
 
 function getDatabaseCountsFromSource(source: unknown): (number | null)[] {
@@ -306,23 +494,39 @@ function getClusterDatabaseCount(cluster: unknown) {
     )
 }
 
-function getVulnerabilitySummary(dockerSource: GetVulnerabilities | null, scoutSource: ScoutOverview | null) {
+type SnapshotSummary = {
+    value: string
+    subvalue: string
+}
+
+function getVulnerabilitySummary(dockerSource: GetVulnerabilities | null, scoutSource: ScoutOverview | null): SnapshotSummary | null {
     const dockerFindings = getDockerVulnerabilityFindings(dockerSource)
     const scoutFindings = getScoutVulnerabilityFindings(scoutSource)
-    const findings = scoutFindings.findings ?? dockerFindings.findings
-    if (findings === null) {
+    const hasFindingsSource = dockerFindings.findings !== null || scoutFindings.findings !== null
+    if (!hasFindingsSource) {
         return null
     }
+
+    const findings = Math.max(
+        dockerFindings.findings ?? 0,
+        scoutFindings.findings ?? 0
+    )
 
     if (
         scoutFindings.projects !== null
         && scoutFindings.findings !== null
         && (scoutFindings.projects > 0 || scoutFindings.findings > 0)
     ) {
-        return `${scoutFindings.projects} projects · ${findings} findings`
+        return {
+            value: `${scoutFindings.projects} projects`,
+            subvalue: `${findings} findings`,
+        }
     }
 
-    return `${dockerFindings.images ?? 0} images · ${findings} findings`
+    return {
+        value: `${dockerFindings.images ?? 0} images`,
+        subvalue: `${findings} findings`,
+    }
 }
 
 function getDockerVulnerabilityFindings(source: GetVulnerabilities | null) {
@@ -576,9 +780,10 @@ type QueenbeeIconName =
     | 'shield'
     | 'tag'
 
-function IconBadge({ name, small = false }: { name: QueenbeeIconName, small?: boolean }) {
+function IconBadge({ name, small = false, color }: { name: QueenbeeIconName, small?: boolean, color?: string }) {
     const { theme } = useSelector((state: ReduxState) => state.theme)
     const size = small ? 30 : 36
+    const badgeColor = color || theme.orange
 
     return (
         <View style={{
@@ -586,12 +791,12 @@ function IconBadge({ name, small = false }: { name: QueenbeeIconName, small?: bo
             height: size,
             borderRadius: 999,
             borderWidth: 1,
-            borderColor: theme.orangeTransparentBorder,
-            backgroundColor: theme.orangeTransparent,
+            borderColor: `${badgeColor}88`,
+            backgroundColor: `${badgeColor}22`,
             alignItems: 'center',
             justifyContent: 'center',
         }}>
-            <QueenbeeIcon name={name} size={small ? 15 : 17} color={theme.orange} />
+            <QueenbeeIcon name={name} size={small ? 15 : 17} color={badgeColor} />
         </View>
     )
 }

@@ -1,7 +1,6 @@
 import Cluster from '@/components/shared/cluster'
 import Space from '@/components/shared/utils'
 import config from '@/constants'
-import InternalNavMenu from '@components/menu/queenbee/internalNavMenu'
 import Swipe from '@components/nav/swipe'
 import Text from '@components/shared/text'
 import TopRefreshIndicator from '@components/shared/topRefreshIndicator'
@@ -16,7 +15,7 @@ import { useSelector } from 'react-redux'
 type ContentTab = 'rules' | 'locations' | 'organizations'
 const CONTENT_PAGE_SIZE = 20
 
-export default function ContentScreen({ navigation }: MenuProps<'ContentScreen'>): JSX.Element {
+export default function ContentScreen(): JSX.Element {
     const { theme } = useSelector((state: ReduxState) => state.theme)
     const { lang } = useSelector((state: ReduxState) => state.lang)
     const [activeTab, setActiveTab] = useState<ContentTab>('rules')
@@ -114,7 +113,6 @@ export default function ContentScreen({ navigation }: MenuProps<'ContentScreen'>
     return (
         <Swipe left='QueenbeeScreen'>
             <View style={{ flex: 1, backgroundColor: theme.darker }}>
-                <InternalNavMenu activeRoute='ContentScreen' navigation={navigation} />
                 <ScrollView
                     refreshControl={
                         <RefreshControl

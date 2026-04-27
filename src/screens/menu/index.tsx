@@ -57,6 +57,10 @@ export default function MenuScreen({ navigation }: MenuProps<'MenuScreen'>): JSX
         PolicyScreen: lang ? 'Personvern og app-policy' : 'Privacy and app policy',
         PwnedScreen: lang ? 'Lås skjermen, ellers...' : 'Lock your screen, or else...',
     }), [lang])
+    const menuItems = useMemo(() => text.setting
+        .filter((item) => item.nav !== 'ProfileScreen' && item.nav !== 'QueenbeeScreen')
+        .sort((a, b) => a.title.localeCompare(b.title, lang ? 'nb' : 'en'))
+    , [lang, text.setting])
 
     function toggleFeedback() {
         setFeedback((current) => !current)
@@ -163,20 +167,14 @@ export default function MenuScreen({ navigation }: MenuProps<'MenuScreen'>): JSX
                         {lang ? 'Utforsk' : 'Explore'}
                     </Text>
 
-                    {text.setting.map((item) => {
-                        if (item.nav === 'ProfileScreen') {
-                            return null
-                        }
-
-                        return (
-                            <MenuItem
-                                key={item.id}
-                                item={item}
-                                navigation={navigation}
-                                subtitle={descriptions[item.nav] || ''}
-                            />
-                        )
-                    })}
+                    {menuItems.map((item) => (
+                        <MenuItem
+                            key={item.id}
+                            item={item}
+                            navigation={navigation}
+                            subtitle={descriptions[item.nav] || ''}
+                        />
+                    ))}
 
                     <Space height={12} />
                     <View style={{ alignItems: 'center' }}>

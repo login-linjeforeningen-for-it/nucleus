@@ -1,6 +1,5 @@
 import Cluster from '@/components/shared/cluster'
 import Space from '@/components/shared/utils'
-import InternalNavMenu from '@components/menu/queenbee/internalNavMenu'
 import Swipe from '@components/nav/swipe'
 import Text from '@components/shared/text'
 import TopRefreshIndicator from '@components/shared/topRefreshIndicator'
@@ -11,7 +10,7 @@ import { JSX, useEffect, useMemo, useState } from 'react'
 import { RefreshControl, ScrollView, TouchableOpacity, View } from 'react-native'
 import { useSelector } from 'react-redux'
 
-export default function LoadBalancingScreen({ navigation }: MenuProps<'LoadBalancingScreen'>): JSX.Element {
+export default function LoadBalancingScreen(): JSX.Element {
     const { theme } = useSelector((state: ReduxState) => state.theme)
     const [sites, setSites] = useState<NativeLoadBalancingSite[]>([])
     const [refreshing, setRefreshing] = useState(false)
@@ -55,7 +54,6 @@ export default function LoadBalancingScreen({ navigation }: MenuProps<'LoadBalan
     return (
         <Swipe left='QueenbeeScreen'>
             <View style={{ flex: 1, backgroundColor: theme.darker }}>
-                <InternalNavMenu activeRoute='LoadBalancingScreen' navigation={navigation} />
                 <ScrollView
                     refreshControl={
                         <RefreshControl

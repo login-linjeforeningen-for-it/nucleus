@@ -1,6 +1,5 @@
 import Cluster from '@/components/shared/cluster'
 import Space from '@/components/shared/utils'
-import InternalNavMenu from '@components/menu/queenbee/internalNavMenu'
 import { glassCard, SummaryTile } from '@components/menu/vulnerabilities/primitives'
 import VulnerabilityImageCard from '@components/menu/vulnerabilities/vulnerabilityImageCard'
 import Swipe from '@components/nav/swipe'
@@ -26,7 +25,7 @@ import { useSelector } from 'react-redux'
 
 type ExpandedState = Record<string, boolean>
 
-export default function VulnerabilitiesScreen({ navigation }: MenuProps<'VulnerabilitiesScreen'>): JSX.Element {
+export default function VulnerabilitiesScreen(): JSX.Element {
     const { theme } = useSelector((state: ReduxState) => state.theme)
     const [data, setData] = useState<GetVulnerabilities | null>(null)
     const [scout, setScout] = useState<ScoutOverview | null>(null)
@@ -89,7 +88,6 @@ export default function VulnerabilitiesScreen({ navigation }: MenuProps<'Vulnera
     return (
         <Swipe left='QueenbeeScreen'>
             <View style={{ flex: 1, backgroundColor: theme.darker }}>
-                <InternalNavMenu activeRoute='VulnerabilitiesScreen' navigation={navigation} />
                 <ScrollView
                     refreshControl={
                         <RefreshControl
