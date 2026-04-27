@@ -30,11 +30,11 @@ function parseLoadBalancingSites(value: unknown): NativeLoadBalancingSite[] {
 }
 
 export async function getLoadBalancingSites(): Promise<NativeLoadBalancingSite[]> {
-    const payload = await requestApi<unknown>(config.beekeeper_api_url, '/sites')
+    const payload = await requestApi<unknown>(config.beekeeper_api, '/sites')
     return parseLoadBalancingSites(payload)
 }
 
 export async function setPrimaryLoadBalancingSite(id: number): Promise<NativeLoadBalancingSite> {
-    const payload = await requestApi<unknown>(config.beekeeper_api_url, `/site/primary/${id}`)
+    const payload = await requestApi<unknown>(config.beekeeper_api, `/site/primary/${id}`)
     return parseLoadBalancingSite(payload)
 }

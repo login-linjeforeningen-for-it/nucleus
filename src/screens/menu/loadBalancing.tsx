@@ -49,7 +49,7 @@ export default function LoadBalancingScreen(): JSX.Element {
     }
 
     useEffect(() => {
-        void load()
+        load()
     }, [])
 
     return (
@@ -59,7 +59,7 @@ export default function LoadBalancingScreen(): JSX.Element {
                     refreshControl={
                         <RefreshControl
                             refreshing={refreshing}
-                            onRefresh={() => void load()}
+                            onRefresh={() => load()}
                             tintColor={theme.orange}
                             colors={[theme.orange]}
                             progressViewOffset={0}
@@ -91,7 +91,7 @@ export default function LoadBalancingScreen(): JSX.Element {
                             key={site.id}
                             site={site}
                             switchingId={switchingId}
-                            onMakePrimary={(id) => void makePrimary(id)}
+                            onMakePrimary={(id) => makePrimary(id)}
                         />
                     ))}
                 </ScrollView>

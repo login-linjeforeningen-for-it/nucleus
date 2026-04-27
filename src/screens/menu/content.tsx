@@ -53,7 +53,7 @@ export default function ContentScreen(): JSX.Element {
     }
 
     useEffect(() => {
-        void load()
+        load()
     }, [limit])
 
     return (

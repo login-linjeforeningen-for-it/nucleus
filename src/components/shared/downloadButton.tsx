@@ -1,11 +1,12 @@
 import MS from '@styles/menuStyles'
-import { ImageSourcePropType, TouchableOpacity } from 'react-native'
+import { ImageSourcePropType } from 'react-native'
 import handleDownload from '@/utils/content/calendar'
 import { Image } from 'react-native'
 import { timeSince } from '@/utils/fetch'
 import { useSelector, useDispatch } from 'react-redux'
 import { setDownloadState } from '@redux/event'
 import { useState } from 'react'
+import HeaderIconButton from '@components/nav/headerIconButton'
 
 type DownloadButtonProps = {
     screen: 'event' | 'ad'
@@ -36,7 +37,8 @@ export default function DownloadButton({ screen }: DownloadButtonProps) {
     return (
         <>
             {clickedItems.length > 0 &&
-                <TouchableOpacity
+                <HeaderIconButton
+                    active={icon === orange}
                     onPress={async () => {
                         if (timeSince(downloadState || 1000) >= 1000) {
                             flashOrange()
@@ -48,7 +50,7 @@ export default function DownloadButton({ screen }: DownloadButtonProps) {
                         }
                     }}>
                     <Image style={MS.multiIcon} source={icon} />
-                </TouchableOpacity>
+                </HeaderIconButton>
             }
         </>
     )

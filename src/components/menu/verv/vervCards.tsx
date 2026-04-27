@@ -94,13 +94,28 @@ export function CommitteeCard({ committee, leader, leaderTitle }: {
 
     return (
         <View>
-            <Text style={{ ...T.text20, color: theme.textColor }}>{committee.title}</Text>
+            <Text style={{ ...T.text20, color: theme.textColor }}>
+                {committee.title}
+            </Text>
             <Space height={5} />
-            <Text style={{ ...T.text15, color: theme.textColor }}>{committee.intro}</Text>
+            <Text style={{ ...T.text15, color: theme.textColor }}>
+                {committee.intro}
+            </Text>
             <Space height={6} />
-            <Text style={{ ...T.text15, color: theme.oppositeTextColor }}>{committee.body}</Text>
+            <Text style={{ ...T.text15, color: theme.oppositeTextColor }}>
+                {committee.body}
+            </Text>
             <Space height={12} />
-            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12, borderRadius: 18, borderWidth: 1, borderColor: '#ffffff14', backgroundColor: theme.contrast, padding: 10 }}>
+            <View style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+                gap: 12,
+                borderRadius: 18,
+                borderWidth: 1,
+                borderColor: '#ffffff14',
+                backgroundColor: theme.contrast,
+                padding: 10
+            }}>
                 <LeaderImage leader={leader} fallback={committee.title} />
                 <View style={{ flex: 1 }}>
                     <Text style={{ ...T.text15, color: theme.textColor }}>{leader?.name || committee.title}</Text>
@@ -118,11 +133,24 @@ function LeaderImage({ leader, fallback }: { leader: VervLeader, fallback: strin
     const { theme } = useSelector((state: ReduxState) => state.theme)
 
     return (
-        <View style={{ width: 56, height: 56, borderRadius: 28, overflow: 'hidden', backgroundColor: theme.darker, alignItems: 'center', justifyContent: 'center' }}>
+        <View style={{
+            width: 56,
+            height: 56,
+            borderRadius: 28,
+            overflow: 'hidden',
+            backgroundColor: theme.darker,
+            alignItems: 'center',
+            justifyContent: 'center'
+        }}>
             {leader?.image ? (
-                <Image source={{ uri: `${config.portrait_url}/${leader.image}`, cache: 'force-cache' }} style={{ width: 56, height: 56 }} />
+                <Image
+                    source={{ uri: `${config.portrait}/${leader.image}`, cache: 'force-cache' }}
+                    style={{ width: 56, height: 56 }}
+                />
             ) : (
-                <Text style={{ ...T.text15, color: theme.orange }}>{(leader?.name || fallback).slice(0, 1)}</Text>
+                <Text style={{ ...T.text15, color: theme.orange }}>
+                    {(leader?.name || fallback).slice(0, 1)}
+                </Text>
             )}
         </View>
     )

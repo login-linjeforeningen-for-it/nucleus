@@ -40,7 +40,7 @@ export default function HoneyScreen(): JSX.Element {
     }
 
     useEffect(() => {
-        void load()
+        load()
     }, [activeService, limit])
 
     return (
@@ -51,7 +51,7 @@ export default function HoneyScreen(): JSX.Element {
                     contentContainerStyle={{ paddingHorizontal: 4, paddingBottom: 90 }}
                     refreshControl={<RefreshControl
                         refreshing={refreshing}
-                        onRefresh={() => void load()}
+                        onRefresh={() => load()}
                         tintColor={theme.orange}
                         colors={[theme.orange]}
                         progressViewOffset={0}
@@ -144,7 +144,9 @@ function ServicePill({ label, active, onPress }: { label: string; active: boolea
                 paddingHorizontal: 11,
                 paddingVertical: 7,
             }}>
-                <Text style={{ ...T.text12, color: active ? theme.textColor : theme.oppositeTextColor }}>{label}</Text>
+                <Text style={{ ...T.text12, color: active ? theme.textColor : theme.oppositeTextColor }}>
+                    {label}
+                </Text>
             </View>
         </TouchableOpacity>
     )
@@ -152,7 +154,13 @@ function ServicePill({ label, active, onPress }: { label: string; active: boolea
 
 function EmptyHoney({ label }: { label: string }) {
     const { theme } = useSelector((state: ReduxState) => state.theme)
-    return <Cluster><View style={{ padding: 18, alignItems: 'center' }}><Text style={{ ...T.text15, color: theme.oppositeTextColor }}>{label}</Text></View></Cluster>
+    return (
+        <Cluster>
+            <View style={{ padding: 18, alignItems: 'center' }}>
+                <Text style={{ ...T.text15, color: theme.oppositeTextColor }}>{label}</Text>
+            </View>
+        </Cluster>
+    )
 }
 
 function LoadMoreButton({ label, onPress }: { label: string, onPress: () => void }) {
@@ -160,8 +168,16 @@ function LoadMoreButton({ label, onPress }: { label: string, onPress: () => void
     return (
         <TouchableOpacity onPress={onPress} activeOpacity={0.88}>
             <Cluster>
-                <View style={{ padding: 14, alignItems: 'center', borderWidth: 1, borderColor: theme.orangeTransparentBorderHighlighted, backgroundColor: theme.orangeTransparent }}>
-                    <Text style={{ ...T.text15, color: theme.textColor }}>{label}</Text>
+                <View style={{
+                    padding: 14,
+                    alignItems: 'center',
+                    borderWidth: 1,
+                    borderColor: theme.orangeTransparentBorderHighlighted,
+                    backgroundColor: theme.orangeTransparent
+                }}>
+                    <Text style={{ ...T.text15, color: theme.textColor }}>
+                        {label}
+                    </Text>
                 </View>
             </Cluster>
         </TouchableOpacity>

@@ -80,7 +80,7 @@ export default function GameScreen({ navigation }: MenuProps<'GameScreen'>): JSX
     }, [])
 
     useEffect(() => {
-        void onRefresh()
+        onRefresh()
     }, [onRefresh])
 
     return (

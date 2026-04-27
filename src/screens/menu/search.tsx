@@ -94,7 +94,7 @@ export default function SearchScreen({ route }: MenuProps<'SearchScreen'>): JSX.
 
             setStage('opening')
             const timer = setTimeout(() => {
-                void Linking.openURL(nextLink)
+                Linking.openURL(nextLink)
                 setStage('idle')
             }, 500)
             timersRef.current.push(timer)
@@ -157,8 +157,8 @@ export default function SearchScreen({ route }: MenuProps<'SearchScreen'>): JSX.
                         typedQuery={typedQuery}
                         onQuery={setQuery}
                         onEngine={setEngine}
-                        onOpen={() => void openLink()}
-                        onCopy={() => void copyLink()}
+                        onOpen={() => openLink()}
+                        onCopy={() => copyLink()}
                     />
                 </View>
             </View>

@@ -21,18 +21,11 @@ import { useDispatch } from 'react-redux'
 import { setTag } from '@redux/event'
 
 const MAX_COMPACT_HEADER_TITLE_LENGTH = 37
-const HEADER_LEFT_SLOT_MARGIN = 18
-const HEADER_LEFT_SLOT_SIZE = 42
-
-const styles = StyleSheet.create({
-    leftSlot: {
-        marginLeft: HEADER_LEFT_SLOT_MARGIN,
-        width: HEADER_LEFT_SLOT_SIZE,
-        height: HEADER_LEFT_SLOT_SIZE,
-        alignItems: 'center',
-        justifyContent: 'center',
-    },
-})
+const HEADER_ACTION_SLOT_SIZE = 24
+const HEADER_ACTION_GAP = 24
+const HEADER_MENU_ACTION_GAP = 24
+const HEADER_RIGHT_INSET = 18
+const HEADER_TITLE_GAP = 16
 
 export default function Header({ options, route, navigation }: HeaderProps): ReactNode {
     const { theme, isDark } = useSelector((state: ReduxState) => state.theme)
@@ -66,8 +59,6 @@ export default function Header({ options, route, navigation }: HeaderProps): Rea
     ]
     const internalDashboardRoutes = aiPositionedRightRoutes.filter(routeName => routeName !== 'AiScreen')
     const hasQueenbeeAccess = login && groups.map((g) => g.toLowerCase()).includes('queenbee')
-    const compactActionRoutes = ['EventScreen', 'AdScreen']
-    const shouldCompactTitle = hasQueenbeeAccess && compactActionRoutes.includes(route.name)
     const rightComponents = useMemo(() => {
         const existing = options.headerComponents?.right?.filter(Boolean) || []
         if (!hasQueenbeeAccess) {
@@ -83,6 +74,10 @@ export default function Header({ options, route, navigation }: HeaderProps): Rea
 
         return [internalMenu, ...existing]
     }, [hasQueenbeeAccess, internalMenuOpen, options.headerComponents?.right, route.name])
+    const rightRailWidth = getRightRailWidth(rightComponents.length)
+    const titleLeft = Number(GS.headerLeftRail.width) + HEADER_TITLE_GAP
+    const titleRight = HEADER_RIGHT_INSET + rightRailWidth + HEADER_TITLE_GAP
+    const titleWidth = Math.min(260, Math.max(120, Dimensions.get('window').width - titleLeft - titleRight))
 
     function navigateInternalRoute(targetRoute: InternalNavRoute) {
         setInternalMenuOpen(false)
@@ -136,15 +131,15 @@ export default function Header({ options, route, navigation }: HeaderProps): Rea
 
     return (
         <BlurWrapper>
-            <View style={{ ...GS.headerView, top: Dimensions.get('window').height / 17 }}>
-                <View style={GS.innerHeaderViewOne}>
+            <View style={{ ...GS.headerFrame, top: Dimensions.get('window').height / 17 }}>
+                <View style={GS.headerLeftRail}>
                     {options.headerComponents?.left ? options.headerComponents?.left.map((node, index) =>
-                        <View style={styles.leftSlot} key={index}>{node}</View>
+                        <View style={GS.headerLeftSlot} key={index}>{node}</View>
                     ) :
                         <Pressable
                             onPress={handlePress}
                             style={({ pressed }) => ({
-                                ...styles.leftSlot,
+                                ...GS.headerLeftSlot,
                                 borderRadius: 21,
                                 overflow: 'hidden',
                                 borderWidth: 1,
@@ -177,13 +172,9 @@ export default function Header({ options, route, navigation }: HeaderProps): Rea
                 </View>
                 {!exceptions.includes(route.name) && (
                     <View style={{
-                        width: shouldCompactTitle ? 210 : 260,
-                        alignSelf: 'center',
-                        top: title?.length > 30 ? Platform.OS === 'ios' ? 4 : -6 : undefined,
-                        borderRadius: 16,
-                        overflow: 'hidden',
-                        borderWidth: 1,
-                        borderColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(255,255,255,0.28)',
+                        ...GS.headerTitleFrame,
+                        left: titleLeft,
+                        width: titleWidth,
                     }}>
                         <HeaderGlassBackground borderRadius={16} />
                         <Text style={{
@@ -196,22 +187,34 @@ export default function Header({ options, route, navigation }: HeaderProps): Rea
                             textShadowOffset: { width: 0, height: 1 },
                             textShadowRadius: 6,
                             paddingHorizontal: 14,
-                            paddingVertical: 8,
                         }}>
                             {title}
                         </Text>
+                        <View
+                            pointerEvents='none'
+                            style={{
+                                ...StyleSheet.absoluteFillObject,
+                                borderRadius: 16,
+                                borderWidth: 1,
+                                borderColor: 'rgba(255,255,255,0.14)',
+                            }}
+                        />
                     </View>
                 )}
-                <View style={GS.innerHeaderViewTwo}>
+                <View style={{
+                    ...GS.headerRightRail,
+                    right: HEADER_RIGHT_INSET,
+                    width: rightRailWidth,
+                }}>
                     {rightComponents.map((node, index) => (
-                        <View style={aiPositionedRightRoutes.includes(route.name)
-                            ? { marginRight: 0 }
-                            : index === 1
-                                ? {
-                                    ...GS.customMenuIcon,
-                                    width: 28,
-                                    left: 8
-                                } : { ...GS.customMenuIcon, left: 8 }} key={index}>{node}
+                        <View
+                            style={{
+                                ...GS.headerRightActionSlot,
+                                right: getRightActionOffset(index),
+                            }}
+                            key={index}
+                        >
+                            {node}
                         </View>
                     ))}
                 </View>
@@ -228,6 +231,26 @@ export default function Header({ options, route, navigation }: HeaderProps): Rea
             ) : null}
         </BlurWrapper>
     )
+}
+
+function getRightRailWidth(actionCount: number) {
+    if (!actionCount) {
+        return 0
+    }
+
+    const remainingGaps = Math.max(0, actionCount - 2)
+    const gapWidth = actionCount > 1 ? HEADER_MENU_ACTION_GAP + remainingGaps * HEADER_ACTION_GAP : 0
+
+    return actionCount * HEADER_ACTION_SLOT_SIZE + gapWidth
+}
+
+function getRightActionOffset(index: number) {
+    if (index === 0) {
+        return 0
+    }
+
+    return HEADER_ACTION_SLOT_SIZE + HEADER_MENU_ACTION_GAP
+        + (index - 1) * (HEADER_ACTION_SLOT_SIZE + HEADER_ACTION_GAP)
 }
 
 // Wraps the content in blur

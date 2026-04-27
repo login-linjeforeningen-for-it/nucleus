@@ -58,7 +58,7 @@ function normalizeCourse(raw: unknown): Course {
 // location parameter to ensure all requests are successful
 export async function getCourses(): Promise<CourseAsList[] | string> {
     try {
-        const response = await fetch(`${config.studentbee_api_url}/course/courses`, {
+        const response = await fetch(`${config.studentbee_api}/courses`, {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
@@ -77,12 +77,9 @@ export async function getCourses(): Promise<CourseAsList[] | string> {
     }
 }
 
-// Fetches the requested course from the server if possible.
-// ID - Course ID
-// location - Whether the request is coming from SSR or CSR
-export async function getCourse(id: number): Promise<Course | string> {
+async function fetchCourse(path: string): Promise<Course | string> {
     try {
-        const response = await fetch(`${config.studentbee_api_url}/course/${id}`, {
+        const response = await fetch(`${config.studentbee_api}${path}`, {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
@@ -101,6 +98,17 @@ export async function getCourse(id: number): Promise<Course | string> {
     }
 }
 
+// Fetches the requested course from the server if possible.
+// ID - Course ID
+export async function getCourse(id: number): Promise<Course | string> {
+    return fetchCourse(`/course/${id}`)
+}
+
+// Fetches the requested course by course code. Codes are not numeric database IDs.
+export async function getCourseByCode(code: string): Promise<Course | string> {
+    return fetchCourse(`/course/code/${encodeURIComponent(code)}`)
+}
+
 export async function updateCourseNotes(id: number, notes: string, token: string | null): Promise<CourseNotesUpdateResult> {
     if (!token) {
         return { ok: false, error: 'Missing access token' }
@@ -111,7 +119,7 @@ export async function updateCourseNotes(id: number, notes: string, token: string
     }
 
     try {
-        const response = await fetch(`${config.studentbee_api_url}/course/${id}/notes`, {
+        const response = await fetch(`${config.studentbee_api}/course/${id}/notes`, {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json',

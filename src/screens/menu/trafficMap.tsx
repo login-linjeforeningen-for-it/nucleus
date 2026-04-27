@@ -65,8 +65,8 @@ export default function TrafficMapScreen({ navigation }: MenuProps<'TrafficMapSc
     }
 
     useEffect(() => {
-        void load()
-        const timer = setInterval(() => void load(), POLL_INTERVAL_MS)
+        load()
+        const timer = setInterval(() => load(), POLL_INTERVAL_MS)
         return () => clearInterval(timer)
     }, [])
 
@@ -110,7 +110,7 @@ export default function TrafficMapScreen({ navigation }: MenuProps<'TrafficMapSc
                 <ScrollView
                     refreshControl={<RefreshControl
                         refreshing={refreshing}
-                        onRefresh={() => void load()}
+                        onRefresh={() => load()}
                         tintColor={theme.orange}
                         colors={[theme.orange]}
                         progressViewOffset={0}

@@ -26,7 +26,7 @@ import { View } from 'react-native'
  */
 export default function AdScreen({ navigation }: AdScreenProps<'AdScreen'>): JSX.Element {
     // Redux states
-    const { search, lastSave, skills } = useSelector((state: ReduxState) => state.ad)
+    const { clickedAds, search, lastSave, skills } = useSelector((state: ReduxState) => state.ad)
     const { theme, isDark } = useSelector((state: ReduxState) => state.theme)
     const ads = useSelector((state: ReduxState) => state.ad.ads)
     const dispatch = useDispatch()
@@ -91,7 +91,11 @@ export default function AdScreen({ navigation }: AdScreenProps<'AdScreen'>): JSX
 
     // Sets the component of the header
     useEffect(() => {
-        const right = ads.length ? [skills.length ? <FilterButton /> : null, <DownloadButton screen='ad' />] : []
+        const right = ads.length ? [
+            skills.length ? <FilterButton /> : null,
+            clickedAds.length ? <DownloadButton screen='ad' /> : null,
+        ] : []
+
         navigation.setOptions({
             headerComponents: {
                 bottom: [<FilterUI />],
@@ -99,7 +103,7 @@ export default function AdScreen({ navigation }: AdScreenProps<'AdScreen'>): JSX
                 right
             }
         } as any)
-    }, [navigation])
+    }, [ads.length, clickedAds.length, navigation, skills.length])
 
     return (
         <Swipe left='EventNav' right='MenuNav'>

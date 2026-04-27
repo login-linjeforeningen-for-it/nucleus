@@ -27,11 +27,12 @@ import {
     loadDashboardPart,
 } from '@utils/queenbee/snapshotData'
 import { JSX, useEffect, useMemo, useState } from 'react'
-import { Dimensions, RefreshControl, ScrollView, View } from 'react-native'
+import { Dimensions, RefreshControl, ScrollView, Text as RNText, View } from 'react-native'
 import { useSelector } from 'react-redux'
 
 export default function QueenbeeScreen({ navigation }: MenuProps<'QueenbeeScreen'>): JSX.Element {
     const { theme } = useSelector((state: ReduxState) => state.theme)
+    const { lang } = useSelector((state: ReduxState) => state.lang)
     const { login, groups } = useSelector((state: ReduxState) => state.login)
     const [dashboard, setDashboard] = useState<NativeDashboardSummary | null>(null)
     const [internalOverview, setInternalOverview] = useState<NativeInternalOverview | null>(null)
@@ -44,10 +45,12 @@ export default function QueenbeeScreen({ navigation }: MenuProps<'QueenbeeScreen
     const [failoverState, setFailoverState] = useState<FailoverState>('idle')
     const [error, setError] = useState<string | null>(null)
     const hasQueenbee = useMemo(() => groups.map(group => group.toLowerCase()).includes('queenbee'), [groups])
+    const unauthorizedError = !!error?.toLowerCase().includes('unauthorized')
+    const errorText = unauthorizedError ? null : error
 
     useEffect(() => {
         if (login && hasQueenbee) {
-            void refresh()
+            refresh()
         }
     }, [login, hasQueenbee])
 
@@ -80,12 +83,12 @@ export default function QueenbeeScreen({ navigation }: MenuProps<'QueenbeeScreen
             }
         }
 
-        void loadDashboardPart(getDashboardSummary, setDashboard, errors, finishRequest)
-        void loadDashboardPart(getInternalOverview, setInternalOverview, errors, finishRequest)
-        void loadDashboardPart(getLoadBalancingSites, updateSites, errors, finishRequest)
-        void loadDashboardPart(getDatabaseOverview, setDatabaseOverview, errors, finishRequest)
-        void loadDashboardPart(getVulnerabilitiesOverview, setVulnerabilities, errors, finishRequest)
-        void loadDashboardPart(getScoutOverview, setScoutOverview, errors, finishRequest)
+        loadDashboardPart(getDashboardSummary, setDashboard, errors, finishRequest)
+        loadDashboardPart(getInternalOverview, setInternalOverview, errors, finishRequest)
+        loadDashboardPart(getLoadBalancingSites, updateSites, errors, finishRequest)
+        loadDashboardPart(getDatabaseOverview, setDatabaseOverview, errors, finishRequest)
+        loadDashboardPart(getVulnerabilitiesOverview, setVulnerabilities, errors, finishRequest)
+        loadDashboardPart(getScoutOverview, setScoutOverview, errors, finishRequest)
     }
 
     function updateSites(nextSites: NativeLoadBalancingSite[]) {
@@ -133,7 +136,7 @@ export default function QueenbeeScreen({ navigation }: MenuProps<'QueenbeeScreen
                     style={GS.content}
                     refreshControl={<RefreshControl
                         refreshing={loading}
-                        onRefresh={() => void refresh()}
+                        onRefresh={() => refresh()}
                         tintColor={theme.orange}
                         colors={[theme.orange]}
                         progressViewOffset={0}
@@ -141,7 +144,11 @@ export default function QueenbeeScreen({ navigation }: MenuProps<'QueenbeeScreen
                     contentContainerStyle={{ paddingBottom: 40 }}
                 >
                     <Space height={Dimensions.get('window').height / 8} />
-                    {error && <Text style={{ ...T.centered15, color: 'red' }}>{error}</Text>}
+                    {error && (
+                        unauthorizedError
+                            ? <UnauthorizedRetryText lang={lang} theme={theme} />
+                            : <Text style={{ ...T.centered15, color: 'red', textAlign: 'center' }}>{errorText}</Text>
+                    )}
                     <OperationsSnapshot
                         system={internalOverview?.system || null}
                         requestsToday={internalOverview?.requestsToday ?? 0}
@@ -158,7 +165,7 @@ export default function QueenbeeScreen({ navigation }: MenuProps<'QueenbeeScreen
                         onOpenTraffic={() => navigation.navigate('TrafficScreen')}
                         onOpenDatabases={() => navigation.navigate('DatabaseScreen')}
                         onOpenVulnerabilities={() => navigation.navigate('VulnerabilitiesScreen')}
-                        onFailover={() => void failoverPrimarySite()}
+                        onFailover={() => failoverPrimarySite()}
                     />
                     <DashboardSummary data={dashboard} />
                     <SummaryListCard title='Traffic targets' items={siteItems} theme={theme} />
@@ -168,6 +175,29 @@ export default function QueenbeeScreen({ navigation }: MenuProps<'QueenbeeScreen
                 <TopRefreshIndicator refreshing={loading} theme={theme} top={112} />
             </View>
         </Swipe>
+    )
+}
+
+function UnauthorizedRetryText({ lang, theme }: { lang: boolean, theme: Theme }) {
+    return (
+        <RNText style={{
+            ...T.centered15,
+            color: theme.oppositeTextColor,
+            textAlign: 'center',
+        }}>
+            {lang ? 'Noe data er ikke tilgjengelig før du ' : 'Some data is not available until you '}
+            <RNText
+                onPress={() => startLogin('queenbee')}
+                style={{
+                    color: theme.orange,
+                    fontWeight: '500',
+                    textDecorationLine: 'underline',
+                }}
+            >
+                {lang ? 'logger inn på ny' : 'log in again'}
+            </RNText>
+            .
+        </RNText>
     )
 }
 

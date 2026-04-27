@@ -3,8 +3,8 @@ import { isObject, requestApi } from './request'
 
 export async function getInternalDashboard(): Promise<System> {
     const [payload, dockerPayload] = await Promise.all([
-        requestApi<unknown>(config.beekeeper_api_url, '/dashboard/internal'),
-        requestApi<unknown>(config.beekeeper_api_url, '/docker').catch(() => null),
+        requestApi<unknown>(config.beekeeper_api, '/dashboard/internal'),
+        requestApi<unknown>(config.beekeeper_api, '/docker').catch(() => null),
     ])
 
     return buildSystem(payload, dockerPayload)
@@ -12,8 +12,8 @@ export async function getInternalDashboard(): Promise<System> {
 
 export async function getInternalOverview(): Promise<NativeInternalOverview> {
     const [payload, dockerPayload] = await Promise.all([
-        requestApi<unknown>(config.beekeeper_api_url, '/dashboard/internal'),
-        requestApi<unknown>(config.beekeeper_api_url, '/docker').catch(() => null),
+        requestApi<unknown>(config.beekeeper_api, '/dashboard/internal'),
+        requestApi<unknown>(config.beekeeper_api, '/docker').catch(() => null),
     ])
     const dashboard = isObject(payload) ? payload : {}
     const statistics = isObject(dashboard.statistics) ? dashboard.statistics : {}
@@ -62,7 +62,7 @@ function buildSystem(payload: unknown, dockerPayload: unknown): System {
 }
 
 export async function getDatabaseOverview(): Promise<GetDatabaseOverview> {
-    return await requestApi<GetDatabaseOverview>(config.beekeeper_api_url, '/db')
+    return await requestApi<GetDatabaseOverview>(config.beekeeper_api, '/db')
 }
 
 export async function getDatabaseContainerCount(): Promise<number> {
@@ -71,12 +71,12 @@ export async function getDatabaseContainerCount(): Promise<number> {
 }
 
 export async function listDatabaseBackups(): Promise<NativeDatabaseBackup[]> {
-    const payload = await requestApi<unknown>(config.beekeeper_api_url, '/backup')
+    const payload = await requestApi<unknown>(config.beekeeper_api, '/backup')
     return Array.isArray(payload) ? payload.filter(isDatabaseBackup) : []
 }
 
 export async function triggerDatabaseBackup(): Promise<{ message: string }> {
-    return await requestApi<{ message: string }>(config.beekeeper_api_url, '/backup', {
+    return await requestApi<{ message: string }>(config.beekeeper_api, '/backup', {
         method: 'POST',
         body: {},
     })
@@ -92,7 +92,7 @@ export async function listDatabaseBackupFiles(params?: {
 
     const suffix = query.toString()
     const payload = await requestApi<unknown>(
-        config.beekeeper_api_url,
+        config.beekeeper_api,
         suffix ? `/backup/files?${suffix}` : '/backup/files',
     )
     return Array.isArray(payload) ? payload.filter(isDatabaseBackupFile) : []
@@ -102,14 +102,14 @@ export async function restoreDatabaseBackup(body: {
     service: string
     file: string
 }): Promise<{ message: string }> {
-    return await requestApi<{ message: string }>(config.beekeeper_api_url, '/backup/restore', {
+    return await requestApi<{ message: string }>(config.beekeeper_api, '/backup/restore', {
         method: 'POST',
         body,
     })
 }
 
 export async function getVulnerabilitiesOverview(): Promise<GetVulnerabilities> {
-    const payload = await requestApi<unknown>(config.beekeeper_api_url, '/vulnerabilities')
+    const payload = await requestApi<unknown>(config.beekeeper_api, '/vulnerabilities')
     if (!isVulnerabilityPayload(payload)) {
         throw new Error('The vulnerability API returned an unexpected response.')
     }
@@ -118,7 +118,7 @@ export async function getVulnerabilitiesOverview(): Promise<GetVulnerabilities> 
 }
 
 export async function getScoutOverview(): Promise<ScoutOverview> {
-    const payload = await requestApi<unknown>(config.beekeeper_api_url, '/scout')
+    const payload = await requestApi<unknown>(config.beekeeper_api, '/scout')
     if (!isScoutPayload(payload)) {
         throw new Error('The scout API returned an unexpected response.')
     }
@@ -128,7 +128,7 @@ export async function getScoutOverview(): Promise<ScoutOverview> {
 
 export async function triggerVulnerabilityScan(): Promise<{ message: string, status: GetVulnerabilities['scanStatus'] }> {
     return await requestApi<{ message: string, status: GetVulnerabilities['scanStatus'] }>(
-        config.beekeeper_api_url,
+        config.beekeeper_api,
         '/vulnerabilities/scan',
         {
             method: 'POST',
@@ -152,7 +152,7 @@ export async function getInternalLogs(params?: {
 
     const suffix = query.toString()
     return await requestApi<LogsPayload>(
-        config.beekeeper_api_url,
+        config.beekeeper_api,
         suffix ? `/docker/logs?${suffix}` : '/docker/logs'
     )
 }

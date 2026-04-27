@@ -1,7 +1,7 @@
 import config from '@/constants'
 
 export async function fetchProfile(token: string): Promise<Profile> {
-    const response = await fetch(`${config.app_api_url}/auth/me`, {
+    const response = await fetch(`${config.app_api}/auth/me`, {
         headers: {
             Authorization: `Bearer ${token}`,
         },

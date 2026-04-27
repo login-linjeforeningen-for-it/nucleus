@@ -53,7 +53,7 @@ export default function MenuScreen({ navigation }: MenuProps<'MenuScreen'>): JSX
             return
         }
 
-        void (async () => {
+        (async () => {
             const [nextEvents, nextAds] = await Promise.all([fetchEvents(), fetchAds()])
 
             if (nextEvents.length) {

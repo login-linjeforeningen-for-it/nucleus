@@ -76,11 +76,11 @@ async function requestCount(path: string, key: string) {
 }
 
 export async function getPublicStatus(): Promise<PublicMonitoringService[]> {
-    return await requestJson<PublicMonitoringService[]>(`${config.beekeeper_api_url}/monitoring`)
+    return await requestJson<PublicMonitoringService[]>(`${config.beekeeper_api}/monitoring`)
 }
 
 export async function getSafeMusicActivity(): Promise<NativeMusicActivity> {
-    const data = await requestJson<any>(`${config.tekkom_bot_api_url}/activity`)
+    const data = await requestJson<any>(`${config.tekkom_bot_api}/activity`)
     return {
         stats: data.stats || {
             avg_seconds: 0,
@@ -133,7 +133,7 @@ export function buildSearchAnimationLink(query: string, engine: 'google' | 'duck
     const payload = JSON.stringify({ query, engine })
     const token = encodeBase64Url(payload)
 
-    return `${config.login_url}/s?s=${token}&play=1`
+    return `${config.login}/s?s=${token}&play=1`
 }
 
 export function decodeSearchAnimationToken(token: string): { query: string; engine: 'google' | 'duckduckgo' | 'brave' } | null {

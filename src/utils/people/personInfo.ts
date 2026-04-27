@@ -45,7 +45,7 @@ export default function personInfo({ person, lang }: personInfoProps) {
         name: 'Tinius Jurgensen Presterud',
         tag: '.tinius',
         dclink: 'https://discordapp.com/users/284712326030950410',
-        img: `${config.portrait_url}/leder.jpg`
+        img: `${config.portrait}/leder.jpg`
     }
 
     const coleader = {
@@ -53,7 +53,7 @@ export default function personInfo({ person, lang }: personInfoProps) {
         name: 'Daoud Chaudhry',
         tag: 'dahood018784',
         dclink: 'https://discordapp.com/users/428285256467087383',
-        img: `${config.portrait_url}/nestleder.jpg`,
+        img: `${config.portrait}/nestleder.jpg`,
     }
 
     const secretary = {
@@ -61,7 +61,7 @@ export default function personInfo({ person, lang }: personInfoProps) {
         name: 'Jørgen Arnesen-Lerudsmoen',
         tag: 'jorgen03',
         dclink: 'https://discordapp.com/users/163668247982505984',
-        img: `${config.portrait_url}/sekret%C3%A6r.jpg`,
+        img: `${config.portrait}/sekret%C3%A6r.jpg`,
     }
 
     const evntkom = {
@@ -69,7 +69,7 @@ export default function personInfo({ person, lang }: personInfoProps) {
         name: 'Caroline Madelén Lau-Revil',
         tag: 'carolinemadelen0574',
         dclink: 'https://discordapp.com/users/890926400314429511',
-        img: `${config.portrait_url}/evntkom.jpg`,
+        img: `${config.portrait}/evntkom.jpg`,
     }
 
     const bedkom = {
@@ -77,7 +77,7 @@ export default function personInfo({ person, lang }: personInfoProps) {
         name: 'Sander Clausen',
         tag: 'clausen03',
         dclink: 'https://discordapp.com/users/526072193235419146',
-        img: `${config.portrait_url}/bedkom.jpg`
+        img: `${config.portrait}/bedkom.jpg`
     }
 
     const tekkom = {
@@ -85,7 +85,7 @@ export default function personInfo({ person, lang }: personInfoProps) {
         name: 'Adam Dariusz Rytel',
         tag: 'adamdarek',
         dclink: 'https://discordapp.com/users/222767435198103553',
-        img: `${config.portrait_url}/tekkom.jpg`,
+        img: `${config.portrait}/tekkom.jpg`,
     }
 
     const ctfkom = {
@@ -93,7 +93,7 @@ export default function personInfo({ person, lang }: personInfoProps) {
         name: 'Maja Melby',
         tag: 'majam_',
         dclink: 'https://discordapp.com/users/1011661501536407552',
-        img: `${config.portrait_url}/ctfkom.jpg`,
+        img: `${config.portrait}/ctfkom.jpg`,
     }
 
     const satkom = {
@@ -101,7 +101,7 @@ export default function personInfo({ person, lang }: personInfoProps) {
         name: 'Mohaymen Al-Diaami',
         tag: 'sygor',
         dclink: 'https://discordapp.com/users/1003701353937391616',
-        img: `${config.portrait_url}/satkom.jpg`
+        img: `${config.portrait}/satkom.jpg`
     }
 
     const pr = {
@@ -109,7 +109,7 @@ export default function personInfo({ person, lang }: personInfoProps) {
         name: 'Andrea Karense Magnussen Øksendal',
         tag: 'andreakarense',
         dclink: 'https://discordapp.com/users/566664434995691540',
-        img: `${config.portrait_url}/pr.jpg`
+        img: `${config.portrait}/pr.jpg`
     }
 
     const barkom = {
@@ -117,7 +117,7 @@ export default function personInfo({ person, lang }: personInfoProps) {
         name: 'Frikk Brændsrød',
         tag: 'frikk.',
         dclink: 'https://discordapp.com/users/277153635832561675',
-        img: `${config.portrait_url}/barkom.jpg`
+        img: `${config.portrait}/barkom.jpg`
     }
 
     switch (person.toLowerCase()) {

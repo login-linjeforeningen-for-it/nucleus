@@ -56,7 +56,7 @@ export default function AdList(): JSX.Element {
         return (
             <View style={{ flex: 1 }}>
                 <ScrollView
-                    style={{ paddingTop: offset }}
+                    contentContainerStyle={{ paddingTop: offset }}
                     showsVerticalScrollIndicator={false}
                     scrollEventThrottle={100}
                     refreshControl={

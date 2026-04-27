@@ -3,7 +3,7 @@ import config from '@/constants'
 export async function fetchAnnouncements(limit = 20): Promise<GetAnnouncementsProps> {
     try {
         const params = new URLSearchParams({ limit: String(limit), includePlaceholders: 'true' })
-        const response = await fetch(`${config.tekkom_bot_api_url}/announcements?${params.toString()}`, {
+        const response = await fetch(`${config.tekkom_bot_api}/announcements?${params.toString()}`, {
             headers: { btg: 'tekkom-bot' },
         })
         if (!response.ok) throw new Error('Failed to fetch announcements')
@@ -25,7 +25,7 @@ export async function fetchAnnouncementRoles(token?: string | null): Promise<Bot
     if (!token) return []
 
     try {
-        const response = await fetch(`${config.tekkom_bot_api_url}/roles`, {
+        const response = await fetch(`${config.tekkom_bot_api}/roles`, {
             headers: { Authorization: `Bearer ${token}`, btg: 'tekkom-bot' },
         })
         if (!response.ok) throw new Error('Failed to fetch announcement roles')
@@ -42,7 +42,7 @@ export async function fetchAnnouncementChannels(token?: string | null): Promise<
     if (!token) return []
 
     try {
-        const response = await fetch(`${config.tekkom_bot_api_url}/channels`, {
+        const response = await fetch(`${config.tekkom_bot_api}/channels`, {
             headers: { Authorization: `Bearer ${token}`, btg: 'tekkom-bot' },
         })
         if (!response.ok) throw new Error('Failed to fetch announcement channels')

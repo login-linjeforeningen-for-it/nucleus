@@ -54,7 +54,7 @@ export function ExpiredEvent(id: { id: number }) {
                             <TextLink
                                 style={{ color: theme.orange }}
                                 text={retry}
-                                url={`${config.login_url}/events/${id}`}
+                                url={`${config.login}/events/${id}`}
                             />
                         </View>
                     </View>

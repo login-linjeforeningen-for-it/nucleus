@@ -86,7 +86,7 @@ function createNativeAuthRedirectUri() {
 
 export async function startLogin(target = 'app') {
     const redirectUri = createNativeAuthRedirectUri()
-    const loginUrl = `${config.app_api_url}/auth/login`
+    const loginUrl = `${config.app_api}/auth/login`
         + `?redirect_uri=${encodeURIComponent(redirectUri)}`
         + `&target=${encodeURIComponent(target)}`
     await Linking.openURL(loginUrl)
@@ -101,10 +101,10 @@ export async function openAuthenticatedDestination(destination: 'gpt' | 'queenbe
     }
 
     const url = destination === 'gpt'
-        ? `${config.login_url}/api/auth/token`
+        ? `${config.login}/api/auth/token`
             + `?access_token=${encodeURIComponent(token)}`
             + `&redirect=${encodeURIComponent('/ai')}`
-        : `${config.queenbee_url}/api/auth/token`
+        : `${config.queenbee}/api/auth/token`
             + `?access_token=${encodeURIComponent(token)}`
             + `&redirect=${encodeURIComponent('/internal')}`
 

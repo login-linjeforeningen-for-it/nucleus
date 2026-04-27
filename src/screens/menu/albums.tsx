@@ -14,7 +14,6 @@ import { useSelector } from 'react-redux'
 export default function AlbumsScreen({ navigation }: MenuProps<'AlbumsScreen'>): JSX.Element {
     const { theme } = useSelector((state: ReduxState) => state.theme)
     const { lang } = useSelector((state: ReduxState) => state.lang)
-    const screenTitle = lang ? require('@text/no.json').screens.AlbumsScreen : require('@text/en.json').screens.AlbumsScreen
     const text = lang ? require('@text/no.json').albums : require('@text/en.json').albums
     const [albums, setAlbums] = useState<GetAlbumProps[]>([])
     const [totalCount, setTotalCount] = useState(0)
@@ -36,7 +35,7 @@ export default function AlbumsScreen({ navigation }: MenuProps<'AlbumsScreen'>):
     }
 
     useEffect(() => {
-        void load()
+        load()
     }, [])
 
     return (
@@ -46,7 +45,7 @@ export default function AlbumsScreen({ navigation }: MenuProps<'AlbumsScreen'>):
                     refreshControl={
                         <RefreshControl
                             refreshing={refreshing}
-                            onRefresh={() => void load()}
+                            onRefresh={() => load()}
                             tintColor={theme.orange}
                             colors={[theme.orange]}
                             progressViewOffset={0}
@@ -59,11 +58,6 @@ export default function AlbumsScreen({ navigation }: MenuProps<'AlbumsScreen'>):
                     <Space height={Dimensions.get('window').height / 8} />
                     <Cluster>
                         <View style={{ padding: 12 }}>
-                            <Text style={{ ...T.text25, color: theme.textColor }}>{screenTitle}</Text>
-                            <Space height={6} />
-                            <Text style={{ ...T.text15, color: theme.oppositeTextColor }}>
-                                {text.intro}
-                            </Text>
                             <Space height={8} />
                             <Text style={{ ...T.text12, color: theme.oppositeTextColor }}>
                                 {text.privacyNotice}

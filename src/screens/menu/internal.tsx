@@ -88,7 +88,7 @@ export default function InternalScreen({ navigation }: MenuProps<'InternalScreen
                         title='Maintenance alerts'
                         description='Follow platform maintenance messages on this device.'
                         label='Subscribe'
-                        onPress={() => void TopicManager({ topic: 'maintenance' })}
+                        onPress={() => TopicManager({ topic: 'maintenance' })}
                         subtle
                     />
                 </ScrollView>

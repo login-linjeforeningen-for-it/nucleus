@@ -73,21 +73,21 @@ export default function DatabaseBackupsScreen(): JSX.Element {
     }
 
     useEffect(() => {
-        void load()
+        load()
     }, [])
 
     return (
         <Swipe left='DatabaseScreen'>
             <View style={{ flex: 1, backgroundColor: theme.darker }}>
                 <ScrollView
-                    refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => void load()} tintColor={theme.orange} colors={[theme.orange]} progressViewOffset={0} />}
+                    refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => load()} tintColor={theme.orange} colors={[theme.orange]} progressViewOffset={0} />}
                     style={GS.content}
                     contentContainerStyle={{ paddingHorizontal: 4, paddingBottom: 90 }}
                     keyboardShouldPersistTaps='handled'
                     showsVerticalScrollIndicator={false}
                 >
                     <Space height={90} />
-                    <BackupHero saving={saving} onBackup={() => void triggerBackup()} />
+                    <BackupHero saving={saving} onBackup={() => triggerBackup()} />
                     {!!notice && <MessageCard message={notice} tone='success' />}
                     {!!error && <MessageCard message={error} tone='error' />}
                     <BackupFilters
@@ -104,7 +104,7 @@ export default function DatabaseBackupsScreen(): JSX.Element {
                         backups={visibleBackups}
                         files={visibleFiles}
                         saving={saving}
-                        onRestore={(file) => confirmRestore(file, () => void restoreBackup(file))}
+                        onRestore={(file) => confirmRestore(file, () => restoreBackup(file))}
                     />
                 </ScrollView>
                 <TopRefreshIndicator refreshing={refreshing} theme={theme} top={112} />

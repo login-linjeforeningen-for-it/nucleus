@@ -1,4 +1,5 @@
 import Space from '@/components/shared/utils'
+import HeaderIconButton from '@components/nav/headerIconButton'
 import Text from '@components/shared/text'
 import T from '@styles/text'
 import { BlurView } from 'expo-blur'
@@ -54,69 +55,21 @@ export default function InternalNavMenu({ activeRoute, onNavigate }: Props): JSX
 }
 
 export function InternalNavMenuButton({ open, onPress }: { open: boolean; onPress: () => void }) {
-    const { theme, isDark } = useSelector((state: ReduxState) => state.theme)
+    const { theme } = useSelector((state: ReduxState) => state.theme)
 
     return (
-        <View style={{
-            width: 40,
-            height: 40,
-            borderRadius: 20,
-            overflow: 'visible',
-        }}>
-            <Pressable
-                onPress={onPress}
-                style={({ pressed }) => ({
-                    width: '100%',
-                    height: '100%',
-                    borderRadius: 19,
-                    backgroundColor: open
-                        ? 'rgba(253,135,56,0.12)'
-                        : pressed
-                            ? 'rgba(255,255,255,0.10)'
-                            : 'transparent',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    overflow: 'hidden',
-                    margin: 0,
-                })}
-            >
-                <BlurView
-                    style={{
-                        ...StyleSheet.absoluteFill,
-                        borderRadius: 19,
-                    }}
-                    blurMethod='dimezisBlurView'
-                    intensity={Platform.OS === 'ios' ? 35 : 24}
-                />
-                <View style={{
-                    ...StyleSheet.absoluteFillObject,
-                    backgroundColor: open
-                        ? 'rgba(253,135,56,0.12)'
-                        : isDark
-                            ? 'rgba(255,255,255,0.07)'
-                            : theme.transparentAndroid,
-                }} />
-                <Text style={{
-                    ...T.text20,
-                    color: theme.orange,
-                    fontSize: 24,
-                    lineHeight: 24,
-                    fontWeight: '700',
-                    marginTop: Platform.OS === 'ios' ? -1 : -3,
-                }}>
-                    ≡
-                </Text>
-                <View
-                    pointerEvents='none'
-                    style={{
-                        ...StyleSheet.absoluteFill,
-                        borderRadius: 20,
-                        borderWidth: 1,
-                        borderColor: open ? 'rgba(253,135,56,0.32)' : 'rgba(255,255,255,0.14)',
-                    }}
-                />
-            </Pressable>
-        </View>
+        <HeaderIconButton active={open} onPress={onPress}>
+            <Text style={{
+                ...T.text20,
+                color: theme.orange,
+                fontSize: 28,
+                lineHeight: 28,
+                fontWeight: '300',
+                marginTop: Platform.OS === 'ios' ? -1 : -3,
+            }}>
+                ≡
+            </Text>
+        </HeaderIconButton>
     )
 }
 

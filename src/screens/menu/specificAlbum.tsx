@@ -41,7 +41,7 @@ export default function SpecificAlbumScreen({
     }
 
     useEffect(() => {
-        void load()
+        load()
     }, [route.params.albumID])
 
     const title = album ? (lang ? album.name_no : album.name_en) : ''
@@ -54,7 +54,7 @@ export default function SpecificAlbumScreen({
                     refreshControl={
                         <RefreshControl
                             refreshing={refreshing}
-                            onRefresh={() => void load()}
+                            onRefresh={() => load()}
                             tintColor={theme.orange}
                             colors={[theme.orange]}
                             progressViewOffset={0}

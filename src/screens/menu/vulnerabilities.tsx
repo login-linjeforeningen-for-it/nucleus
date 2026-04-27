@@ -55,12 +55,12 @@ export default function VulnerabilitiesScreen(): JSX.Element {
     }
 
     useEffect(() => {
-        void load()
+        load()
     }, [])
 
     useEffect(() => {
         if (!data?.scanStatus.isRunning) return
-        const timer = setInterval(() => void load(), 3000)
+        const timer = setInterval(() => load(), 3000)
         return () => clearInterval(timer)
     }, [data?.scanStatus.isRunning])
 
@@ -70,7 +70,7 @@ export default function VulnerabilitiesScreen(): JSX.Element {
                 <ScrollView
                     refreshControl={<RefreshControl
                         refreshing={refreshing}
-                        onRefresh={() => void load()}
+                        onRefresh={() => load()}
                         tintColor={theme.orange}
                         colors={[theme.orange]}
                         progressViewOffset={0}
@@ -80,7 +80,7 @@ export default function VulnerabilitiesScreen(): JSX.Element {
                     showsVerticalScrollIndicator={false}
                 >
                     <Space height={Dimensions.get('window').height / 8} />
-                    <RunScanCard isRunning={running || Boolean(data?.scanStatus.isRunning)} scanStatus={data?.scanStatus} onPress={() => void runScan()} theme={theme} />
+                    <RunScanCard isRunning={running || Boolean(data?.scanStatus.isRunning)} scanStatus={data?.scanStatus} onPress={() => runScan()} theme={theme} />
                     <ErrorCard error={error} />
                     {data || scout ? (
                         <>

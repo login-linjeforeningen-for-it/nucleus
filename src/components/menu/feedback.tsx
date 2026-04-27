@@ -46,7 +46,7 @@ export default function Feedback({ index, setting, feedback, toggleFeedback }: F
                     }}
                 />
                 <TextLink
-                    url={config.mailto_url}
+                    url={config.mailto}
                     text='Mail'
                     style={{
                         ...T.contact,

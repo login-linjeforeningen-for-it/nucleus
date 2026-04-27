@@ -53,7 +53,7 @@ export default function useAiChat(text: AiText) {
     [clients, session?.clientName])
 
     useEffect(() => {
-        void refresh()
+        refresh()
     }, [])
 
     useEffect(() => {
@@ -85,13 +85,13 @@ export default function useAiChat(text: AiText) {
         }
 
         if (conversations.length) {
-            void openConversation(conversations[0].id)
+            openConversation(conversations[0].id)
             return
         }
 
         const bestClient = selectBestNativeClient(clients)
         if (bestClient) {
-            void createConversationForClient(bestClient.name)
+            createConversationForClient(bestClient.name)
         }
     }, [clients, conversations, loading, session])
 
@@ -208,7 +208,7 @@ export default function useAiChat(text: AiText) {
 
         if (message.type === 'prompt_complete') {
             setSession(prev => updateLastAssistantMessage(prev, message, false))
-            void refresh()
+            refresh()
             return
         }
 

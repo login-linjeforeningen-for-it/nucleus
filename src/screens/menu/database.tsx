@@ -32,7 +32,7 @@ export default function DatabaseScreen({ navigation }: MenuProps<'DatabaseScreen
     }
 
     useEffect(() => {
-        void load()
+        load()
     }, [])
 
     return (
@@ -41,7 +41,7 @@ export default function DatabaseScreen({ navigation }: MenuProps<'DatabaseScreen
                 <ScrollView
                     refreshControl={<RefreshControl
                         refreshing={refreshing}
-                        onRefresh={() => void load()}
+                        onRefresh={() => load()}
                         tintColor={theme.orange}
                         colors={[theme.orange]}
                         progressViewOffset={0}

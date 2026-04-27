@@ -49,7 +49,7 @@ export default function PolicyScreen(): JSX.Element {
                             </Text>
                             <Space height={12} />
                             <TouchableOpacity
-                                onPress={() => void Linking.openURL(config.mailto_url)}
+                                onPress={() => Linking.openURL(config.mailto)}
                                 activeOpacity={0.88}
                             >
                                 <View style={{

@@ -3,7 +3,7 @@ import Parent from '@components/shared/parent'
 import ReadOnly from '@components/course/readonly'
 import TopRefreshIndicator from '@components/shared/topRefreshIndicator'
 import { setLocalTitle } from '@redux/misc'
-import { getCourse } from '@utils/course/course'
+import { getCourseByCode } from '@utils/course/course'
 import { JSX, useCallback, useEffect, useState } from 'react'
 import { RefreshControl, Text, View } from 'react-native'
 import Swipeable from '@components/course/swipeable'
@@ -18,18 +18,20 @@ export default function SpecificCourseScreen({ route }: MenuProps<'SpecificCours
     const [clicked, setClicked] = useState<number[]>([])
     const dispatch = useDispatch()
 
-    if (route.params.code !== localTitle?.title) {
-        dispatch(setLocalTitle({ title: route.params.code, screen: 'SpecificCourseScreen' }))
-    }
-
     async function fetchCourse() {
-        const course = await getCourse(route.params.id)
+        const course = await getCourseByCode(route.params.code)
 
         if (course) {
             setCourse(course)
             return true
         }
     }
+
+    useEffect(() => {
+        if (route.params.code !== localTitle?.title) {
+            dispatch(setLocalTitle({ title: route.params.code, screen: 'SpecificCourseScreen' }))
+        }
+    }, [dispatch, localTitle?.title, route.params.code])
 
     useEffect(() => {
         (async () => {

@@ -27,8 +27,8 @@ export const MS = StyleSheet.create({
         height: 32,
     },
     multiIcon: {
-        height: 24,
-        width: 24,
+        height: 18,
+        width: 18,
     },
     // ----- BOTTOM MENU -----
     // Bottom menu view

@@ -31,13 +31,13 @@ export default function StatusScreen(): JSX.Element {
             {
                 text: 'Delete',
                 style: 'destructive',
-                onPress: () => void status.removeService(status.editing!.id),
+                onPress: () => status.removeService(status.editing!.id),
             },
         ])
     }
 
     useEffect(() => {
-        void status.load()
+        status.load()
     }, [])
 
     return (
@@ -47,7 +47,7 @@ export default function StatusScreen(): JSX.Element {
                     refreshControl={
                         <RefreshControl
                             refreshing={status.refreshing}
-                            onRefresh={() => void status.load()}
+                            onRefresh={() => status.load()}
                             tintColor={theme.orange}
                             colors={[theme.orange]}
                             progressViewOffset={0}
@@ -67,7 +67,7 @@ export default function StatusScreen(): JSX.Element {
                                     <NotificationForm
                                         form={status.notificationForm}
                                         onChange={status.setNotificationForm}
-                                        onSave={() => void status.saveNotification()}
+                                        onSave={() => status.saveNotification()}
                                         onCancel={status.cancelNotification}
                                         saving={status.saving}
                                     />
@@ -78,7 +78,7 @@ export default function StatusScreen(): JSX.Element {
                                 form={status.form}
                                 notifications={status.notifications}
                                 onChange={status.setForm}
-                                onSave={() => void status.saveService()}
+                                onSave={() => status.saveService()}
                                 onCancel={status.cancelEdit}
                                 onDelete={status.editing ? confirmDelete : undefined}
                                 onAddNotification={() => status.setAddingNotification(true)}
@@ -97,7 +97,7 @@ export default function StatusScreen(): JSX.Element {
                                             <NotificationForm
                                                 form={status.notificationForm}
                                                 onChange={status.setNotificationForm}
-                                                onSave={() => void status.saveNotification()}
+                                                onSave={() => status.saveNotification()}
                                                 onCancel={status.cancelNotification}
                                                 saving={status.saving}
                                             />
@@ -110,7 +110,7 @@ export default function StatusScreen(): JSX.Element {
                                 form={status.form}
                                 notifications={status.notifications}
                                 onChange={status.setForm}
-                                onSave={() => void status.saveService()}
+                                onSave={() => status.saveService()}
                                 onCancel={() => {
                                     status.cancelEdit()
                                     setNewServiceOpen(false)
@@ -132,7 +132,7 @@ export default function StatusScreen(): JSX.Element {
                                 showDetails={!status.editing && status.selectedService?.id === service.id}
                                 onClose={status.closeServiceDetails}
                                 onPress={() => status.selectService(service)}
-                                onEdit={() => void status.beginEdit(service)}
+                                onEdit={() => status.beginEdit(service)}
                             />
                             <Space height={10} />
                         </View>

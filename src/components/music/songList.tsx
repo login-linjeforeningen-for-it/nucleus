@@ -39,7 +39,7 @@ export default function SongList({ title, items, metricLabel }: SongListProps) {
                     return (
                         <Wrapper
                             key={`${title}-${item.name}-${index}`}
-                            onPress={url ? () => void openItem(item) : undefined}
+                            onPress={url ? () => openItem(item) : undefined}
                             style={{
                                 flexDirection: 'row',
                                 gap: 10,

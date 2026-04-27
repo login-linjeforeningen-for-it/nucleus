@@ -50,11 +50,11 @@ export function CheckBox() {
     const { theme } = useSelector((state: ReduxState) => state.theme)
 
     return <View style={{
-        width: 24,
-        height: 24,
-        backgroundColor: theme.darker,
+        width: 28,
+        height: 28,
+        backgroundColor: `${theme.orange}12`,
         borderColor: theme.orange,
-        borderRadius: 8,
+        borderRadius: 10,
         borderWidth: 1,
     }} />
 }
@@ -71,11 +71,11 @@ export function CheckedBox() {
     const { theme } = useSelector((state: ReduxState) => state.theme)
 
     return <View style={{
-        width: 24,
-        height: 24,
+        width: 28,
+        height: 28,
         backgroundColor: theme.orange,
         borderColor: theme.orange,
-        borderRadius: 8,
+        borderRadius: 10,
         borderWidth: 1,
     }}><SmallCheck /></View>
 }

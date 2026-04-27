@@ -43,7 +43,7 @@ export default function TrafficScreen({ navigation }: MenuProps<'TrafficScreen'>
     }
 
     useEffect(() => {
-        void load()
+        load()
     }, [])
 
     const totalRequests = Number(metrics?.total_requests || 0)
@@ -61,7 +61,7 @@ export default function TrafficScreen({ navigation }: MenuProps<'TrafficScreen'>
                     refreshControl={
                         <RefreshControl
                             refreshing={refreshing}
-                            onRefresh={() => void load()}
+                            onRefresh={() => load()}
                             tintColor={theme.orange}
                             colors={[theme.orange]}
                             progressViewOffset={0}
@@ -79,7 +79,7 @@ export default function TrafficScreen({ navigation }: MenuProps<'TrafficScreen'>
                         selectedDomain={selectedDomain}
                         onSelect={(domain) => {
                             setSelectedDomain(domain)
-                            void load(domain)
+                            load(domain)
                         }}
                     />
                     <Space height={12} />

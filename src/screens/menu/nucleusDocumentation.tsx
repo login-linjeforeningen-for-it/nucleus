@@ -6,7 +6,7 @@ import GS from '@styles/globalStyles'
 import T from '@styles/text'
 import { copyToClipboard } from '@utils/general/clipboard'
 import { JSX, useMemo } from 'react'
-import { Alert, ScrollView, TouchableOpacity, View } from 'react-native'
+import { Alert, ScrollView, Text as RNText, TouchableOpacity, View } from 'react-native'
 import { useSelector } from 'react-redux'
 
 const topics = ['TEKKOM', 'SOCIAL', 'CTF', 'KARRIEREDAG', 'FADDERUKA', 'BEDPRES', 'LOGIN', 'ANNET']
@@ -47,9 +47,10 @@ export default function NucleusDocumentationScreen(): JSX.Element {
     const { theme } = useSelector((state: ReduxState) => state.theme)
     const { lang } = useSelector((state: ReduxState) => state.lang)
     const labels = useMemo(() => ({
-        intro: lang
-            ? 'Varslinger er inntrengende og skal brukes med samme varsomhet som @everyone i Discord.'
-            : 'Push notifications are powerful and should be used with the same care as @everyone in Discord.',
+        introBefore: lang
+            ? 'Varslinger er inntrengende og skal brukes med samme varsomhet som '
+            : 'Push notifications are powerful and should be used with the same care as ',
+        introAfter: lang ? ' i Discord.' : ' in Discord.',
         topics: lang ? 'Topics' : 'Topics',
         intervals: lang ? 'Intervaller' : 'Intervals',
         prefixes: lang ? 'Prefixer' : 'Prefixes',
@@ -77,7 +78,19 @@ export default function NucleusDocumentationScreen(): JSX.Element {
                     <Space height={90} />
                     <Cluster>
                         <View style={{ padding: 14 }}>
-                            <Text style={{ ...T.text15, color: theme.oppositeTextColor }}>{labels.intro}</Text>
+                            <RNText style={{ ...T.text15, color: theme.oppositeTextColor }}>
+                                {labels.introBefore}
+                                <RNText style={{
+                                    color: theme.orange,
+                                    backgroundColor: theme.orangeTransparent,
+                                    borderRadius: 6,
+                                    overflow: 'hidden',
+                                    paddingHorizontal: 5,
+                                }}>
+                                    @everyone
+                                </RNText>
+                                {labels.introAfter}
+                            </RNText>
                         </View>
                     </Cluster>
 

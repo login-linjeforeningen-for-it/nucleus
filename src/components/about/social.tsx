@@ -111,37 +111,37 @@ export function Social() {
 
     const media: MediaProps = {
         discord: {
-            link: config.discord_url,
+            link: config.discord,
             logo: isDark
                 ? require('@assets/social/discord-white.png')
                 : require('@assets/social/discord-black.png')
         },
         instagram: {
-            link: config.instagram_url,
+            link: config.instagram,
             logo: isDark
                 ? require('@assets/social/instagram-white.png')
                 : require('@assets/social/instagram-black.png')
         },
         facebook: {
-            link: config.facebook_url,
+            link: config.facebook,
             logo: isDark
                 ? require('@assets/social/facebook-white.png')
                 : require('@assets/social/facebook-black.png')
         },
         linkedin: {
-            link: config.linkedin_url,
+            link: config.linkedin,
             logo: isDark
                 ? require('@assets/social/linkedin-white.png')
                 : require('@assets/social/linkedin-black.png')
         },
         gitlab: {
-            link: config.github_url,
+            link: config.github,
             logo: isDark
                 ? require('@assets/social/github-white.png')
                 : require('@assets/social/github-black.png')
         },
         wiki: {
-            link: config.wiki_url,
+            link: config.wiki,
             logo: isDark
                 ? require('@assets/social/wiki-white.png')
                 : require('@assets/social/wiki-black.png')
@@ -219,8 +219,8 @@ export function Contact() {
             <Text style={{ ...T.centered15, color }}>{info.post}</Text>
 
             <TextLink
-                url={config.mailto_url}
-                text={config.mail_url}
+                url={config.mailto}
+                text={config.mail}
                 style={{ ...T.orange15, top: 3.2, alignSelf: 'center', marginBottom: 20 }}
             />
         </View>

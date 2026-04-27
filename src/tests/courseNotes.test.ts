@@ -1,4 +1,4 @@
-import { updateCourseNotes } from '@utils/course/course'
+import { getCourseByCode, updateCourseNotes } from '@utils/course/course'
 
 describe('course notes mobile editing', () => {
     beforeEach(() => {
@@ -51,5 +51,27 @@ describe('course notes mobile editing', () => {
             ok: false,
             error: 'Missing required field (user ID, notes)',
         })
+    })
+
+    it('fetches course details with the code endpoint', async () => {
+        global.fetch = jest.fn(async () => ({
+            ok: true,
+            json: async () => ({
+                id: 42,
+                code: 'TDT4100',
+                name: 'Object oriented programming',
+                cards: [],
+                notes: '',
+            }),
+        })) as any
+
+        await expect(getCourseByCode('TDT4100')).resolves.toEqual(expect.objectContaining({
+            id: '42',
+            code: 'TDT4100',
+        }))
+        expect(global.fetch).toHaveBeenCalledWith(
+            'https://studentbee-api.login.no/api/course/code/TDT4100',
+            expect.objectContaining({ method: 'GET' }),
+        )
     })
 })

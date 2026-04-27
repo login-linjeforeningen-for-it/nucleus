@@ -39,7 +39,7 @@ export default function TrafficRecordsScreen({ navigation }: MenuProps<'TrafficR
     }
 
     useEffect(() => {
-        void load()
+        load()
     }, [])
 
     const totalPages = Math.max(1, Math.ceil((records?.total || 0) / PAGE_SIZE))
@@ -51,7 +51,7 @@ export default function TrafficRecordsScreen({ navigation }: MenuProps<'TrafficR
                     refreshControl={
                         <RefreshControl
                             refreshing={refreshing}
-                            onRefresh={() => void load()}
+                            onRefresh={() => load()}
                             tintColor={theme.orange}
                             colors={[theme.orange]}
                             progressViewOffset={0}
@@ -70,7 +70,7 @@ export default function TrafficRecordsScreen({ navigation }: MenuProps<'TrafficR
                         onSelect={(domain) => {
                             setSelectedDomain(domain)
                             setPage(1)
-                            void load(1, domain)
+                            load(1, domain)
                         }}
                     />
                     <Space height={12} />
@@ -93,7 +93,7 @@ export default function TrafficRecordsScreen({ navigation }: MenuProps<'TrafficR
                             onPress={() => {
                                 const nextPage = Math.max(1, page - 1)
                                 setPage(nextPage)
-                                void load(nextPage)
+                                load(nextPage)
                             }}
                         />
                         <PagerButton
@@ -102,7 +102,7 @@ export default function TrafficRecordsScreen({ navigation }: MenuProps<'TrafficR
                             onPress={() => {
                                 const nextPage = page + 1
                                 setPage(nextPage)
-                                void load(nextPage)
+                                load(nextPage)
                             }}
                         />
                     </View>

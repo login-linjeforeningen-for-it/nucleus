@@ -27,7 +27,7 @@ export function AiModelPicker({
                         key={client.name}
                         onPress={() => {
                             onClose()
-                            void ai.changeModel(client.name)
+                            ai.changeModel(client.name)
                         }}
                         style={{
                             borderRadius: 16,
@@ -70,11 +70,11 @@ export function AiConversationOverlay({
                 theme={theme}
                 onCreate={() => {
                     onClose()
-                    void ai.createNewConversation()
+                    ai.createNewConversation()
                 }}
                 onSelect={(conversationId) => {
                     onClose()
-                    void ai.openConversation(conversationId)
+                    ai.openConversation(conversationId)
                 }}
                 currentConversationLabel={text.currentConversation}
                 newConversationLabel={text.newConversation}

@@ -30,7 +30,7 @@ export default function DashboardScreen(): JSX.Element {
     }
 
     useEffect(() => {
-        void load()
+        load()
     }, [])
 
     return (
@@ -40,7 +40,7 @@ export default function DashboardScreen(): JSX.Element {
                     refreshControl={
                         <RefreshControl
                             refreshing={refreshing}
-                            onRefresh={() => void load()}
+                            onRefresh={() => load()}
                             tintColor={theme.orange}
                             colors={[theme.orange]}
                             progressViewOffset={0}

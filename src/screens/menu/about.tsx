@@ -126,7 +126,7 @@ export default function AboutScreen(): JSX.Element {
                                 {text.publicDocs.body}
                             </Text>
                             <TextLink
-                                url={config.wiki_url}
+                                url={config.wiki}
                                 text={text.publicDocs.wiki}
                             />
                             <Text style={{ ...T.paragraph, color: theme.textColor }}>.</Text>

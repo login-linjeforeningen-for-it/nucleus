@@ -9,6 +9,8 @@ import { ScrollView } from 'react-native-gesture-handler'
 import { setClickedSkills } from '@redux/ad'
 import { JSX, useRef } from 'react'
 import { useRoute } from '@react-navigation/native'
+import HeaderIconButton from '@components/nav/headerIconButton'
+import { BlurView } from 'expo-blur'
 import { useSelector, useDispatch } from 'react-redux'
 import {
     TouchableOpacity,
@@ -16,8 +18,8 @@ import {
     Image,
     View,
     Text,
-    Dimensions,
     Platform,
+    StyleSheet,
 } from 'react-native'
 import {
     reset as resetEvents,
@@ -44,34 +46,56 @@ export function FilterUI(): JSX.Element {
     const isSearchingEvents = route.name === 'EventScreen' && search
     const isSearchingAds = route.name === 'AdScreen' && ad.search
     const isSearching = isSearchingEvents || isSearchingAds
-    const top = (isSearchingAds && 35) || Platform.OS === 'ios' ? 40 : 35
 
     return (
-        <View style={isSearching ? { top } : { display: 'none' }}>
-            <View style={ES.absoluteView}>
-                <TextInput
-                    ref={textInputRef}
-                    style={{ ...ES.clusterFilterText }}
-                    maxLength={40}
-                    placeholder={lang ? 'Søk..' : 'Search..'}
-                    placeholderTextColor={theme.titleTextColor}
-                    textAlign='center'
-                    onChangeText={(val) => dispatch(isSearchingEvents ? setEvents(val) : setAds(val))}
-                    selectionColor={theme.orange}
+        <View style={isSearching ? { ...ES.filterPanel, top: 20 } : { display: 'none' }}>
+            <View style={ES.filterPanelBody}>
+                <BlurView
+                    style={StyleSheet.absoluteFill}
+                    blurMethod='dimezisBlurView'
+                    intensity={Platform.OS === 'ios' ? 35 : 24}
                 />
-                <TouchableOpacity onPress={() => {
-                    if (isSearchingEvents) {
-                        dispatch(resetEvents())
-                    }
-                    if (isSearchingAds) {
-                        dispatch(resetAds())
-                    }
-                    if (textInputRef.current) textInputRef.current.clear()
-                }}>
-                    <Image style={ES.clusterFilterResetIcon} source={resetIcon} />
-                </TouchableOpacity>
+                <View style={{
+                    ...StyleSheet.absoluteFill,
+                    backgroundColor: isDark ? 'rgba(255,255,255,0.07)' : theme.transparentAndroid,
+                }} />
+                <View style={ES.filterPanelContent}>
+                    <View style={ES.filterSearchRow}>
+                        <TextInput
+                            ref={textInputRef}
+                            style={{ ...ES.clusterFilterText, color: theme.textColor }}
+                            maxLength={40}
+                            placeholder={lang ? 'Søk..' : 'Search..'}
+                            placeholderTextColor={theme.titleTextColor}
+                            textAlign='center'
+                            onChangeText={(val) => dispatch(isSearchingEvents ? setEvents(val) : setAds(val))}
+                            selectionColor={theme.orange}
+                        />
+                        <TouchableOpacity
+                            style={{
+                                width: 38,
+                                height: 38,
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                borderRadius: 19,
+                                backgroundColor: '#ffffff08',
+                            }}
+                            onPress={() => {
+                                if (isSearchingEvents) {
+                                    dispatch(resetEvents())
+                                }
+                                if (isSearchingAds) {
+                                    dispatch(resetAds())
+                                }
+                                if (textInputRef.current) textInputRef.current.clear()
+                            }}
+                        >
+                            <Image style={ES.clusterFilterResetIcon} source={resetIcon} />
+                        </TouchableOpacity>
+                    </View>
+                    <FilterCategoriesOrSkills />
+                </View>
             </View>
-            <FilterCategoriesOrSkills />
         </View>
     )
 }
@@ -101,32 +125,33 @@ export function FilterButton() {
     }
 
     return (
-        <TouchableOpacity onPress={handlePress}>
-            {isSearching
-                ? <Image
-                    style={MS.multiIcon}
-                    source={require('@assets/icons/filter-orange.png')}
-                />
-                :
-                hasFilterEnabled
-                    ?
-                    <Image
-                        style={MS.multiIcon}
-                        source={isDark
-                            ? require('@assets/icons/filter-active.png')
-                            : require('@assets/icons/filter-black-active.png')}
-                    />
-                    :
-                    <Image
-                        style={MS.multiIcon}
-                        source={isDark
-                            ? require('@assets/icons/filter.png')
-                            : require('@assets/icons/filter-black.png')
-                        }
-                    />
-            }
-        </TouchableOpacity>
+        <HeaderIconButton active={!!isSearching} connector={!!isSearching} onPress={handlePress}>
+            <Image
+                style={MS.multiIcon}
+                source={getFilterIcon({ hasFilterEnabled: !!hasFilterEnabled, isDark, isSearching })}
+            />
+        </HeaderIconButton>
     )
+}
+
+function getFilterIcon({ hasFilterEnabled, isDark, isSearching }: {
+    hasFilterEnabled: boolean
+    isDark: boolean
+    isSearching: boolean
+}) {
+    if (isSearching) {
+        return require('@assets/icons/filter-orange.png')
+    }
+
+    if (hasFilterEnabled) {
+        return isDark
+            ? require('@assets/icons/filter-active.png')
+            : require('@assets/icons/filter-black-active.png')
+    }
+
+    return isDark
+        ? require('@assets/icons/filter.png')
+        : require('@assets/icons/filter-black.png')
 }
 
 /**
@@ -168,6 +193,7 @@ function FilterCategoriesOrSkills() {
             style={{ height }}
             scrollEnabled={item.length > 9 ? true : false}
             showsVerticalScrollIndicator={false}
+            contentContainerStyle={{ paddingBottom: 2 }}
         >
             {item.map((text, index) => {
                 if (text === 'Påmeldt' || text === 'Enrolled') {
@@ -176,7 +202,7 @@ function FilterCategoriesOrSkills() {
 
                 if (index % 3 === 0) {
                     return (
-                        <View key={index / 3} style={{ flexDirection: 'row' }}>
+                        <View key={index / 3} style={{ flexDirection: 'row', marginHorizontal: -3 }}>
                             <FilterItem text={text || ''} />
                             <FilterItem text={item[index + 1] || ''} />
                             <FilterItem text={item[index + 2] || ''} />
@@ -223,18 +249,23 @@ function FilterItem({ text }: { text: string }) {
 
     return (
         <View style={ES.clusterCategoryView}>
-            <TouchableOpacity onPress={() => checked ? handleUnchecked(text) : handleChecked(text)}>
+            <TouchableOpacity
+                style={{ width: '100%' }}
+                onPress={() => checked ? handleUnchecked(text) : handleChecked(text)}
+            >
                 <View style={{
                     flexDirection: 'row',
                     maxHeight: 50,
                     minHeight: 30,
                     alignItems: 'center',
-                    width: Dimensions.get('window').width / 4
+                    gap: 8,
+                    width: '100%',
                 }}>
                     {checked ? <CheckedBox /> : <CheckBox />}
                     <Text style={{
-                        ...T.filterCategoryText,
-                        color: theme.titleTextColor
+                        ...T.text12,
+                        color: theme.titleTextColor,
+                        flex: 1,
                     }}>
                         {text}
                     </Text>

@@ -95,7 +95,7 @@ function NotificationRow({ item, list, id, setList, hideOld, setHideOld, readInd
                 onSwipeableWillClose={() => setIsSwiping(false)}
                 rightThreshold={Dimensions.get('window').width * 0.28}
                 overshootRight={false}
-                onSwipeableOpen={(direction) => direction === 'right' ? void deleteNotification() : undefined}
+                onSwipeableOpen={(direction) => direction === 'right' ? deleteNotification() : undefined}
             >
                 <TouchableHighlight
                     activeOpacity={1}

@@ -1,8 +1,7 @@
 import Markdown from './markdown'
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Pressable, TextInput, View } from 'react-native'
 import { useSelector } from 'react-redux'
-import InfoBlock from '@components/shared/infoBlock'
 import Space from '@components/shared/utils'
 import Text from '@components/shared/text'
 import T from '@styles/text'
@@ -36,21 +35,9 @@ export default function ReadOnly({ courseId, text, onSaved }: ReadOnlyProps) {
         setSavedText(normalized)
     }, [text])
 
-    const dirty = draft !== savedText
+    const dirty = (draft !== savedText) && savedText.trim().length > 0
     const trimmedDraft = draft.trim()
     const canSave = login && trimmedDraft.length > 0 && dirty && !saving
-
-    const helperText = useMemo(() => {
-        if (!login) {
-            return lang
-                ? 'Logg inn for å lagre notatene dine tilbake til Studentbee.'
-                : 'Log in to save your notes back to Studentbee.'
-        }
-
-        return lang
-            ? 'Notater kan nå redigeres på mobil. Bytt mellom redigering og forhåndsvisning mens du skriver.'
-            : 'Notes can now be edited on mobile. Switch between editing and preview while you write.'
-    }, [lang, login])
 
     const emptyText = lang
         ? 'Det finnes ingen notater enda. Start med et kort sammendrag, lenker eller markdown.'
@@ -61,7 +48,7 @@ export default function ReadOnly({ courseId, text, onSaved }: ReadOnlyProps) {
     const resetLabel = lang ? 'Tilbakestill' : 'Reset'
     const editLabel = lang ? 'Rediger' : 'Edit'
     const previewLabel = lang ? 'Forhåndsvisning' : 'Preview'
-    const title = lang ? 'Studienotater' : 'Study notes'
+    const title = lang ? 'Notater' : 'Notes'
     const subtitle = lang
         ? 'Skriv og finpuss notatene dine direkte på mobilen.'
         : 'Write and refine your notes directly on mobile.'
@@ -108,7 +95,6 @@ export default function ReadOnly({ courseId, text, onSaved }: ReadOnlyProps) {
 
     return (
         <View>
-            <InfoBlock text={helperText} />
             <Space height={12} />
             <View style={{
                 borderRadius: 24,
@@ -176,7 +162,7 @@ export default function ReadOnly({ courseId, text, onSaved }: ReadOnlyProps) {
                             />
                             <ActionButton
                                 label={saveLabel}
-                                onPress={() => void handleSave()}
+                                onPress={() => handleSave()}
                                 disabled={!canSave}
                                 theme={theme}
                             />
@@ -220,17 +206,21 @@ export default function ReadOnly({ courseId, text, onSaved }: ReadOnlyProps) {
                             <Markdown text={trimmedDraft.length ? draft : emptyText} />
                         </View>
                     )}
-                    <Space height={10} />
-                    <Text style={{
-                        ...T.text12,
-                        color: status
-                            ? status.includes('saved') || status.includes('lagret')
-                                ? theme.textColor
-                                : '#ffb3b3'
-                            : theme.oppositeTextColor,
-                    }}>
-                        {dirty && lang ? 'Du har ulagrede endringer.' : 'You have unsaved changes.'}
-                    </Text>
+                    {dirty && (
+                        <>
+                            <Space height={10} />
+                            <Text style={{
+                                ...T.text12,
+                                color: status
+                                    ? status.includes('saved') || status.includes('lagret')
+                                        ? theme.textColor
+                                        : '#ffb3b3'
+                                    : theme.oppositeTextColor,
+                            }}>
+                                {lang ? 'Du har ulagrede endringer.' : 'You have unsaved changes.'}
+                            </Text>
+                        </>
+                    )}
                 </View>
             </View>
             <Space height={120} />
@@ -258,7 +248,7 @@ function MetaPill({ label, value, theme }: { label: string, value: string, theme
                 backgroundColor: theme.orange,
             }} />
             <Text style={{ ...T.text12, color: theme.oppositeTextColor }}>{label}</Text>
-            <Text style={{ ...T.text15, color: theme.textColor }}>{value}</Text>
+            <Text style={{ ...T.text12, color: theme.textColor }}>{value}</Text>
         </View>
     )
 }

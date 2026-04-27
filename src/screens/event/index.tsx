@@ -32,7 +32,7 @@ export default function EventScreen({ navigation }: EventScreenProps<'EventScree
 
     // Redux states
     const notification = useSelector((state: ReduxState) => state.notification)
-    const { lastSave } = useSelector((state: ReduxState) => state.event)
+    const { clickedEvents, lastSave } = useSelector((state: ReduxState) => state.event)
     const { theme, isDark } = useSelector((state: ReduxState) => state.theme)
     const dispatch = useDispatch()
 
@@ -76,14 +76,19 @@ export default function EventScreen({ navigation }: EventScreenProps<'EventScree
 
     // Sets the component of the header
     useEffect(() => {
+        const right = [
+            <FilterButton />,
+            clickedEvents.length ? <DownloadButton screen='event' /> : null,
+        ]
+
         navigation.setOptions({
             headerComponents: {
                 bottom: [<FilterUI />],
                 left: [<LogoNavigation />],
-                right: [<FilterButton />, <DownloadButton screen='event' />]
+                right
             }
         } as any)
-    }, [navigation])
+    }, [clickedEvents.length, navigation])
 
     initializeNotifications({
         shouldRun: shouldSetupNotifications,

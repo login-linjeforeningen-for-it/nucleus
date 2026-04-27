@@ -25,9 +25,9 @@ export default function NotificationRuntime() {
             }),
         })
 
-        void registerForPushNotificationsAsync()
+        registerForPushNotificationsAsync()
 
-        void Notifications.getLastNotificationResponseAsync().then((response) => {
+        Notifications.getLastNotificationResponseAsync().then((response) => {
             const data = response?.notification.request.content.data
             if (data && Object.keys(data).length) {
                 navigateFromNotification(data as Record<string, unknown>)
@@ -36,7 +36,7 @@ export default function NotificationRuntime() {
 
         const foregroundSubscription = Notifications.addNotificationReceivedListener((notification) => {
             const { title, body, data } = notification.request.content
-            void storeNotification({
+            storeNotification({
                 title: title || '',
                 body: body || '',
                 data: (data || {}) as Record<string, unknown>,
@@ -53,7 +53,7 @@ export default function NotificationRuntime() {
 
         const responseSubscription = Notifications.addNotificationResponseReceivedListener((response) => {
             const { title, body, data } = response.notification.request.content
-            void storeNotification({
+            storeNotification({
                 title: title || '',
                 body: body || '',
                 data: (data || {}) as Record<string, unknown>,

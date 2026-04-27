@@ -190,7 +190,7 @@ itemsToCalendarFormatProps) {
                 : event.description_en || event.description_no || ''
 
             notes = fixedDesc.replace(/\\n/g, '\n') || undefined
-            if (!location.length) location = `${config.login_url}/events/${item.id}`
+            if (!location.length) location = `${config.login}/events/${item.id}`
             startDate = new Date(event.time_start)
             endDate = new Date(event.time_end)
         } else if (ad) {
@@ -207,7 +207,7 @@ itemsToCalendarFormatProps) {
             const shortDescription = tempShort ? tempShort.replace(/\\n/g, '\n') : ''
             const LongDescription = tempLong ? tempLong.replace(/\\n/g, '\n') : ''
             notes = LongDescription || shortDescription || ''
-            if (!location.length) location = `${config.login_url}/career/${item.id}`
+            if (!location.length) location = `${config.login}/career/${item.id}`
             startDate = new Date(new Date(ad.time_expire).getTime() - 14400000)
             endDate = new Date(ad.time_expire)
         }

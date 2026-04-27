@@ -1,7 +1,7 @@
 {
     "screens": {
         "EventScreen": "Arrangementer",
-        "AdScreen": "Jobbanonser",
+        "AdScreen": "Jobbannonser",
         "MenuScreen": "Meny",
         "SettingScreen": "Innstillinger",
         "NotificationScreen": "Notifikasjoner",
@@ -77,7 +77,6 @@
         }
     },
     "albums": {
-        "intro": "Bla gjennom bilder fra arrangementer.",
         "privacyNotice": "Vennligst respekter personvernet til alle på bildene. Send mail til pr@login.no dersom du ønsker at noen av bildene skal fjernes.",
         "failedToLoad": "Kunne ikke laste albumer",
         "failedToLoadAlbum": "Kunne ikke laste album",

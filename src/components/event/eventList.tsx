@@ -50,7 +50,7 @@ export default function EventList(): JSX.Element {
         return (
             <View style={{ flex: 1 }}>
                 <ScrollView
-                    style={{ paddingTop: getListOffset({ search, categories: cat, clickedEvents }) }}
+                    contentContainerStyle={{ paddingTop: getListOffset({ search, categories: cat, clickedEvents }) }}
                     showsVerticalScrollIndicator={false}
                     scrollEventThrottle={100}
                     refreshControl={

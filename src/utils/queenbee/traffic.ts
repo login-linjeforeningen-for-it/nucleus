@@ -23,7 +23,7 @@ export async function getTrafficMetrics({
     if (domain) query.set('domain', domain)
 
     return await requestApi<TrafficMetricsProps>(
-        config.beekeeper_api_url,
+        config.beekeeper_api,
         query.toString() ? `/traffic/metrics?${query.toString()}` : '/traffic/metrics'
     )
 }
@@ -43,12 +43,12 @@ export async function getTrafficRecords({
     if (domain) query.set('domain', domain)
 
     return await requestApi<TrafficRecordsProps>(
-        config.beekeeper_api_url,
+        config.beekeeper_api,
         query.toString() ? `/traffic/records?${query.toString()}` : '/traffic/records'
     )
 }
 
 export async function getTrafficDomains(): Promise<string[]> {
-    const payload = await requestApi<unknown>(config.beekeeper_api_url, '/traffic/domains')
+    const payload = await requestApi<unknown>(config.beekeeper_api, '/traffic/domains')
     return Array.isArray(payload) ? payload.filter((domain): domain is string => typeof domain === 'string') : []
 }

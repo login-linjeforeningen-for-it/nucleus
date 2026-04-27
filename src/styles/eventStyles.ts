@@ -116,12 +116,37 @@ export const ES = StyleSheet.create({
         flexDirection: 'row',
         maxHeight: 100
     },
+    filterPanel: {
+        position: 'absolute',
+        left: 10,
+        right: 10,
+        zIndex: 13,
+        overflow: 'visible',
+    },
+    filterPanelBody: {
+        zIndex: 1,
+        borderRadius: 18,
+        overflow: 'hidden',
+        borderWidth: 1,
+        borderTopWidth: 0,
+        borderColor: 'rgba(255,255,255,0.14)',
+    },
+    filterPanelContent: {
+        paddingHorizontal: 16,
+        paddingTop: 10,
+        paddingBottom: 14,
+    },
+    filterSearchRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        minHeight: 36,
+        marginBottom: 12,
+    },
     // EventScreen filter text
     clusterFilterText: {
         alignSelf: 'center',
         alignItems: 'center',
-        height: 40,
-        color: 'white', // White text color (should be moved to depend on theme)
+        height: 34,
         display: 'flex',
         flexGrow: 1
     },
@@ -142,14 +167,15 @@ export const ES = StyleSheet.create({
     // View for categories inside the filter
     clusterCategoryView: {
         flexDirection: 'row',
-        left: 6,
-        width: Dimensions.get('window').width / 3.1,
+        width: '33.33%',
         alignItems: 'center',
+        paddingHorizontal: 3,
+        marginBottom: 8,
     },
     // Filter reset icon
     clusterFilterResetIcon: {
-        height: 40,
-        width: 40,
+        height: 28,
+        width: 28,
     },
     eventButton: {
         height: 40,

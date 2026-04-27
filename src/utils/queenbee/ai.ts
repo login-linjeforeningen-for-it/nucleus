@@ -25,7 +25,7 @@ function isConversationRecord(value: unknown): value is NativeConversationRecord
 }
 
 export function getBeekeeperWsUrl() {
-    return `${config.beekeeper_wss_url}/client/ws/beeswarm`
+    return `${config.beekeeper_wss}/client/ws/beeswarm`
 }
 
 export function defaultNativeModelMetrics(): NativeModelMetrics {
@@ -66,7 +66,7 @@ export function selectBestNativeClient(clients: NativeClient[]) {
 }
 
 export async function listAiClients(): Promise<NativeClient[]> {
-    const payload = await requestApi<unknown>(config.beekeeper_api_url, '/clients', {
+    const payload = await requestApi<unknown>(config.beekeeper_api, '/clients', {
         requiresAuth: false,
         includeAiSession: true,
     })
@@ -83,7 +83,7 @@ export async function listAiClients(): Promise<NativeClient[]> {
 }
 
 export async function listAiConversations(): Promise<NativeConversationSummary[]> {
-    const payload = await requestApi<unknown>(config.beekeeper_api_url, '/ai/conversations', {
+    const payload = await requestApi<unknown>(config.beekeeper_api, '/ai/conversations', {
         requiresAuth: false,
         includeAiSession: true,
     })
@@ -96,7 +96,7 @@ export async function listAiConversations(): Promise<NativeConversationSummary[]
 }
 
 export async function getAiConversation(id: string): Promise<NativeConversationRecord> {
-    const payload = await requestApi<unknown>(config.beekeeper_api_url, `/ai/conversations/${id}`, {
+    const payload = await requestApi<unknown>(config.beekeeper_api, `/ai/conversations/${id}`, {
         requiresAuth: false,
         includeAiSession: true,
     })
@@ -109,7 +109,7 @@ export async function getAiConversation(id: string): Promise<NativeConversationR
 }
 
 export async function createAiConversation(clientName: string): Promise<NativeConversationRecord> {
-    const payload = await requestApi<unknown>(config.beekeeper_api_url, '/ai/conversations', {
+    const payload = await requestApi<unknown>(config.beekeeper_api, '/ai/conversations', {
         method: 'POST',
         body: { clientName },
         requiresAuth: false,
@@ -124,7 +124,7 @@ export async function createAiConversation(clientName: string): Promise<NativeCo
 }
 
 export async function switchAiConversationClient(id: string, clientName: string): Promise<NativeConversationRecord> {
-    const payload = await requestApi<unknown>(config.beekeeper_api_url, `/ai/conversations/${id}/switch-client`, {
+    const payload = await requestApi<unknown>(config.beekeeper_api, `/ai/conversations/${id}/switch-client`, {
         method: 'POST',
         body: { clientName },
         requiresAuth: false,

@@ -54,7 +54,7 @@ export function ActionLinkButton({ label, url, highlight }: {
 
     return (
         <Pressable
-            onPress={() => void Linking.openURL(url)}
+            onPress={() => Linking.openURL(url)}
             style={{
                 flexGrow: 1,
                 minWidth: '30%',
