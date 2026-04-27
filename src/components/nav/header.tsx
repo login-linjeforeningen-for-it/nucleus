@@ -78,6 +78,7 @@ export default function Header({ options, route, navigation }: HeaderProps): Rea
     const titleLeft = Number(GS.headerLeftRail.width) + HEADER_TITLE_GAP
     const titleRight = HEADER_RIGHT_INSET + rightRailWidth + HEADER_TITLE_GAP
     const titleWidth = Math.min(260, Math.max(120, Dimensions.get('window').width - titleLeft - titleRight))
+    const headerOffset = Dimensions.get('window').height / 17 + (Platform.OS === 'ios' ? 8 : 0)
 
     function navigateInternalRoute(targetRoute: InternalNavRoute) {
         setInternalMenuOpen(false)
@@ -131,7 +132,7 @@ export default function Header({ options, route, navigation }: HeaderProps): Rea
 
     return (
         <BlurWrapper>
-            <View style={{ ...GS.headerFrame, top: Dimensions.get('window').height / 17 }}>
+            <View style={{ ...GS.headerFrame, top: headerOffset }}>
                 <View style={GS.headerLeftRail}>
                     {options.headerComponents?.left ? options.headerComponents?.left.map((node, index) =>
                         <View style={GS.headerLeftSlot} key={index}>{node}</View>
@@ -292,10 +293,10 @@ function BlurWrapper(props: PropsWithChildren) {
 
     const gameID = (route.params as any)?.gameID
     const gameImages = [
-        { style: GM.terning, icon: require('@assets/games/terning.png')},
-        { style: GM.questions, icon: require('@assets/games/100questions.png')},
-        { style: GM.neverhaveiever, icon: require('@assets/games/neverhaveiever.png')},
-        { style: GM.okredflagdealbreaker, icon: require('@assets/games/okredflagdealbreaker.png')}
+        { style: GM.terning, icon: require('@assets/games/terning.png') },
+        { style: GM.questions, icon: require('@assets/games/100questions.png') },
+        { style: GM.neverhaveiever, icon: require('@assets/games/neverhaveiever.png') },
+        { style: GM.okredflagdealbreaker, icon: require('@assets/games/okredflagdealbreaker.png') }
     ]
 
     return (
