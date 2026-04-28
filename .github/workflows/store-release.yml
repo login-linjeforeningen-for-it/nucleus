@@ -144,7 +144,9 @@ jobs:
         run: npm test -- --runInBand
 
       - name: Generate iOS project locally
-        run: npx expo prebuild --platform ios --clean --no-install
+        run: |
+          npx expo prebuild --platform ios --clean --no-install
+          node scripts/ci/disable-pods-code-signing.mjs
 
       - name: Ensure iOS platform is installed
         run: |
