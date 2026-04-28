@@ -1,4 +1,5 @@
 import AsyncStorage from '@react-native-async-storage/async-storage'
+import { parseResponseBody } from '@utils/http'
 import { useEffect, useState } from 'react'
 
 export const defaultPublicPinnedRoutes = ['SettingScreen', 'NotificationScreen', 'GameScreen', 'AiScreen']
@@ -16,7 +17,7 @@ export function usePinnedRoutes(storageKey: string, defaults: string[]) {
                     return
                 }
 
-                const parsed = JSON.parse(stored)
+                const parsed = parseResponseBody(stored)
 
                 if (Array.isArray(parsed)) {
                     setPinnedRoutes(parsed.filter((route): route is string => typeof route === 'string'))
