@@ -31,7 +31,7 @@ import AdScreen from '@screens/ads'
 import EventScreen from '@screens/event'
 import MenuScreen from '@screens/menu'
 import MS from '@styles/menuStyles'
-import TagInfo from '@components/shared/tagInfo'
+import T from '@styles/text'
 import NotificationModal from '@components/shared/notificationModal'
 import NotificationScreen from '@screens/menu/notifications'
 import ProfileScreen from '@screens/menu/profile'
@@ -76,12 +76,12 @@ import Header from './header'
 import * as SystemUI from 'expo-system-ui'
 import * as NavigationBar from 'expo-navigation-bar'
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs'
-import { NavigationContainer } from '@react-navigation/native'
+import { NavigationContainer, useNavigation } from '@react-navigation/native'
 import linking from '@utils/app/linking'
 import NotificationRuntime from '@utils/notification/navigateFromPushNotification'
 import { navigationRef } from '@utils/app/navigationRef'
 import { useSelector } from 'react-redux'
-import { Image, Platform } from 'react-native'
+import { Image, Platform, Text, TouchableOpacity, View } from 'react-native'
 import {
     StackCardInterpolatedStyle,
     StackCardInterpolationProps,
@@ -255,6 +255,34 @@ function Tabs(): JSX.Element {
                 })}
             />
         </Tab.Navigator>
+    )
+}
+
+function TagInfo() {
+    const { theme } = useSelector((state: ReduxState) => state.theme)
+    const { tag } = useSelector((state: ReduxState) => state.event)
+    const navigation = useNavigation()
+
+    return (
+        <TouchableOpacity
+            style={{ flex: 1, justifyContent: 'flex-end' }}
+            onPress={() => navigation.goBack()}
+            activeOpacity={1}
+        >
+            <View
+                style={{
+                    backgroundColor: theme.dark,
+                    borderRadius: 20,
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                }}
+                testID='TagInfo'
+            >
+                <Text style={{ ...T.text20, color: theme.textColor, marginTop: 5 }}>{tag.title}</Text>
+                <Text style={{ ...T.text18, color: theme.textColor, margin: 5, marginHorizontal: 12 }}>{tag.body}</Text>
+            </View>
+            <View style={{ height: 20, backgroundColor: theme.dark }} />
+        </TouchableOpacity>
     )
 }
 
