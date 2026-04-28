@@ -21,6 +21,10 @@ jobs:
     timeout-minutes: 180
     env:
       GOOGLE_PLAY_SERVICE_ACCOUNT_JSON_BASE64: ${{ secrets.GOOGLE_PLAY_SERVICE_ACCOUNT_JSON_BASE64 }}
+      ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+      ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+      ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+      ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
       GOOGLE_PLAY_TRACK: internal
       RUNNER_TOOL_CACHE: /Users/tekkom/actions-runner/nucleus/_work/_tool
       CI: '1'
@@ -54,6 +58,12 @@ jobs:
 
       - name: Test project
         run: npm test -- --runInBand
+
+      - name: Generate Android project locally
+        run: npx expo prebuild --platform android --clean --no-install
+
+      - name: Configure Android release signing
+        run: node scripts/ci/configure-android-release-signing.mjs
 
       - name: Write Google Play service account key
         run: |
@@ -101,6 +111,9 @@ jobs:
 
       - name: Test project
         run: npm test -- --runInBand
+
+      - name: Generate iOS project locally
+        run: npx expo prebuild --platform ios --clean --no-install
 
       - name: Build and submit iOS directly with Fastlane
         run: bundle exec fastlane ios release

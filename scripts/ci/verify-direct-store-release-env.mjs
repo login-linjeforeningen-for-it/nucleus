@@ -22,6 +22,10 @@ const iosEnv = [
 
 const androidEnv = [
     'GOOGLE_PLAY_SERVICE_ACCOUNT_JSON_BASE64',
+    'ANDROID_KEYSTORE_BASE64',
+    'ANDROID_KEYSTORE_PASSWORD',
+    'ANDROID_KEY_ALIAS',
+    'ANDROID_KEY_PASSWORD',
 ]
 
 for (const file of requiredFiles) {

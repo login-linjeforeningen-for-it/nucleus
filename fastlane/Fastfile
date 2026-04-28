@@ -12,7 +12,7 @@ platform :ios do
     )
 
     cocoapods(
-      podfile: 'ios/Podfile'
+      project_directory: 'ios'
     )
 
     build_app(
