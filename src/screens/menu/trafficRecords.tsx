@@ -8,7 +8,8 @@ import { getTrafficDomains, getTrafficRecords } from '@utils/queenbee/api'
 import { JSX, useEffect, useState } from 'react'
 import { Dimensions, Pressable, RefreshControl, ScrollView, View } from 'react-native'
 import { useSelector } from 'react-redux'
-import { DomainPicker, SummaryCard, TrafficRecordCard, TrafficTabs } from './traffic/shared'
+import { SummaryCard, TrafficRecordCard } from './traffic/cards'
+import { DomainPicker, TrafficTabs } from './traffic/nav'
 
 const PAGE_SIZE = 25
 

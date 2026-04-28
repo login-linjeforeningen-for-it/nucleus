@@ -12,7 +12,8 @@ import {
 import { JSX, useEffect, useState } from 'react'
 import { Dimensions, RefreshControl, ScrollView, View } from 'react-native'
 import { useSelector } from 'react-redux'
-import { DomainPicker, MetricList, SummaryCard, TrafficRecordCard, TrafficTabs } from './traffic/shared'
+import { MetricList, SummaryCard, TrafficRecordCard } from './traffic/cards'
+import { DomainPicker, TrafficTabs } from './traffic/nav'
 
 export default function TrafficScreen({ navigation }: MenuProps<'TrafficScreen'>): JSX.Element {
     const { theme } = useSelector((state: ReduxState) => state.theme)

@@ -15,7 +15,8 @@ import {
 import { TrafficCountrySummary, TrafficRecordPreview, TrafficSummary } from './traffic/trafficMapCards'
 import TrafficMapPanel from './traffic/trafficMapPanel'
 import { useTrafficMapState } from './traffic/useTrafficMapState'
-import { MetricList, TrafficTabs } from './traffic/shared'
+import { MetricList } from './traffic/cards'
+import { TrafficTabs } from './traffic/nav'
 
 export default function TrafficMapScreen({ navigation }: MenuProps<'TrafficMapScreen'>) {
     const { theme } = useSelector((state: ReduxState) => state.theme)

@@ -5,7 +5,7 @@ import T from '@styles/text'
 import { View } from 'react-native'
 import { useSelector } from 'react-redux'
 import { NORWAY, haversineKilometers } from './mapUtils'
-import { StatusBadge, SummaryCard } from './shared'
+import { StatusBadge, SummaryCard } from './cards'
 import { useTrafficMapState } from './useTrafficMapState'
 
 export function TrafficSummary({ countryCount, requestCount, status }: { countryCount: number, requestCount: number, status: string }) {
