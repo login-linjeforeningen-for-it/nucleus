@@ -1,4 +1,5 @@
 import config from '@/constants'
+import { parseResponseBody, toRecord } from '@utils/http'
 
 type RequestOptions = {
     timeoutMs?: number
@@ -138,7 +139,11 @@ export function buildSearchAnimationLink(query: string, engine: 'google' | 'duck
 
 export function decodeSearchAnimationToken(token: string): { query: string; engine: 'google' | 'duckduckgo' | 'brave' } | null {
     try {
-        const parsed = JSON.parse(decodeBase64Url(token)) as Record<string, unknown>
+        const parsed = toRecord(parseResponseBody(decodeBase64Url(token)))
+        if (!parsed) {
+            return null
+        }
+
         const query = typeof parsed.query === 'string' ? parsed.query.trim() : ''
 
         if (!query) {

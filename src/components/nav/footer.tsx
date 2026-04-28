@@ -9,6 +9,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import { JSX, useEffect, useState } from 'react'
 import Svg, { Path } from 'react-native-svg'
+import { parseNotificationList } from '@utils/notification/list'
 
 type FooterProps = {
     state: TabNavigationState<ParamListBase>
@@ -167,18 +168,9 @@ function NotificationIcon({ position }: NotificationIconProps) {
 
 async function unreadNotifications(): Promise<boolean> {
     const notifications = await AsyncStorage.getItem('notificationList')
+    const parsed = parseNotificationList(notifications)
 
-    if (notifications) {
-        const parsed = JSON.parse(notifications)
-
-        for (let i = 0; i < parsed.length; i++) {
-            if (!('read' in parsed[i]) || parsed[i].read == false) {
-                return true
-            }
-        }
-    }
-
-    return false
+    return parsed.some(notification => notification.read === false)
 }
 
 function resolveMenuTarget(route: Route<string>) {

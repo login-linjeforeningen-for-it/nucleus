@@ -2,6 +2,7 @@ import Cluster from '@/components/shared/cluster'
 import Space from '@/components/shared/utils'
 import Text from '@components/shared/text'
 import T from '@styles/text'
+import { parseResponseBody } from '@utils/http'
 import { View } from 'react-native'
 import { useSelector } from 'react-redux'
 
@@ -102,11 +103,7 @@ function DatePill({ label, value }: { label: string; value: string }) {
 
 function formatHoneyPreview(text?: string) {
     if (!text) return ''
-    try {
-        return flattenHoneyText(JSON.parse(text)).join('\n')
-    } catch {
-        return text
-    }
+    return flattenHoneyText(parseResponseBody(text)).join('\n')
 }
 
 function flattenHoneyText(value: unknown, prefix = ''): string[] {

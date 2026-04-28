@@ -10,6 +10,7 @@ import {
     selectBestNativeClient,
     switchAiConversationClient,
 } from '@utils/queenbee/api'
+import { parseResponseBody, toRecord } from '@utils/http'
 import { useEffect, useMemo, useRef, useState } from 'react'
 
 type NativeChatSession = {
@@ -64,7 +65,11 @@ export default function useAiChat(text: AiText) {
 
         ws.onmessage = (event) => {
             try {
-                const message = JSON.parse(event.data) as NativeSocketMessage
+                const message = toRecord(parseResponseBody(event.data))
+                if (!message) {
+                    throw new Error('Invalid socket message')
+                }
+
                 handleSocketMessage(message)
             } catch (err) {
                 console.log(err)
