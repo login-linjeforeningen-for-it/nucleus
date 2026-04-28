@@ -72,34 +72,37 @@ export async function fetchAlbumDetails(albumID: number): Promise<GetAlbumProps 
 }
 
 export async function fetchRules(limit = 20): Promise<GetRulesProps> {
-    try {
-        const response = await fetch(`${config.api}/rules?limit=${limit}`)
-        if (!response.ok) throw new Error('Failed to fetch rules')
-        const data = await response.json()
-        return { rules: Array.isArray(data?.rules) ? data.rules : [], total_count: typeof data?.total_count === 'number' ? data.total_count : 0 }
-    } catch {
-        return { rules: [], total_count: 0 }
-    }
+    return await fetchCollection('rules', limit)
 }
 
 export async function fetchLocations(limit = 20): Promise<GetLocationsProps> {
-    try {
-        const response = await fetch(`${config.api}/locations?limit=${limit}`)
-        if (!response.ok) throw new Error('Failed to fetch locations')
-        const data = await response.json()
-        return { locations: Array.isArray(data?.locations) ? data.locations : [], total_count: typeof data?.total_count === 'number' ? data.total_count : 0 }
-    } catch {
-        return { locations: [], total_count: 0 }
-    }
+    return await fetchCollection('locations', limit)
 }
 
 export async function fetchOrganizations(limit = 20): Promise<GetOrganizationsProps> {
+    return await fetchCollection('organizations', limit)
+}
+
+type PublicContentCollections = {
+    rules: GetRulesProps
+    locations: GetLocationsProps
+    organizations: GetOrganizationsProps
+}
+
+async function fetchCollection<Key extends keyof PublicContentCollections>(
+    key: Key,
+    limit: number
+): Promise<PublicContentCollections[Key]> {
     try {
-        const response = await fetch(`${config.api}/organizations?limit=${limit}`)
-        if (!response.ok) throw new Error('Failed to fetch organizations')
+        const response = await fetch(`${config.api}/${key}?limit=${limit}`)
+        if (!response.ok) throw new Error(`Failed to fetch ${key}`)
         const data = await response.json()
-        return { organizations: Array.isArray(data?.organizations) ? data.organizations : [], total_count: typeof data?.total_count === 'number' ? data.total_count : 0 }
+
+        return {
+            [key]: Array.isArray(data?.[key]) ? data[key] : [],
+            total_count: typeof data?.total_count === 'number' ? data.total_count : 0,
+        } as unknown as PublicContentCollections[Key]
     } catch {
-        return { organizations: [], total_count: 0 }
+        return { [key]: [], total_count: 0 } as unknown as PublicContentCollections[Key]
     }
 }
