@@ -100,11 +100,11 @@ export default function ChatPicker({
                             key={conversation.id}
                             renderLeftActions={() => <HideAction hidden={hidden} theme={theme} />}
                             renderRightActions={() => (
-                                <View style={{ flexDirection: 'row', gap: 8 }}>
+                                <View style={{ flexDirection: 'row', alignItems: 'stretch' }}>
                                     <Pressable onPress={() => onDelete(conversation.id)}>
                                         <DeleteAction />
                                     </Pressable>
-                                    <Pressable onPress={() => togglePinnedRoute(conversation.id)}>
+                                    <Pressable onPress={() => togglePinnedRoute(conversation.id)} style={{ marginLeft: 8 }}>
                                         <PinAction pinned={pinned} theme={theme} />
                                     </Pressable>
                                 </View>
