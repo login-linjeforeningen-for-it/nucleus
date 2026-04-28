@@ -1221,6 +1221,10 @@ type Theme = {
     orangeTransparentBorderHighlighted: string
     greyTransparent: string
     greyTransparentBorder: string
+    glassButtonActive: string
+    glassButtonPressed: string
+    glassButtonSubtle: string
+    filterResetBackground: string
     discord: string
     textColor: string
     titleTextColor: string

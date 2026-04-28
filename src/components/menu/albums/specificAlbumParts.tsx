@@ -67,13 +67,11 @@ export function SpecificAlbumSummary({
 }
 
 export function AlbumDownloadButton({
-    headerActionTop,
     onPress,
     showDownloadSheet,
     text,
     theme,
 }: {
-    headerActionTop: number
     onPress: () => void
     showDownloadSheet: boolean
     text: any
@@ -86,10 +84,6 @@ export function AlbumDownloadButton({
             testID='album-download-button'
             onPress={onPress}
             style={({ pressed }) => ({
-                position: 'absolute',
-                right: 18,
-                top: headerActionTop,
-                zIndex: 14,
                 width: 42,
                 height: 42,
                 borderRadius: 21,

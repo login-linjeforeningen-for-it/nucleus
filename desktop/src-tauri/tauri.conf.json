@@ -1,42 +1,42 @@
 {
-  "$schema": "https://schema.tauri.app/config/2",
-  "productName": "Login Desktop",
-  "version": "0.1.1",
-  "identifier": "no.login.desktop",
-  "build": {
-    "beforeDevCommand": "npm run dev",
-    "devUrl": "http://127.0.0.1:14321",
-    "beforeBuildCommand": "npm run build",
-    "frontendDist": "../dist"
-  },
-  "app": {
-    "windows": [
-      {
-        "title": "Login Desktop",
-        "width": 1440,
-        "height": 920,
-        "minWidth": 1100,
-        "minHeight": 720,
-        "resizable": true,
-        "fullscreen": false
-      }
-    ],
-    "security": {
-      "csp": null
+    "$schema": "https://schema.tauri.app/config/2",
+    "productName": "Login Desktop",
+    "version": "0.1.1",
+    "identifier": "no.login.desktop",
+    "build": {
+        "beforeDevCommand": "npm run dev",
+        "devUrl": "http://127.0.0.1:14321",
+        "beforeBuildCommand": "npm run build",
+        "frontendDist": "../dist"
+    },
+    "app": {
+        "windows": [
+            {
+                "title": "Login Desktop",
+                "width": 1440,
+                "height": 920,
+                "minWidth": 1100,
+                "minHeight": 720,
+                "resizable": true,
+                "fullscreen": false
+            }
+        ],
+        "security": {
+            "csp": null
+        }
+    },
+    "bundle": {
+        "active": true,
+        "targets": ["app"],
+        "createUpdaterArtifacts": true,
+        "icon": ["icons/icon.png"]
+    },
+    "plugins": {
+        "updater": {
+            "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDc4NzZFM0MzNjdFRDlEMzkKUldRNW5lMW53K04yZUFKOHFGYmdpODR5RWdKSXRqZWpINUpWMUVnSGI3SzBRNHl5Rk1TUWZmd2gK",
+            "endpoints": [
+                "https://hanasand.com/api/app/{{target}}/{{current_version}}"
+            ]
+        }
     }
-  },
-  "bundle": {
-    "active": true,
-    "targets": ["app"],
-    "createUpdaterArtifacts": true,
-    "icon": ["icons/icon.png"]
-  },
-  "plugins": {
-    "updater": {
-      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDc4NzZFM0MzNjdFRDlEMzkKUldRNW5lMW53K04yZUFKOHFGYmdpODR5RWdKSXRqZWpINUpWMUVnSGI3SzBRNHl5Rk1TUWZmd2gK",
-      "endpoints": [
-        "https://hanasand.com/api/app/{{target}}/{{current_version}}"
-      ]
-    }
-  }
 }

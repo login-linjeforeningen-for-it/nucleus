@@ -1,29 +1,29 @@
 {
-  "name": "login-desktop",
-  "version": "0.1.1",
-  "private": true,
-  "type": "module",
-  "scripts": {
-    "dev": "vite --host 127.0.0.1",
-    "build": "node ../scripts/desktop/check-update-endpoints.mjs && tsc && vite build",
-    "preview": "vite preview --host 127.0.0.1",
-    "tauri": "tauri",
-    "desktop:dev": "tauri dev",
-    "desktop:build": "tauri build"
-  },
-  "dependencies": {
-    "@tauri-apps/api": "^2.8.0",
-    "@tauri-apps/plugin-opener": "^2.5.0",
-    "@vitejs/plugin-react": "^5.1.1",
-    "vite": "^7.2.7",
-    "typescript": "^5.9.3",
-    "react": "^19.2.0",
-    "react-dom": "^19.2.0",
-    "lucide-react": "^0.468.0"
-  },
-  "devDependencies": {
-    "@tauri-apps/cli": "^2.8.4",
-    "@types/react": "^19.2.14",
-    "@types/react-dom": "^19.2.3"
-  }
+    "name": "login-desktop",
+    "version": "0.1.1",
+    "private": true,
+    "type": "module",
+    "scripts": {
+        "dev": "vite --host 127.0.0.1",
+        "build": "node ../scripts/desktop/check-update-endpoints.mjs && tsc && vite build",
+        "preview": "vite preview --host 127.0.0.1",
+        "tauri": "tauri",
+        "desktop:dev": "tauri dev",
+        "desktop:build": "tauri build"
+    },
+    "dependencies": {
+        "@tauri-apps/api": "^2.8.0",
+        "@tauri-apps/plugin-opener": "^2.5.0",
+        "@vitejs/plugin-react": "^5.1.1",
+        "vite": "^7.2.7",
+        "typescript": "^5.9.3",
+        "react": "^19.2.0",
+        "react-dom": "^19.2.0",
+        "lucide-react": "^0.468.0"
+    },
+    "devDependencies": {
+        "@tauri-apps/cli": "^2.8.4",
+        "@types/react": "^19.2.14",
+        "@types/react-dom": "^19.2.3"
+    }
 }
