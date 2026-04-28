@@ -83,6 +83,10 @@ jobs:
         run: |
           printf '%s' "$GOOGLE_PLAY_SERVICE_ACCOUNT_JSON_BASE64" | base64 --decode > google-play-service-account.json
 
+      - name: Validate Google Play service account key
+        run: |
+          bundle exec ruby -rgoogleauth -e "creds = Google::Auth::ServiceAccountCredentials.make_creds(json_key_io: File.open('google-play-service-account.json'), scope: ['https://www.googleapis.com/auth/androidpublisher']); creds.fetch_access_token!"
+
       - name: Build and submit Android directly with Fastlane
         run: bundle exec fastlane android release
 
@@ -131,10 +135,10 @@ jobs:
 
       - name: Ensure iOS platform is installed
         run: |
-          if xcodebuild -showsdks | grep -q iphoneos; then
+          if xcodebuild -showsdks | grep -q iphoneos26.2; then
             exit 0
           fi
-          xcodebuild -downloadPlatform iOS
+          xcodebuild -downloadPlatform iOS -buildVersion 26.2
 
       - name: Build and submit iOS directly with Fastlane
         run: bundle exec fastlane ios release
