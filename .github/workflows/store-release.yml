@@ -44,6 +44,9 @@ jobs:
           distribution: temurin
           java-version: '17'
 
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+
       - name: Setup Ruby for Fastlane
         uses: ruby/setup-ruby@v1
         with:
@@ -125,6 +128,13 @@ jobs:
 
       - name: Generate iOS project locally
         run: npx expo prebuild --platform ios --clean --no-install
+
+      - name: Ensure iOS platform is installed
+        run: |
+          if xcodebuild -showsdks | grep -q iphoneos; then
+            exit 0
+          fi
+          xcodebuild -downloadPlatform iOS
 
       - name: Build and submit iOS directly with Fastlane
         run: bundle exec fastlane ios release
