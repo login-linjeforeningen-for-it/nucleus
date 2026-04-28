@@ -12,7 +12,7 @@ concurrency:
 
 jobs:
   android:
-    name: EAS build and submit Android
+    name: Local build and submit Android
     runs-on:
       - self-hosted
       - macOS
@@ -21,6 +21,7 @@ jobs:
     timeout-minutes: 180
     env:
       EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+      GOOGLE_PLAY_SERVICE_ACCOUNT_JSON_BASE64: ${{ secrets.GOOGLE_PLAY_SERVICE_ACCOUNT_JSON_BASE64 }}
       RUNNER_TOOL_CACHE: /Users/tekkom/actions-runner/nucleus/_work/_tool
       CI: '1'
     steps:
@@ -33,20 +34,35 @@ jobs:
           node-version: 25.8.1
           cache: npm
 
+      - name: Setup Java for Android local build
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
       - name: Install dependencies
         run: npm ci
 
       - name: Preflight EAS store release
-        run: node scripts/ci/verify-store-release-env.mjs --strict
+        run: node scripts/ci/verify-store-release-env.mjs --strict --platform=android
 
       - name: Test project
         run: npm test -- --runInBand
 
-      - name: Build and submit to Google Play through EAS
-        run: npx eas-cli@latest build --platform android --profile production --auto-submit --wait --non-interactive
+      - name: Write Google Play service account key
+        run: |
+          printf '%s' "$GOOGLE_PLAY_SERVICE_ACCOUNT_JSON_BASE64" | base64 --decode > google-play-service-account.json
+
+      - name: Build Android locally
+        run: |
+          mkdir -p dist
+          npx eas-cli@latest build --local --platform android --profile production --output ./dist/login-android.aab --non-interactive
+
+      - name: Submit Android artifact to Google Play
+        run: npx eas-cli@latest submit --platform android --profile production --path ./dist/login-android.aab --wait --non-interactive
 
   ios:
-    name: EAS build and submit iOS
+    name: Local build and submit iOS
     runs-on:
       - self-hosted
       - macOS
@@ -67,14 +83,28 @@ jobs:
           node-version: 25.8.1
           cache: npm
 
+      - name: Setup Ruby for CocoaPods
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.3'
+          bundler-cache: true
+
       - name: Install dependencies
         run: npm ci
 
       - name: Preflight EAS store release
-        run: node scripts/ci/verify-store-release-env.mjs --strict
+        run: node scripts/ci/verify-store-release-env.mjs --strict --platform=ios
 
       - name: Test project
         run: npm test -- --runInBand
 
-      - name: Build and submit to TestFlight through EAS
-        run: npx eas-cli@latest build --platform ios --profile production --auto-submit --wait --non-interactive
+      - name: Add bundled CocoaPods to PATH
+        run: echo "$PWD/vendor/bundle/ruby/3.3.0/bin" >> "$GITHUB_PATH"
+
+      - name: Build iOS locally
+        run: |
+          mkdir -p dist
+          npx eas-cli@latest build --local --platform ios --profile production --output ./dist/login-ios.ipa --non-interactive
+
+      - name: Submit iOS artifact to TestFlight
+        run: npx eas-cli@latest submit --platform ios --profile production --path ./dist/login-ios.ipa --wait --non-interactive

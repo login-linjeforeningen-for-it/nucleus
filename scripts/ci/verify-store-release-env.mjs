@@ -11,6 +11,8 @@ const requiredEnv = [
 ]
 
 const strict = process.argv.includes('--strict')
+const platformArg = process.argv.find((arg) => arg.startsWith('--platform='))
+const platform = platformArg ? platformArg.split('=')[1] : 'all'
 const failures = []
 
 for (const file of requiredFiles) {
@@ -46,13 +48,21 @@ if (existsSync('eas.json')) {
     if (eas.submit?.production?.android?.track !== 'internal') {
         failures.push('eas.json submit.production.android.track must be "internal"')
     }
+    if (eas.submit?.production?.android && !eas.submit.production.android.serviceAccountKeyPath) {
+        failures.push('eas.json submit.production.android.serviceAccountKeyPath must point at the Play service account file')
+    }
     if (eas.submit?.production?.ios && !eas.submit.production.ios.ascAppId) {
         failures.push('eas.json submit.production.ios.ascAppId must target the App Store Connect app')
     }
 }
 
 if (strict) {
-    for (const key of requiredEnv) {
+    const platformEnv = [
+        ...requiredEnv,
+        ...(platform === 'all' || platform === 'android' ? ['GOOGLE_PLAY_SERVICE_ACCOUNT_JSON_BASE64'] : []),
+    ]
+
+    for (const key of platformEnv) {
         if (!process.env[key]) {
             failures.push(`Missing required CI secret/env: ${key}`)
         }
@@ -67,4 +77,4 @@ if (failures.length) {
     process.exit(1)
 }
 
-console.log(`Store release preflight passed (${strict ? 'strict' : 'local'} mode).`)
+console.log(`Store release preflight passed (${strict ? 'strict' : 'local'} mode, platform=${platform}).`)
