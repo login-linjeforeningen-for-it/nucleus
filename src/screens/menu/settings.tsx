@@ -1,16 +1,17 @@
-import { View, Dimensions, Platform } from 'react-native'
+import { View, Dimensions, Platform, TouchableOpacity, Image } from 'react-native'
 import { ScrollView } from 'react-native-gesture-handler'
-import ThemeSwitch from '@/components/settings/themeSwitch'
 import Reminders from '@/components/settings/reminders'
 import Language from '@/components/settings/language'
 import Space from '@/components/shared/utils'
 import GS from '@styles/globalStyles'
-import { useSelector } from 'react-redux'
+import SS from '@styles/settingStyles'
+import { useDispatch, useSelector } from 'react-redux'
 import en from '@text/menu/settings/en.json'
 import no from '@text/menu/settings/no.json'
 import Swipe from '@components/nav/swipe'
 import { JSX } from 'react'
 import { SectionHeader, SettingRow, SwitchCluster } from '@/components/settings/settingsRows'
+import { changeTheme, resetTheme } from '@redux/theme'
 
 export default function SettingScreen(): JSX.Element {
 
@@ -64,5 +65,50 @@ function Content(): JSX.Element {
             <Reminders />
             <Space height={Dimensions.get('window').height / (Platform.OS === 'ios' ? 9 : 7)} />
         </ScrollView>
+    )
+}
+
+function ThemeSwitch() {
+    const { value } = useSelector((state: ReduxState) => state.theme)
+    const dispatch = useDispatch()
+
+    return (
+        <View style={{ height: 40, width: 56, justifyContent: 'center', alignItems: 'flex-end' }}>
+            <TouchableOpacity
+                onPress={() => value > 3 ? dispatch(resetTheme()) : dispatch(changeTheme())}
+                style={{ height: 40, width: 56, justifyContent: 'center', alignItems: 'flex-end' }}
+            >
+                {value === 0 ? (
+                    <Image
+                        style={[SS.lightSwitchImage, { transform: [{ translateX: 15 }] }]}
+                        source={require('@assets/themes/sun.png')}
+                    />
+                ) : null}
+                {value === 1 ? (
+                    <Image
+                        style={[SS.lightSwitchImage, { transform: [{ translateX: 15 }] }]}
+                        source={require('@assets/themes/abyss.png')}
+                    />
+                ) : null}
+                {value === 2 ? (
+                    <Image
+                        style={[SS.lightSwitchImage, { transform: [{ translateX: 15 }] }]}
+                        source={require('@assets/themes/sunset.png')}
+                    />
+                ) : null}
+                {value === 3 ? (
+                    <Image
+                        style={[SS.lightSwitchImage, { transform: [{ translateX: 15 }] }]}
+                        source={require('@assets/themes/christmas.png')}
+                    />
+                ) : null}
+                {value === 4 ? (
+                    <Image
+                        style={[SS.lightSwitchImage, { transform: [{ translateX: 15 }] }]}
+                        source={require('@assets/themes/moon.png')}
+                    />
+                ) : null}
+            </TouchableOpacity>
+        </View>
     )
 }
