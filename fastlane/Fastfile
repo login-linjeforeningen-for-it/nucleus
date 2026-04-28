@@ -8,6 +8,7 @@ repo_root = File.expand_path('..', __dir__)
 ios_dir = File.join(repo_root, 'ios')
 android_dir = File.join(repo_root, 'android')
 google_play_key = File.join(repo_root, 'google-play-service-account.json')
+ios_app_identifier = 'com.eirikhanasand.Login'
 
 platform :ios do
   lane :release do
@@ -23,12 +24,25 @@ platform :ios do
 
     sh("cd #{ios_dir.shellescape} && bundle exec pod install")
 
+    get_certificates(
+      api_key: api_key,
+      development: false
+    )
+
+    get_provisioning_profile(
+      api_key: api_key,
+      app_identifier: ios_app_identifier,
+      force: true
+    )
+    profile_name = lane_context[SharedValues::SIGH_NAME]
+
     update_code_signing_settings(
       path: File.join(ios_dir, 'Login.xcodeproj'),
-      use_automatic_signing: true,
+      use_automatic_signing: false,
       team_id: ENV.fetch('APPLE_TEAM_ID'),
       targets: ['Login'],
       build_configurations: ['Release'],
+      profile_name: profile_name,
       code_sign_identity: 'Apple Distribution'
     )
 
@@ -38,16 +52,18 @@ platform :ios do
       configuration: 'Release',
       export_method: 'app-store',
       export_options: {
-        signingStyle: 'automatic',
-        teamID: ENV.fetch('APPLE_TEAM_ID')
+        signingStyle: 'manual',
+        teamID: ENV.fetch('APPLE_TEAM_ID'),
+        provisioningProfiles: {
+          ios_app_identifier => profile_name
+        }
       },
       xcargs: [
         '-allowProvisioningUpdates',
         "-authenticationKeyPath #{asc_key_path.shellescape}",
         "-authenticationKeyID #{ENV.fetch('ASC_KEY_ID').shellescape}",
         "-authenticationKeyIssuerID #{ENV.fetch('ASC_ISSUER_ID').shellescape}",
-        "DEVELOPMENT_TEAM=#{ENV.fetch('APPLE_TEAM_ID').shellescape}",
-        'CODE_SIGN_STYLE=Automatic'
+        "DEVELOPMENT_TEAM=#{ENV.fetch('APPLE_TEAM_ID').shellescape}"
       ].join(' ')
     )
 
