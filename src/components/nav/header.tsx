@@ -8,12 +8,13 @@
 import GS from '@styles/globalStyles'
 import { ReactNode, useMemo, useState } from 'react'
 import { NavButton, NavDropdown, InternalNavRoute } from '@components/menu/queenbee/internalNavMenu'
-import { Dimensions, Platform, View, Text, Pressable, StyleSheet } from 'react-native'
+import { Dimensions, Platform, View } from 'react-native'
 import { HeaderProps } from '@/interfaces'
 import { useSelector } from 'react-redux'
 import { useDispatch } from 'react-redux'
 import { setTag } from '@redux/event'
-import { BlurWrapper, HeaderGlassBackground } from './headerBackground'
+import { BlurWrapper } from './headerBackground'
+import { HeaderBackButton, HeaderTitlePill } from './headerParts'
 import {
     HEADER_RIGHT_INSET,
     HEADER_TITLE_GAP,
@@ -115,70 +116,21 @@ export default function Header({ options, route, navigation }: HeaderProps): Rea
                     {options.headerComponents?.left ? options.headerComponents?.left.map((node, index) =>
                         <View style={GS.headerLeftSlot} key={index}>{node}</View>
                     ) :
-                        <Pressable
+                        <HeaderBackButton
                             onPress={handlePress}
-                            style={({ pressed }) => ({
-                                ...GS.headerLeftSlot,
-                                borderRadius: 21,
-                                overflow: 'hidden',
-                                borderWidth: 1,
-                                borderColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.08)',
-                                backgroundColor: pressed
-                                    ? (isDark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.05)')
-                                    : 'transparent',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                shadowColor: '#000',
-                                shadowOpacity: isDark ? 0.12 : 0.05,
-                                shadowRadius: 8,
-                                shadowOffset: { width: 0, height: 3 },
-                                elevation: 3,
-                            })}
-                        >
-                            <HeaderGlassBackground borderRadius={21} />
-                            <Text style={{
-                                color: theme.orange,
-                                fontSize: 26,
-                                lineHeight: 28,
-                                fontWeight: '600',
-                                marginLeft: -2,
-                                marginTop: Platform.OS === 'ios' ? -1 : -3,
-                            }}>
-                                ‹
-                            </Text>
-                        </Pressable>
+                            isDark={isDark}
+                            theme={theme}
+                        />
                     }
                 </View>
                 {!exceptions.includes(route.name) && (
-                    <View style={{
-                        ...GS.headerTitleFrame,
-                        left: titleLeft,
-                        width: titleWidth,
-                    }}>
-                        <HeaderGlassBackground borderRadius={16} />
-                        <Text style={{
-                            ...GS.headerTitle,
-                            color: theme.textColor,
-                            textAlign: 'center',
-                            fontWeight: '700',
-                            letterSpacing: 0.2,
-                            textShadowColor: isDark ? 'rgba(0,0,0,0.16)' : 'rgba(255,255,255,0.12)',
-                            textShadowOffset: { width: 0, height: 1 },
-                            textShadowRadius: 6,
-                            paddingHorizontal: 14,
-                        }}>
-                            {title}
-                        </Text>
-                        <View
-                            pointerEvents='none'
-                            style={{
-                                ...StyleSheet.absoluteFillObject,
-                                borderRadius: 16,
-                                borderWidth: 1,
-                                borderColor: 'rgba(255,255,255,0.14)',
-                            }}
-                        />
-                    </View>
+                    <HeaderTitlePill
+                        isDark={isDark}
+                        theme={theme}
+                        title={title}
+                        left={titleLeft}
+                        width={titleWidth}
+                    />
                 )}
                 <View style={{
                     ...GS.headerRightRail,
