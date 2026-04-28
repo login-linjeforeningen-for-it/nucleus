@@ -1,15 +1,7 @@
-import config from '@/constants'
+import { resolveCdnAssetUrl } from '@utils/general'
 
 export function resolveEventImageUrl(url: string | null | undefined) {
-    if (!url) {
-        return ''
-    }
-
-    if (url.startsWith('http://') || url.startsWith('https://')) {
-        return url
-    }
-
-    return `${config.cdn}/img/events/${url.replace(/^\/+/, '')}`
+    return resolveCdnAssetUrl(url, 'events')
 }
 
 export function formatEventDate(dateValue: string, lang: boolean) {

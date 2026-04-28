@@ -1,15 +1,7 @@
-import config from '@/constants'
+import { resolveCdnAssetUrl } from '@utils/general'
 
 export function resolveAssetUrl(url: string | null | undefined, folder: 'jobs' | 'organizations') {
-    if (!url) {
-        return ''
-    }
-
-    if (url.startsWith('http://') || url.startsWith('https://')) {
-        return url
-    }
-
-    return `${config.cdn}/img/${folder}/${url.replace(/^\/+/, '')}`
+    return resolveCdnAssetUrl(url, folder)
 }
 
 export function formatList(value: string[] | null | undefined) {

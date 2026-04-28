@@ -1,3 +1,5 @@
+import config from '@/constants'
+
 type GetCategoriesProps = {
     lang: boolean
     categories: {
@@ -43,4 +45,16 @@ export function formatSourceLabel(source: string, fallback = '') {
 
 export function formatAdditionAction(action: 'created' | 'updated') {
     return action === 'created' ? 'Created' : 'Updated'
+}
+
+export function resolveCdnAssetUrl(url: string | null | undefined, folder: string) {
+    if (!url) {
+        return ''
+    }
+
+    if (url.startsWith('http://') || url.startsWith('https://')) {
+        return url
+    }
+
+    return `${config.cdn}/img/${folder}/${url.replace(/^\/+/, '')}`
 }
