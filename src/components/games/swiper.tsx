@@ -1,14 +1,19 @@
-import { View, Dimensions } from 'react-native'
+import { View } from 'react-native'
 import { Gesture, GestureDetector } from 'react-native-gesture-handler'
 import {
-    useAnimatedStyle,
     useSharedValue,
     withSpring,
-    interpolate,
 } from 'react-native-reanimated'
 import { scheduleOnRN } from 'react-native-worklets'
 import { GameCardNumber, GameContent, GameStackCard } from './swiperCards'
 import { useGameSwiperNavigation } from './useGameSwiperNavigation'
+import {
+    GAME_CARD_HEIGHT,
+    GAME_CARD_TOP,
+    SCREEN_WIDTH,
+    SWIPE_THRESHOLD,
+    useGameSwiperStyles,
+} from './useGameSwiperStyles'
 
 type GameListContentProps = {
     game: Question[] | NeverHaveIEver[] | OkRedFlagDealBreaker[]
@@ -17,15 +22,12 @@ type GameListContentProps = {
     ntnu: boolean
 }
 
-const { width: SCREEN_WIDTH } = Dimensions.get('window')
-const { height: SCREEN_HEIGHT } = Dimensions.get('window')
-const SWIPE_THRESHOLD = SCREEN_WIDTH * 0.25
-
 export default function Swiper({ game, mode, school, ntnu }: GameListContentProps) {
     const translateX = useSharedValue(0)
     const totalCards = game.length
     const startX = useSharedValue(0)
     const { nav, navigate } = useGameSwiperNavigation({ game, mode, school, ntnu })
+    const styles = useGameSwiperStyles(translateX)
 
     function onSwipeRight() {
         navigate('next')
@@ -69,188 +71,30 @@ export default function Swiper({ game, mode, school, ntnu }: GameListContentProp
             }
         })
 
-    // Animated styles for the top card (current card)
-    const animatedStyle = useAnimatedStyle(() => {
-        if (translateX.value < 0) {
-            const translateY = interpolate(
-                translateX.value,
-                [-SCREEN_WIDTH, 0, SCREEN_WIDTH],
-                [10, 0, 10],
-            )
-
-            const width = interpolate(
-                translateX.value,
-                [-SCREEN_WIDTH, 0, SCREEN_WIDTH],
-                [SCREEN_WIDTH * 0.8, SCREEN_WIDTH * 0.85, SCREEN_WIDTH * 0.8],
-            )
-
-            return {
-                width,
-                transform: [{ translateY }],
-            }
-        }
-
-        const rotate = `${(translateX.value / SCREEN_WIDTH) * 15}deg`
-
-        return {
-            top: SCREEN_HEIGHT * 0.16,
-            width: SCREEN_WIDTH * 0.85,
-            transform: [
-                { translateX: translateX.value },
-                { rotate }
-            ]
-        }
-    })
-
-    // Animated styles for the second card in the stack
-    const animatedSecondCardStyle = useAnimatedStyle(() => {
-        if (translateX.value < 0) {
-            const translateY = interpolate(
-                translateX.value,
-                [-SCREEN_WIDTH, 0, SCREEN_WIDTH],
-                [10, 0, 10]
-            )
-
-            const width = interpolate(
-                translateX.value,
-                [-SCREEN_WIDTH, 0, SCREEN_WIDTH],
-                [SCREEN_WIDTH * 0.75, SCREEN_WIDTH * 0.8, SCREEN_WIDTH * 0.75]
-            )
-
-            return {
-                width,
-                transform: [{ translateY }]
-            }
-        }
-
-        const translateY = interpolate(
-            translateX.value,
-            [SCREEN_HEIGHT * 0.45, 0, SCREEN_HEIGHT * 0.45],
-            [-9, 0, -9]
-        )
-
-        const width = interpolate(
-            translateX.value,
-            [-SCREEN_WIDTH, 0, SCREEN_WIDTH],
-            [SCREEN_WIDTH * 0.845, SCREEN_WIDTH * 0.8, SCREEN_WIDTH * 0.845],
-        )
-
-        return {
-            width,
-            height: SCREEN_HEIGHT * 0.45,
-            transform: [{ translateY }],
-        }
-    })
-
-    // Animated styles for the third card
-    const animatedThirdCardStyle = useAnimatedStyle(() => {
-        if (translateX.value < 0) {
-            const translateY = interpolate(
-                translateX.value,
-                [-SCREEN_WIDTH, 0, SCREEN_WIDTH],
-                [10, 0, 10],
-            )
-
-            const width = interpolate(
-                translateX.value,
-                [-SCREEN_WIDTH, 0, SCREEN_WIDTH],
-                [SCREEN_WIDTH * 0.7, SCREEN_WIDTH * 0.75, SCREEN_WIDTH * 0.7],
-            )
-
-            return {
-                width,
-                transform: [{ translateY }],
-            }
-        }
-
-        const translateY = interpolate(
-            translateX.value,
-            [SCREEN_HEIGHT * 0.45, 0, SCREEN_HEIGHT * 0.45],
-            [-9, 0, -9],
-        )
-
-        const width = interpolate(
-            translateX.value,
-            [-SCREEN_WIDTH, 0, SCREEN_WIDTH],
-            [SCREEN_WIDTH * 0.8, SCREEN_WIDTH * 0.75, SCREEN_WIDTH * 0.8],
-        )
-
-        return {
-            width,
-            height: SCREEN_HEIGHT * 0.45,
-            transform: [{ translateY }],
-        }
-    })
-
-    // Animated styles for the fourth card
-    const animatedFourthCardStyle = useAnimatedStyle(() => {
-        const translateY = interpolate(
-            translateX.value,
-            [-SCREEN_WIDTH, 0, SCREEN_WIDTH],
-            [-10, 0, -10],
-        )
-
-        const width = interpolate(
-            translateX.value,
-            [-SCREEN_WIDTH, 0, SCREEN_WIDTH],
-            [SCREEN_WIDTH * 0.75, SCREEN_WIDTH * 0.7, SCREEN_WIDTH * 0.75],
-        )
-
-        return {
-            width,
-            height: SCREEN_HEIGHT * 0.45,
-            transform: [{ translateY }],
-        }
-    })
-
-    const animatedHiddenCardStyle = useAnimatedStyle(() => {
-        if (translateX.value > 0) {
-            return {}
-        }
-
-        const left = interpolate(
-            translateX.value,
-            [-SCREEN_WIDTH, 0, SCREEN_WIDTH],
-            [0, SCREEN_WIDTH * 1.1, 0],
-        )
-
-        const rotation = interpolate(
-            translateX.value,
-            [-SCREEN_WIDTH, 0, SCREEN_WIDTH],
-            [0, 15, 0],
-        )
-
-        return {
-            width: SCREEN_WIDTH * 0.85,
-            left,
-            transform: [{ rotate: `${rotation + 0.5}deg` }],
-        }
-    })
-
     return (
         <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
             {/* Fifth card */}
             <GameStackCard style={{
-                top: SCREEN_HEIGHT * 0.16 + 30,
+                top: GAME_CARD_TOP + 30,
                 width: SCREEN_WIDTH * 0.7,
-                height: SCREEN_HEIGHT * 0.45,
+                height: GAME_CARD_HEIGHT,
             }} />
 
             {/* Forth card */}
             <GameStackCard style={[{
-                top: SCREEN_HEIGHT * 0.16 + 30,
-            }, animatedFourthCardStyle]} />
+                top: GAME_CARD_TOP + 30,
+            }, styles.fourthCard]} />
 
             {/* Third card */}
             <GameStackCard style={[{
-                top: SCREEN_HEIGHT * 0.16 + 20,
-            }, animatedThirdCardStyle]} />
+                top: GAME_CARD_TOP + 20,
+            }, styles.thirdCard]} />
 
             {/* Second card (next card) */}
             <GameStackCard style={[{
-                top: SCREEN_HEIGHT * 0.16 + 10,
+                top: GAME_CARD_TOP + 10,
                 padding: 16,
-            }, animatedSecondCardStyle]}>
+            }, styles.secondCard]}>
                 <GameCardNumber value={nav.uxIndex + 1} />
                 <GameContent game={game[(nav.dataIndex + 1) % totalCards]} />
             </GameStackCard>
@@ -258,10 +102,10 @@ export default function Swiper({ game, mode, school, ntnu }: GameListContentProp
             {/* Top card (current card) */}
             <GestureDetector gesture={panGesture}>
                 <GameStackCard style={[{
-                    top: SCREEN_HEIGHT * 0.16,
-                    height: SCREEN_HEIGHT * 0.45,
+                    top: GAME_CARD_TOP,
+                    height: GAME_CARD_HEIGHT,
                     padding: 16,
-                }, animatedStyle]}>
+                }, styles.topCard]}>
                     <GameCardNumber value={nav.uxIndex} />
                     <GameContent game={game[nav.dataIndex]} />
                 </GameStackCard>
@@ -269,11 +113,11 @@ export default function Swiper({ game, mode, school, ntnu }: GameListContentProp
 
             {/* Previous (hidden) card */}
             {nav.dataIndex > 0 && <GameStackCard style={[{
-                top: SCREEN_HEIGHT * 0.16,
+                top: GAME_CARD_TOP,
                 width: SCREEN_WIDTH * 0.85,
-                height: SCREEN_HEIGHT * 0.45,
+                height: GAME_CARD_HEIGHT,
                 padding: 16,
-            }, animatedHiddenCardStyle]} >
+            }, styles.hiddenCard]} >
                 <GameCardNumber value={nav.uxIndex - 1} />
                 <GameContent game={game[Math.max(0, nav.dataIndex - 1)]} />
             </GameStackCard>}
