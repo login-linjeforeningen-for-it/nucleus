@@ -12,7 +12,7 @@ concurrency:
 
 jobs:
   android:
-    name: Local build and submit Android
+    name: Build locally and submit Android
     runs-on:
       - self-hosted
       - macOS
@@ -20,8 +20,8 @@ jobs:
       - nucleus-release
     timeout-minutes: 180
     env:
-      EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
       GOOGLE_PLAY_SERVICE_ACCOUNT_JSON_BASE64: ${{ secrets.GOOGLE_PLAY_SERVICE_ACCOUNT_JSON_BASE64 }}
+      GOOGLE_PLAY_TRACK: internal
       RUNNER_TOOL_CACHE: /Users/tekkom/actions-runner/nucleus/_work/_tool
       CI: '1'
     steps:
@@ -40,11 +40,17 @@ jobs:
           distribution: temurin
           java-version: '17'
 
+      - name: Setup Ruby for Fastlane
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.3'
+          bundler-cache: true
+
       - name: Install dependencies
         run: npm ci
 
-      - name: Preflight EAS store release
-        run: node scripts/ci/verify-store-release-env.mjs --strict --platform=android
+      - name: Preflight direct store release
+        run: node scripts/ci/verify-direct-store-release-env.mjs --strict --platform=android
 
       - name: Test project
         run: npm test -- --runInBand
@@ -53,16 +59,11 @@ jobs:
         run: |
           printf '%s' "$GOOGLE_PLAY_SERVICE_ACCOUNT_JSON_BASE64" | base64 --decode > google-play-service-account.json
 
-      - name: Build Android locally
-        run: |
-          mkdir -p dist
-          npx eas-cli@latest build --local --platform android --profile production --output ./dist/login-android.aab --non-interactive
-
-      - name: Submit Android artifact to Google Play
-        run: npx eas-cli@latest submit --platform android --profile production --path ./dist/login-android.aab --wait --non-interactive
+      - name: Build and submit Android directly with Fastlane
+        run: bundle exec fastlane android release
 
   ios:
-    name: Local build and submit iOS
+    name: Build locally and submit iOS
     runs-on:
       - self-hosted
       - macOS
@@ -70,7 +71,10 @@ jobs:
       - nucleus-release
     timeout-minutes: 180
     env:
-      EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+      ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
+      ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
+      ASC_PRIVATE_KEY_BASE64: ${{ secrets.ASC_PRIVATE_KEY_BASE64 }}
+      APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
       RUNNER_TOOL_CACHE: /Users/tekkom/actions-runner/nucleus/_work/_tool
       CI: '1'
     steps:
@@ -83,7 +87,7 @@ jobs:
           node-version: 25.8.1
           cache: npm
 
-      - name: Setup Ruby for CocoaPods
+      - name: Setup Ruby for Fastlane and CocoaPods
         uses: ruby/setup-ruby@v1
         with:
           ruby-version: '3.3'
@@ -92,23 +96,11 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Preflight EAS store release
-        run: node scripts/ci/verify-store-release-env.mjs --strict --platform=ios
+      - name: Preflight direct store release
+        run: node scripts/ci/verify-direct-store-release-env.mjs --strict --platform=ios
 
       - name: Test project
         run: npm test -- --runInBand
 
-      - name: Expose bundled Apple build tools
-        run: |
-          bundle config set bin vendor/bundle/bin
-          bundle binstubs fastlane cocoapods --force
-          echo "$PWD/vendor/bundle/bin" >> "$GITHUB_PATH"
-          echo "$PWD/vendor/bundle/ruby/3.3.0/bin" >> "$GITHUB_PATH"
-
-      - name: Build iOS locally
-        run: |
-          mkdir -p dist
-          npx eas-cli@latest build --local --platform ios --profile production --output ./dist/login-ios.ipa --non-interactive
-
-      - name: Submit iOS artifact to TestFlight
-        run: npx eas-cli@latest submit --platform ios --profile production --path ./dist/login-ios.ipa --wait --non-interactive
+      - name: Build and submit iOS directly with Fastlane
+        run: bundle exec fastlane ios release
