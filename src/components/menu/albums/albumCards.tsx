@@ -3,7 +3,17 @@ import Space from '@/components/shared/utils'
 import config from '@/constants'
 import Text from '@components/shared/text'
 import T from '@styles/text'
-import { Image, TouchableOpacity, View } from 'react-native'
+import {
+    Image,
+    Modal,
+    Platform,
+    Pressable,
+    ScrollView,
+    TouchableOpacity,
+    useWindowDimensions,
+    View
+} from 'react-native'
+import { useMemo, useState } from 'react'
 import { useSelector } from 'react-redux'
 
 export function AlbumCard({
@@ -50,6 +60,7 @@ export function AlbumCard({
 export function AlbumImageGrid({ album, title }: { album: GetAlbumProps, title: string }) {
     const { theme } = useSelector((state: ReduxState) => state.theme)
     const images = Array.isArray(album.images) ? album.images : []
+    const [selectedImage, setSelectedImage] = useState<string | null>(null)
 
     if (!images.length) {
         return (
@@ -62,28 +73,215 @@ export function AlbumImageGrid({ album, title }: { album: GetAlbumProps, title: 
     }
 
     return (
-        <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 10 }}>
-            {images.map((image, index) => (
-                <View
-                    key={image}
+        <>
+            <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 10 }}>
+                {images.map((image, index) => {
+                    const uri = `${config.cdn}/albums/${album.id}/${image}`
+                    const openImage = () => setSelectedImage(uri)
+
+                    return (
+                        <Pressable
+                            key={image}
+                            onPress={openImage}
+                            {...(Platform.OS === 'web'
+                                ? {
+                                    onStartShouldSetResponder: () => true,
+                                    onResponderRelease: openImage,
+                                }
+                                : {})}
+                            accessibilityRole='button'
+                            accessibilityLabel={`${title} ${index + 1}`}
+                            testID={`album-image-${index}`}
+                            style={({ pressed }) => ({
+                                width: '48%',
+                                aspectRatio: 1,
+                                borderRadius: 18,
+                                overflow: 'hidden',
+                                backgroundColor: theme.contrast,
+                                borderWidth: 1,
+                                borderColor: '#ffffff14',
+                                opacity: pressed ? 0.84 : 1,
+                            })}
+                        >
+                            <Image
+                                source={{ uri, cache: 'force-cache' }}
+                                accessibilityLabel={`${title} ${index + 1}`}
+                                style={{ width: '100%', height: '100%' }}
+                            />
+                        </Pressable>
+                    )
+                })}
+            </View>
+            <AlbumImageViewer
+                title={title}
+                imageUri={selectedImage}
+                onClose={() => setSelectedImage(null)}
+            />
+        </>
+    )
+}
+
+function AlbumImageViewer({
+    imageUri,
+    onClose,
+    title,
+}: {
+    imageUri: string | null
+    onClose: () => void
+    title: string
+}) {
+    const { theme } = useSelector((state: ReduxState) => state.theme)
+    const [zoom, setZoom] = useState(1)
+    const viewport = useWindowDimensions()
+    const initialSize = useMemo(() => ({
+        width: viewport.width * 0.8,
+        height: viewport.height * 0.7,
+    }), [viewport.height, viewport.width])
+
+    const close = () => {
+        setZoom(1)
+        onClose()
+    }
+
+    return (
+        <Modal
+            visible={Boolean(imageUri)}
+            transparent
+            animationType='fade'
+            onRequestClose={close}
+            statusBarTranslucent
+        >
+            <View
+                testID='album-image-viewer'
+                style={{
+                    flex: 1,
+                    backgroundColor: '#050505f2',
+                }}
+            >
+                <ScrollView
+                    horizontal
                     style={{
-                        width: '48%',
-                        aspectRatio: 1,
-                        borderRadius: 18,
-                        overflow: 'hidden',
-                        backgroundColor: theme.contrast,
-                        borderWidth: 1,
-                        borderColor: '#ffffff14',
+                        flex: 1,
+                        width: viewport.width,
+                        height: viewport.height,
+                    }}
+                    maximumZoomScale={5}
+                    minimumZoomScale={1}
+                    bouncesZoom
+                    centerContent
+                    showsHorizontalScrollIndicator={zoom > 1}
+                    showsVerticalScrollIndicator={zoom > 1}
+                    contentContainerStyle={{
+                        minWidth: viewport.width,
+                        minHeight: viewport.height,
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        padding: 24,
                     }}
                 >
-                    <Image
-                        source={{ uri: `${config.cdn}/albums/${album.id}/${image}`, cache: 'force-cache' }}
-                        accessibilityLabel={`${title} ${index + 1}`}
-                        style={{ width: '100%', height: '100%' }}
-                    />
+                    <ScrollView
+                        style={{
+                            width: Math.max(viewport.width, initialSize.width * zoom),
+                            height: Math.max(viewport.height, initialSize.height * zoom),
+                        }}
+                        maximumZoomScale={5}
+                        minimumZoomScale={1}
+                        bouncesZoom
+                        centerContent
+                        showsVerticalScrollIndicator={zoom > 1}
+                        contentContainerStyle={{
+                            minWidth: Math.max(viewport.width, initialSize.width * zoom),
+                            minHeight: Math.max(viewport.height, initialSize.height * zoom),
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                        }}
+                    >
+                        {imageUri ? (
+                            <Image
+                                source={{ uri: imageUri, cache: 'force-cache' }}
+                                accessibilityLabel={title}
+                                resizeMode='contain'
+                                style={{
+                                    width: initialSize.width * zoom,
+                                    height: initialSize.height * zoom,
+                                    borderRadius: Math.max(8, 24 / zoom),
+                                }}
+                            />
+                        ) : null}
+                    </ScrollView>
+                </ScrollView>
+                <View style={{
+                    position: 'absolute',
+                    right: 18,
+                    top: 18,
+                    zIndex: 10,
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    gap: 8,
+                }}>
+                    <Pressable
+                        onPress={() => setZoom((value) => Math.max(1, value - 1))}
+                        testID='album-image-zoom-out'
+                        style={{
+                            width: 38,
+                            height: 38,
+                            borderRadius: 19,
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            backgroundColor: '#161616cc',
+                            borderWidth: 1,
+                            borderColor: '#ffffff24',
+                        }}
+                    >
+                        <Text style={{ ...T.text20, color: theme.textColor }}>-</Text>
+                    </Pressable>
+                    <View style={{
+                        minWidth: 58,
+                        height: 38,
+                        borderRadius: 19,
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        backgroundColor: theme.orangeTransparent,
+                        borderWidth: 1,
+                        borderColor: theme.orangeTransparentBorder,
+                    }}>
+                        <Text style={{ ...T.text12, color: theme.textColor }}>{Math.round(zoom * 100)}%</Text>
+                    </View>
+                    <Pressable
+                        onPress={() => setZoom((value) => Math.min(5, value + 1))}
+                        testID='album-image-zoom-in'
+                        style={{
+                            width: 38,
+                            height: 38,
+                            borderRadius: 19,
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            backgroundColor: '#161616cc',
+                            borderWidth: 1,
+                            borderColor: '#ffffff24',
+                        }}
+                    >
+                        <Text style={{ ...T.text20, color: theme.orange }}>+</Text>
+                    </Pressable>
+                    <Pressable
+                        onPress={close}
+                        testID='album-image-close'
+                        style={{
+                            width: 38,
+                            height: 38,
+                            borderRadius: 19,
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            backgroundColor: '#161616cc',
+                            borderWidth: 1,
+                            borderColor: '#ffffff24',
+                        }}
+                    >
+                        <Text style={{ ...T.text20, color: theme.textColor }}>x</Text>
+                    </Pressable>
                 </View>
-            ))}
-        </View>
+            </View>
+        </Modal>
     )
 }
 

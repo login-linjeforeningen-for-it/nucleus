@@ -22,7 +22,7 @@ export default function ForceUpdate() {
     }
 
     async function checkVersion() {
-        if (__DEV__) {
+        if (__DEV__ || Platform.OS === 'web') {
             return
         }
 
