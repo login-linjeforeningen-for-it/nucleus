@@ -58,3 +58,20 @@ export function resolveCdnAssetUrl(url: string | null | undefined, folder: strin
 
     return `${config.cdn}/img/${folder}/${url.replace(/^\/+/, '')}`
 }
+
+export function formatNorwegianDate(
+    value: string | null | undefined,
+    options: Intl.DateTimeFormatOptions = { day: '2-digit', month: 'short', year: 'numeric' },
+    fallback = ''
+) {
+    if (!value) {
+        return fallback
+    }
+
+    const date = new Date(value)
+    if (Number.isNaN(date.valueOf())) {
+        return fallback || value
+    }
+
+    return new Intl.DateTimeFormat('nb-NO', options).format(date)
+}

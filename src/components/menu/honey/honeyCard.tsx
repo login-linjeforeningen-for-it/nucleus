@@ -2,6 +2,7 @@ import Cluster from '@/components/shared/cluster'
 import Space from '@/components/shared/utils'
 import Text from '@components/shared/text'
 import T from '@styles/text'
+import { formatNorwegianDate } from '@utils/general'
 import { parseResponseBody } from '@utils/http'
 import { View } from 'react-native'
 import { useSelector } from 'react-redux'
@@ -116,9 +117,7 @@ function flattenHoneyText(value: unknown, prefix = ''): string[] {
 }
 
 function formatHoneyDate(date: string) {
-    const parsed = new Date(date)
-    if (Number.isNaN(parsed.getTime())) return date
-    return parsed.toLocaleDateString('nb-NO', { day: '2-digit', month: 'short', year: 'numeric' })
+    return formatNorwegianDate(date, { day: '2-digit', month: 'short', year: 'numeric' }, date)
 }
 
 function orangePill(theme: Theme) {

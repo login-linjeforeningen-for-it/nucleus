@@ -1,3 +1,5 @@
+import { formatNorwegianDate } from '@utils/general'
+
 export function filterByContentQuery<T>(rows: T[], query: string, getValues: (row: T) => unknown[]) {
     const normalizedQuery = query.trim().toLowerCase()
 
@@ -33,14 +35,5 @@ export function formatLocationDetails(location: WorkerbeeLocation, fallback: str
 }
 
 export function formatContentDate(value: string) {
-    const date = new Date(value)
-    if (Number.isNaN(date.valueOf())) {
-        return value
-    }
-
-    return new Intl.DateTimeFormat('nb-NO', {
-        day: '2-digit',
-        month: 'short',
-        year: 'numeric',
-    }).format(date)
+    return formatNorwegianDate(value, { day: '2-digit', month: 'short', year: 'numeric' }, value)
 }
