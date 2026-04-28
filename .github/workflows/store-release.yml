@@ -12,7 +12,7 @@ concurrency:
 
 jobs:
   android:
-    name: Build and submit Android
+    name: EAS build and submit Android
     runs-on:
       - self-hosted
       - macOS
@@ -20,8 +20,7 @@ jobs:
       - nucleus-release
     timeout-minutes: 180
     env:
-      GOOGLE_PLAY_SERVICE_ACCOUNT_JSON_BASE64: ${{ secrets.GOOGLE_PLAY_SERVICE_ACCOUNT_JSON_BASE64 }}
-      GOOGLE_PLAY_TRACK: internal
+      EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
       RUNNER_TOOL_CACHE: /Users/tekkom/actions-runner/nucleus/_work/_tool
       CI: '1'
     steps:
@@ -34,38 +33,20 @@ jobs:
           node-version: 25.8.1
           cache: npm
 
-      - name: Setup Java
-        uses: actions/setup-java@v4
-        with:
-          distribution: temurin
-          java-version: '21'
-
-      - name: Setup Ruby
-        uses: ruby/setup-ruby@v1
-        with:
-          ruby-version: '3.3'
-          bundler-cache: true
-
       - name: Install dependencies
         run: npm ci
 
-      - name: Preflight Android store release
-        run: node scripts/ci/verify-direct-store-release-env.mjs --strict --platform=android
+      - name: Preflight EAS store release
+        run: node scripts/ci/verify-store-release-env.mjs --strict
 
       - name: Test project
         run: npm test -- --runInBand
 
-      - name: Write Android release credentials
-        run: node scripts/ci/write-direct-store-credentials.mjs --platform=android
-
-      - name: Generate native projects
-        run: npx expo prebuild --non-interactive --clean
-
-      - name: Build and submit to Google Play internal testing
-        run: bundle exec fastlane android release
+      - name: Build and submit to Google Play through EAS
+        run: npx eas build --platform android --profile production --auto-submit --wait --non-interactive
 
   ios:
-    name: Build and submit iOS
+    name: EAS build and submit iOS
     runs-on:
       - self-hosted
       - macOS
@@ -73,10 +54,7 @@ jobs:
       - nucleus-release
     timeout-minutes: 180
     env:
-      ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
-      ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
-      ASC_PRIVATE_KEY_BASE64: ${{ secrets.ASC_PRIVATE_KEY_BASE64 }}
-      APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+      EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
       RUNNER_TOOL_CACHE: /Users/tekkom/actions-runner/nucleus/_work/_tool
       CI: '1'
     steps:
@@ -89,26 +67,14 @@ jobs:
           node-version: 25.8.1
           cache: npm
 
-      - name: Setup Ruby
-        uses: ruby/setup-ruby@v1
-        with:
-          ruby-version: '3.3'
-          bundler-cache: true
-
       - name: Install dependencies
         run: npm ci
 
-      - name: Preflight iOS store release
-        run: node scripts/ci/verify-direct-store-release-env.mjs --strict --platform=ios
+      - name: Preflight EAS store release
+        run: node scripts/ci/verify-store-release-env.mjs --strict
 
       - name: Test project
         run: npm test -- --runInBand
 
-      - name: Write iOS release credentials
-        run: node scripts/ci/write-direct-store-credentials.mjs --platform=ios
-
-      - name: Generate native projects
-        run: npx expo prebuild --non-interactive --clean
-
-      - name: Build and submit to TestFlight
-        run: bundle exec fastlane ios release
+      - name: Build and submit to TestFlight through EAS
+        run: npx eas build --platform ios --profile production --auto-submit --wait --non-interactive
