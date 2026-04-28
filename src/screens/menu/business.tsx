@@ -1,17 +1,22 @@
 import Cluster from '@/components/shared/cluster'
 import en from '@text/menu/companies/en.json'
 import no from '@text/menu/companies/no.json'
-import Paragraph from '@/components/business/paragraph'
 import Space, { Line } from '@/components/shared/utils'
 import GS from '@styles/globalStyles'
 import { Contact } from '@/components/about/social'
 import T from '@styles/text'
-import { Text, View, Dimensions, Platform } from 'react-native'
+import { Text, View, Dimensions, Platform, Image, ImageSourcePropType } from 'react-native'
 import { ScrollView } from 'react-native-gesture-handler'
 import { useSelector } from 'react-redux'
 import Swipe from '@components/nav/swipe'
 import { TextWithLinks } from '@components/shared/link'
 import { JSX } from 'react'
+
+type ParagraphProps = {
+    logo: ImageSourcePropType
+    title: string
+    body: JSX.Element | string
+}
 
 export default function BusinessScreen(): JSX.Element {
 
@@ -102,5 +107,24 @@ function Content(): JSX.Element {
             <Contact />
             <Space height={height <= 700 ? 30 : 10} />
         </Cluster>
+    )
+}
+
+function Paragraph({ logo, title, body }: ParagraphProps) {
+    const { theme } = useSelector((state: ReduxState) => state.theme)
+
+    return (
+        <View>
+            <View style={GS.row}>
+                <Image style={GS.medium} source={logo} />
+                <Text style={{ ...T.bold28, color: theme.textColor }}>
+                    {title}
+                </Text>
+            </View>
+            <Text style={{ ...T.paragraph, color: theme.textColor }}>
+                {body}
+            </Text>
+            <Space height={25} />
+        </View>
     )
 }
