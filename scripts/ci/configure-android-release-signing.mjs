@@ -23,14 +23,15 @@ let gradle = readFileSync(gradlePath, 'utf8')
 
 if (!gradle.includes('upload {')) {
     const withUploadConfig = gradle.replace(
-        /signingConfigs\s*\{\s*debug\s*\{[\s\S]*?\n\s*\}\s*\}/,
-        (block) => `${block}
+        /(signingConfigs\s*\{\s*debug\s*\{[\s\S]*?\n\s{8}\})\n(\s{4}\})/,
+        (_, debugSigningBlock, signingConfigsClose) => `${debugSigningBlock}
         upload {
             storeFile file('upload-keystore.jks')
             storePassword System.getenv('ANDROID_KEYSTORE_PASSWORD')
             keyAlias System.getenv('ANDROID_KEY_ALIAS')
             keyPassword System.getenv('ANDROID_KEY_PASSWORD')
-        }`
+        }
+${signingConfigsClose}`
     )
 
     if (withUploadConfig === gradle) {

@@ -11,9 +11,7 @@ platform :ios do
       is_key_content_base64: false
     )
 
-    cocoapods(
-      project_directory: 'ios'
-    )
+    sh('cd ios && bundle exec pod install')
 
     build_app(
       workspace: 'ios/Login.xcworkspace',
