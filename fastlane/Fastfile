@@ -26,7 +26,8 @@ platform :ios do
 
     get_certificates(
       api_key: api_key,
-      development: false
+      development: false,
+      keychain_password: ENV.fetch('MACOS_KEYCHAIN_PASSWORD')
     )
 
     get_provisioning_profile(
