@@ -1,3 +1,5 @@
+import { isObject, parseResponseBody } from '@utils/http'
+
 const THIRTY_DAYS_IN_MS = 30 * 24 * 60 * 60 * 1000
 
 export function parseNotificationList(raw: string | null): NotificationListProps[] {
@@ -6,7 +8,7 @@ export function parseNotificationList(raw: string | null): NotificationListProps
     }
 
     try {
-        const parsed = JSON.parse(raw) as unknown
+        const parsed = parseResponseBody(raw)
         if (!Array.isArray(parsed)) {
             return []
         }
@@ -70,10 +72,6 @@ export function resolveNotificationTarget(data: NotificationListProps['data']) {
     }
 
     return null
-}
-
-function isObject(value: unknown): value is Record<string, unknown> {
-    return typeof value === 'object' && value !== null
 }
 
 function normalizeNotificationData(data: unknown): NotificationListProps['data'] {

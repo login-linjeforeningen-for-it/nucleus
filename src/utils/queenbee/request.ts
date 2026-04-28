@@ -1,6 +1,8 @@
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import store from '@redux/store'
-import { getResponseErrorMessage, parseResponseBody } from '@utils/http'
+import { getResponseErrorMessage, isObject, parseResponseBody } from '@utils/http'
+
+export { isObject }
 
 const AI_SESSION_ID_KEY = 'ai_session_id'
 let cachedAiSessionId: string | null = null
@@ -75,8 +77,4 @@ export async function requestApi<T>(
     }
 
     return data as T
-}
-
-export function isObject(value: unknown): value is Record<string, unknown> {
-    return typeof value === 'object' && value !== null
 }
