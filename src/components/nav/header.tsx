@@ -6,17 +6,14 @@
  * so it might be worth rewriting this component/checking if the default header can be used
  */
 import GS from '@styles/globalStyles'
-import { getCategories, getHeight } from '@utils/general'
-import { PropsWithChildren, ReactNode, useMemo, useState } from 'react'
+import { ReactNode, useMemo, useState } from 'react'
 import { NavButton, NavDropdown, InternalNavRoute } from '@components/menu/queenbee/internalNavMenu'
-import { BlurView } from 'expo-blur'
-import { Dimensions, Platform, View, Text, StatusBar, Pressable, StyleSheet } from 'react-native'
+import { Dimensions, Platform, View, Text, Pressable, StyleSheet } from 'react-native'
 import { HeaderProps } from '@/interfaces'
 import { useSelector } from 'react-redux'
-import { useRoute } from '@react-navigation/native'
-import { Image } from 'react-native'
 import { useDispatch } from 'react-redux'
 import { setTag } from '@redux/event'
+import { BlurWrapper, HeaderGlassBackground } from './headerBackground'
 
 const MAX_COMPACT_HEADER_TITLE_LENGTH = 37
 const HEADER_ACTION_SLOT_SIZE = 24
@@ -24,37 +21,6 @@ const HEADER_ACTION_GAP = 24
 const HEADER_MENU_ACTION_GAP = 24
 const HEADER_RIGHT_INSET = 18
 const HEADER_TITLE_GAP = 16
-const GAME_IMAGE_STYLES = StyleSheet.create({
-    terning: {
-        width: 200,
-        height: 200,
-        top: 100,
-        left: '25%',
-        resizeMode: 'contain'
-    },
-    questions: {
-        width: 180,
-        height: 135,
-        top: 55,
-        left: '27%',
-        resizeMode: 'contain'
-    },
-    neverhaveiever: {
-        width: 130,
-        height: 130,
-        top: 57,
-        left: '34%',
-        resizeMode: 'contain'
-    },
-    okredflagdealbreaker: {
-        width: 180,
-        height: 160,
-        top: 85,
-        left: '27.5%',
-        resizeMode: 'contain',
-    }
-})
-
 export default function Header({ options, route, navigation }: HeaderProps): ReactNode {
     const { theme, isDark } = useSelector((state: ReduxState) => state.theme)
     const { lang } = useSelector((state: ReduxState) => state.lang)
@@ -280,94 +246,6 @@ function getRightActionOffset(index: number) {
 
     return HEADER_ACTION_SLOT_SIZE + HEADER_MENU_ACTION_GAP
         + (index - 1) * (HEADER_ACTION_SLOT_SIZE + HEADER_ACTION_GAP)
-}
-
-// Wraps the content in blur
-function BlurWrapper(props: PropsWithChildren) {
-    const { lang } = useSelector((state: ReduxState) => state.lang)
-    const event = useSelector((state: ReduxState) => state.event)
-    const ad = useSelector((state: ReduxState) => state.ad)
-    const route = useRoute()
-    const exceptions = ['SpecificGameScreen']
-
-    const defaultHeight =
-        Dimensions.get('window').height * 8 // Base decrementor for both platforms
-        / (Platform.OS === 'ios' ? 85 // Base height of header on iOS
-            : 100 // Base height of header on Android
-        ) + (StatusBar.currentHeight ? StatusBar.currentHeight - 2 // Subtractor for Statusbar visible on Android
-            : 0 // Defaults to 0 if no statusbar is visible on Android
-        )
-    const isSearchingEvents = event.search && route.name === 'EventScreen'
-    const categories = getCategories({ lang, categories: event.categories })
-    const item = isSearchingEvents ? categories : ad.skills
-    const isSearchingAds = ad.search && route.name === 'AdScreen'
-    const extraHeight = getHeight(item.length)
-    const windowHeight = Dimensions.get('window').height
-    const largeDeviceReduction = windowHeight > 915 ? -15 : 0
-    const height = defaultHeight + (isSearchingEvents || isSearchingAds
-        ? Platform.OS === 'ios'
-            ? 50 + extraHeight // Extraheight on iOS
-            : isSearchingEvents
-                ? 35 + extraHeight + largeDeviceReduction // Extraheight during eventSearch on Android
-                : 25 + extraHeight + largeDeviceReduction // Extraheight during adSearch on Android
-        : Platform.OS === 'ios'
-            ? 20 // Extra base height for header on iOS while not searching
-            : defaultHeight <= 100
-                ? 5 // Extra base height for header on Android while not searching
-                : windowHeight > 915 // Except if its a very tall device
-                    ? -defaultHeight / 3.8
-                    : -defaultHeight / 5
-    )
-
-    const gameID = (route.params as any)?.gameID
-    const gameImages = [
-        { style: GAME_IMAGE_STYLES.terning, icon: require('@assets/games/terning.png') },
-        { style: GAME_IMAGE_STYLES.questions, icon: require('@assets/games/100questions.png') },
-        { style: GAME_IMAGE_STYLES.neverhaveiever, icon: require('@assets/games/neverhaveiever.png') },
-        { style: GAME_IMAGE_STYLES.okredflagdealbreaker, icon: require('@assets/games/okredflagdealbreaker.png') }
-    ]
-
-    return (
-        <>
-            {!exceptions.includes(route.name) && <BlurView
-                blurMethod='dimezisBlurView'
-                intensity={Platform.OS === 'ios' ? 30 : 20}
-            />}
-            <View style={{
-                ...GS.blurBackgroundView,
-                height,
-            }}>
-                {Object.keys(route.params || {}).includes('gameID') && <Image
-                    style={gameImages[gameID + 1].style}
-                    source={gameImages[gameID + 1].icon}
-                />}
-                {route.name === 'DiceScreen' && <Image
-                    style={GAME_IMAGE_STYLES.terning}
-                    source={gameImages[0].icon}
-                />}
-                {props.children}
-            </View>
-        </>
-    )
-}
-
-function HeaderGlassBackground({ borderRadius }: { borderRadius: number }) {
-    const { theme, isDark } = useSelector((state: ReduxState) => state.theme)
-
-    return (
-        <>
-            <BlurView
-                style={StyleSheet.absoluteFill}
-                blurMethod='dimezisBlurView'
-                intensity={Platform.OS === 'ios' ? 35 : 24}
-            />
-            <View style={{
-                ...StyleSheet.absoluteFillObject,
-                borderRadius,
-                backgroundColor: isDark ? 'rgba(255,255,255,0.07)' : theme.transparentAndroid,
-            }} />
-        </>
-    )
 }
 
 function getCompactHeaderTitle({
