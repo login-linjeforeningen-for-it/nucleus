@@ -10,6 +10,7 @@ import { fetchAlbumDetails } from '@utils/fetch'
 import { formatNorwegianDate } from '@utils/general'
 import { BottomTabNavigationProp } from '@react-navigation/bottom-tabs'
 import { JSX, useEffect, useState } from 'react'
+import { X } from 'lucide-react-native'
 import { Dimensions, Image, Platform, Pressable, RefreshControl, ScrollView, TouchableOpacity, View } from 'react-native'
 import { useSelector } from 'react-redux'
 import MS from '@styles/menuStyles'
@@ -157,7 +158,7 @@ export default function SpecificAlbumScreen({
                 {album?.images?.length ? (
                     <Pressable
                         accessibilityRole='button'
-                        accessibilityLabel={text.downloadImages}
+                        accessibilityLabel={showDownloadSheet ? text.close : text.downloadImages}
                         testID='album-download-button'
                         onPress={() => setShowDownloadSheet((current) => !current)}
                         style={({ pressed }) => ({
@@ -182,10 +183,14 @@ export default function SpecificAlbumScreen({
                                     : 'rgba(255,255,255,0.07)',
                         })}
                     >
-                        <Image
-                            source={require('@assets/icons/download-orange.png')}
-                            style={MS.multiIcon}
-                        />
+                        {showDownloadSheet ? (
+                            <X size={24} color={theme.orange} strokeWidth={2.4} />
+                        ) : (
+                            <Image
+                                source={require('@assets/icons/download-orange.png')}
+                                style={MS.multiIcon}
+                            />
+                        )}
                     </Pressable>
                 ) : null}
                 <AlbumDownloadSheet
