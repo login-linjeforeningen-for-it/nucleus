@@ -4,7 +4,6 @@ import { toggleSearch } from '@redux/event'
 import { LinearGradient } from 'expo-linear-gradient'
 import { Dimensions, Text, TouchableOpacity, View } from 'react-native'
 import { useDispatch, useSelector } from 'react-redux'
-import EventClusterTitle from './EventClusterTitle'
 import Bell from './bell'
 import ES from '@styles/eventStyles'
 import CategorySquare from '@components/shared/category'
@@ -22,6 +21,10 @@ type EventClusterProps = {
 type FullCategorySquareProps = {
     item: GetEventProps
     height?: number
+}
+
+type EventClusterTitleProps = {
+    item: GetEventProps
 }
 
 /**
@@ -80,6 +83,34 @@ function ListFooter({ index }: ListFooterProps): JSX.Element {
             {index === renderedEvents.length - 1 &&
                 <Space height={Dimensions.get('window').height / 7} />}
         </>
+    )
+}
+
+function EventClusterTitle({ item }: EventClusterTitleProps): JSX.Element {
+    const { theme } = useSelector((state: ReduxState) => state.theme)
+    const { lang } = useSelector((state: ReduxState) => state.lang)
+    let time = ' ' + item.time_start[11] + item.time_start[12] + ':' +
+        item.time_start[14] + item.time_start[15] + '. '
+
+    if (item.time_start[11] + item.time_start[12] + item.time_start[14] +
+        item.time_start[15] === '0000') time = '  '
+
+    const locationNo = item.location?.name_no ? item.location?.name_no : 'Mer info TBA!'
+    const locationEn = item.location?.name_en ? item.location?.name_en || item.location?.name_no : 'More info TBA!'
+    const title = lang ? (item.name_no || item.name_en) : (item.name_en || item.name_no)
+    const info = (time + lang ? locationNo : locationEn).trim()
+
+    return (
+        <View style={ES.view2}>
+            <Text style={{ ...ES.title, color: theme.textColor }}>
+                {title}
+            </Text>
+            <View style={{ flexDirection: 'row' }}>
+                <Text style={{ ...ES.loc, color: theme.oppositeTextColor }}>
+                    {info}
+                </Text>
+            </View>
+        </View>
     )
 }
 
