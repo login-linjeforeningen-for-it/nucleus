@@ -22,6 +22,10 @@ export default function ForceUpdate() {
     }
 
     async function checkVersion() {
+        if (__DEV__) {
+            return
+        }
+
         try {
             const response = await fetch(apiUrl)
             if (!response.ok) {
