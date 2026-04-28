@@ -6,11 +6,10 @@ import GS from '@styles/globalStyles'
 import T from '@styles/text'
 import Swipe from '@components/nav/swipe'
 import Text from '@components/shared/text'
-import { JSX, useEffect, useState } from 'react'
+import { JSX, useEffect, useMemo, useState } from 'react'
 import {
     ActivityIndicator,
-    KeyboardAvoidingView,
-    Platform,
+    Keyboard,
     Pressable,
     View
 } from 'react-native'
@@ -26,7 +25,12 @@ export default function AiScreen({ navigation }: MenuProps<'AiScreen'>): JSX.Ele
     const insets = useSafeAreaInsets()
     const [showConversations, setShowConversations] = useState(false)
     const [showModels, setShowModels] = useState(false)
+    const [keyboardHeight, setKeyboardHeight] = useState(0)
     const ai = useAiChat(text)
+    const composerBottom = useMemo(
+        () => keyboardHeight > 0 ? keyboardHeight + 12 : 160 + insets.bottom,
+        [insets.bottom, keyboardHeight]
+    )
 
     function formatClientSubtitle(client: NativeClient) {
         const parts = []
@@ -82,11 +86,24 @@ export default function AiScreen({ navigation }: MenuProps<'AiScreen'>): JSX.Ele
         } as any)
     }, [navigation, showConversations, theme.orange])
 
+    useEffect(() => {
+        const showSubscription = Keyboard.addListener('keyboardDidShow', (event) => {
+            setKeyboardHeight(event.endCoordinates.height)
+        })
+        const hideSubscription = Keyboard.addListener('keyboardDidHide', () => {
+            setKeyboardHeight(0)
+        })
+
+        return () => {
+            showSubscription.remove()
+            hideSubscription.remove()
+        }
+    }, [])
+
     return (
         <Swipe left='MenuScreen'>
-            <KeyboardAvoidingView
+            <View
                 style={{ flex: 1, backgroundColor: theme.darker, paddingTop: 100 }}
-                behavior={Platform.OS === 'ios' ? 'padding' : undefined}
             >
                 <View style={{ ...GS.content, flex: 1, paddingBottom: 0 }}>
                     {ai.activeClient ? (
@@ -138,7 +155,7 @@ export default function AiScreen({ navigation }: MenuProps<'AiScreen'>): JSX.Ele
                         position: 'absolute',
                         left: 12,
                         right: 12,
-                        bottom: 160 + insets.bottom,
+                        bottom: composerBottom,
                     }}>
                         <AiComposer
                             value={ai.input}
@@ -146,10 +163,11 @@ export default function AiScreen({ navigation }: MenuProps<'AiScreen'>): JSX.Ele
                             onSend={() => void ai.sendPrompt()}
                             theme={theme}
                             placeholder={text.composerPlaceholder}
+                            autoFocus
                         />
                     </View>
                 </View>
-            </KeyboardAvoidingView>
+            </View>
         </Swipe>
     )
 }

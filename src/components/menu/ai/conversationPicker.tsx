@@ -28,8 +28,8 @@ export default function AiConversationPicker({
                 <TouchableOpacity onPress={onCreate}>
                     <View style={{
                         borderRadius: 14,
-                        backgroundColor: theme.orangeTransparent,
-                        borderColor: theme.orangeTransparentBorder,
+                        backgroundColor: theme.greyTransparent,
+                        borderColor: theme.greyTransparentBorder,
                         borderWidth: 1,
                         paddingHorizontal: 12,
                         paddingVertical: 8,
@@ -49,12 +49,12 @@ export default function AiConversationPicker({
                         <TouchableOpacity key={conversation.id} onPress={() => onSelect(conversation.id)}>
                             <View style={{
                                 borderRadius: 14,
-                                backgroundColor: isActive ? theme.orangeTransparentHighlighted : theme.orangeTransparent,
+                                backgroundColor: isActive ? theme.orangeTransparentHighlighted : theme.greyTransparent,
                                 borderWidth: 1,
-                                borderColor: isActive ? theme.orangeTransparentBorderHighlighted : theme.orangeTransparentBorder,
+                                borderColor: isActive ? theme.orangeTransparentBorderHighlighted : theme.greyTransparentBorder,
                                 paddingHorizontal: 12,
                                 paddingVertical: 8,
-                                minWidth: Dimensions.get('window').width * 0.875
+                                minWidth: Dimensions.get('window').width * 0.873,
                             }}>
                                 <Text style={{ ...T.text15, color: theme.textColor }}>
                                     {conversation.title}

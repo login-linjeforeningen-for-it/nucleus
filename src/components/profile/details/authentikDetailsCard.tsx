@@ -72,7 +72,7 @@ export default function AuthentikDetailsCard({
 
 function collectGroups(profile: Profile | null, fallbackGroups: string[]) {
     const groups = [
-        ...(profile?.groups || []),
+        ...(Array.isArray(profile?.groups) ? profile.groups : []),
         ...fallbackGroups,
     ]
 

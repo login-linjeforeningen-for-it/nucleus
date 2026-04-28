@@ -1,7 +1,7 @@
 import AiConversationPicker from '@components/menu/ai/conversationPicker'
 import Text from '@components/shared/text'
 import T from '@styles/text'
-import { Dimensions, Pressable, View } from 'react-native'
+import { Pressable, View } from 'react-native'
 
 type AiText = {
     currentConversation: string
@@ -18,7 +18,7 @@ export function AiModelPicker({
     onClose: () => void
 }) {
     return (
-        <Overlay top={Dimensions.get('window').height / 8 + 18} zIndex={21}>
+        <Overlay top={8} zIndex={21}>
             {ai.clients.map((client) => {
                 const isActive = ai.session?.clientName === client.name
 
@@ -31,8 +31,8 @@ export function AiModelPicker({
                         }}
                         style={{
                             borderRadius: 16,
-                            backgroundColor: isActive ? theme.orangeTransparent : theme.orangeTransparentHighlighted,
-                            borderColor: isActive ? theme.orangeTransparentBorder : theme.orangeTransparentBorderHighlighted,
+                            backgroundColor: isActive ? 'rgba(255,255,255,0.08)' : 'rgba(255,255,255,0.045)',
+                            borderColor: isActive ? theme.greyTransparentBorder : 'rgba(255,255,255,0.08)',
                             borderWidth: 1,
                             paddingHorizontal: 14,
                             paddingVertical: 10,
@@ -63,7 +63,7 @@ export function AiConversationOverlay({
     onClose: () => void
 }) {
     return (
-        <Overlay top={Dimensions.get('window').height / 8 + 42} zIndex={20}>
+        <Overlay top={8} zIndex={20}>
             <AiConversationPicker
                 conversations={ai.conversations}
                 activeConversationId={ai.session?.conversationId}

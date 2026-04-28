@@ -7,11 +7,8 @@ import T from '@styles/text'
 import { JSX, useEffect, useState } from 'react'
 import { Alert, Dimensions, RefreshControl, ScrollView, View } from 'react-native'
 import { useSelector } from 'react-redux'
-import {
-    NotificationForm,
-    ServiceForm,
-    ServiceRow,
-} from './status/statusComponents'
+import { ServiceRow } from './status/statusCards'
+import { NotificationForm, ServiceForm } from './status/statusForms'
 import useStatusServices from './status/useStatusServices'
 
 export default function StatusScreen(): JSX.Element {

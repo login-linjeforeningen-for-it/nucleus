@@ -298,6 +298,19 @@ type VulnerabilityDetail = {
     fixedVersion: string | null
     description: string | null
     references: string[]
+    scanners: VulnerabilityScanner[]
+}
+
+type VulnerabilityScanner = 'docker_scout' | 'trivy' | 'npm_audit'
+
+type VulnerabilityScannerResult = {
+    scanner: VulnerabilityScanner
+    scannedAt: string
+    totalVulnerabilities: number
+    severity: SeverityCount
+    scanError: string | null
+    summaryOnly: boolean
+    note: string | null
 }
 
 type ImageVulnerabilityReport = {
@@ -307,6 +320,7 @@ type ImageVulnerabilityReport = {
     severity: SeverityCount
     groups: VulnerabilityGroup[]
     vulnerabilities: VulnerabilityDetail[]
+    scannerResults: VulnerabilityScannerResult[]
     scanError: string | null
 }
 

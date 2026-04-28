@@ -1,6 +1,6 @@
 import Text from '@components/shared/text'
 import T from '@styles/text'
-import { JSX } from 'react'
+import { JSX, useEffect, useRef } from 'react'
 import { Pressable, TextInput, View } from 'react-native'
 
 type Props = {
@@ -9,17 +9,31 @@ type Props = {
     onSend: () => void
     theme: Theme
     placeholder: string
+    autoFocus?: boolean
 }
 
-export default function AiComposer({ value, onChangeText, onSend, theme, placeholder }: Props): JSX.Element {
+export default function AiComposer({ value, onChangeText, onSend, theme, placeholder, autoFocus }: Props): JSX.Element {
+    const inputRef = useRef<TextInput | null>(null)
     const canSend = value.trim().length > 0
+
+    useEffect(() => {
+        if (!autoFocus) {
+            return
+        }
+
+        const timeout = setTimeout(() => inputRef.current?.focus(), 250)
+
+        return () => clearTimeout(timeout)
+    }, [autoFocus])
 
     return (
         <View>
             <TextInput
+                ref={inputRef}
                 value={value}
                 onChangeText={onChangeText}
                 placeholder={placeholder}
+                autoFocus={autoFocus}
                 autoCorrect={false}
                 returnKeyType='send'
                 onSubmitEditing={() => canSend && onSend()}

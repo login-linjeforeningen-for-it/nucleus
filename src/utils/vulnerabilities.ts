@@ -1,4 +1,5 @@
 export const SEVERITY_ORDER: SeverityLevel[] = ['critical', 'high', 'medium', 'low', 'unknown']
+export const SCANNER_ORDER: VulnerabilityScanner[] = ['docker_scout', 'trivy', 'npm_audit']
 
 export function severityColor(level: SeverityLevel) {
     if (level === 'critical') return 'rgba(255, 107, 107, 0.14)'
@@ -44,6 +45,10 @@ export function formatScanStatus(scanStatus?: DockerScoutScanStatus) {
     }
 
     if (scanStatus.lastError) {
+        if (scanStatus.lastError.toLowerCase().includes('interrupted')) {
+            return 'Last scan was interrupted. Run a new scan to refresh results.'
+        }
+
         return `Last scan error: ${scanStatus.lastError}`
     }
 
@@ -52,6 +57,30 @@ export function formatScanStatus(scanStatus?: DockerScoutScanStatus) {
     }
 
     return 'Ready to run a vulnerability scan'
+}
+
+export function scannerTitle(scanner: VulnerabilityScanner) {
+    if (scanner === 'docker_scout') return 'Docker Scout'
+    if (scanner === 'npm_audit') return 'npm audit'
+    return 'Trivy'
+}
+
+export function scannerColor(scanner: VulnerabilityScanner) {
+    if (scanner === 'docker_scout') return 'rgba(56, 189, 248, 0.12)'
+    if (scanner === 'npm_audit') return 'rgba(251, 191, 36, 0.12)'
+    return 'rgba(52, 211, 153, 0.12)'
+}
+
+export function scannerBorder(scanner: VulnerabilityScanner) {
+    if (scanner === 'docker_scout') return 'rgba(56, 189, 248, 0.26)'
+    if (scanner === 'npm_audit') return 'rgba(251, 191, 36, 0.26)'
+    return 'rgba(52, 211, 153, 0.26)'
+}
+
+export function scannerTextColor(scanner: VulnerabilityScanner) {
+    if (scanner === 'docker_scout') return '#bae6fd'
+    if (scanner === 'npm_audit') return '#fde68a'
+    return '#bbf7d0'
 }
 
 export function formatDateTime(value: string | null) {

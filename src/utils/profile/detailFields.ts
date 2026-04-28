@@ -10,6 +10,8 @@ export function buildDetailFields(profile: Profile | null, lang: boolean): Profi
 
     const locale = lang ? 'nb-NO' : 'en-GB'
     const auth = profile?.authentik || {}
+    const groups = Array.isArray(profile.groups) ? profile.groups : []
+    const authentikGroups = Array.isArray(auth.groups) ? auth.groups : []
     const fields: Array<ProfileField | null> = [
         toCopyField(lang, 'ID', profile.id, { wrapEvery: 6 }),
         toCopyField(lang, 'Name', profile.name),
@@ -21,7 +23,7 @@ export function buildDetailFields(profile: Profile | null, lang: boolean): Profi
         toCopyField(lang, 'Given name', profile.givenName),
         toCopyField(lang, 'Family name', profile.familyName),
         toCopyField(lang, 'Picture', profile.picture),
-        toCopyField(lang, 'Groups', profile.groups.join(', ')),
+        toCopyField(lang, 'Groups', groups.join(', ')),
         toCopyField(lang, 'Authentik available', auth.available),
         toCopyField(lang, 'Authentik PK', auth.pk),
         toCopyField(lang, 'UID', auth.uid, { wrapEvery: 6 }),
@@ -33,7 +35,7 @@ export function buildDetailFields(profile: Profile | null, lang: boolean): Profi
         toCopyField(lang, 'Date joined', formatProfileDate(auth.dateJoined || null, locale)),
         toCopyField(lang, 'Type', auth.type),
         toCopyField(lang, 'Path', auth.path),
-        toCopyField(lang, 'Authentik groups', auth.groups?.map(normalizeGroup).filter(Boolean).join(', ')),
+        toCopyField(lang, 'Authentik groups', authentikGroups.map(normalizeGroup).filter(Boolean).join(', ')),
         ...getProfileAttributes(profile).map((attribute) => toCopyField(lang, attribute.key, attribute.value)),
     ]
 

@@ -17,6 +17,7 @@ import T from '@styles/text'
 import en from '@text/menu/en.json'
 import no from '@text/menu/no.json'
 import { getMenuDescriptions } from '@utils/menu/descriptions'
+import { defaultPublicPinnedRoutes, usePinnedRoutes } from '@utils/menu/pinnedRoutes'
 
 export default function MenuScreen({ navigation }: MenuProps<'MenuScreen'>): JSX.Element {
     const { lang } = useSelector((state: ReduxState) => state.lang)
@@ -29,12 +30,25 @@ export default function MenuScreen({ navigation }: MenuProps<'MenuScreen'>): JSX
     const versionLabel = `${(text as any).version}${nativeApplicationVersion}`
     const dispatch = useDispatch()
     const [feedback, setFeedback] = useState(false)
+    const { pinnedRoutes, togglePinnedRoute } = usePinnedRoutes('menu:pinned-routes', defaultPublicPinnedRoutes)
 
     const descriptions = useMemo(() => getMenuDescriptions(lang), [lang])
     const menuItems = useMemo(() => text.setting
         .filter((item) => item.nav !== 'ProfileScreen' && item.nav !== 'QueenbeeScreen')
-        .sort((a, b) => a.title.localeCompare(b.title, lang ? 'nb' : 'en'))
-    , [lang, text.setting])
+        .sort((a, b) => {
+            const aPinnedIndex = pinnedRoutes.indexOf(a.nav)
+            const bPinnedIndex = pinnedRoutes.indexOf(b.nav)
+            const aPinned = aPinnedIndex !== -1
+            const bPinned = bPinnedIndex !== -1
+
+            if (aPinned || bPinned) {
+                return (aPinned ? aPinnedIndex : pinnedRoutes.length)
+                    - (bPinned ? bPinnedIndex : pinnedRoutes.length)
+            }
+
+            return a.title.localeCompare(b.title, lang ? 'nb' : 'en')
+        })
+    , [lang, pinnedRoutes, text.setting])
 
     function toggleFeedback() {
         setFeedback((current) => !current)
@@ -105,6 +119,8 @@ export default function MenuScreen({ navigation }: MenuProps<'MenuScreen'>): JSX
                             item={item}
                             navigation={navigation}
                             subtitle={descriptions[item.nav] || ''}
+                            pinned={pinnedRoutes.includes(item.nav)}
+                            onTogglePinned={() => togglePinnedRoute(item.nav)}
                         />
                     ))}
 
