@@ -1,5 +1,5 @@
 import { createSlice } from '@reduxjs/toolkit'
-import { filterAds, setSkills } from './helpers/adFilters'
+import { filterAds, setSkills } from './helpers/listFilters'
 
 export const AdSlice = createSlice({
     name: 'ad',

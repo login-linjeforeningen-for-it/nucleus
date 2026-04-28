@@ -1,5 +1,5 @@
 import { createSlice } from '@reduxjs/toolkit'
-import { filterEvents, setCategories } from './helpers/eventFilters'
+import { filterEvents, setCategories } from './helpers/listFilters'
 
 export const EventSlice = createSlice({
     name: 'event',
