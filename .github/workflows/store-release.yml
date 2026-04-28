@@ -187,6 +187,11 @@ jobs:
             printf 'export MACOS_KEYCHAIN_PASSWORD=%q\n' "$MACOS_KEYCHAIN_PASSWORD"
             printf 'export RUNNER_TOOL_CACHE=%q\n' "$RUNNER_TOOL_CACHE"
             printf 'export CI=%q\n' "$CI"
+            for name in PATH GEM_HOME GEM_PATH BUNDLE_GEMFILE RUBYLIB RUBYOPT; do
+              if [ -n "${!name:-}" ]; then
+                printf 'export %s=%q\n' "$name" "${!name}"
+              fi
+            done
             printf 'cd %q\n' "$GITHUB_WORKSPACE"
             printf 'bundle exec fastlane ios release\n'
           } > "$RELEASE_ENV"
