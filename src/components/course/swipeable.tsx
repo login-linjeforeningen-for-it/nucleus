@@ -1,16 +1,16 @@
 import { Dispatch, SetStateAction, useEffect, useState } from 'react'
 import { View, Dimensions, Platform } from 'react-native'
 import { Gesture, GestureDetector } from 'react-native-gesture-handler'
-import Animated, {
+import {
     useAnimatedStyle,
     useSharedValue,
     withSpring,
     interpolate
 } from 'react-native-reanimated'
 import { scheduleOnRN } from 'react-native-worklets'
-import { useSelector } from 'react-redux'
 import CourseContent from './content'
 import ReadOnly from './readonly'
+import { CourseStackCard, getCourseCardHeight } from './swipeCards'
 
 type CourseContentProps = {
     course: Course,
@@ -23,7 +23,6 @@ const { height: SCREEN_HEIGHT } = Dimensions.get('window')
 const SWIPE_THRESHOLD = SCREEN_WIDTH * (Platform.OS === 'ios' ? 0.25 : 0.32)
 
 export default function Swiper({ course, clicked, setClicked }: CourseContentProps) {
-    const { theme } = useSelector((state: ReduxState) => state.theme)
     const translateX = useSharedValue(0)
     const [cardID, setCardID] = useState<number>(0)
     const next = cardID + 1
@@ -166,11 +165,7 @@ export default function Swiper({ course, clicked, setClicked }: CourseContentPro
 
         return {
             width,
-            height: Platform.OS === 'ios' ? SCREEN_HEIGHT * 0.75
-                : SCREEN_HEIGHT * (SCREEN_HEIGHT === 592 ? 0.72
-                    : SCREEN_HEIGHT >= 592 && SCREEN_HEIGHT < 700 ? 0.76
-                        : SCREEN_HEIGHT > 800 && SCREEN_HEIGHT <= 900 ? 0.8
-                            : SCREEN_HEIGHT > 900 ? 0.77 : 0.75),
+            height: getCourseCardHeight(SCREEN_HEIGHT),
             transform: [{ translateY }],
         }
     })
@@ -210,11 +205,7 @@ export default function Swiper({ course, clicked, setClicked }: CourseContentPro
 
         return {
             width,
-            height: Platform.OS === 'ios' ? SCREEN_HEIGHT * 0.75
-                : SCREEN_HEIGHT * (SCREEN_HEIGHT === 592 ? 0.72
-                    : SCREEN_HEIGHT >= 592 && SCREEN_HEIGHT < 700 ? 0.76
-                        : SCREEN_HEIGHT > 800 && SCREEN_HEIGHT <= 900 ? 0.8
-                            : SCREEN_HEIGHT > 900 ? 0.77 : 0.75),
+            height: getCourseCardHeight(SCREEN_HEIGHT),
             transform: [{ translateY }],
         }
     })
@@ -235,11 +226,7 @@ export default function Swiper({ course, clicked, setClicked }: CourseContentPro
 
         return {
             width,
-            height: Platform.OS === 'ios' ? SCREEN_HEIGHT * 0.75
-                : SCREEN_HEIGHT * (SCREEN_HEIGHT === 592 ? 0.72
-                    : SCREEN_HEIGHT >= 592 && SCREEN_HEIGHT < 700 ? 0.76
-                        : SCREEN_HEIGHT > 800 && SCREEN_HEIGHT <= 900 ? 0.8
-                            : SCREEN_HEIGHT > 900 ? 0.77 : 0.75),
+            height: getCourseCardHeight(SCREEN_HEIGHT),
             transform: [{ translateY }],
         }
     })
@@ -278,69 +265,25 @@ export default function Swiper({ course, clicked, setClicked }: CourseContentPro
             paddingBottom: 10
         }}>
             {/* Fifth card */}
-            <Animated.View style={[{
-                position: 'absolute',
+            <CourseStackCard style={{
                 width: SCREEN_WIDTH * 0.75,
-                height: Platform.OS === 'ios' ? SCREEN_HEIGHT * 0.75
-                    : SCREEN_HEIGHT * (SCREEN_HEIGHT === 592 ? 0.72
-                        : SCREEN_HEIGHT >= 592 && SCREEN_HEIGHT < 700 ? 0.76
-                            : SCREEN_HEIGHT > 800 && SCREEN_HEIGHT <= 900 ? 0.8
-                                : SCREEN_HEIGHT > 900 ? 0.77 : 0.75),
+                height: getCourseCardHeight(SCREEN_HEIGHT),
                 top: 16,
-                justifyContent: 'center',
-                alignItems: 'center',
-                backgroundColor: theme.contrast,
-                borderRadius: 20,
-                elevation: 10,
-                shadowColor: '#000',
-                shadowOffset: { width: 0, height: 10 },
-                shadowOpacity: 0.3,
-                shadowRadius: 10,
-            }]} />
+            }} />
 
             {/* Forth card */}
-            <Animated.View style={[{
-                position: 'absolute',
+            <CourseStackCard style={[{
                 top: 12,
-                justifyContent: 'center',
-                alignItems: 'center',
-                backgroundColor: theme.contrast,
-                borderRadius: 20,
-                elevation: 10,
-                shadowColor: '#000',
-                shadowOffset: { width: 0, height: 10 },
-                shadowOpacity: 0.3,
-                shadowRadius: 10,
             }, animatedFourthCardStyle]} />
 
             {/* Third card */}
-            <Animated.View style={[{
-                position: 'absolute',
+            <CourseStackCard style={[{
                 top: 8,
-                justifyContent: 'center',
-                alignItems: 'center',
-                backgroundColor: theme.contrast,
-                borderRadius: 20,
-                elevation: 10,
-                shadowColor: '#000',
-                shadowOffset: { width: 0, height: 10 },
-                shadowOpacity: 0.3,
-                shadowRadius: 10,
             }, animatedThirdCardStyle]} />
 
             {/* Second card (next card) */}
-            <Animated.View style={[{
-                position: 'absolute',
+            <CourseStackCard style={[{
                 top: 4,
-                justifyContent: 'center',
-                alignItems: 'center',
-                backgroundColor: theme.contrast,
-                borderRadius: 20,
-                elevation: 10,
-                shadowColor: '#000',
-                shadowOffset: { width: 0, height: 10 },
-                shadowOpacity: 0.3,
-                shadowRadius: 10,
             }, animatedSecondCardStyle]}>
                 <CourseContent
                     course={course}
@@ -353,25 +296,12 @@ export default function Swiper({ course, clicked, setClicked }: CourseContentPro
                     next={next}
                     showFooter={false}
                 />
-            </Animated.View>
+            </CourseStackCard>
 
             {/* Top card (current card) */}
             <GestureDetector gesture={panGesture}>
-                <Animated.View style={[{
-                    justifyContent: 'center',
-                    alignItems: 'center',
-                    backgroundColor: theme.contrast,
-                    borderRadius: 20,
-                    shadowColor: '#000',
-                    shadowOffset: { width: 0, height: 10 },
-                    shadowOpacity: 0.3,
-                    shadowRadius: 10,
-                    elevation: 10,
-                    height: Platform.OS === 'ios' ? SCREEN_HEIGHT * 0.75
-                        : SCREEN_HEIGHT * (SCREEN_HEIGHT === 592 ? 0.72
-                            : SCREEN_HEIGHT >= 592 && SCREEN_HEIGHT < 700 ? 0.76
-                                : SCREEN_HEIGHT > 800 && SCREEN_HEIGHT <= 900 ? 0.8
-                                    : SCREEN_HEIGHT > 900 ? 0.77 : 0.75),
+                <CourseStackCard style={[{
+                    height: getCourseCardHeight(SCREEN_HEIGHT),
                 }, animatedStyle]}>
                     <CourseContent
                         course={course}
@@ -382,27 +312,13 @@ export default function Swiper({ course, clicked, setClicked }: CourseContentPro
                         previous={previous}
                         next={next}
                     />
-                </Animated.View>
+                </CourseStackCard>
             </GestureDetector>
 
             {/* Previous (hidden) card */}
-            {cardID !== 0 && <Animated.View style={[{
-                position: 'absolute',
+            {cardID !== 0 && <CourseStackCard style={[{
                 left: SCREEN_WIDTH * 0.025,
-                justifyContent: 'center',
-                alignItems: 'center',
-                backgroundColor: theme.contrast,
-                borderRadius: 20,
-                elevation: 10,
-                shadowColor: '#000',
-                shadowOffset: { width: 0, height: 10 },
-                shadowOpacity: 0.3,
-                shadowRadius: 10,
-                height: Platform.OS === 'ios' ? SCREEN_HEIGHT * 0.75
-                    : SCREEN_HEIGHT * (SCREEN_HEIGHT === 592 ? 0.72
-                        : SCREEN_HEIGHT >= 592 && SCREEN_HEIGHT < 700 ? 0.76
-                            : SCREEN_HEIGHT > 800 && SCREEN_HEIGHT <= 900 ? 0.8
-                                : SCREEN_HEIGHT > 900 ? 0.77 : 0.75),
+                height: getCourseCardHeight(SCREEN_HEIGHT),
                 width: SCREEN_WIDTH * 0.95,
             }, animatedHiddenCardStyle]} >
                 <CourseContent
@@ -416,7 +332,7 @@ export default function Swiper({ course, clicked, setClicked }: CourseContentPro
                     next={next}
                     showFooter={false}
                 />
-            </Animated.View>}
+            </CourseStackCard>}
         </View>
     )
 }
