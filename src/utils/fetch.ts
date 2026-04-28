@@ -69,30 +69,33 @@ export async function fetchHoneyServices(): Promise<string[]> {
 }
 
 export async function fetchHoneyList(service: string, limit = 20): Promise<GetHoneyListProps> {
-    try {
-        const response = await fetch(`${config.api}/text/${service}?limit=${limit}`)
-        if (!response.ok) throw new Error('Failed to fetch honey')
-        const data = await response.json()
-        return {
-            honeys: Array.isArray(data?.honeys) ? data.honeys : [],
-            total_count: typeof data?.total_count === 'number' ? data.total_count : 0,
-        }
-    } catch {
-        return { honeys: [], total_count: 0 }
-    }
+    return await fetchCountedCollection('honeys', `${config.api}/text/${service}?limit=${limit}`)
 }
 
 export async function fetchAlerts(limit = 20): Promise<GetAlertsProps> {
+    const params = new URLSearchParams({ limit: String(limit) })
+    return await fetchCountedCollection('alerts', `${config.api}/alerts?${params.toString()}`)
+}
+
+type CountedCollections = {
+    honeys: GetHoneyListProps
+    alerts: GetAlertsProps
+}
+
+async function fetchCountedCollection<Key extends keyof CountedCollections>(
+    key: Key,
+    url: string
+): Promise<CountedCollections[Key]> {
     try {
-        const params = new URLSearchParams({ limit: String(limit) })
-        const response = await fetch(`${config.api}/alerts?${params.toString()}`)
-        if (!response.ok) throw new Error('Failed to fetch alerts')
+        const response = await fetch(url)
+        if (!response.ok) throw new Error(`Failed to fetch ${key}`)
         const data = await response.json()
+
         return {
-            alerts: Array.isArray(data?.alerts) ? data.alerts : [],
+            [key]: Array.isArray(data?.[key]) ? data[key] : [],
             total_count: typeof data?.total_count === 'number' ? data.total_count : 0,
-        }
+        } as unknown as CountedCollections[Key]
     } catch {
-        return { alerts: [], total_count: 0 }
+        return { [key]: [], total_count: 0 } as unknown as CountedCollections[Key]
     }
 }
