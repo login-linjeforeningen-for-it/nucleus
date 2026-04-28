@@ -1,4 +1,5 @@
 require 'base64'
+require 'securerandom'
 require 'shellwords'
 require 'tmpdir'
 
@@ -11,7 +12,14 @@ google_play_key = File.join(repo_root, 'google-play-service-account.json')
 
 platform :ios do
   lane :release do
-    setup_ci
+    create_keychain(
+      name: "nucleus_release_#{Time.now.to_i}",
+      password: "nucleus_release_#{SecureRandom.hex(16)}",
+      default_keychain: true,
+      unlock: true,
+      timeout: 3600,
+      add_to_search_list: true
+    )
 
     asc_key_path = File.join(Dir.tmpdir, "app-store-connect-#{ENV.fetch('ASC_KEY_ID')}.p8")
     File.write(asc_key_path, Base64.decode64(ENV.fetch('ASC_PRIVATE_KEY_BASE64')))
