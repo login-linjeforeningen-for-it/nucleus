@@ -23,7 +23,7 @@ type GetListOffsetProps = {
  */
 export default function getListOffset({ search, categories: cat, clickedEvents, bottom, ad }: GetListOffsetProps): number {
     const windowHeight = Dimensions.get('window').height
-    const contentOffset = (100 - getHeight(cat.length + clickedEvents.length))
+    const contentOffset = (92 - getHeight(cat.length + clickedEvents.length))
     const filterInset = bottom ? 0 : 45
     let baseOffset = Dimensions.get('window').height / 3
 

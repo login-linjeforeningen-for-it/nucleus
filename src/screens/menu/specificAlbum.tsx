@@ -9,7 +9,7 @@ import GS from '@styles/globalStyles'
 import T from '@styles/text'
 import { fetchAlbumDetails } from '@utils/fetch'
 import { JSX, useEffect, useState } from 'react'
-import { Dimensions, Platform, RefreshControl, ScrollView, View } from 'react-native'
+import { Dimensions, RefreshControl, ScrollView, View } from 'react-native'
 import { useSelector } from 'react-redux'
 
 export default function SpecificAlbumScreen({
@@ -47,7 +47,6 @@ export default function SpecificAlbumScreen({
 
     const title = album ? (lang ? album.name_no : album.name_en) : ''
     const description = album ? (lang ? album.description_no : album.description_en) : ''
-    const headerActionTop = Dimensions.get('window').height / 17 + (Platform.OS === 'ios' ? 9 : 1)
     const closeDownloadSheet = () => {
         setShowDownloadSheet(false)
         setInitialDownloadImage(null)
@@ -67,6 +66,22 @@ export default function SpecificAlbumScreen({
         setInitialDownloadImage(image)
         setShowDownloadSheet(true)
     }
+
+    useEffect(() => {
+        navigation.setOptions({
+            headerComponents: {
+                right: album?.images?.length ? [
+                    <AlbumDownloadButton
+                        key='album-download'
+                        onPress={toggleDownloadSheet}
+                        showDownloadSheet={showDownloadSheet}
+                        text={text}
+                        theme={theme}
+                    />
+                ] : []
+            }
+        } as any)
+    }, [album?.images?.length, navigation, showDownloadSheet, text, theme])
 
     return (
         <Swipe left='AlbumsScreen'>
@@ -116,15 +131,6 @@ export default function SpecificAlbumScreen({
                     ) : null}
                 </ScrollView>
                 <TopRefreshIndicator refreshing={refreshing} theme={theme} top={112} />
-                {album?.images?.length ? (
-                    <AlbumDownloadButton
-                        headerActionTop={headerActionTop}
-                        onPress={toggleDownloadSheet}
-                        showDownloadSheet={showDownloadSheet}
-                        text={text}
-                        theme={theme}
-                    />
-                ) : null}
                 <AlbumDownloadSheet
                     album={album}
                     initialSelectedImage={initialDownloadImage}

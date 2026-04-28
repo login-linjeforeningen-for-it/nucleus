@@ -42,14 +42,13 @@ export function NavButton({ open, onPress }: { open: boolean; onPress: () => voi
     const { theme } = useSelector((state: ReduxState) => state.theme)
 
     return (
-        <HeaderIconButton active={open} onPress={onPress}>
+        <HeaderIconButton onPress={onPress}>
             <Text style={{
                 ...T.text20,
-                color: theme.orange,
+                color: open ? theme.orange : '#555',
                 fontSize: 28,
                 lineHeight: 28,
-                fontWeight: '300',
-                marginTop: Platform.OS === 'ios' ? -1 : -3,
+                fontWeight: '300'
             }}>
                 ≡
             </Text>

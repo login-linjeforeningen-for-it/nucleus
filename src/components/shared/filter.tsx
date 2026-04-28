@@ -42,17 +42,17 @@ export function FilterUI(): JSX.Element {
     const isSearching = isSearchingEvents || isSearchingAds
 
     return (
-        <View style={isSearching ? { ...ES.filterPanel, top: 20 } : { display: 'none' }}>
-            <View style={ES.filterPanelBody}>
+        <View style={isSearching ? ES.filterPanel : { display: 'none' }}>
+            <View style={{
+                ...ES.filterPanelBody,
+                backgroundColor: theme.greyTransparent,
+                borderColor: theme.greyTransparentBorder
+            }}>
                 <BlurView
                     style={StyleSheet.absoluteFill}
                     blurMethod='dimezisBlurView'
                     intensity={Platform.OS === 'ios' ? 35 : 24}
                 />
-                <View style={{
-                    ...StyleSheet.absoluteFill,
-                    backgroundColor: isDark ? 'rgba(255,255,255,0.07)' : theme.transparentAndroid,
-                }} />
                 <View style={ES.filterPanelContent}>
                     <View style={ES.filterSearchRow}>
                         <TextInput
@@ -72,7 +72,7 @@ export function FilterUI(): JSX.Element {
                                 alignItems: 'center',
                                 justifyContent: 'center',
                                 borderRadius: 19,
-                                backgroundColor: '#ffffff08',
+                                backgroundColor: theme.filterResetBackground,
                             }}
                             onPress={() => {
                                 if (isSearchingEvents) {
@@ -113,13 +113,14 @@ export function FilterButton() {
         if (route.name === 'EventScreen') {
             dispatch(eventToggleSearch())
         }
+
         if (route.name === 'AdScreen') {
             dispatch(adToggleSearch())
         }
     }
 
     return (
-        <HeaderIconButton active={!!isSearching} connector={!!isSearching} onPress={handlePress}>
+        <HeaderIconButton onPress={handlePress}>
             <Image
                 style={MS.multiIcon}
                 source={getFilterIcon({ hasFilterEnabled: !!hasFilterEnabled, isDark, isSearching })}

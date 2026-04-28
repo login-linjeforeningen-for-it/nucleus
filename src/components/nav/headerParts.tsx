@@ -9,7 +9,6 @@ type HeaderBackButtonProps = {
 }
 
 type HeaderTitlePillProps = {
-    isDark: boolean
     theme: Theme
     title: string
     left: number
@@ -25,13 +24,11 @@ export function HeaderBackButton({ isDark, theme, onPress }: HeaderBackButtonPro
                 borderRadius: 21,
                 overflow: 'hidden',
                 borderWidth: 1,
-                borderColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.08)',
-                backgroundColor: pressed
-                    ? (isDark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.05)')
-                    : 'transparent',
+                borderColor: theme.greyTransparentBorder,
+                backgroundColor: pressed ? theme.glassButtonPressed : 'transparent',
                 alignItems: 'center',
                 justifyContent: 'center',
-                shadowColor: '#000',
+                shadowColor: theme.greyTransparent,
                 shadowOpacity: isDark ? 0.12 : 0.05,
                 shadowRadius: 8,
                 shadowOffset: { width: 0, height: 3 },
@@ -53,13 +50,9 @@ export function HeaderBackButton({ isDark, theme, onPress }: HeaderBackButtonPro
     )
 }
 
-export function HeaderTitlePill({ isDark, theme, title, left, width }: HeaderTitlePillProps) {
+export function HeaderTitlePill({ theme, title, left, width }: HeaderTitlePillProps) {
     return (
-        <View style={{
-            ...GS.headerTitleFrame,
-            left,
-            width,
-        }}>
+        <View style={{ ...GS.headerTitleFrame, left, width }}>
             <HeaderGlassBackground borderRadius={16} />
             <Text style={{
                 ...GS.headerTitle,
@@ -67,7 +60,7 @@ export function HeaderTitlePill({ isDark, theme, title, left, width }: HeaderTit
                 textAlign: 'center',
                 fontWeight: '700',
                 letterSpacing: 0.2,
-                textShadowColor: isDark ? 'rgba(0,0,0,0.16)' : 'rgba(255,255,255,0.12)',
+                textShadowColor: theme.greyTransparent,
                 textShadowOffset: { width: 0, height: 1 },
                 textShadowRadius: 6,
                 paddingHorizontal: 14,
@@ -77,10 +70,10 @@ export function HeaderTitlePill({ isDark, theme, title, left, width }: HeaderTit
             <View
                 pointerEvents='none'
                 style={{
-                    ...StyleSheet.absoluteFillObject,
+                    ...StyleSheet.absoluteFill,
                     borderRadius: 16,
                     borderWidth: 1,
-                    borderColor: 'rgba(255,255,255,0.14)',
+                    borderColor: theme.greyTransparentBorder,
                 }}
             />
         </View>

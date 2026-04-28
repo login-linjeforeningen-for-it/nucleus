@@ -125,7 +125,6 @@ export default function Header({ options, route, navigation }: HeaderProps): Rea
                 </View>
                 {!exceptions.includes(route.name) && (
                     <HeaderTitlePill
-                        isDark={isDark}
                         theme={theme}
                         title={title}
                         left={titleLeft}

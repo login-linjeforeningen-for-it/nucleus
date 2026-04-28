@@ -74,7 +74,7 @@ export function BlurWrapper(props: PropsWithChildren) {
 }
 
 export function HeaderGlassBackground({ borderRadius }: { borderRadius: number }) {
-    const { theme, isDark } = useSelector((state: ReduxState) => state.theme)
+    const { theme } = useSelector((state: ReduxState) => state.theme)
 
     return (
         <>
@@ -84,9 +84,9 @@ export function HeaderGlassBackground({ borderRadius }: { borderRadius: number }
                 intensity={Platform.OS === 'ios' ? 35 : 24}
             />
             <View style={{
-                ...StyleSheet.absoluteFillObject,
+                ...StyleSheet.absoluteFill,
                 borderRadius,
-                backgroundColor: isDark ? 'rgba(255,255,255,0.07)' : theme.transparentAndroid,
+                backgroundColor: theme.greyTransparent,
             }} />
         </>
     )
