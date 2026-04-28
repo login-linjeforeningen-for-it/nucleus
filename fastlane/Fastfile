@@ -14,6 +14,7 @@ ios_app_identifier = 'com.eirikhanasand.Login'
 
 platform :ios do
   lane :release do
+    keychain_path = File.expand_path('~/Library/Keychains/login.keychain-db')
     asc_key_path = File.join(Dir.tmpdir, "app-store-connect-#{ENV.fetch('ASC_KEY_ID')}.p8")
     File.write(asc_key_path, Base64.decode64(ENV.fetch('ASC_PRIVATE_KEY_BASE64')))
 
@@ -29,8 +30,14 @@ platform :ios do
     get_certificates(
       api_key: api_key,
       development: false,
+      keychain_path: keychain_path,
       keychain_password: ENV.fetch('MACOS_KEYCHAIN_PASSWORD')
     )
+    sh("security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k #{ENV.fetch('MACOS_KEYCHAIN_PASSWORD').shellescape} #{keychain_path.shellescape}")
+
+    identities, identity_status = Open3.capture2('security', 'find-identity', '-v', '-p', 'codesigning', keychain_path)
+    UI.user_error!("Unable to inspect code signing identities in #{keychain_path}") unless identity_status.success?
+    signing_identity = identities[/"(Apple Distribution:[^"]+)"/, 1] || 'Apple Distribution'
 
     get_provisioning_profile(
       api_key: api_key,
@@ -58,7 +65,7 @@ platform :ios do
       targets: ['Login'],
       build_configurations: ['Release'],
       profile_name: profile_name,
-      code_sign_identity: 'Apple Distribution'
+      code_sign_identity: signing_identity
     )
 
     build_app(
@@ -78,7 +85,8 @@ platform :ios do
         "-authenticationKeyPath #{asc_key_path.shellescape}",
         "-authenticationKeyID #{ENV.fetch('ASC_KEY_ID').shellescape}",
         "-authenticationKeyIssuerID #{ENV.fetch('ASC_ISSUER_ID').shellescape}",
-        "DEVELOPMENT_TEAM=#{ENV.fetch('APPLE_TEAM_ID').shellescape}"
+        "DEVELOPMENT_TEAM=#{ENV.fetch('APPLE_TEAM_ID').shellescape}",
+        "OTHER_CODE_SIGN_FLAGS=#{Shellwords.escape("--keychain #{keychain_path}")}"
       ].join(' ')
     )
 
