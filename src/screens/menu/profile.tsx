@@ -3,7 +3,6 @@ import Swipe from '@components/nav/swipe'
 import ProfileInfo from '@/components/profile/profileInfo'
 import ProfileCard from '@/components/profile/profile'
 import ProfileActions from '@/components/profile/details/profileActions'
-import ProfileBackground from '@/components/profile/details/profileBackground'
 import ProfileDetailsToggle from '@/components/profile/details/profileDetailsToggle'
 import { clearSession } from '@redux/loginStatus'
 import { clearProfile, setProfile } from '@redux/profile'
@@ -14,6 +13,7 @@ import { useDispatch, useSelector } from 'react-redux'
 import { ScrollView } from 'react-native-gesture-handler'
 import { Dimensions, View } from 'react-native'
 import PS from '@styles/profileStyles'
+import Svg, { LinearGradient, Rect, Stop } from 'react-native-svg'
 
 type ScrollProps = {
     nativeEvent: {
@@ -119,5 +119,55 @@ export default function ProfileScreen({ navigation }: MenuProps<'ProfileScreen'>
                 </ScrollView>
             </View>
         </Swipe>
+    )
+}
+
+function ProfileBackground({
+    theme,
+    screenHeight,
+    scrollPosition,
+}: {
+    theme: Theme
+    screenHeight: number
+    scrollPosition: number
+}) {
+    return (
+        <>
+            <View style={{
+                ...PS.profileView,
+                backgroundColor: theme.orange,
+                opacity: Math.max(0, Math.min(scrollPosition / 220, 0.14)),
+                transform: [{ translateY: Math.min(scrollPosition * 0.18, 18) }]
+            }} />
+            <Svg style={{
+                height: screenHeight / 2,
+                left: 0,
+                position: 'absolute',
+                right: 0,
+                top: 0,
+                width: '100%'
+            }}>
+                <LinearGradient
+                    id='profileGradient'
+                    x1='0%'
+                    y1='0%'
+                    x2='0%'
+                    y2='100%'
+                >
+                    <Stop offset='0%' stopColor={theme.orange} />
+                    <Stop
+                        offset='100%'
+                        stopColor={theme.darker}
+                    />
+                </LinearGradient>
+                <Rect
+                    x='0'
+                    y='0'
+                    width='100%'
+                    height='100%'
+                    fill='url(#profileGradient)'
+                />
+            </Svg>
+        </>
     )
 }
