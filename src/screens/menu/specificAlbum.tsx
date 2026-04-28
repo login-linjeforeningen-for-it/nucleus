@@ -44,6 +44,7 @@ export default function SpecificAlbumScreen({
     const [refreshing, setRefreshing] = useState(false)
     const [error, setError] = useState('')
     const [showDownloadSheet, setShowDownloadSheet] = useState(false)
+    const [initialDownloadImage, setInitialDownloadImage] = useState<string | null>(null)
 
     async function load() {
         setRefreshing(true)
@@ -68,6 +69,25 @@ export default function SpecificAlbumScreen({
     const title = album ? (lang ? album.name_no : album.name_en) : ''
     const description = album ? (lang ? album.description_no : album.description_en) : ''
     const headerActionTop = Dimensions.get('window').height / 17 + (Platform.OS === 'ios' ? 9 : 1)
+    const closeDownloadSheet = () => {
+        setShowDownloadSheet(false)
+        setInitialDownloadImage(null)
+    }
+    const toggleDownloadSheet = () => {
+        setShowDownloadSheet((current) => {
+            if (current) {
+                setInitialDownloadImage(null)
+                return false
+            }
+
+            setInitialDownloadImage(null)
+            return true
+        })
+    }
+    const selectImageForDownload = (image: string) => {
+        setInitialDownloadImage(image)
+        setShowDownloadSheet(true)
+    }
 
     return (
         <Swipe left='AlbumsScreen'>
@@ -150,7 +170,11 @@ export default function SpecificAlbumScreen({
                             </Cluster>
 
                             <Space height={10} />
-                            <AlbumImageGrid album={album} title={title} />
+                            <AlbumImageGrid
+                                album={album}
+                                title={title}
+                                onSelectImage={selectImageForDownload}
+                            />
                         </>
                     ) : null}
                 </ScrollView>
@@ -160,7 +184,7 @@ export default function SpecificAlbumScreen({
                         accessibilityRole='button'
                         accessibilityLabel={showDownloadSheet ? text.close : text.downloadImages}
                         testID='album-download-button'
-                        onPress={() => setShowDownloadSheet((current) => !current)}
+                        onPress={toggleDownloadSheet}
                         style={({ pressed }) => ({
                             position: 'absolute',
                             right: 18,
@@ -195,10 +219,11 @@ export default function SpecificAlbumScreen({
                 ) : null}
                 <AlbumDownloadSheet
                     album={album}
+                    initialSelectedImage={initialDownloadImage}
                     title={title}
                     text={text}
                     visible={showDownloadSheet}
-                    onClose={() => setShowDownloadSheet(false)}
+                    onClose={closeDownloadSheet}
                 />
             </View>
         </Swipe>
