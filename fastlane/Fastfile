@@ -33,7 +33,8 @@ platform :ios do
     get_provisioning_profile(
       api_key: api_key,
       app_identifier: ios_app_identifier,
-      force: true
+      force: true,
+      skip_certificate_verification: true
     )
     profile_name = lane_context[SharedValues::SIGH_NAME]
 
