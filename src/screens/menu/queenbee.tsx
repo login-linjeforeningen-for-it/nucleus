@@ -1,14 +1,14 @@
 import Space from '@/components/shared/utils'
 import DashboardSummary from '@components/menu/queenbee/dashboardSummary'
-import QueenbeeGate from '@components/menu/queenbee/gate'
+import { QueenbeeAccessGate, UnauthorizedRetryText } from '@components/menu/queenbee/accessMessages'
 import OperationsSnapshot from '@components/menu/queenbee/operationsSnapshot'
 import { FailoverState, getFailoverTone } from '@components/menu/queenbee/snapshotPill'
+import SummaryListCard from '@components/menu/queenbee/summaryListCard'
 import Swipe from '@components/nav/swipe'
 import Text from '@components/shared/text'
 import TopRefreshIndicator from '@components/shared/topRefreshIndicator'
 import GS from '@styles/globalStyles'
 import T from '@styles/text'
-import { startLogin } from '@utils/auth/auth'
 import { getDashboardSummary } from '@utils/discovery/discoveryApi'
 import {
     getDatabaseOverview,
@@ -26,13 +26,8 @@ import {
     loadDashboardPart,
 } from '@utils/queenbee/snapshotData'
 import { JSX, useEffect, useMemo, useState } from 'react'
-import { Dimensions, RefreshControl, ScrollView, Text as RNText, View } from 'react-native'
+import { Dimensions, RefreshControl, ScrollView, View } from 'react-native'
 import { useSelector } from 'react-redux'
-
-type SummaryListItem = {
-    title: string
-    body: string
-}
 
 export default function QueenbeeScreen({ navigation }: MenuProps<'QueenbeeScreen'>): JSX.Element {
     const { theme } = useSelector((state: ReduxState) => state.theme)
@@ -179,79 +174,5 @@ export default function QueenbeeScreen({ navigation }: MenuProps<'QueenbeeScreen
                 <TopRefreshIndicator refreshing={loading} theme={theme} top={112} />
             </View>
         </Swipe>
-    )
-}
-
-function UnauthorizedRetryText({ lang, theme }: { lang: boolean, theme: Theme }) {
-    return (
-        <RNText style={{
-            ...T.centered15,
-            color: theme.oppositeTextColor,
-            textAlign: 'center',
-        }}>
-            {lang ? 'Noe data er ikke tilgjengelig før du ' : 'Some data is not available until you '}
-            <RNText
-                onPress={() => startLogin('queenbee')}
-                style={{
-                    color: theme.orange,
-                    fontWeight: '500',
-                    textDecorationLine: 'underline',
-                }}
-            >
-                {lang ? 'logger inn på ny' : 'log in again'}
-            </RNText>
-            .
-        </RNText>
-    )
-}
-
-function SummaryListCard({ title, items, theme }: { title: string, items: SummaryListItem[], theme: Theme }): JSX.Element | null {
-    if (!items.length) {
-        return null
-    }
-
-    return (
-        <>
-            <Space height={16} />
-            <View style={{ borderRadius: 18, backgroundColor: theme.contrast, padding: 14 }}>
-                <Text style={{ ...T.text20, color: theme.textColor }}>{title}</Text>
-                <Space height={10} />
-                {items.map((item, index) => (
-                    <View
-                        key={`${item.title}-${index}`}
-                        style={{
-                            paddingVertical: 8,
-                            borderBottomWidth: index === items.length - 1 ? 0 : 1,
-                            borderBottomColor: theme.darker,
-                        }}
-                    >
-                        <Text style={{ ...T.text15, color: theme.textColor }}>
-                            {item.title}
-                        </Text>
-                        <Text style={{ ...T.text12, color: theme.oppositeTextColor }}>
-                            {item.body}
-                        </Text>
-                    </View>
-                ))}
-            </View>
-        </>
-    )
-}
-
-function QueenbeeAccessGate({ login, hasQueenbee, theme }: { login: boolean, hasQueenbee: boolean, theme: Theme }) {
-    return (
-        <QueenbeeGate
-            backgroundColor={theme.darker}
-            textColor={theme.textColor}
-            mutedTextColor={theme.oppositeTextColor}
-            title='Queenbee'
-            body={login && !hasQueenbee
-                ? 'Your account is signed in, but it does not currently have Queenbee access.'
-                : 'Sign in to use Queenbee.'}
-            actionLabel={login ? undefined : 'Sign in'}
-            actionColor={theme.orange}
-            actionTextColor={theme.darker}
-            onPress={login ? undefined : () => startLogin('queenbee')}
-        />
     )
 }
