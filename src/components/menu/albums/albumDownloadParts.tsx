@@ -6,12 +6,9 @@ import { useSelector } from 'react-redux'
 
 export type AlbumText = {
     close?: string
-    downloadedImages?: string
-    downloading?: string
     downloadAll?: string
     downloadImages?: string
     downloadSelected?: string
-    failedImages?: string
     noImagesSelected?: string
     selectedImages?: string
 }
@@ -81,7 +78,6 @@ export function AlbumDownloadGrid({
 }
 
 export function AlbumDownloadActions({
-    downloading,
     imageCount,
     onClose,
     onDownloadAll,
@@ -89,7 +85,6 @@ export function AlbumDownloadActions({
     selectedCount,
     text,
 }: {
-    downloading: boolean
     imageCount: number
     onClose: () => void
     onDownloadAll: () => void
@@ -104,19 +99,17 @@ export function AlbumDownloadActions({
             <View style={{ flexDirection: 'row', gap: 10 }}>
                 <AlbumDownloadButton flex={1} label={text.close || 'Close'} onPress={onClose} />
                 <AlbumDownloadButton
-                    disabled={!imageCount || downloading}
+                    disabled={!imageCount}
                     flex={1}
-                    label={downloading ? text.downloading || 'Downloading...' : text.downloadAll || 'Download all'}
+                    label={text.downloadAll || 'Download all'}
                     onPress={onDownloadAll}
                     testID='album-download-all'
                 />
             </View>
             <AlbumDownloadButton
                 accent={Boolean(selectedCount)}
-                disabled={!selectedCount || downloading}
-                label={downloading
-                    ? text.downloading || 'Downloading...'
-                    : selectedCount ? text.downloadSelected || 'Download selected' : text.noImagesSelected || 'No images selected'}
+                disabled={!selectedCount}
+                label={selectedCount ? text.downloadSelected || 'Download selected' : text.noImagesSelected || 'No images selected'}
                 labelColor={selectedCount ? theme.orange : theme.oppositeTextColor}
                 onPress={onDownloadSelected}
                 testID='album-download-selected'

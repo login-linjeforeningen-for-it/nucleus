@@ -89,9 +89,6 @@
         "downloadImages": "Download images",
         "downloadAll": "Download all",
         "downloadSelected": "Download selected",
-        "downloadedImages": "downloaded",
-        "downloading": "Downloading...",
-        "failedImages": "failed",
         "noImagesSelected": "No images selected",
         "selectedImages": "selected",
         "close": "Close"

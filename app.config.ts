@@ -62,13 +62,6 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
                 photosPermission: 'Login needs photo access if you want a profile picture.',
                 cameraPermission: 'Login needs camera access if you want to take a selfie.'
             }
-        ],
-        [
-            'expo-media-library',
-            {
-                photosPermission: 'Login needs photo access to save album downloads.',
-                savePhotosPermission: 'Login needs permission to save album downloads.'
-            }
         ]
     ],
     assetBundlePatterns: [
@@ -84,8 +77,6 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
         ],
         infoPlist: {
             ITSAppUsesNonExemptEncryption: false,
-            NSPhotoLibraryAddUsageDescription: 'Login needs permission to save album downloads.',
-            NSPhotoLibraryUsageDescription: 'Login needs photo access to save album downloads.',
             UIBackgroundModes: [
                 'fetch',
                 'remote-notification'
@@ -104,9 +95,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
             'NOTIFICATIONS',
             'PUSH_NOTIFICATIONS',
             'READ_CALENDAR',
-            'WRITE_CALENDAR',
-            'READ_MEDIA_IMAGES',
-            'WRITE_EXTERNAL_STORAGE'
+            'WRITE_CALENDAR'
         ],
         intentFilters: [
             {

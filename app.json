@@ -3,7 +3,7 @@
     "owner": "loginapp",
     "slug": "Login",
     "scheme": "login",
-    "version": "2.9.7",
+    "version": "2.9.6",
     "orientation": "portrait",
     "icon": "./public/assets/logo/icon.png",
     "userInterfaceStyle": "dark",
@@ -37,13 +37,6 @@
           "photosPermission": "Login needs photo access if you want a profile picture.",
           "cameraPermission": "Login needs camera access if you want to take a selfie."
         }
-      ],
-      [
-        "expo-media-library",
-        {
-          "photosPermission": "Login needs photo access to save album downloads.",
-          "savePhotosPermission": "Login needs permission to save album downloads."
-        }
       ]
     ],
     "assetBundlePatterns": [
@@ -52,13 +45,11 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.eirikhanasand.Login",
-      "buildNumber": "156",
+      "buildNumber": "155",
       "associatedDomains": [
         "applinks:login.no"
       ],
       "infoPlist": {
-        "NSPhotoLibraryAddUsageDescription": "Login needs permission to save album downloads.",
-        "NSPhotoLibraryUsageDescription": "Login needs photo access to save album downloads.",
         "UIBackgroundModes": [
           "fetch",
           "remote-notification"
@@ -71,15 +62,13 @@
         "backgroundColor": "#000000"
       },
       "package": "com.login.Login",
-      "versionCode": 109,
+      "versionCode": 108,
       "permissions": [
         "INTERNET",
         "NOTIFICATIONS",
         "PUSH_NOTIFICATIONS",
         "READ_CALENDAR",
-        "WRITE_CALENDAR",
-        "READ_MEDIA_IMAGES",
-        "WRITE_EXTERNAL_STORAGE"
+        "WRITE_CALENDAR"
       ],
       "intentFilters": [
         {

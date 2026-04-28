@@ -2,7 +2,6 @@ import Text from '@components/shared/text'
 import T from '@styles/text'
 import { Image, Modal, Pressable, ScrollView, useWindowDimensions, View } from 'react-native'
 import { useMemo, useState } from 'react'
-import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useSelector } from 'react-redux'
 
 export function AlbumImageViewer({
@@ -16,18 +15,10 @@ export function AlbumImageViewer({
 }) {
     const [zoom, setZoom] = useState(1)
     const viewport = useWindowDimensions()
-    const insets = useSafeAreaInsets()
-    const controlsTop = insets.top + 56
-    const viewerTop = controlsTop + 54
-    const viewerHeight = Math.max(240, viewport.height - viewerTop - insets.bottom - 24)
-    const imageSize = useMemo(() => ({
-        width: viewport.width - 32,
-        height: viewerHeight - 16,
-    }), [viewerHeight, viewport.width])
-    const scaledSize = {
-        width: imageSize.width * zoom,
-        height: imageSize.height * zoom,
-    }
+    const initialSize = useMemo(() => ({
+        width: viewport.width * 0.8,
+        height: viewport.height * 0.7,
+    }), [viewport.height, viewport.width])
 
     const close = () => {
         setZoom(1)
@@ -47,50 +38,61 @@ export function AlbumImageViewer({
                 style={{
                     flex: 1,
                     backgroundColor: '#050505f2',
-                    paddingTop: viewerTop,
                 }}
             >
                 <ScrollView
-                    style={{ width: viewport.width, height: viewerHeight }}
-                    contentContainerStyle={{
-                        width: Math.max(viewport.width, scaledSize.width),
-                        minHeight: Math.max(viewerHeight, scaledSize.height),
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                    }}
+                    horizontal
+                    style={{ flex: 1, width: viewport.width, height: viewport.height }}
                     maximumZoomScale={5}
                     minimumZoomScale={1}
                     bouncesZoom
                     centerContent
                     showsHorizontalScrollIndicator={zoom > 1}
                     showsVerticalScrollIndicator={zoom > 1}
-                    onScroll={(event) => {
-                        const nextZoom = event.nativeEvent.zoomScale
-                        if (nextZoom && Math.abs(nextZoom - zoom) > 0.05) {
-                            setZoom(nextZoom)
-                        }
+                    contentContainerStyle={{
+                        minWidth: viewport.width,
+                        minHeight: viewport.height,
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        padding: 24,
                     }}
-                    scrollEventThrottle={16}
                 >
-                    {imageUri ? (
-                        <Image
-                            source={{ uri: imageUri, cache: 'force-cache' }}
-                            accessibilityLabel={title}
-                            resizeMode='contain'
-                            style={{
-                                width: scaledSize.width,
-                                height: scaledSize.height,
-                                borderRadius: Math.max(8, 24 / zoom),
-                            }}
-                        />
-                    ) : null}
+                    <ScrollView
+                        style={{
+                            width: Math.max(viewport.width, initialSize.width * zoom),
+                            height: Math.max(viewport.height, initialSize.height * zoom),
+                        }}
+                        maximumZoomScale={5}
+                        minimumZoomScale={1}
+                        bouncesZoom
+                        centerContent
+                        showsVerticalScrollIndicator={zoom > 1}
+                        contentContainerStyle={{
+                            minWidth: Math.max(viewport.width, initialSize.width * zoom),
+                            minHeight: Math.max(viewport.height, initialSize.height * zoom),
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                        }}
+                    >
+                        {imageUri ? (
+                            <Image
+                                source={{ uri: imageUri, cache: 'force-cache' }}
+                                accessibilityLabel={title}
+                                resizeMode='contain'
+                                style={{
+                                    width: initialSize.width * zoom,
+                                    height: initialSize.height * zoom,
+                                    borderRadius: Math.max(8, 24 / zoom),
+                                }}
+                            />
+                        ) : null}
+                    </ScrollView>
                 </ScrollView>
                 <AlbumImageViewerActions
                     zoom={zoom}
-                    top={controlsTop}
                     onClose={close}
-                    onZoomIn={() => setZoom((value) => Math.min(5, value + 0.5))}
-                    onZoomOut={() => setZoom((value) => Math.max(1, value - 0.5))}
+                    onZoomIn={() => setZoom((value) => Math.min(5, value + 1))}
+                    onZoomOut={() => setZoom((value) => Math.max(1, value - 1))}
                 />
             </View>
         </Modal>
@@ -101,13 +103,11 @@ function AlbumImageViewerActions({
     onClose,
     onZoomIn,
     onZoomOut,
-    top,
     zoom,
 }: {
     onClose: () => void
     onZoomIn: () => void
     onZoomOut: () => void
-    top: number
     zoom: number
 }) {
     const { theme } = useSelector((state: ReduxState) => state.theme)
@@ -116,7 +116,7 @@ function AlbumImageViewerActions({
         <View style={{
             position: 'absolute',
             right: 18,
-            top,
+            top: 18,
             zIndex: 10,
             flexDirection: 'row',
             alignItems: 'center',
