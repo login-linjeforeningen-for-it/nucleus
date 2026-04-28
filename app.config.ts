@@ -71,6 +71,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
         supportsTablet: true,
         bundleIdentifier: 'com.eirikhanasand.Login',
         buildNumber: config.ios?.buildNumber,
+        googleServicesFile: './GoogleService-Info.plist',
         associatedDomains: [
             'applinks:login.no',
             'applinks:www.login.no',
@@ -90,6 +91,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
         },
         package: 'com.login.Login',
         versionCode: config.android?.versionCode,
+        googleServicesFile: './google-services.json',
         permissions: [
             'INTERNET',
             'NOTIFICATIONS',

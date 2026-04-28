@@ -12,9 +12,8 @@ function writeBase64File(envName, path, mode = 0o600) {
     chmodSync(path, mode)
 }
 
-mkdirSync('googleServices', { recursive: true })
-writeBase64File('GOOGLE_SERVICES_JSON_BASE64', 'googleServices/google-services.json')
-writeBase64File('GOOGLE_SERVICES_PLIST_BASE64', 'googleServices/GoogleService-Info.plist')
+writeBase64File('GOOGLE_SERVICES_JSON_BASE64', 'google-services.json')
+writeBase64File('GOOGLE_SERVICES_PLIST_BASE64', 'GoogleService-Info.plist')
 writeBase64File('GOOGLE_PLAY_SERVICE_ACCOUNT_JSON_BASE64', 'google-play-service-account.json')
 
 const ascDir = join(homedir(), '.appstoreconnect', 'private_keys')

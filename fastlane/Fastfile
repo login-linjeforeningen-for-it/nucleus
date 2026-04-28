@@ -27,11 +27,9 @@ platform :ios do
       xcargs: '-allowProvisioningUpdates'
     )
 
-    upload_to_app_store(
+    upload_to_testflight(
       api_key: api_key,
-      skip_metadata: true,
-      skip_screenshots: true,
-      submit_for_review: false
+      skip_waiting_for_build_processing: true
     )
   end
 end
