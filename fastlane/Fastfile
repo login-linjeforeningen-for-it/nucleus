@@ -1,4 +1,6 @@
 require 'base64'
+require 'fileutils'
+require 'open3'
 require 'shellwords'
 require 'tmpdir'
 
@@ -33,10 +35,21 @@ platform :ios do
     get_provisioning_profile(
       api_key: api_key,
       app_identifier: ios_app_identifier,
-      force: true,
-      skip_certificate_verification: true
+      force: false,
+      skip_certificate_verification: true,
+      skip_install: true
     )
-    profile_name = lane_context[SharedValues::SIGH_NAME]
+    profile_path = lane_context[SharedValues::SIGH_PROFILE_PATH] || File.join(repo_root, "AppStore_#{ios_app_identifier}.mobileprovision")
+    profile_plist, profile_status = Open3.capture2('openssl', 'smime', '-inform', 'der', '-verify', '-noverify', '-in', profile_path)
+    UI.user_error!("Unable to decode provisioning profile at #{profile_path}") unless profile_status.success?
+
+    profile_name = profile_plist[/<key>Name<\/key>\s*<string>([^<]+)<\/string>/, 1] || "#{ios_app_identifier} AppStore"
+    profile_uuid = profile_plist[/<key>UUID<\/key>\s*<string>([^<]+)<\/string>/, 1]
+    UI.user_error!("Unable to find UUID in provisioning profile at #{profile_path}") unless profile_uuid
+
+    profiles_dir = File.expand_path('~/Library/MobileDevice/Provisioning Profiles')
+    FileUtils.mkdir_p(profiles_dir)
+    FileUtils.cp(profile_path, File.join(profiles_dir, "#{profile_uuid}.mobileprovision"))
 
     update_code_signing_settings(
       path: File.join(ios_dir, 'Login.xcodeproj'),
