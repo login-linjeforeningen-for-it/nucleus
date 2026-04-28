@@ -14,13 +14,15 @@ import { useSelector } from 'react-redux'
 import { useDispatch } from 'react-redux'
 import { setTag } from '@redux/event'
 import { BlurWrapper, HeaderGlassBackground } from './headerBackground'
+import {
+    HEADER_RIGHT_INSET,
+    HEADER_TITLE_GAP,
+    getCompactHeaderTitle,
+    getInternalDashboardRoutes,
+    getRightActionOffset,
+    getRightRailWidth,
+} from './headerLayout'
 
-const MAX_COMPACT_HEADER_TITLE_LENGTH = 37
-const HEADER_ACTION_SLOT_SIZE = 24
-const HEADER_ACTION_GAP = 24
-const HEADER_MENU_ACTION_GAP = 24
-const HEADER_RIGHT_INSET = 18
-const HEADER_TITLE_GAP = 16
 export default function Header({ options, route, navigation }: HeaderProps): ReactNode {
     const { theme, isDark } = useSelector((state: ReduxState) => state.theme)
     const { lang } = useSelector((state: ReduxState) => state.lang)
@@ -33,25 +35,7 @@ export default function Header({ options, route, navigation }: HeaderProps): Rea
     const SES = route.name === 'SpecificEventScreen'
     const SAS = route.name === 'SpecificAdScreen'
     const exceptions = ['SpecificGameScreen']
-    const aiPositionedRightRoutes = [
-        'AiScreen',
-        'QueenbeeScreen',
-        'StatusScreen',
-        'LoadBalancingScreen',
-        'DatabaseScreen',
-        'VulnerabilitiesScreen',
-        'LogsScreen',
-        'TrafficScreen',
-        'TrafficRecordsScreen',
-        'TrafficMapScreen',
-        'ContentScreen',
-        'AnnouncementsScreen',
-        'AlertsScreen',
-        'NucleusDocumentationScreen',
-        'HoneyScreen',
-        'DatabaseBackupsScreen',
-    ]
-    const internalDashboardRoutes = aiPositionedRightRoutes.filter(routeName => routeName !== 'AiScreen')
+    const internalDashboardRoutes = getInternalDashboardRoutes()
     const hasQueenbeeAccess = login && groups.map((g) => g.toLowerCase()).includes('queenbee')
     const rightComponents = useMemo(() => {
         const existing = options.headerComponents?.right?.filter(Boolean) || []
@@ -226,42 +210,4 @@ export default function Header({ options, route, navigation }: HeaderProps): Rea
             ) : null}
         </BlurWrapper>
     )
-}
-
-function getRightRailWidth(actionCount: number) {
-    if (!actionCount) {
-        return 0
-    }
-
-    const remainingGaps = Math.max(0, actionCount - 2)
-    const gapWidth = actionCount > 1 ? HEADER_MENU_ACTION_GAP + remainingGaps * HEADER_ACTION_GAP : 0
-
-    return actionCount * HEADER_ACTION_SLOT_SIZE + gapWidth
-}
-
-function getRightActionOffset(index: number) {
-    if (index === 0) {
-        return 0
-    }
-
-    return HEADER_ACTION_SLOT_SIZE + HEADER_MENU_ACTION_GAP
-        + (index - 1) * (HEADER_ACTION_SLOT_SIZE + HEADER_ACTION_GAP)
-}
-
-function getCompactHeaderTitle({
-    value,
-    fallback,
-}: {
-    value?: string
-    fallback: string
-}) {
-    const normalized = value?.trim()
-
-    if (!normalized) {
-        return fallback
-    }
-
-    return normalized.length > MAX_COMPACT_HEADER_TITLE_LENGTH
-        ? fallback
-        : normalized
 }
