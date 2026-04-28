@@ -27,52 +27,10 @@
  */
 
 import Footer from '@nav/footer'
-import AdScreen from '@screens/ads'
-import EventScreen from '@screens/event'
-import MenuScreen from '@screens/menu'
 import MS from '@styles/menuStyles'
 import T from '@styles/text'
 import NotificationModal from '@components/shared/notificationModal'
-import NotificationScreen from '@screens/menu/notifications'
-import ProfileScreen from '@screens/menu/profile'
-import SettingScreen from '@screens/menu/settings'
-import AboutScreen from '@screens/menu/about'
-import BusinessScreen from '@screens/menu/business'
-import InternalScreen from '@screens/menu/internal'
-import LoginScreen from '@screens/menu/login'
-import AiScreen from '@screens/menu/ai'
-import QueenbeeScreen from '@screens/menu/queenbee'
-import GameScreen from '@screens/menu/games/index'
-import CourseScreen from '@screens/menu/course/index'
-import SearchScreen from '@screens/menu/search'
-import StatusScreen from '@screens/menu/status'
-import MusicScreen from '@screens/menu/music'
-import AlbumsScreen from '@screens/menu/albums'
-import FundScreen from '@screens/menu/fund'
-import VervScreen from '@screens/menu/verv'
-import PolicyScreen from '@screens/menu/policy'
-import PwnedScreen from '@screens/menu/pwned'
-import DashboardScreen from '@screens/menu/dashboard'
-import LoadBalancingScreen from '@screens/menu/loadBalancing'
-import DatabaseScreen from '@screens/menu/database'
-import VulnerabilitiesScreen from '@screens/menu/vulnerabilities'
-import LogsScreen from '@screens/menu/logs'
-import TrafficScreen from '@screens/menu/traffic'
-import TrafficRecordsScreen from '@screens/menu/trafficRecords'
-import TrafficMapScreen from '@screens/menu/trafficMap'
-import ContentScreen from '@screens/menu/content'
-import AnnouncementsScreen from '@screens/menu/announcements'
-import AlertsScreen from '@screens/menu/alerts'
-import NucleusDocumentationScreen from '@screens/menu/nucleusDocumentation'
-import HoneyScreen from '@screens/menu/honey'
-import DatabaseBackupsScreen from '@screens/menu/databaseBackups'
-import SpecificEventScreen from '@screens/event/specificEvent'
-import SpecificAdScreen from '@screens/ads/specificAd'
-import SpecificAlbumScreen from '@screens/menu/specificAlbum'
-import SpecificCourseScreen from '@screens/menu/course/specificCourse'
-import SpecificGameScreen from '@screens/menu/games/specificGame'
-import DiceScreen from '@screens/menu/games/dice'
-import Header from './header'
+import { Ads, Events, Menu } from './stacks'
 import * as SystemUI from 'expo-system-ui'
 import * as NavigationBar from 'expo-navigation-bar'
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs'
@@ -92,92 +50,6 @@ import { JSX, useEffect } from 'react'
 // Defines the navigators
 const Root = createStackNavigator<RootStackParamList>()
 const Tab = createBottomTabNavigator<TabBarParamList>()
-const EventStack = createStackNavigator<EventStackParamList>()
-const AdStack = createStackNavigator<AdStackParamList>()
-const MenuStack = createStackNavigator<MenuStackParamList>()
-
-// Defines the components in the eventStck
-function Events() {
-    return (
-        <EventStack.Navigator screenOptions={{
-            animation: 'none',
-            headerTransparent: true,
-            header: props => <Header {...props} />
-        }}>
-            <EventStack.Screen name='EventScreen' component={EventScreen} />
-            <EventStack.Screen name='SpecificEventScreen' component={SpecificEventScreen} />
-        </EventStack.Navigator>
-    )
-}
-
-// Defines the components in the adStack
-function Ads() {
-    return (
-        <AdStack.Navigator screenOptions={{
-            animation: 'none',
-            headerTransparent: true,
-            header: props => <Header {...props} />
-        }}>
-            <AdStack.Screen name='AdScreen' component={AdScreen} />
-            <AdStack.Screen name='SpecificAdScreen' component={SpecificAdScreen} />
-        </AdStack.Navigator>
-    )
-}
-
-function MenuSpecificAdScreen(props: MenuProps<'SpecificAdScreen'>) {
-    return <SpecificAdScreen {...props as unknown as AdScreenProps<'SpecificAdScreen'>} />
-}
-
-// Defines the components in the menuStack
-function Menu() {
-    return (
-        <MenuStack.Navigator screenOptions={{
-            animation: 'none',
-            headerTransparent: true,
-            header: props => <Header {...props} />
-        }}>
-            <MenuStack.Screen name='MenuScreen' component={MenuScreen} />
-            <MenuStack.Screen name='ProfileScreen' component={ProfileScreen} />
-            <MenuStack.Screen name='SettingScreen' component={SettingScreen} />
-            <MenuStack.Screen name='NotificationScreen' component={NotificationScreen} />
-            <MenuStack.Screen name='AboutScreen' component={AboutScreen} />
-            <MenuStack.Screen name='BusinessScreen' component={BusinessScreen} />
-            <MenuStack.Screen name='LoginScreen' component={LoginScreen} />
-            <MenuStack.Screen name='AiScreen' component={AiScreen} />
-            <MenuStack.Screen name='QueenbeeScreen' component={QueenbeeScreen} />
-            <MenuStack.Screen name='InternalScreen' component={InternalScreen} />
-            <MenuStack.Screen name='SearchScreen' component={SearchScreen} />
-            <MenuStack.Screen name='StatusScreen' component={StatusScreen} />
-            <MenuStack.Screen name='MusicScreen' component={MusicScreen} />
-            <MenuStack.Screen name='AlbumsScreen' component={AlbumsScreen} />
-            <MenuStack.Screen name='SpecificAlbumScreen' component={SpecificAlbumScreen} />
-            <MenuStack.Screen name='FundScreen' component={FundScreen} />
-            <MenuStack.Screen name='VervScreen' component={VervScreen} />
-            <MenuStack.Screen name='PolicyScreen' component={PolicyScreen} />
-            <MenuStack.Screen name='PwnedScreen' component={PwnedScreen} />
-            <MenuStack.Screen name='SpecificAdScreen' component={MenuSpecificAdScreen} />
-            <MenuStack.Screen name='DashboardScreen' component={DashboardScreen} />
-            <MenuStack.Screen name='LoadBalancingScreen' component={LoadBalancingScreen} />
-            <MenuStack.Screen name='TrafficScreen' component={TrafficScreen} />
-            <MenuStack.Screen name='TrafficRecordsScreen' component={TrafficRecordsScreen} />
-            <MenuStack.Screen name='TrafficMapScreen' component={TrafficMapScreen} />
-            <MenuStack.Screen name='ContentScreen' component={ContentScreen} />
-            <MenuStack.Screen name='AnnouncementsScreen' component={AnnouncementsScreen} />
-            <MenuStack.Screen name='AlertsScreen' component={AlertsScreen} />
-            <MenuStack.Screen name='NucleusDocumentationScreen' component={NucleusDocumentationScreen} />
-            <MenuStack.Screen name='HoneyScreen' component={HoneyScreen} />
-            <MenuStack.Screen name='DatabaseScreen' component={DatabaseScreen} />
-            <MenuStack.Screen name='DatabaseBackupsScreen' component={DatabaseBackupsScreen} />
-            <MenuStack.Screen name='VulnerabilitiesScreen' component={VulnerabilitiesScreen} />
-            <MenuStack.Screen name='LogsScreen' component={LogsScreen} />
-            <MenuStack.Screen name='CourseScreen' component={CourseScreen} />
-            <MenuStack.Screen name='SpecificCourseScreen' component={SpecificCourseScreen} />
-            <MenuStack.Screen name='GameScreen' component={GameScreen} />
-            <MenuStack.Screen name='SpecificGameScreen' component={SpecificGameScreen} />
-            <MenuStack.Screen name='DiceScreen' component={DiceScreen} />
-        </MenuStack.Navigator>
-    )
-}
 
 /**
  * Declares the tab navigator, and declares the eventstack, adstack and menustack.
