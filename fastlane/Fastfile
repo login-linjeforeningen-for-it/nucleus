@@ -92,10 +92,6 @@ platform :ios do
         }
       },
       xcargs: [
-        '-allowProvisioningUpdates',
-        "-authenticationKeyPath #{asc_key_path.shellescape}",
-        "-authenticationKeyID #{ENV.fetch('ASC_KEY_ID').shellescape}",
-        "-authenticationKeyIssuerID #{ENV.fetch('ASC_ISSUER_ID').shellescape}",
         "DEVELOPMENT_TEAM=#{ENV.fetch('APPLE_TEAM_ID').shellescape}",
         "CODE_SIGN_IDENTITY=#{signing_identity.shellescape}",
         "CODE_SIGN_KEYCHAIN=#{keychain_path.shellescape}",
