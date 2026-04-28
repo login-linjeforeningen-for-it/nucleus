@@ -1,6 +1,5 @@
 import Cluster from '@/components/shared/cluster'
 import Space from '@/components/shared/utils'
-import NotificationText from '@/components/notification/notificationText'
 import TrashCan from '@components/menu/navigation'
 import { NotificationSeperator } from '@components/event/seperator'
 import NS from '@styles/notificationStyles'
@@ -124,6 +123,25 @@ function PreviousSeparator({ lang, onPress }: { lang: boolean, onPress: () => vo
         <TouchableOpacity onPress={onPress}>
             <NotificationSeperator text={lang ? 'Tidligere' : 'Previous'} />
         </TouchableOpacity>
+    )
+}
+
+function NotificationText({ title, body }: { title: string, body: string }) {
+    const { theme } = useSelector((state: ReduxState) => state.theme)
+
+    return (
+        <View>
+            <View>
+                <Text style={{ ...NS.title, color: theme.textColor }}>
+                    {title}
+                </Text>
+            </View>
+            <View style={{ flexDirection: 'row' }}>
+                <Text style={{ ...NS.loc, color: theme.oppositeTextColor }}>
+                    {body}
+                </Text>
+            </View>
+        </View>
     )
 }
 
