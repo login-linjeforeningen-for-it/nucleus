@@ -164,11 +164,13 @@ jobs:
             exit 1
           fi
 
-          security list-keychains -d user -s "$LOGIN_KEYCHAIN" /Library/Keychains/System.keychain
+          security list-keychains -d user -s "$LOGIN_KEYCHAIN"
           security default-keychain -d user -s "$LOGIN_KEYCHAIN"
           security unlock-keychain -p "$MACOS_KEYCHAIN_PASSWORD" "$LOGIN_KEYCHAIN"
           security set-keychain-settings -lut 21600 "$LOGIN_KEYCHAIN"
+          mkdir -p "$HOME/Library/MobileDevice/Provisioning Profiles"
           security default-keychain -d user
+          security find-identity -v -p codesigning "$LOGIN_KEYCHAIN"
 
       - name: Build and submit iOS directly with Fastlane
         run: bundle exec fastlane ios release
