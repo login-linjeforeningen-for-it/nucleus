@@ -12,10 +12,6 @@ export function resolveEventImageUrl(url: string | null | undefined) {
     return `${config.cdn}/img/events/${url.replace(/^\/+/, '')}`
 }
 
-export function formatText(value: string | null | undefined) {
-    return value ? value.replace(/\\n/g, '\n').trim() : ''
-}
-
 export function formatEventDate(dateValue: string, lang: boolean) {
     return new Intl.DateTimeFormat(lang ? 'nb-NO' : 'en-GB', {
         weekday: 'short',

@@ -7,7 +7,8 @@ import LastFetch from '@utils/fetch'
 import T from '@styles/text'
 import { Text, View } from 'react-native'
 import { useSelector } from 'react-redux'
-import { formatCapacity, formatText, getMazemapUrl, getOrganizerName } from './specificEventUtils'
+import { formatEscapedText } from '@utils/general'
+import { formatCapacity, getMazemapUrl, getOrganizerName } from './specificEventUtils'
 import ReactMarkdown from 'react-native-markdown-display'
 
 type EventDetailsProps = {
@@ -46,11 +47,11 @@ function DescriptionContent({ event }: EventDetailsProps) {
 export default function EventDetails({ event }: EventDetailsProps) {
     const { lang } = useSelector((state: ReduxState) => state.lang)
     const shortInfo = lang
-        ? formatText(event.informational_no || event.informational_en)
-        : formatText(event.informational_en || event.informational_no)
+        ? formatEscapedText(event.informational_no || event.informational_en)
+        : formatEscapedText(event.informational_en || event.informational_no)
     const description = lang
-        ? formatText(event.description_no || event.description_en)
-        : formatText(event.description_en || event.description_no)
+        ? formatEscapedText(event.description_no || event.description_en)
+        : formatEscapedText(event.description_en || event.description_no)
     const location = event.location
         ? (lang ? event.location.name_no || event.location.name_en : event.location.name_en || event.location.name_no)
         : (lang ? 'Ikke oppgitt' : 'Not specified')

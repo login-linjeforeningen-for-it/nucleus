@@ -12,10 +12,6 @@ export function resolveAssetUrl(url: string | null | undefined, folder: 'jobs' |
     return `${config.cdn}/img/${folder}/${url.replace(/^\/+/, '')}`
 }
 
-export function formatText(value: string | null | undefined) {
-    return value ? value.replace(/\\n/g, '\n').trim() : ''
-}
-
 export function formatList(value: string[] | null | undefined) {
     if (!Array.isArray(value) || !value.length) {
         return ''

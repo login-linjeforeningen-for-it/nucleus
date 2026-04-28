@@ -2,6 +2,7 @@ import Cluster from '@/components/shared/cluster'
 import Space from '@/components/shared/utils'
 import Text from '@components/shared/text'
 import T from '@styles/text'
+import { formatAdditionAction, formatSourceLabel } from '@utils/general'
 import { View } from 'react-native'
 import { useSelector } from 'react-redux'
 import { IconBadge, QueenbeeIcon, QueenbeeIconName } from './queenbeeIcon'
@@ -137,7 +138,7 @@ function RecentAdditionRow({ addition }: { addition: NativeDashboardSummary['add
                     paddingVertical: 3,
                     overflow: 'hidden',
                 }}>
-                    {formatAdditionSource(addition.source)}
+                    {formatSourceLabel(addition.source)}
                 </Text>
                 <Text style={{
                     ...T.text12,
@@ -153,15 +154,4 @@ function RecentAdditionRow({ addition }: { addition: NativeDashboardSummary['add
             </View>
         </View>
     )
-}
-
-function formatAdditionSource(source: string) {
-    return source
-        .split('_')
-        .map(part => `${part.charAt(0).toUpperCase()}${part.slice(1)}`)
-        .join(' ')
-}
-
-function formatAdditionAction(action: 'created' | 'updated') {
-    return action === 'created' ? 'Created' : 'Updated'
 }

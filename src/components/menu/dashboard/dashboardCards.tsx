@@ -2,6 +2,7 @@ import Cluster from '@/components/shared/cluster'
 import Space from '@/components/shared/utils'
 import Text from '@components/shared/text'
 import T from '@styles/text'
+import { formatAdditionAction, formatSourceLabel } from '@utils/general'
 import { View } from 'react-native'
 import { useSelector } from 'react-redux'
 
@@ -50,7 +51,7 @@ export function RecentAdditionRow({ item, showDivider }: {
                     <Text style={{ ...T.text15, color: theme.textColor }}>{item.name_en}</Text>
                     <Space height={5} />
                     <Text style={{ ...T.text12, color: theme.oppositeTextColor }}>
-                        {formatAdditionSource(item.source)}
+                        {formatSourceLabel(item.source, 'Unknown')}
                     </Text>
                 </View>
                 <View style={{
@@ -63,7 +64,7 @@ export function RecentAdditionRow({ item, showDivider }: {
                     alignSelf: 'center',
                 }}>
                     <Text style={{ ...T.text12, color: item.action === 'created' ? theme.textColor : theme.oppositeTextColor }}>
-                        {item.action === 'created' ? 'Created' : 'Updated'}
+                        {formatAdditionAction(item.action)}
                     </Text>
                 </View>
             </View>
@@ -100,12 +101,4 @@ function CategoryRow({ label, value, showDivider }: { label: string, value: numb
             <Text style={{ ...T.text15, color: theme.textColor }}>{value}</Text>
         </View>
     )
-}
-
-function formatAdditionSource(source: string) {
-    if (!source) {
-        return 'Unknown'
-    }
-
-    return source.split('_').join(' ').replace(/\b\w/g, (letter) => letter.toUpperCase())
 }

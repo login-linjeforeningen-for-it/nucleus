@@ -25,3 +25,22 @@ export function getCategories({ lang, categories }: GetCategoriesProps) {
 export function getHeight(length: number) {
     return length > 9 ? 100 : length > 6 ? 90 : length > 3 ? 60 : 30
 }
+
+export function formatEscapedText(value: string | null | undefined) {
+    return value ? value.replace(/\\n/g, '\n').trim() : ''
+}
+
+export function formatSourceLabel(source: string, fallback = '') {
+    if (!source) {
+        return fallback
+    }
+
+    return source
+        .split('_')
+        .map(part => `${part.charAt(0).toUpperCase()}${part.slice(1)}`)
+        .join(' ')
+}
+
+export function formatAdditionAction(action: 'created' | 'updated') {
+    return action === 'created' ? 'Created' : 'Updated'
+}

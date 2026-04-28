@@ -1,13 +1,13 @@
 import Embed from '@components/event/embed'
 import Space from '@components/shared/utils'
-import { capitalizeFirstLetter } from '@utils/general'
+import { capitalizeFirstLetter, formatEscapedText } from '@utils/general'
 import SpecificAdHero from '@components/ads/specificAdHero'
 import { ActionLinkButton, DetailSectionCard, MetaChip } from '@components/shared/detailSections'
 import LastFetch from '@/utils/fetch'
 import T from '@styles/text'
 import { Text, View } from 'react-native'
 import { useSelector } from 'react-redux'
-import { formatList, formatText } from './specificAdUtils'
+import { formatList } from './specificAdUtils'
 import { useMemo } from 'react'
 import Markdown from 'react-native-markdown-display'
 
@@ -48,11 +48,11 @@ export default function SpecificAdSections({ ad }: SpecificAdSectionsProps) {
     const { lang } = useSelector((state: ReduxState) => state.lang)
     const unknownLabel = lang ? 'Ukjent' : 'Unknown'
     const shortDescription = lang
-        ? formatText(ad.description_short_no || ad.description_short_en)
-        : formatText(ad.description_short_en || ad.description_short_no)
+        ? formatEscapedText(ad.description_short_no || ad.description_short_en)
+        : formatEscapedText(ad.description_short_en || ad.description_short_no)
     const longDescription = lang
-        ? formatText(ad.description_long_no || ad.description_long_en)
-        : formatText(ad.description_long_en || ad.description_long_no)
+        ? formatEscapedText(ad.description_long_no || ad.description_long_en)
+        : formatEscapedText(ad.description_long_en || ad.description_long_no)
     const position = lang
         ? capitalizeFirstLetter(ad.position_title_no || ad.position_title_en)
         : capitalizeFirstLetter(ad.position_title_en || ad.position_title_no)
