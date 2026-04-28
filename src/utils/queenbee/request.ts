@@ -1,5 +1,6 @@
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import store from '@redux/store'
+import { getResponseErrorMessage, parseResponseBody } from '@utils/http'
 
 const AI_SESSION_ID_KEY = 'ai_session_id'
 let cachedAiSessionId: string | null = null
@@ -67,10 +68,10 @@ export async function requestApi<T>(
     })
 
     const raw = await response.text()
-    const data = parseJson(raw)
+    const data = parseResponseBody(raw)
 
     if (!response.ok) {
-        throw new Error(getErrorMessage(data) || 'Request failed.')
+        throw new Error(getResponseErrorMessage(data) || 'Request failed.')
     }
 
     return data as T
@@ -78,33 +79,4 @@ export async function requestApi<T>(
 
 export function isObject(value: unknown): value is Record<string, unknown> {
     return typeof value === 'object' && value !== null
-}
-
-function parseJson(raw: string) {
-    if (!raw) {
-        return null
-    }
-
-    try {
-        return JSON.parse(raw)
-    } catch {
-        return raw
-    }
-}
-
-function getErrorMessage(data: unknown) {
-    if (!data) {
-        return null
-    }
-
-    if (typeof data === 'string') {
-        return data
-    }
-
-    if (typeof data === 'object') {
-        const record = data as Record<string, unknown>
-        return String(record.error || record.message || '')
-    }
-
-    return null
 }
