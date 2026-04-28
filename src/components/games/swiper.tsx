@@ -1,4 +1,3 @@
-import { useState } from 'react'
 import { View, Dimensions } from 'react-native'
 import { Gesture, GestureDetector } from 'react-native-gesture-handler'
 import {
@@ -9,19 +8,13 @@ import {
 } from 'react-native-reanimated'
 import { scheduleOnRN } from 'react-native-worklets'
 import { GameCardNumber, GameContent, GameStackCard } from './swiperCards'
+import { useGameSwiperNavigation } from './useGameSwiperNavigation'
 
 type GameListContentProps = {
     game: Question[] | NeverHaveIEver[] | OkRedFlagDealBreaker[]
     mode: number
     school: boolean
     ntnu: boolean
-}
-
-type CategorizedGame = Question | NeverHaveIEver | OkRedFlagDealBreaker
-
-type NavState = {
-    dataIndex: number
-    uxIndex: number
 }
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window')
@@ -32,86 +25,7 @@ export default function Swiper({ game, mode, school, ntnu }: GameListContentProp
     const translateX = useSharedValue(0)
     const totalCards = game.length
     const startX = useSharedValue(0)
-    const [nav, setNav] = useState<NavState>({
-        dataIndex: 0,
-        uxIndex: 1
-    })
-
-    function navigate(direction: 'next' | 'prev') {
-        setNav((prev) => {
-            const currentIndex = prev.dataIndex
-            const isForward = direction === 'next'
-
-            function resolveNextIndex() {
-                if (!Object.hasOwn(game[0], 'categories')) {
-                    return isForward
-                        ? currentIndex + 1
-                        : Math.max(0, currentIndex - 1)
-                }
-
-                const step = isForward ? 1 : -1
-                let i = currentIndex + step
-                const boundary = isForward ? game.length : -1
-
-                while (i !== boundary) {
-                    const item = game[i] as CategorizedGame
-
-                    if (mode === 0 && item.categories.includes('Wild')) {
-                        i += step
-                        continue
-                    }
-
-                    if (mode === 2 && !item.categories.includes('Wild')) {
-                        i += step
-                        continue
-                    }
-
-                    if (!school && item.categories.includes('School')) {
-                        i += step
-                        continue
-                    }
-
-                    if (!ntnu && item.categories.includes('NTNU')) {
-                        i += step
-                        continue
-                    }
-
-                    return i
-                }
-
-                return currentIndex
-            }
-
-            const nextIndex = resolveNextIndex()
-
-            if (prev.uxIndex === 1 && !isForward) {
-                return prev
-            }
-
-            if (!isForward) {
-                return {
-                    dataIndex: nextIndex,
-                    uxIndex: isForward ? prev.uxIndex + 1 : Math.max(1, prev.uxIndex - 1),
-                }
-            } else {
-                setTimeout(() => {
-                    scheduleOnRN(() => {
-                        setNav((prev) => ({
-                            ...prev,
-                            uxIndex: isForward
-                                ? prev.uxIndex + 1
-                                : Math.max(1, prev.uxIndex - 1),
-                        }))
-                    })
-                }, 25)
-
-                return {
-                    ...prev,
-                    dataIndex: nextIndex,
-                }
-            }
-        })
-    }
+    const { nav, navigate } = useGameSwiperNavigation({ game, mode, school, ntnu })
 
     function onSwipeRight() {
         navigate('next')
