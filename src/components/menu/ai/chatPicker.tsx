@@ -1,8 +1,11 @@
+import { PinAction, PinnedLine } from '@components/menu/root/menuCards'
 import Text from '@components/shared/text'
 import T from '@styles/text'
+import { usePinnedRoutes } from '@utils/menu/pinnedRoutes'
 import { Plus } from 'lucide-react-native'
-import { JSX } from 'react'
-import { Dimensions, ScrollView, TouchableOpacity, View } from 'react-native'
+import { JSX, useMemo } from 'react'
+import { Dimensions, Pressable, ScrollView, TouchableOpacity, View } from 'react-native'
+import Swipeable from 'react-native-gesture-handler/ReanimatedSwipeable'
 
 type Props = {
     conversations: NativeConversationSummary[]
@@ -23,8 +26,27 @@ export default function ChatPicker({
     currentConversationLabel,
     newConversationLabel
 }: Props): JSX.Element {
+    const { pinnedRoutes, togglePinnedRoute } = usePinnedRoutes('ai:pinned-conversations', [])
+    const sortedConversations = useMemo(() => {
+        const originalIndex = new Map(conversations.map((conversation, index) => [conversation.id, index]))
+
+        return [...conversations].sort((first, second) => {
+            const firstPinnedIndex = pinnedRoutes.indexOf(first.id)
+            const secondPinnedIndex = pinnedRoutes.indexOf(second.id)
+            const firstPinned = firstPinnedIndex !== -1
+            const secondPinned = secondPinnedIndex !== -1
+
+            if (firstPinned || secondPinned) {
+                return (firstPinned ? firstPinnedIndex : pinnedRoutes.length)
+                    - (secondPinned ? secondPinnedIndex : pinnedRoutes.length)
+            }
+
+            return (originalIndex.get(first.id) ?? 0) - (originalIndex.get(second.id) ?? 0)
+        })
+    }, [conversations, pinnedRoutes])
+
     return (
-        <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+        <ScrollView showsVerticalScrollIndicator={false}>
             <View style={{ gap: 10 }}>
                 <TouchableOpacity onPress={onCreate}>
                     <View style={{
@@ -56,28 +78,42 @@ export default function ChatPicker({
                         </View>
                     </View>
                 </TouchableOpacity>
-                {conversations.map(conversation => {
+                {sortedConversations.map(conversation => {
                     const isActive = activeConversationId === conversation.id
+                    const pinned = pinnedRoutes.includes(conversation.id)
 
                     return (
-                        <TouchableOpacity key={conversation.id} onPress={() => onSelect(conversation.id)}>
-                            <View style={{
-                                borderRadius: 14,
-                                backgroundColor: isActive ? theme.orangeTransparentHighlighted : theme.greyTransparent,
-                                borderWidth: 1,
-                                borderColor: isActive ? theme.orangeTransparentBorderHighlighted : theme.greyTransparentBorder,
-                                paddingHorizontal: 12,
-                                paddingVertical: 8,
-                                minWidth: Dimensions.get('window').width * 0.873,
-                            }}>
-                                <Text style={{ ...T.text15, color: theme.textColor }}>
-                                    {conversation.title}
-                                </Text>
-                                <Text style={{ ...T.text12, color: theme.oppositeTextColor }}>
-                                    {isActive ? currentConversationLabel : conversation.activeClientName}
-                                </Text>
-                            </View>
-                        </TouchableOpacity>
+                        <Swipeable
+                            key={conversation.id}
+                            renderRightActions={() => <PinAction pinned={pinned} theme={theme} />}
+                            rightThreshold={44}
+                            overshootRight={false}
+                            onSwipeableOpen={(direction) => direction === 'right' ? togglePinnedRoute(conversation.id) : undefined}
+                        >
+                            <Pressable onPress={() => onSelect(conversation.id)}>
+                                <View style={{
+                                    borderRadius: 14,
+                                    backgroundColor: isActive ? theme.orangeTransparentHighlighted : theme.greyTransparent,
+                                    borderWidth: 1,
+                                    borderColor: isActive ? theme.orangeTransparentBorderHighlighted : theme.greyTransparentBorder,
+                                    minWidth: Dimensions.get('window').width * 0.873,
+                                    paddingHorizontal: 12,
+                                    paddingVertical: 8,
+                                }}>
+                                    <View style={{ flexDirection: 'row', alignItems: 'stretch', gap: 10 }}>
+                                        <PinnedLine pinned={pinned} theme={theme} />
+                                        <View style={{ flex: 1 }}>
+                                            <Text style={{ ...T.text15, color: theme.textColor }}>
+                                                {conversation.title}
+                                            </Text>
+                                            <Text style={{ ...T.text12, color: theme.oppositeTextColor }}>
+                                                {isActive ? currentConversationLabel : conversation.activeClientName}
+                                            </Text>
+                                        </View>
+                                    </View>
+                                </View>
+                            </Pressable>
+                        </Swipeable>
                     )
                 })}
             </View>
