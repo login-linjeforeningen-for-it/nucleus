@@ -5,8 +5,7 @@ import T from '@styles/text'
 import { Linking, Modal, Platform, useWindowDimensions, View } from 'react-native'
 import { useEffect, useMemo, useState } from 'react'
 import { useSelector } from 'react-redux'
-import { AlbumDownloadActions, AlbumDownloadGrid } from './albumDownloadParts'
-import { AlbumText } from './albumTypes'
+import { AlbumDownloadActions, AlbumDownloadGrid, AlbumText } from './albumDownloadParts'
 
 export function AlbumDownloadSheet({
     album,

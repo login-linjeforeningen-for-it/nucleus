@@ -3,7 +3,15 @@ import Text from '@components/shared/text'
 import T from '@styles/text'
 import { Image, Pressable, ScrollView, View } from 'react-native'
 import { useSelector } from 'react-redux'
-import { AlbumText } from './albumTypes'
+
+export type AlbumText = {
+    close?: string
+    downloadAll?: string
+    downloadImages?: string
+    downloadSelected?: string
+    noImagesSelected?: string
+    selectedImages?: string
+}
 
 export function AlbumDownloadGrid({
     album,
