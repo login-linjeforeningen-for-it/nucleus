@@ -86,6 +86,7 @@ platform :ios do
         "-authenticationKeyID #{ENV.fetch('ASC_KEY_ID').shellescape}",
         "-authenticationKeyIssuerID #{ENV.fetch('ASC_ISSUER_ID').shellescape}",
         "DEVELOPMENT_TEAM=#{ENV.fetch('APPLE_TEAM_ID').shellescape}",
+        "CODE_SIGN_KEYCHAIN=#{keychain_path.shellescape}",
         "OTHER_CODE_SIGN_FLAGS=#{Shellwords.escape("--keychain #{keychain_path}")}"
       ].join(' ')
     )
