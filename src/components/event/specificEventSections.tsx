@@ -1,6 +1,6 @@
 import Space from '@components/shared/utils'
-import DescriptionContent from '@components/event/descriptionContent'
 import Markdown from '@components/course/markdown'
+import Embed from '@components/event/embed'
 import SpecificEventHero from '@components/event/specificEventHero'
 import { ActionLinkButton, DetailSectionCard, MetaChip } from '@components/shared/detailSections'
 import LastFetch from '@utils/fetch'
@@ -8,9 +8,39 @@ import T from '@styles/text'
 import { Text, View } from 'react-native'
 import { useSelector } from 'react-redux'
 import { formatCapacity, formatText, getMazemapUrl, getOrganizerName } from './specificEventUtils'
+import ReactMarkdown from 'react-native-markdown-display'
 
 type SpecificEventSectionsProps = {
     event: GetEventProps
+}
+
+function DescriptionContent({ event }: SpecificEventSectionsProps) {
+    const { theme } = useSelector((state: ReduxState) => state.theme)
+    const { lang } = useSelector((state: ReduxState) => state.lang)
+    const description = lang
+        ? event.description_no || event.description_en
+        : event.description_en || event.description_no
+
+    const embededEvent = /(\[:\w+\]\(\d+\))/
+    const findNumber = /\((\d+)\)/
+    const split = description.replace(/\\n/g, '<br>').split(embededEvent)
+
+    return split.map((content, index) => {
+        const sliced = content.slice(0, 50000)
+        const match = sliced.match(findNumber)
+        const number = match ? Number(match[1]) : null
+        const markdown = sliced.replace(/<br>/g, '\n').replace(/###/g, '')
+
+        if (!sliced.includes('[:event]') && !sliced.includes('[:jobad]')) {
+            return <ReactMarkdown key={index} style={{ text: { color: theme.textColor } }}>{markdown}</ReactMarkdown>
+        }
+
+        return <Embed
+            key={index}
+            id={number}
+            type={sliced.includes('[:event]') ? 'event' : 'ad'}
+        />
+    })
 }
 
 export default function SpecificEventSections({ event }: SpecificEventSectionsProps) {
@@ -89,7 +119,7 @@ export default function SpecificEventSections({ event }: SpecificEventSectionsPr
                 <>
                     <Space height={10} />
                     <DetailSectionCard title={lang ? 'Beskrivelse' : 'Description'} flush>
-                        <DescriptionContent />
+                        <DescriptionContent event={event} />
                     </DetailSectionCard>
                 </>
             ) : null}

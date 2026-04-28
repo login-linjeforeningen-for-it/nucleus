@@ -10,7 +10,6 @@ import SpecificAdSections from '@/components/ads/specificAdSections'
 import TopRefreshIndicator from '@components/shared/topRefreshIndicator'
 import { setAdName } from '@redux/ad'
 import { fetchAdDetails } from '@utils/fetch'
-import { AdContext } from '@utils/app/contextProvider'
 
 export default function SpecificAdScreen({ route: { params: { adID } } }: AdScreenProps<'SpecificAdScreen'>): JSX.Element {
     const { theme } = useSelector((state: ReduxState) => state.theme)
@@ -57,40 +56,38 @@ export default function SpecificAdScreen({ route: { params: { adID } } }: AdScre
     }, [])
 
     return (
-        <AdContext.Provider value={ad}>
-            <Swipe left='AdScreen'>
-                <View style={{ flex: 1, backgroundColor: theme.darker }}>
-                    <ScrollView
-                        style={AS.content}
-                        contentContainerStyle={{
-                            paddingTop: Dimensions.get('window').height / 9.7 + (height > 800 && height < 900 ? 15 : 0),
-                            paddingBottom: 100
-                        }}
-                        showsVerticalScrollIndicator={false}
-                        scrollEventThrottle={100}
-                        refreshControl={
-                            <RefreshControl
-                                refreshing={refresh}
-                                onRefresh={onRefresh}
-                                tintColor={theme.orange}
-                                colors={[theme.orange]}
-                                progressViewOffset={0}
-                            />
-                        }
-                    >
-                        {error ? (
-                            <Cluster>
-                                <View style={{ padding: 14 }}>
-                                    <Text style={{ ...T.text15, color: '#ff8b8b' }}>{error}</Text>
-                                </View>
-                            </Cluster>
-                        ) : null}
-                        {ad?.id ? <SpecificAdSections ad={ad} /> : null}
-                        <Space height={22} />
-                    </ScrollView>
-                    <TopRefreshIndicator refreshing={refresh} theme={theme} top={112} />
-                </View>
-            </Swipe>
-        </AdContext.Provider>
+        <Swipe left='AdScreen'>
+            <View style={{ flex: 1, backgroundColor: theme.darker }}>
+                <ScrollView
+                    style={AS.content}
+                    contentContainerStyle={{
+                        paddingTop: Dimensions.get('window').height / 9.7 + (height > 800 && height < 900 ? 15 : 0),
+                        paddingBottom: 100
+                    }}
+                    showsVerticalScrollIndicator={false}
+                    scrollEventThrottle={100}
+                    refreshControl={
+                        <RefreshControl
+                            refreshing={refresh}
+                            onRefresh={onRefresh}
+                            tintColor={theme.orange}
+                            colors={[theme.orange]}
+                            progressViewOffset={0}
+                        />
+                    }
+                >
+                    {error ? (
+                        <Cluster>
+                            <View style={{ padding: 14 }}>
+                                <Text style={{ ...T.text15, color: '#ff8b8b' }}>{error}</Text>
+                            </View>
+                        </Cluster>
+                    ) : null}
+                    {ad?.id ? <SpecificAdSections ad={ad} /> : null}
+                    <Space height={22} />
+                </ScrollView>
+                <TopRefreshIndicator refreshing={refresh} theme={theme} top={112} />
+            </View>
+        </Swipe>
     )
 }

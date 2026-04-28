@@ -10,7 +10,6 @@ import T from '@styles/text'
 import SpecificEventSections from '@components/event/specificEventSections'
 import { useDispatch } from 'react-redux'
 import { fetchEventDetails } from '@utils/fetch'
-import { EventContext } from '@utils/app/contextProvider'
 import { setEventName } from '@redux/event'
 
 /**
@@ -67,42 +66,40 @@ export default function SpecificEventScreen({
     }, [])
 
     return (
-        <EventContext.Provider value={event}>
-            <Swipe left='EventScreen'>
-                <View style={{ ...ES.sesContent, backgroundColor: theme.background }}>
-                    <Space height={Platform.OS == 'ios'
-                        ? Dimensions.get('window').height / 8.5
-                        : Dimensions.get('window').height / 7.5 + (height > 800 && height < 900 ? 15 : 0)
-                    } />
-                    <ScrollView
-                        showsVerticalScrollIndicator={false}
-                        scrollEventThrottle={100}
-                        refreshControl={
-                            <RefreshControl
-                                refreshing={refresh}
-                                onRefresh={onRefresh}
-                                tintColor={refreshColor}
-                                colors={[refreshColor]}
-                                progressBackgroundColor={theme.darker || theme.background}
-                                titleColor={refreshColor}
-                                progressViewOffset={0}
-                            />
-                        }
-                    >
-                        <Space height={10} />
-                        {error ? (
-                            <Cluster marginHorizontal={0}>
-                                <View style={{ padding: 14 }}>
-                                    <Text style={{ ...T.text15, color: '#ff8b8b' }}>{error}</Text>
-                                </View>
-                            </Cluster>
-                        ) : null}
-                        {event?.id ? <SpecificEventSections event={event} /> : null}
-                        <Space height={Dimensions.get('window').height / (Platform.OS === 'ios' ? 3 : 2.75)} />
-                    </ScrollView>
-                    <TopRefreshIndicator color={refreshColor} refreshing={refresh} theme={theme} top={112} />
-                </View>
-            </Swipe>
-        </EventContext.Provider>
+        <Swipe left='EventScreen'>
+            <View style={{ ...ES.sesContent, backgroundColor: theme.background }}>
+                <Space height={Platform.OS == 'ios'
+                    ? Dimensions.get('window').height / 8.5
+                    : Dimensions.get('window').height / 7.5 + (height > 800 && height < 900 ? 15 : 0)
+                } />
+                <ScrollView
+                    showsVerticalScrollIndicator={false}
+                    scrollEventThrottle={100}
+                    refreshControl={
+                        <RefreshControl
+                            refreshing={refresh}
+                            onRefresh={onRefresh}
+                            tintColor={refreshColor}
+                            colors={[refreshColor]}
+                            progressBackgroundColor={theme.darker || theme.background}
+                            titleColor={refreshColor}
+                            progressViewOffset={0}
+                        />
+                    }
+                >
+                    <Space height={10} />
+                    {error ? (
+                        <Cluster marginHorizontal={0}>
+                            <View style={{ padding: 14 }}>
+                                <Text style={{ ...T.text15, color: '#ff8b8b' }}>{error}</Text>
+                            </View>
+                        </Cluster>
+                    ) : null}
+                    {event?.id ? <SpecificEventSections event={event} /> : null}
+                    <Space height={Dimensions.get('window').height / (Platform.OS === 'ios' ? 3 : 2.75)} />
+                </ScrollView>
+                <TopRefreshIndicator color={refreshColor} refreshing={refresh} theme={theme} top={112} />
+            </View>
+        </Swipe>
     )
 }
