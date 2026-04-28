@@ -34,18 +34,7 @@ export async function getPushToken() {
  */
 export async function subscribeToTopic(topic: string) {
     try {
-        const token = await getPushToken()
-
-        const response = await fetch(`${config.app_api}/subscribe`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ token, topic }),
-        })
-
-        if (!response.ok) {
-            throw new Error(await response.text() || 'Subscription failed')
-        }
-
+        await postTopicSubscription('/subscribe', topic, 'Subscription failed')
         return { result: true, feedback: `Subscribed to ${topic}` }
     } catch (e: any) {
         return { result: false, feedback: `Subscription to topic failed: ${e.message}` }
@@ -57,20 +46,22 @@ export async function subscribeToTopic(topic: string) {
  */
 export async function unsubscribeFromTopic(topic: string) {
     try {
-        const token = await getPushToken()
-
-        const response = await fetch(`${config.app_api}/unsubscribe`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ token, topic }),
-        })
-
-        if (!response.ok) {
-            throw new Error(await response.text() || 'Unsubscribe failed')
-        }
-
+        await postTopicSubscription('/unsubscribe', topic, 'Unsubscribe failed')
         return { result: true, feedback: `Unsubscribed from ${topic}` }
     } catch (e: any) {
         return { result: false, feedback: `Unsubscribe from topic failed: ${e.message}` }
+    }
+}
+
+async function postTopicSubscription(path: '/subscribe' | '/unsubscribe', topic: string, fallback: string) {
+    const token = await getPushToken()
+    const response = await fetch(`${config.app_api}${path}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ token, topic }),
+    })
+
+    if (!response.ok) {
+        throw new Error(await response.text() || fallback)
     }
 }
