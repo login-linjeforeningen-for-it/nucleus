@@ -1,4 +1,5 @@
 import config from '@/constants'
+import { toRecord } from '@utils/http'
 
 export async function fetchEventDetails(id: number): Promise<GetEventProps> {
     const response = await fetch(`${config.api}/events/${id}`)
@@ -7,10 +8,8 @@ export async function fetchEventDetails(id: number): Promise<GetEventProps> {
 
 export async function fetchEvents(): Promise<GetEventProps[]> {
     try {
-        const response = await fetch(`${config.api}/events`)
-        if (!response.ok) throw new Error('Failed to fetch events from API')
-        const data = await response.json()
-        return data.events
+        const data = await fetchPublicJson('/events', 'Failed to fetch events from API')
+        return Array.isArray(data?.events) ? data.events : []
     } catch (error) {
         console.log(error)
         return []
@@ -19,10 +18,8 @@ export async function fetchEvents(): Promise<GetEventProps[]> {
 
 export async function fetchAds(): Promise<GetJobProps[]> {
     try {
-        const response = await fetch(`${config.api}/jobs`)
-        if (!response.ok) throw new Error('Failed to fetch ads from API')
-        const data = await response.json()
-        return data.jobs || []
+        const data = await fetchPublicJson('/jobs', 'Failed to fetch ads from API')
+        return Array.isArray(data?.jobs) ? data.jobs : []
     } catch (error) {
         console.log(error)
         return []
@@ -31,10 +28,8 @@ export async function fetchAds(): Promise<GetJobProps[]> {
 
 export async function fetchAdDetails(adID: number): Promise<GetJobProps | null> {
     try {
-        const response = await fetch(`${config.api}/jobs/${adID}`)
-        if (!response.ok) throw new Error('Failed to fetch ad details from API')
-        const adDetails = await response.json()
-        return adDetails && typeof adDetails === 'object' && typeof adDetails.id === 'number'
+        const adDetails = await fetchPublicJson(`/jobs/${adID}`, 'Failed to fetch ad details from API')
+        return adDetails && typeof adDetails.id === 'number'
             ? adDetails as GetJobProps
             : null
     } catch {
@@ -45,9 +40,7 @@ export async function fetchAdDetails(adID: number): Promise<GetJobProps | null> 
 export async function fetchAlbums(limit = 50, offset = 0): Promise<GetAlbumsProps> {
     try {
         const params = new URLSearchParams({ limit: String(limit), offset: String(offset), sort: 'desc' })
-        const response = await fetch(`${config.api}/albums?${params.toString()}`)
-        if (!response.ok) throw new Error('Failed to fetch albums from API')
-        const data = await response.json()
+        const data = await fetchPublicJson(`/albums?${params.toString()}`, 'Failed to fetch albums from API')
         return {
             albums: Array.isArray(data?.albums) ? data.albums : [],
             total_count: typeof data?.total_count === 'number' ? data.total_count : 0,
@@ -60,10 +53,8 @@ export async function fetchAlbums(limit = 50, offset = 0): Promise<GetAlbumsProp
 
 export async function fetchAlbumDetails(albumID: number): Promise<GetAlbumProps | null> {
     try {
-        const response = await fetch(`${config.api}/albums/${albumID}`)
-        if (!response.ok) throw new Error('Failed to fetch album details from API')
-        const albumDetails = await response.json()
-        return albumDetails && typeof albumDetails === 'object' && typeof albumDetails.id === 'number'
+        const albumDetails = await fetchPublicJson(`/albums/${albumID}`, 'Failed to fetch album details from API')
+        return albumDetails && typeof albumDetails.id === 'number'
             ? albumDetails as GetAlbumProps
             : null
     } catch {
@@ -105,4 +96,10 @@ async function fetchCollection<Key extends keyof PublicContentCollections>(
     } catch {
         return { [key]: [], total_count: 0 } as unknown as PublicContentCollections[Key]
     }
+}
+
+async function fetchPublicJson(path: string, error: string) {
+    const response = await fetch(`${config.api}${path}`)
+    if (!response.ok) throw new Error(error)
+    return toRecord(await response.json())
 }
