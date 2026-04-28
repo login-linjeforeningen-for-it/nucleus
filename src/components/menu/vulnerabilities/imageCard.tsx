@@ -17,9 +17,9 @@ import {
 } from '@utils/vulnerabilities'
 import { glassCard, MetaStat, SeverityBadge } from './primitives'
 import VulnList from './vulnerabilityDetails'
+import ImageSources from './imageSources'
 
 type VulnerabilityImage = GetVulnerabilities['images'][number]
-const INITIAL_SOURCE_LIMIT = 8
 
 type Props = {
     image: VulnerabilityImage
@@ -169,43 +169,6 @@ function ImageStats({ image, theme }: { image: VulnerabilityImage, theme: Theme 
                 <MetaStat label='Total findings' value={String(image.totalVulnerabilities)} theme={theme} />
                 <MetaStat label='Groups' value={String(image.groups.length)} theme={theme} />
                 <MetaStat label='Details' value={String(image.vulnerabilities.length)} theme={theme} />
-            </View>
-        </>
-    )
-}
-
-function ImageSources({ image, theme }: { image: VulnerabilityImage, theme: Theme }) {
-    const visibleGroups = image.groups.slice(0, INITIAL_SOURCE_LIMIT)
-    const hiddenCount = image.groups.length - visibleGroups.length
-
-    return (
-        <>
-            <Space height={12} />
-            <View style={{ gap: 10 }}>
-                <Text style={{ ...T.text12, color: theme.oppositeTextColor }}>Sources</Text>
-                {visibleGroups.length ? visibleGroups.map(group => (
-                    <View key={`${image.image}-${group.source}`} style={glassCard('rgba(255,255,255,0.03)', 'rgba(255,255,255,0.08)', 12)}>
-                        <View style={{ gap: 10 }}>
-                            <View>
-                                <Text style={{ ...T.text15, color: theme.textColor }}>{group.source}</Text>
-                                <Space height={2} />
-                                <Text style={{ ...T.text12, color: theme.oppositeTextColor }}>{`${group.total} findings`}</Text>
-                            </View>
-                            <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6 }}>
-                                {SEVERITY_ORDER.filter(level => group.severity[level] > 0).map(level => (
-                                    <SeverityBadge
-                                        key={`${image.image}-${group.source}-${level}`}
-                                        label={`${severityTitle(level)} ${group.severity[level]}`}
-                                        color={severityColor(level)}
-                                        borderColor={severityBorder(level)}
-                                        textColor={theme.textColor}
-                                    />
-                                ))}
-                            </View>
-                        </View>
-                    </View>
-                )) : <Text style={{ ...T.text12, color: theme.oppositeTextColor }}>No grouped findings available yet.</Text>}
-                {hiddenCount > 0 ? <Text style={{ ...T.text12, color: theme.oppositeTextColor }}>{`+ ${hiddenCount} more sources hidden for faster loading`}</Text> : null}
             </View>
         </>
     )
