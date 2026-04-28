@@ -7,7 +7,7 @@ import Swipe from '@components/nav/swipe'
 import Cluster from '@components/shared/cluster'
 import TopRefreshIndicator from '@components/shared/topRefreshIndicator'
 import T from '@styles/text'
-import SpecificEventSections from '@components/event/specificEventSections'
+import EventDetails from '@components/event/eventDetails'
 import { useDispatch } from 'react-redux'
 import { fetchEventDetails } from '@utils/fetch'
 import { setEventName } from '@redux/event'
@@ -95,7 +95,7 @@ export default function SpecificEventScreen({
                             </View>
                         </Cluster>
                     ) : null}
-                    {event?.id ? <SpecificEventSections event={event} /> : null}
+                    {event?.id ? <EventDetails event={event} /> : null}
                     <Space height={Dimensions.get('window').height / (Platform.OS === 'ios' ? 3 : 2.75)} />
                 </ScrollView>
                 <TopRefreshIndicator color={refreshColor} refreshing={refresh} theme={theme} top={112} />

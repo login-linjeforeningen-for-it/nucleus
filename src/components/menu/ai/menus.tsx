@@ -1,4 +1,4 @@
-import AiConversationPicker from '@components/menu/ai/conversationPicker'
+import ChatPicker from '@components/menu/ai/chatPicker'
 import Text from '@components/shared/text'
 import T from '@styles/text'
 import { Pressable, View } from 'react-native'
@@ -8,7 +8,7 @@ type AiText = {
     newConversation: string
 }
 
-export function AiModelPicker({
+export function ModelMenu({
     ai,
     theme,
     onClose,
@@ -51,7 +51,7 @@ export function AiModelPicker({
     )
 }
 
-export function AiConversationOverlay({
+export function ChatMenu({
     ai,
     theme,
     text,
@@ -64,7 +64,7 @@ export function AiConversationOverlay({
 }) {
     return (
         <Overlay top={8} zIndex={20}>
-            <AiConversationPicker
+            <ChatPicker
                 conversations={ai.conversations}
                 activeConversationId={ai.session?.conversationId}
                 theme={theme}

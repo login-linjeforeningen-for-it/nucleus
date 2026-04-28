@@ -16,12 +16,12 @@ import {
     severityTitle,
 } from '@utils/vulnerabilities'
 import { glassCard, MetaStat, SeverityBadge } from './primitives'
-import VulnerabilityList from './vulnerabilityDetails'
+import VulnList from './vulnerabilityDetails'
 
 type VulnerabilityImage = GetVulnerabilities['images'][number]
 const INITIAL_SOURCE_LIMIT = 8
 
-type VulnerabilityImageCardProps = {
+type Props = {
     image: VulnerabilityImage
     isExpanded: boolean
     expandedVulnerabilities: Record<string, boolean>
@@ -30,14 +30,14 @@ type VulnerabilityImageCardProps = {
     theme: Theme
 }
 
-export default function VulnerabilityImageCard({
+export default function ImageCard({
     image,
     isExpanded,
     expandedVulnerabilities,
     onToggleImage,
     onToggleVulnerability,
     theme
-}: VulnerabilityImageCardProps) {
+}: Props) {
     return (
         <View>
             <Cluster>
@@ -47,7 +47,7 @@ export default function VulnerabilityImageCard({
                         <>
                             <ImageStats image={image} theme={theme} />
                             <ImageSources image={image} theme={theme} />
-                            <VulnerabilityList
+                            <VulnList
                                 image={image}
                                 expandedVulnerabilities={expandedVulnerabilities}
                                 onToggle={onToggleVulnerability}

@@ -44,8 +44,8 @@ export default function InternalNavMenu({ activeRoute, onNavigate }: Props): JSX
 
     return (
         <>
-            <InternalNavMenuButton open={open} onPress={() => setOpen((current) => !current)} />
-            <InternalNavMenuDropdown
+            <NavButton open={open} onPress={() => setOpen((current) => !current)} />
+            <NavDropdown
                 activeRoute={activeRoute}
                 open={open}
                 onNavigate={(route) => {
@@ -57,7 +57,7 @@ export default function InternalNavMenu({ activeRoute, onNavigate }: Props): JSX
     )
 }
 
-export function InternalNavMenuButton({ open, onPress }: { open: boolean; onPress: () => void }) {
+export function NavButton({ open, onPress }: { open: boolean; onPress: () => void }) {
     const { theme } = useSelector((state: ReduxState) => state.theme)
 
     return (
@@ -76,7 +76,7 @@ export function InternalNavMenuButton({ open, onPress }: { open: boolean; onPres
     )
 }
 
-export function InternalNavMenuDropdown({
+export function NavDropdown({
     activeRoute,
     open,
     onNavigate,

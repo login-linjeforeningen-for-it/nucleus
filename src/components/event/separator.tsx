@@ -2,16 +2,16 @@ import { Line } from '@components/shared/utils'
 import { View, Text, Dimensions } from 'react-native'
 import { useSelector } from 'react-redux'
 
-type SeperatorProps = {
+type SeparatorProps = {
     item: GetEventProps
     usedIndexes: number[]
 }
 
-type NotificationSeperatorProps = {
+type NotificationSeparatorProps = {
     text: string
 }
 
-export default function Seperator({item, usedIndexes}: SeperatorProps) {
+export default function Separator({item, usedIndexes}: SeparatorProps) {
     const { lang } = useSelector((state: ReduxState) => state.lang)
     const { theme } = useSelector((state: ReduxState) => state.theme)
 
@@ -61,7 +61,7 @@ export default function Seperator({item, usedIndexes}: SeperatorProps) {
     )
 }
 
-export function NotificationSeperator({text}: NotificationSeperatorProps) {
+export function NotificationSeparator({text}: NotificationSeparatorProps) {
     const { theme } = useSelector((state: ReduxState) => state.theme)
 
     return (

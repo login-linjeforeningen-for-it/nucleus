@@ -10,11 +10,11 @@ import { useSelector } from 'react-redux'
 import { formatCapacity, formatText, getMazemapUrl, getOrganizerName } from './specificEventUtils'
 import ReactMarkdown from 'react-native-markdown-display'
 
-type SpecificEventSectionsProps = {
+type EventDetailsProps = {
     event: GetEventProps
 }
 
-function DescriptionContent({ event }: SpecificEventSectionsProps) {
+function DescriptionContent({ event }: EventDetailsProps) {
     const { theme } = useSelector((state: ReduxState) => state.theme)
     const { lang } = useSelector((state: ReduxState) => state.lang)
     const description = lang
@@ -43,7 +43,7 @@ function DescriptionContent({ event }: SpecificEventSectionsProps) {
     })
 }
 
-export default function SpecificEventSections({ event }: SpecificEventSectionsProps) {
+export default function EventDetails({ event }: EventDetailsProps) {
     const { lang } = useSelector((state: ReduxState) => state.lang)
     const shortInfo = lang
         ? formatText(event.informational_no || event.informational_en)

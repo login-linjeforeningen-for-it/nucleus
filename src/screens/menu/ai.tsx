@@ -1,5 +1,5 @@
 import Space from '@/components/shared/utils'
-import { AiConversationOverlay, AiModelPicker } from '@/components/menu/ai/aiOverlays'
+import { ChatMenu, ModelMenu } from '@/components/menu/ai/menus'
 import AiComposer from '@components/menu/ai/composer'
 import AiMessageList from '@components/menu/ai/messageList'
 import GS from '@styles/globalStyles'
@@ -146,10 +146,10 @@ export default function AiScreen({ navigation }: MenuProps<'AiScreen'>): JSX.Ele
                         <AiMessageList session={ai.session} theme={theme} isLoggedIn={login} text={text} />
                     </View>
                     {showModels ? (
-                        <AiModelPicker ai={ai} theme={theme} onClose={() => setShowModels(false)} />
+                        <ModelMenu ai={ai} theme={theme} onClose={() => setShowModels(false)} />
                     ) : null}
                     {showConversations ? (
-                        <AiConversationOverlay ai={ai} theme={theme} text={text} onClose={() => setShowConversations(false)} />
+                        <ChatMenu ai={ai} theme={theme} text={text} onClose={() => setShowConversations(false)} />
                     ) : null}
                     <View style={{
                         position: 'absolute',

@@ -8,7 +8,7 @@
 import GS from '@styles/globalStyles'
 import { getCategories, getHeight } from '@utils/general'
 import { PropsWithChildren, ReactNode, useMemo, useState } from 'react'
-import { InternalNavMenuButton, InternalNavMenuDropdown, InternalNavRoute } from '@components/menu/queenbee/internalNavMenu'
+import { NavButton, NavDropdown, InternalNavRoute } from '@components/menu/queenbee/internalNavMenu'
 import { BlurView } from 'expo-blur'
 import { Dimensions, Platform, View, Text, StatusBar, Pressable, StyleSheet } from 'react-native'
 import { HeaderProps } from '@/interfaces'
@@ -94,7 +94,7 @@ export default function Header({ options, route, navigation }: HeaderProps): Rea
         }
 
         const internalMenu = (
-            <InternalNavMenuButton
+            <NavButton
                 open={internalMenuOpen}
                 onPress={() => setInternalMenuOpen((current) => !current)}
             />
@@ -252,7 +252,7 @@ export default function Header({ options, route, navigation }: HeaderProps): Rea
                 <View key={index}>{node}</View>
             )}
             {hasQueenbeeAccess ? (
-                <InternalNavMenuDropdown
+                <NavDropdown
                     activeRoute={route.name}
                     open={internalMenuOpen}
                     onNavigate={navigateInternalRoute}

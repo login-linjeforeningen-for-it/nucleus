@@ -1,7 +1,7 @@
 import EventCluster from './eventCluster'
 import { getCategories } from '@utils/general'
 import LastFetch, { fetchEvents } from '@utils/fetch'
-import Seperator from './seperator'
+import Separator from './separator'
 import Space, { ErrorMessage } from '@components/shared/utils'
 import TopRefreshIndicator from '@components/shared/topRefreshIndicator'
 import { setEvents, setLastFetch } from '@redux/event'
@@ -79,7 +79,7 @@ function Content({ usedIndexes }: ContentProps) {
 
     return renderedEvents.map((event, index) => (
         <View key={`View${index}`}>
-            <Seperator key={`Seperator${index}`} item={event} usedIndexes={usedIndexes} />
+            <Separator key={`Separator${index}`} item={event} usedIndexes={usedIndexes} />
             <EventCluster key={index} item={event} index={index} />
         </View>
     ))

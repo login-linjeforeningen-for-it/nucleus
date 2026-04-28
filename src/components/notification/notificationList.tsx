@@ -1,6 +1,6 @@
 import Cluster from '@/components/shared/cluster'
 import Space from '@/components/shared/utils'
-import { NotificationSeperator } from '@components/event/seperator'
+import { NotificationSeparator } from '@components/event/separator'
 import GS from '@styles/globalStyles'
 import NS from '@styles/notificationStyles'
 import T from '@styles/text'
@@ -46,7 +46,7 @@ export default function NotificationListView({
 
     return (
         <>
-            {readIndex > 0 && <NotificationSeperator text={lang ? 'Nye' : 'New'} />}
+            {readIndex > 0 && <NotificationSeparator text={lang ? 'Nye' : 'New'} />}
             {list.map((item, index) => (
                 <NotificationRow
                     key={index}
@@ -122,7 +122,7 @@ function NotificationRow({ item, list, id, setList, hideOld, setHideOld, readInd
 function PreviousSeparator({ lang, onPress }: { lang: boolean, onPress: () => void }) {
     return (
         <TouchableOpacity onPress={onPress}>
-            <NotificationSeperator text={lang ? 'Tidligere' : 'Previous'} />
+            <NotificationSeparator text={lang ? 'Tidligere' : 'Previous'} />
         </TouchableOpacity>
     )
 }

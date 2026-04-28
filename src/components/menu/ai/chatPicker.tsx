@@ -14,7 +14,7 @@ type Props = {
     newConversationLabel: string
 }
 
-export default function AiConversationPicker({
+export default function ChatPicker({
     conversations,
     activeConversationId,
     theme,

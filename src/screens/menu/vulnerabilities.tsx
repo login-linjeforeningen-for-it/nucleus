@@ -1,13 +1,13 @@
 import Space from '@/components/shared/utils'
 import {
     ErrorCard,
-    ProjectFindingList,
+    ProjectFindings,
     RunScanCard,
-    VulnerabilitySummary,
+    SummaryStrip,
     getLoadError,
     useVulnerabilityTotals,
 } from '@components/menu/vulnerabilities/vulnerabilityOverview'
-import VulnerabilityImageCard from '@components/menu/vulnerabilities/vulnerabilityImageCard'
+import ImageCard from '@components/menu/vulnerabilities/imageCard'
 import Swipe from '@components/nav/swipe'
 import TopRefreshIndicator from '@components/shared/topRefreshIndicator'
 import GS from '@styles/globalStyles'
@@ -84,8 +84,8 @@ export default function VulnerabilitiesScreen(): JSX.Element {
                     <ErrorCard error={error} />
                     {data || scout ? (
                         <>
-                            <VulnerabilitySummary data={data} findings={totals.findings} severity={totals.severity} projectCount={totals.projectCount} theme={theme} />
-                            <ProjectFindingList scout={scout} theme={theme} />
+                            <SummaryStrip data={data} findings={totals.findings} severity={totals.severity} projectCount={totals.projectCount} theme={theme} />
+                            <ProjectFindings scout={scout} theme={theme} />
                             <ImageList
                                 data={data}
                                 expandedImages={expandedImages}
@@ -121,7 +121,7 @@ function ImageList({
     if (!data?.images.length) return null
 
     return data.images.map(image => (
-        <VulnerabilityImageCard
+        <ImageCard
             key={image.image}
             image={image}
             isExpanded={expandedImages[image.image] ?? false}
