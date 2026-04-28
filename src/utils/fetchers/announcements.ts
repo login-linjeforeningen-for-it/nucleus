@@ -1,4 +1,5 @@
 import config from '@/constants'
+import { normalizeHexColor } from '@utils/general'
 
 export async function fetchAnnouncements(limit = 20): Promise<GetAnnouncementsProps> {
     try {
@@ -58,7 +59,7 @@ function normalizeAnnouncementRole(role: unknown): BotRole | null {
     const record = role as Record<string, unknown>
     const id = stringValue(record.id ?? record.roleID ?? record.roleId ?? record.value)
     const name = stringValue(record.name ?? record.label)
-    const color = normalizeAnnouncementRoleColor(record.color ?? record.hexColor ?? record.roleColor)
+    const color = normalizeHexColor(record.color ?? record.hexColor ?? record.roleColor)
     return id && name ? { id, name, color } : null
 }
 
@@ -81,19 +82,4 @@ function normalizeAnnouncementChannel(channel: unknown): BotChannel | null {
 
 function stringValue(value: unknown) {
     return typeof value === 'string' || typeof value === 'number' ? String(value) : undefined
-}
-
-function normalizeAnnouncementRoleColor(value: unknown) {
-    const raw = stringValue(value)
-
-    if (!raw) return '#fd8738'
-    if (/^#[0-9a-f]{6}$/i.test(raw)) return raw
-    if (/^[0-9a-f]{6}$/i.test(raw)) return `#${raw}`
-
-    const decimal = Number(raw)
-    if (Number.isFinite(decimal) && decimal > 0) {
-        return `#${Math.trunc(decimal).toString(16).padStart(6, '0').slice(-6)}`
-    }
-
-    return '#fd8738'
 }

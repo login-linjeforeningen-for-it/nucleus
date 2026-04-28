@@ -3,6 +3,7 @@ import Space from '@/components/shared/utils'
 import Text from '@components/shared/text'
 import T from '@styles/text'
 import { filterByContentQuery, formatContentDate } from '@utils/content/content'
+import { normalizeHexColor } from '@utils/general'
 import { View } from 'react-native'
 import { useSelector } from 'react-redux'
 import { CopyableChip, InfoChip, InfoRow, MetaPill, StatusPill } from './announcementPrimitives'
@@ -155,13 +156,9 @@ function RoleList({ roleIds, roles }: { roleIds: string[]; roles: BotRole[] }) {
 function RolePill({ roleId, roles }: { roleId: string; roles: BotRole[] }) {
     const normalizedRoleId = String(roleId)
     const role = roles.find((candidate) => candidate.id === normalizedRoleId)
-    const color = normalizeRoleColor(role?.color)
+    const color = normalizeHexColor(role?.color)
 
     return <CopyableChip label={`@${role?.name || 'Unknown role'}`} copyValue={`#${normalizedRoleId}`} color={color} backgroundColor={`${color}26`} />
-}
-
-function normalizeRoleColor(color?: string) {
-    return /^#[0-9a-f]{6}$/i.test(color || '') ? color! : '#fd8738'
 }
 
 function resolveChannel(channelId: string | undefined, channels: BotChannel[]) {

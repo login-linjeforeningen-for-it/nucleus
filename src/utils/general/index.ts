@@ -75,3 +75,18 @@ export function formatNorwegianDate(
 
     return new Intl.DateTimeFormat('nb-NO', options).format(date)
 }
+
+export function normalizeHexColor(value: unknown, fallback = '#fd8738') {
+    const raw = typeof value === 'string' || typeof value === 'number' ? String(value) : ''
+
+    if (!raw) return fallback
+    if (/^#[0-9a-f]{6}$/i.test(raw)) return raw
+    if (/^[0-9a-f]{6}$/i.test(raw)) return `#${raw}`
+
+    const decimal = Number(raw)
+    if (Number.isFinite(decimal) && decimal > 0) {
+        return `#${Math.trunc(decimal).toString(16).padStart(6, '0').slice(-6)}`
+    }
+
+    return fallback
+}
