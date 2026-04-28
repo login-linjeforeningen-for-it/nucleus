@@ -46,6 +46,9 @@ if (existsSync('eas.json')) {
     if (eas.submit?.production?.android?.track !== 'internal') {
         failures.push('eas.json submit.production.android.track must be "internal"')
     }
+    if (eas.submit?.production?.ios && !eas.submit.production.ios.ascAppId) {
+        failures.push('eas.json submit.production.ios.ascAppId must target the App Store Connect app')
+    }
 }
 
 if (strict) {
