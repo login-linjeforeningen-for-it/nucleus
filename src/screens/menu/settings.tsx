@@ -1,7 +1,6 @@
-import { View, Dimensions, Platform, TouchableOpacity, Image } from 'react-native'
+import { View, Dimensions, Platform, TouchableOpacity, Image, Text } from 'react-native'
 import { ScrollView } from 'react-native-gesture-handler'
 import Reminders from '@/components/settings/reminders'
-import Language from '@/components/settings/language'
 import Space from '@/components/shared/utils'
 import GS from '@styles/globalStyles'
 import SS from '@styles/settingStyles'
@@ -12,6 +11,8 @@ import Swipe from '@components/nav/swipe'
 import { JSX } from 'react'
 import { SectionHeader, SettingRow, SwitchCluster } from '@/components/settings/settingsRows'
 import { changeTheme, resetTheme } from '@redux/theme'
+import { changeLang } from '@redux/lang'
+import topic from '@/utils/notification/queue/topic'
 
 export default function SettingScreen(): JSX.Element {
 
@@ -108,6 +109,28 @@ function ThemeSwitch() {
                         source={require('@assets/themes/moon.png')}
                     />
                 ) : null}
+            </TouchableOpacity>
+        </View>
+    )
+}
+
+function Language() {
+    const notification = useSelector((state: ReduxState) => state.notification)
+    const { lang } = useSelector((state: ReduxState) => state.lang)
+    const { theme } = useSelector((state: ReduxState) => state.theme)
+    const dispatch = useDispatch()
+
+    function handleLangChange() {
+        dispatch(changeLang())
+        topic({ topicID: 'langChange', lang, notification })
+    }
+
+    return (
+        <View>
+            <TouchableOpacity onPress={() => handleLangChange()}>
+                <Text style={{ ...SS.langSwitch, color: theme.textColor }}>
+                    {lang ? 'EN' : 'NO'}
+                </Text>
             </TouchableOpacity>
         </View>
     )
