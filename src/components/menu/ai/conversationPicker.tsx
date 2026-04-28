@@ -1,5 +1,6 @@
 import Text from '@components/shared/text'
 import T from '@styles/text'
+import { Plus } from 'lucide-react-native'
 import { JSX } from 'react'
 import { Dimensions, ScrollView, TouchableOpacity, View } from 'react-native'
 
@@ -27,19 +28,32 @@ export default function AiConversationPicker({
             <View style={{ gap: 10 }}>
                 <TouchableOpacity onPress={onCreate}>
                     <View style={{
+                        alignItems: 'center',
                         borderRadius: 14,
                         backgroundColor: theme.greyTransparent,
                         borderColor: theme.greyTransparentBorder,
                         borderWidth: 1,
+                        flexDirection: 'row',
+                        justifyContent: 'space-between',
+                        minWidth: Dimensions.get('window').width * 0.873,
                         paddingHorizontal: 12,
                         paddingVertical: 8,
                     }}>
                         <Text style={{ ...T.text15, color: theme.textColor }}>
                             {newConversationLabel}
                         </Text>
-                        <Text style={{ ...T.text12, color: theme.orange }}>
-                            +
-                        </Text>
+                        <View style={{
+                            alignItems: 'center',
+                            backgroundColor: theme.orangeTransparentHighlighted,
+                            borderColor: theme.orangeTransparentBorderHighlighted,
+                            borderRadius: 13,
+                            borderWidth: 1,
+                            height: 26,
+                            justifyContent: 'center',
+                            width: 26,
+                        }}>
+                            <Plus color={theme.orange} size={16} strokeWidth={2.3} />
+                        </View>
                     </View>
                 </TouchableOpacity>
                 {conversations.map(conversation => {
