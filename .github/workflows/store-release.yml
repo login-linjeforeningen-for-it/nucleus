@@ -43,7 +43,7 @@ jobs:
         run: npm test -- --runInBand
 
       - name: Build and submit to Google Play through EAS
-        run: npx eas build --platform android --profile production --auto-submit --wait --non-interactive
+        run: npx eas-cli@latest build --platform android --profile production --auto-submit --wait --non-interactive
 
   ios:
     name: EAS build and submit iOS
@@ -77,4 +77,4 @@ jobs:
         run: npm test -- --runInBand
 
       - name: Build and submit to TestFlight through EAS
-        run: npx eas build --platform ios --profile production --auto-submit --wait --non-interactive
+        run: npx eas-cli@latest build --platform ios --profile production --auto-submit --wait --non-interactive
