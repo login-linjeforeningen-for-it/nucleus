@@ -1,4 +1,4 @@
-import { Dispatch, SetStateAction, useEffect, useState } from 'react'
+import { Dispatch, SetStateAction, useEffect } from 'react'
 import { View, Dimensions, Platform } from 'react-native'
 import { Gesture, GestureDetector } from 'react-native-gesture-handler'
 import {
@@ -11,6 +11,7 @@ import { scheduleOnRN } from 'react-native-worklets'
 import CourseContent from './content'
 import ReadOnly from './readonly'
 import { CourseStackCard, getCourseCardHeight } from './swipeCards'
+import { useCourseSwiperNavigation } from './useCourseSwiperNavigation'
 
 type CourseContentProps = {
     course: Course,
@@ -24,23 +25,13 @@ const SWIPE_THRESHOLD = SCREEN_WIDTH * (Platform.OS === 'ios' ? 0.25 : 0.32)
 
 export default function Swiper({ course, clicked, setClicked }: CourseContentProps) {
     const translateX = useSharedValue(0)
-    const [cardID, setCardID] = useState<number>(0)
+    const { cardID, setCardID, handleNext, handlePrevious } = useCourseSwiperNavigation(course.cards.length, setClicked)
     const next = cardID + 1
     const previous = cardID - 1
     const startX = useSharedValue(0)
 
     if (!course.cards.length) {
         return <ReadOnly courseId={Number(course.id)} text={course.notes} />
-    }
-
-    function handlePrevious() {
-        setClicked([])
-        setCardID(previous >= 0 ? previous : cardID)
-    }
-
-    function handleNext() {
-        setClicked([])
-        setCardID(next < course.cards.length ? next : cardID)
     }
 
     function onSwipeRight() {
