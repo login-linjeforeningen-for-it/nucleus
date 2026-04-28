@@ -28,7 +28,7 @@ platform :ios do
         signingStyle: 'automatic',
         teamID: ENV.fetch('APPLE_TEAM_ID')
       },
-      xcargs: '-allowProvisioningUpdates'
+      xcargs: "-allowProvisioningUpdates DEVELOPMENT_TEAM=#{ENV.fetch('APPLE_TEAM_ID').shellescape}"
     )
 
     upload_to_testflight(
