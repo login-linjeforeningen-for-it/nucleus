@@ -38,8 +38,7 @@ platform :ios do
         "-authenticationKeyID #{ENV.fetch('ASC_KEY_ID').shellescape}",
         "-authenticationKeyIssuerID #{ENV.fetch('ASC_ISSUER_ID').shellescape}",
         "DEVELOPMENT_TEAM=#{ENV.fetch('APPLE_TEAM_ID').shellescape}",
-        'CODE_SIGN_STYLE=Automatic',
-        "CODE_SIGN_IDENTITY=#{'Apple Distribution'.shellescape}"
+        'CODE_SIGN_STYLE=Automatic'
       ].join(' ')
     )
 
