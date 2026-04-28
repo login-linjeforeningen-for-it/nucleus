@@ -1,6 +1,5 @@
 import {
     createAiConversation,
-    defaultNativeModelMetrics,
     deleteAiConversation,
     getAiConversation,
     getAiOwner,
@@ -13,7 +12,15 @@ import {
 import { parseResponseBody, toRecord } from '@utils/http'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import {
-    NativeChatSession, NativeSocketMessage, conversationToSession, pendingAssistantMessage, updateLastAssistantMessage,
+    NativeChatSession,
+    NativeSocketMessage,
+    applyPromptError,
+    applyPromptStarted,
+    conversationToSession,
+    normalizeClientUpdate,
+    pendingAssistantMessage,
+    updateLastAssistantMessage,
+    upsertNativeClient,
 } from './chatMessages'
 
 type AiText = {
@@ -179,19 +186,8 @@ export default function useAiChat(text: AiText) {
 
     function handleSocketMessage(message: NativeSocketMessage) {
         if (message.type === 'update' && message.client) {
-            const nextClient: NativeClient = {
-                ...message.client,
-                model: {
-                    ...defaultNativeModelMetrics(),
-                    ...(message.client.model || {})
-                }
-            }
-            setClients(prev => {
-                const existing = prev.find(client => client.name === nextClient.name)
-                return existing
-                    ? prev.map(client => client.name === nextClient.name ? nextClient : client)
-                    : [...prev, nextClient]
-            })
+            const nextClient = normalizeClientUpdate(message.client)
+            setClients(prev => upsertNativeClient(prev, nextClient))
             return
         }
 
@@ -200,13 +196,7 @@ export default function useAiChat(text: AiText) {
         }
 
         if (message.type === 'prompt_started') {
-            setSession(prev => prev ? {
-                ...prev,
-                isSending: true,
-                messages: prev.messages.some(item => item.id === `${prev.conversationId}-assistant`)
-                    ? prev.messages
-                    : [...prev.messages, pendingAssistantMessage(prev.conversationId)]
-            } : prev)
+            setSession(applyPromptStarted)
             return
         }
 
@@ -222,25 +212,7 @@ export default function useAiChat(text: AiText) {
         }
 
         if (message.type === 'prompt_error') {
-            setSession(prev => {
-                if (!prev) return prev
-                const messages = [...prev.messages]
-                const content = message.error || text.modelFailed
-                const last = messages[messages.length - 1]
-                if (last?.role === 'assistant') {
-                    messages[messages.length - 1] = { ...last, content, error: true }
-                } else {
-                    messages.push({
-                        id: `${prev.conversationId}-error-${Date.now()}`,
-                        role: 'assistant',
-                        content,
-                        error: true,
-                        clientName: prev.clientName,
-                        createdAt: new Date().toISOString()
-                    })
-                }
-                return { ...prev, isSending: false, messages }
-            })
+            setSession(prev => applyPromptError(prev, message.error || text.modelFailed))
         }
     }
 

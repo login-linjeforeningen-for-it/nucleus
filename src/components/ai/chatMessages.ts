@@ -46,6 +46,58 @@ export function updateLastAssistantMessage(
     return { ...session, isSending, messages }
 }
 
+export function normalizeClientUpdate(client: NativeClient): NativeClient {
+    return {
+        ...client,
+        model: {
+            ...defaultNativeModelMetrics(),
+            ...(client.model || {}),
+        },
+    }
+}
+
+export function upsertNativeClient(clients: NativeClient[], nextClient: NativeClient) {
+    const existing = clients.find(client => client.name === nextClient.name)
+
+    return existing
+        ? clients.map(client => client.name === nextClient.name ? nextClient : client)
+        : [...clients, nextClient]
+}
+
+export function applyPromptStarted(session: NativeChatSession | null) {
+    if (!session) return session
+
+    return {
+        ...session,
+        isSending: true,
+        messages: session.messages.some(item => item.id === `${session.conversationId}-assistant`)
+            ? session.messages
+            : [...session.messages, pendingAssistantMessage(session.conversationId)],
+    }
+}
+
+export function applyPromptError(session: NativeChatSession | null, content: string) {
+    if (!session) return session
+
+    const messages = [...session.messages]
+    const last = messages[messages.length - 1]
+
+    if (last?.role === 'assistant') {
+        messages[messages.length - 1] = { ...last, content, error: true }
+    } else {
+        messages.push({
+            id: `${session.conversationId}-error-${Date.now()}`,
+            role: 'assistant',
+            content,
+            error: true,
+            clientName: session.clientName,
+            createdAt: new Date().toISOString(),
+        })
+    }
+
+    return { ...session, isSending: false, messages }
+}
+
 export function pendingAssistantMessage(conversationId: string): NativeStoredMessage {
     return {
         id: `${conversationId}-assistant`,
