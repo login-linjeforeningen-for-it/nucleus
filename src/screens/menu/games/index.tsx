@@ -1,60 +1,19 @@
 import Cluster from '@/components/shared/cluster'
 import Space from '@/components/shared/utils'
+import { FeaturedGame, GameList, GameScreenText, SectionTitle } from '@components/games/cards'
 import Swipe from '@components/nav/swipe'
 import TopRefreshIndicator from '@components/shared/topRefreshIndicator'
 import { getGames } from '@utils/games/game'
 import { JSX, useCallback, useEffect, useMemo, useState } from 'react'
 import { useSelector } from 'react-redux'
 import {
-    Image,
     RefreshControl,
     ScrollView,
     Text,
-    TouchableOpacity,
     View,
 } from 'react-native'
-import { StackNavigationProp } from '@react-navigation/stack'
 import GS from '@styles/globalStyles'
 import T from '@styles/text'
-
-type GameListProps = {
-    game: Game
-    navigation: StackNavigationProp<MenuStackParamList, 'GameScreen'>
-    theme: Theme
-    text: {
-        diceTitle: string
-        diceBody: string
-        communityDeck: string
-        tapToOpen: string
-    }
-}
-
-type FeaturedGameProps = {
-    name: string
-    navigation: StackNavigationProp<MenuStackParamList, 'GameScreen'>
-    theme: Theme
-    text: {
-        diceBody: string
-        tapToOpen: string
-    }
-}
-
-type GameScreenText = {
-    intro: string
-    featured: string
-    library: string
-    diceTitle: string
-    diceBody: string
-    communityDeck: string
-    tapToOpen: string
-}
-
-const GAME_ASSETS = [
-    require('@assets/games/terning.png'),
-    require('@assets/games/100questions.png'),
-    require('@assets/games/neverhaveiever.png'),
-    require('@assets/games/okredflagdealbreaker.png'),
-]
 
 export default function GameScreen({ navigation }: MenuProps<'GameScreen'>): JSX.Element {
     const [games, setGames] = useState<string | Game[]>([])
@@ -149,114 +108,5 @@ export default function GameScreen({ navigation }: MenuProps<'GameScreen'>): JSX
                 <TopRefreshIndicator refreshing={refreshing} theme={theme} top={112} />
             </View>
         </Swipe>
-    )
-}
-
-function SectionTitle({ title, theme }: { title: string, theme: Theme }): JSX.Element {
-    return (
-        <Text style={{
-            ...T.text15,
-            color: theme.oppositeTextColor,
-            letterSpacing: 0.5,
-            textTransform: 'uppercase',
-            marginLeft: 4,
-        }}>
-            {title}
-        </Text>
-    )
-}
-
-function GameList({ game, navigation, theme, text }: GameListProps): JSX.Element {
-    function handlePress() {
-        navigation.navigate('SpecificGameScreen', { gameID: game.id, gameName: game.name })
-    }
-
-    const image = GAME_ASSETS[game.id + 1] || GAME_ASSETS[1]
-
-    return (
-        <TouchableOpacity style={{ marginBottom: 10 }} onPress={handlePress} activeOpacity={0.88}>
-            <Cluster style={{ paddingHorizontal: 0 }}>
-                <View style={{
-                    flexDirection: 'row',
-                    alignItems: 'center',
-                    paddingHorizontal: 14,
-                    paddingVertical: 14,
-                    gap: 12,
-                }}>
-                    <View style={{
-                        width: 64,
-                        height: 64,
-                        borderRadius: 18,
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        backgroundColor: 'rgba(253,135,56,0.10)',
-                    }}>
-                        <Image
-                            source={image}
-                            style={{ width: 42, height: 42, resizeMode: 'contain' }}
-                        />
-                    </View>
-                    <View style={{ flex: 1 }}>
-                        <Text style={{ ...T.text20, color: theme.textColor, marginBottom: 4 }}>
-                            {game.name}
-                        </Text>
-                        <Text style={{ ...T.text15, color: theme.oppositeTextColor }}>
-                            {text.communityDeck}
-                        </Text>
-                    </View>
-                    <View style={{ alignItems: 'flex-end' }}>
-                        <Text style={{ ...T.text15, color: theme.orange }}>
-                            {text.tapToOpen}
-                        </Text>
-                    </View>
-                </View>
-            </Cluster>
-        </TouchableOpacity>
-    )
-}
-
-function FeaturedGame({ name, navigation, theme, text }: FeaturedGameProps): JSX.Element {
-    function handlePress() {
-        navigation.navigate('DiceScreen')
-    }
-
-    return (
-        <TouchableOpacity onPress={handlePress} activeOpacity={0.9}>
-            <Cluster style={{ paddingHorizontal: 0 }}>
-                <View style={{ paddingHorizontal: 14, paddingVertical: 14 }}>
-                    <View style={{
-                        borderRadius: 24,
-                        backgroundColor: 'rgba(253,135,56,0.10)',
-                        paddingHorizontal: 14,
-                        paddingVertical: 14,
-                        flexDirection: 'row',
-                        alignItems: 'center',
-                        gap: 14,
-                    }}>
-                        <View style={{
-                            width: 72,
-                            height: 72,
-                            borderRadius: 20,
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            backgroundColor: 'rgba(253,135,56,0.12)',
-                        }}>
-                            <Image
-                                source={GAME_ASSETS[0]}
-                                style={{ width: 50, height: 50, resizeMode: 'contain' }}
-                            />
-                        </View>
-                        <View style={{ flex: 1 }}>
-                            <Text style={{ ...T.text20, color: theme.textColor, marginBottom: 4 }}>
-                                {name}
-                            </Text>
-                            <Text style={{ ...T.text15, color: theme.oppositeTextColor }}>
-                                {text.diceBody}
-                            </Text>
-                        </View>
-                    </View>
-                </View>
-            </Cluster>
-        </TouchableOpacity>
     )
 }
