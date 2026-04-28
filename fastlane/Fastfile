@@ -38,7 +38,8 @@ platform :ios do
 
     identities, identity_status = Open3.capture2('security', 'find-identity', '-v', '-p', 'codesigning', keychain_path)
     UI.user_error!("Unable to inspect code signing identities in #{keychain_path}") unless identity_status.success?
-    UI.user_error!("No Apple Distribution identity found in #{keychain_path}") unless identities.include?('Apple Distribution:')
+    signing_identity = identities[/"(Apple Distribution:[^"]+)"/, 1]
+    UI.user_error!("No Apple Distribution identity found in #{keychain_path}") unless signing_identity
 
     get_provisioning_profile(
       api_key: api_key,
@@ -66,14 +67,14 @@ platform :ios do
       targets: ['Login'],
       build_configurations: ['Release'],
       profile_name: profile_name,
-      code_sign_identity: 'Apple Distribution'
+      code_sign_identity: signing_identity
     )
     project = Xcodeproj::Project.open(File.join(ios_dir, 'Login.xcodeproj'))
     project.build_configurations.each do |configuration|
       next unless configuration.name == 'Release'
 
-      configuration.build_settings['CODE_SIGN_IDENTITY'] = 'Apple Distribution'
-      configuration.build_settings['CODE_SIGN_IDENTITY[sdk=iphoneos*]'] = 'Apple Distribution'
+      configuration.build_settings['CODE_SIGN_IDENTITY'] = signing_identity
+      configuration.build_settings['CODE_SIGN_IDENTITY[sdk=iphoneos*]'] = signing_identity
       configuration.build_settings['DEVELOPMENT_TEAM'] = ENV.fetch('APPLE_TEAM_ID')
     end
     project.save
@@ -96,6 +97,7 @@ platform :ios do
         "-authenticationKeyID #{ENV.fetch('ASC_KEY_ID').shellescape}",
         "-authenticationKeyIssuerID #{ENV.fetch('ASC_ISSUER_ID').shellescape}",
         "DEVELOPMENT_TEAM=#{ENV.fetch('APPLE_TEAM_ID').shellescape}",
+        "CODE_SIGN_IDENTITY=#{signing_identity.shellescape}",
         "CODE_SIGN_KEYCHAIN=#{keychain_path.shellescape}",
         "OTHER_CODE_SIGN_FLAGS=#{Shellwords.escape("--keychain #{keychain_path}")}"
       ].join(' ')
