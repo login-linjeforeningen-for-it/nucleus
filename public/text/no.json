@@ -85,7 +85,12 @@
         "empty": "Fant ingen albumer.",
         "event": "Arrangement",
         "openEvent": "Åpne arrangement",
-        "updated": "Oppdatert"
+        "updated": "Oppdatert",
+        "downloadImages": "Last ned bilder",
+        "downloadSelected": "Last ned valgte",
+        "noImagesSelected": "Ingen bilder valgt",
+        "selectedImages": "valgt",
+        "close": "Lukk"
     },
     "fund": {
         "title": "Logins Fond",

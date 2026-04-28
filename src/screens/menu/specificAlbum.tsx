@@ -1,6 +1,6 @@
 import Cluster from '@/components/shared/cluster'
 import Space from '@/components/shared/utils'
-import { AlbumImageGrid, AlbumPill } from '@/components/menu/albums/albumCards'
+import { AlbumDownloadSheet, AlbumImageGrid, AlbumPill } from '@/components/menu/albums/albumCards'
 import Swipe from '@components/nav/swipe'
 import Text from '@components/shared/text'
 import TopRefreshIndicator from '@components/shared/topRefreshIndicator'
@@ -10,8 +10,9 @@ import { fetchAlbumDetails } from '@utils/fetch'
 import { formatNorwegianDate } from '@utils/general'
 import { BottomTabNavigationProp } from '@react-navigation/bottom-tabs'
 import { JSX, useEffect, useState } from 'react'
-import { Dimensions, RefreshControl, ScrollView, TouchableOpacity, View } from 'react-native'
+import { Dimensions, Image, Platform, Pressable, RefreshControl, ScrollView, TouchableOpacity, View } from 'react-native'
 import { useSelector } from 'react-redux'
+import MS from '@styles/menuStyles'
 
 function formatAlbumDate(value?: string | null) {
     const formatted = formatNorwegianDate(value, {
@@ -41,6 +42,7 @@ export default function SpecificAlbumScreen({
     const [album, setAlbum] = useState<GetAlbumProps | null>(null)
     const [refreshing, setRefreshing] = useState(false)
     const [error, setError] = useState('')
+    const [showDownloadSheet, setShowDownloadSheet] = useState(false)
 
     async function load() {
         setRefreshing(true)
@@ -64,6 +66,7 @@ export default function SpecificAlbumScreen({
 
     const title = album ? (lang ? album.name_no : album.name_en) : ''
     const description = album ? (lang ? album.description_no : album.description_en) : ''
+    const headerActionTop = Dimensions.get('window').height / 17 + (Platform.OS === 'ios' ? 9 : 1)
 
     return (
         <Swipe left='AlbumsScreen'>
@@ -151,6 +154,47 @@ export default function SpecificAlbumScreen({
                     ) : null}
                 </ScrollView>
                 <TopRefreshIndicator refreshing={refreshing} theme={theme} top={112} />
+                {album?.images?.length ? (
+                    <Pressable
+                        accessibilityRole='button'
+                        accessibilityLabel={text.downloadImages}
+                        testID='album-download-button'
+                        onPress={() => setShowDownloadSheet((current) => !current)}
+                        style={({ pressed }) => ({
+                            position: 'absolute',
+                            right: 18,
+                            top: headerActionTop,
+                            zIndex: 14,
+                            width: 42,
+                            height: 42,
+                            borderRadius: 21,
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            overflow: 'hidden',
+                            borderWidth: 1,
+                            borderColor: showDownloadSheet
+                                ? theme.orangeTransparentBorder
+                                : 'rgba(255,255,255,0.14)',
+                            backgroundColor: showDownloadSheet
+                                ? theme.orangeTransparent
+                                : pressed
+                                    ? 'rgba(255,255,255,0.10)'
+                                    : 'rgba(255,255,255,0.07)',
+                        })}
+                    >
+                        <Image
+                            source={require('@assets/icons/download-orange.png')}
+                            style={MS.multiIcon}
+                        />
+                    </Pressable>
+                ) : null}
+                <AlbumDownloadSheet
+                    album={album}
+                    title={title}
+                    text={text}
+                    visible={showDownloadSheet}
+                    onClose={() => setShowDownloadSheet(false)}
+                />
             </View>
         </Swipe>
     )

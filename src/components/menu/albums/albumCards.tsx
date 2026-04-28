@@ -5,6 +5,7 @@ import Text from '@components/shared/text'
 import T from '@styles/text'
 import {
     Image,
+    Linking,
     Modal,
     Platform,
     Pressable,
@@ -13,8 +14,16 @@ import {
     useWindowDimensions,
     View
 } from 'react-native'
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useSelector } from 'react-redux'
+
+type AlbumText = {
+    close?: string
+    downloadImages?: string
+    downloadSelected?: string
+    noImagesSelected?: string
+    selectedImages?: string
+}
 
 export function AlbumCard({
     album,
@@ -118,6 +127,221 @@ export function AlbumImageGrid({ album, title }: { album: GetAlbumProps, title: 
                 onClose={() => setSelectedImage(null)}
             />
         </>
+    )
+}
+
+export function AlbumDownloadSheet({
+    album,
+    onClose,
+    text,
+    title,
+    visible,
+}: {
+    album: GetAlbumProps | null
+    onClose: () => void
+    text: AlbumText
+    title: string
+    visible: boolean
+}) {
+    const { theme } = useSelector((state: ReduxState) => state.theme)
+    const viewport = useWindowDimensions()
+    const images = useMemo(() => Array.isArray(album?.images) ? album.images : [], [album?.images])
+    const [selectedImages, setSelectedImages] = useState<string[]>(images)
+    const selectedCount = selectedImages.length
+
+    useEffect(() => {
+        if (visible) {
+            setSelectedImages(images)
+        }
+    }, [images, visible])
+
+    function toggleImage(image: string) {
+        setSelectedImages((current) => current.includes(image)
+            ? current.filter((candidate) => candidate !== image)
+            : [...current, image])
+    }
+
+    function downloadOnWeb(uri: string, image: string) {
+        const link = document.createElement('a')
+        link.href = uri
+        link.download = image
+        link.target = '_blank'
+        document.body.appendChild(link)
+        link.click()
+        link.remove()
+    }
+
+    async function downloadSelected() {
+        if (!album || !selectedImages.length) {
+            return
+        }
+
+        for (const image of selectedImages) {
+            const uri = `${config.cdn}/albums/${album.id}/${image}`
+            if (Platform.OS === 'web') {
+                downloadOnWeb(uri, image)
+            } else {
+                await Linking.openURL(uri)
+            }
+        }
+    }
+
+    return (
+        <Modal
+            visible={visible}
+            transparent
+            animationType='fade'
+            onRequestClose={onClose}
+            statusBarTranslucent
+        >
+            <View style={{
+                flex: 1,
+                backgroundColor: '#050505d9',
+                alignItems: 'center',
+                justifyContent: 'center',
+                paddingHorizontal: 16,
+            }}>
+                <View style={{
+                    width: Math.min(560, viewport.width - 28),
+                    maxHeight: viewport.height * 0.78,
+                    borderRadius: 28,
+                    borderWidth: 1,
+                    borderColor: '#ffffff20',
+                    backgroundColor: '#151515e6',
+                    overflow: 'hidden',
+                }}>
+                    <View style={{ padding: 16, paddingBottom: 12 }}>
+                        <Text style={{ ...T.text20, color: theme.textColor }}>
+                            {text.downloadImages || 'Download images'}
+                        </Text>
+                        <Space height={4} />
+                        <Text style={{ ...T.text12, color: theme.oppositeTextColor }}>
+                            {`${selectedCount} ${text.selectedImages || 'selected'}`}
+                        </Text>
+                    </View>
+                    <ScrollView
+                        style={{ maxHeight: viewport.height * 0.55 }}
+                        contentContainerStyle={{
+                            flexDirection: 'row',
+                            flexWrap: 'wrap',
+                            gap: 10,
+                            padding: 12,
+                            paddingTop: 0,
+                        }}
+                    >
+                        {images.map((image, index) => {
+                            const selected = selectedImages.includes(image)
+                            const uri = `${config.cdn}/albums/${album?.id}/${image}`
+
+                            return (
+                                <Pressable
+                                    key={image}
+                                    onPress={() => toggleImage(image)}
+                                    accessibilityRole='checkbox'
+                                    accessibilityState={{ checked: selected }}
+                                    accessibilityLabel={`${title} ${index + 1}`}
+                                    testID={`album-download-image-${index}`}
+                                    style={({ pressed }) => ({
+                                        width: '48%',
+                                        aspectRatio: 1,
+                                        borderRadius: 18,
+                                        overflow: 'hidden',
+                                        backgroundColor: theme.contrast,
+                                        borderWidth: 1,
+                                        borderColor: selected
+                                            ? theme.orangeTransparentBorder
+                                            : '#ffffff14',
+                                        opacity: pressed ? 0.82 : 1,
+                                    })}
+                                >
+                                    <Image
+                                        source={{ uri, cache: 'force-cache' }}
+                                        accessibilityLabel={`${title} ${index + 1}`}
+                                        style={{ width: '100%', height: '100%' }}
+                                    />
+                                    <View style={{
+                                        position: 'absolute',
+                                        right: 8,
+                                        bottom: 8,
+                                        width: 28,
+                                        height: 28,
+                                        borderRadius: 14,
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        backgroundColor: selected
+                                            ? 'rgba(253,135,56,0.22)'
+                                            : 'rgba(8,8,8,0.58)',
+                                        borderWidth: 1,
+                                        borderColor: selected
+                                            ? theme.orangeTransparentBorder
+                                            : '#ffffff42',
+                                    }}>
+                                        {selected ? (
+                                            <View style={{
+                                                width: 12,
+                                                height: 12,
+                                                borderRadius: 6,
+                                                backgroundColor: theme.orange,
+                                            }} />
+                                        ) : null}
+                                    </View>
+                                </Pressable>
+                            )
+                        })}
+                    </ScrollView>
+                    <View style={{
+                        flexDirection: 'row',
+                        gap: 10,
+                        padding: 14,
+                        borderTopWidth: 1,
+                        borderTopColor: '#ffffff12',
+                    }}>
+                        <Pressable
+                            onPress={onClose}
+                            style={({ pressed }) => ({
+                                flex: 1,
+                                borderRadius: 18,
+                                paddingVertical: 13,
+                                alignItems: 'center',
+                                backgroundColor: pressed ? '#ffffff12' : '#ffffff08',
+                                borderWidth: 1,
+                                borderColor: '#ffffff14',
+                            })}
+                        >
+                            <Text style={{ ...T.text15, color: theme.textColor }}>
+                                {text.close || 'Close'}
+                            </Text>
+                        </Pressable>
+                        <Pressable
+                            onPress={downloadSelected}
+                            disabled={!selectedCount}
+                            style={({ pressed }) => ({
+                                flex: 1.3,
+                                borderRadius: 18,
+                                paddingVertical: 13,
+                                alignItems: 'center',
+                                backgroundColor: selectedCount
+                                    ? pressed
+                                        ? 'rgba(253,135,56,0.24)'
+                                        : theme.orangeTransparent
+                                    : '#ffffff08',
+                                borderWidth: 1,
+                                borderColor: selectedCount
+                                    ? theme.orangeTransparentBorder
+                                    : '#ffffff14',
+                                opacity: selectedCount ? 1 : 0.55,
+                            })}
+                        >
+                            <Text style={{ ...T.text15, color: selectedCount ? theme.orange : theme.oppositeTextColor }}>
+                                {selectedCount
+                                    ? text.downloadSelected || 'Download selected'
+                                    : text.noImagesSelected || 'No images selected'}
+                            </Text>
+                        </Pressable>
+                    </View>
+                </View>
+            </View>
+        </Modal>
     )
 }
 

@@ -85,7 +85,12 @@
         "empty": "No albums found.",
         "event": "Event",
         "openEvent": "Open event",
-        "updated": "Updated"
+        "updated": "Updated",
+        "downloadImages": "Download images",
+        "downloadSelected": "Download selected",
+        "noImagesSelected": "No images selected",
+        "selectedImages": "selected",
+        "close": "Close"
     },
     "fund": {
         "title": "Login Fund",
