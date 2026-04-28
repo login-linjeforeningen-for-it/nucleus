@@ -13,12 +13,15 @@ import { parseResponseBody, toRecord } from '@utils/http'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import {
     NativeChatSession,
+    NativeChatOwner,
     NativeSocketMessage,
+    appendPendingPrompt,
     applyPromptError,
     applyPromptStarted,
     conversationToSession,
+    createPromptRequest,
+    createUserMessage,
     normalizeClientUpdate,
-    pendingAssistantMessage,
     updateLastAssistantMessage,
     upsertNativeClient,
 } from './chatMessages'
@@ -38,7 +41,7 @@ export default function useAiChat(text: AiText) {
     const [conversations, setConversations] = useState<NativeConversationSummary[]>([])
     const [session, setSession] = useState<NativeChatSession | null>(null)
     const [input, setInput] = useState('')
-    const [owner, setOwner] = useState<{ userId?: string | null, sessionId?: string | null }>({})
+    const [owner, setOwner] = useState<NativeChatOwner>({})
     const [loading, setLoading] = useState(false)
     const [error, setError] = useState<string | null>(null)
     const socketRef = useRef<WebSocket | null>(null)
@@ -226,35 +229,9 @@ export default function useAiChat(text: AiText) {
             return
         }
 
-        const userMessage: NativeStoredMessage = {
-            id: `${Date.now()}`,
-            role: 'user',
-            content: input.trim(),
-            error: false,
-            clientName: session.clientName,
-            createdAt: new Date().toISOString()
-        }
-
-        const nextMessages = [...session.messages, userMessage, pendingAssistantMessage(session.conversationId)]
-        setSession({
-            ...session,
-            isSending: true,
-            messages: nextMessages,
-        })
-
-        socketRef.current.send(JSON.stringify({
-            type: 'prompt_request',
-            conversationId: session.conversationId,
-            clientName: session.clientName,
-            ownerUserId: owner.userId,
-            ownerSessionId: owner.sessionId,
-            messages: [...session.messages, userMessage].map(message => ({
-                role: message.role,
-                content: message.content,
-            })),
-            maxTokens: 512,
-            temperature: 0.7,
-        }))
+        const userMessage = createUserMessage(input, session.clientName)
+        setSession(appendPendingPrompt(session, userMessage))
+        socketRef.current.send(JSON.stringify(createPromptRequest(session, userMessage, owner)))
 
         setInput('')
     }

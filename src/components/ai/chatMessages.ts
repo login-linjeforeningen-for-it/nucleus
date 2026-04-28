@@ -18,6 +18,46 @@ export type NativeSocketMessage = {
     error?: string
 }
 
+export type NativeChatOwner = {
+    userId?: string | null
+    sessionId?: string | null
+}
+
+export function createUserMessage(input: string, clientName: string): NativeStoredMessage {
+    return {
+        id: `${Date.now()}`,
+        role: 'user',
+        content: input.trim(),
+        error: false,
+        clientName,
+        createdAt: new Date().toISOString()
+    }
+}
+
+export function appendPendingPrompt(session: NativeChatSession, userMessage: NativeStoredMessage): NativeChatSession {
+    return {
+        ...session,
+        isSending: true,
+        messages: [...session.messages, userMessage, pendingAssistantMessage(session.conversationId)],
+    }
+}
+
+export function createPromptRequest(session: NativeChatSession, userMessage: NativeStoredMessage, owner: NativeChatOwner) {
+    return {
+        type: 'prompt_request',
+        conversationId: session.conversationId,
+        clientName: session.clientName,
+        ownerUserId: owner.userId,
+        ownerSessionId: owner.sessionId,
+        messages: [...session.messages, userMessage].map(message => ({
+            role: message.role,
+            content: message.content,
+        })),
+        maxTokens: 512,
+        temperature: 0.7,
+    }
+}
+
 export function conversationToSession(conversation: NativeConversationRecord, clients: NativeClient[]): NativeChatSession {
     return {
         conversationId: conversation.id,
