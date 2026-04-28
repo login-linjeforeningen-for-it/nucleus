@@ -123,6 +123,14 @@ export async function createAiConversation(clientName: string): Promise<NativeCo
     return payload
 }
 
+export async function deleteAiConversation(id: string): Promise<void> {
+    await requestApi<null>(config.beekeeper_api, `/ai/conversations/${id}`, {
+        method: 'DELETE',
+        requiresAuth: false,
+        includeAiSession: true,
+    })
+}
+
 export async function switchAiConversationClient(id: string, clientName: string): Promise<NativeConversationRecord> {
     const payload = await requestApi<unknown>(config.beekeeper_api, `/ai/conversations/${id}/switch-client`, {
         method: 'POST',

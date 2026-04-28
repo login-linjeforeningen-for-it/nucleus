@@ -76,6 +76,7 @@ export function ChatMenu({
                     onClose()
                     ai.openConversation(conversationId)
                 }}
+                onDelete={ai.removeConversation}
                 currentConversationLabel={text.currentConversation}
                 newConversationLabel={text.newConversation}
             />

@@ -1,6 +1,7 @@
 import {
     createAiConversation,
     defaultNativeModelMetrics,
+    deleteAiConversation,
     getAiConversation,
     getAiOwner,
     getBeekeeperWsUrl,
@@ -33,6 +34,7 @@ type AiText = {
     failedWorkspace: string
     failedOpenConversation: string
     failedCreateConversation: string
+    failedDeleteConversation?: string
     failedSwitchModel: string
     modelFailed: string
     socketDisconnected: string
@@ -150,6 +152,23 @@ export default function useAiChat(text: AiText) {
         }
 
         await createConversationForClient(nextClientName)
+    }
+
+    async function removeConversation(conversationId: string) {
+        try {
+            setLoading(true)
+            setError(null)
+            await deleteAiConversation(conversationId)
+            setConversations(prev => prev.filter(item => item.id !== conversationId))
+            if (session?.conversationId === conversationId) {
+                setSession(null)
+            }
+            await refresh()
+        } catch (err) {
+            setError(err instanceof Error ? err.message : text.failedDeleteConversation || text.failedOpenConversation)
+        } finally {
+            setLoading(false)
+        }
     }
 
     async function changeModel(clientName: string) {
@@ -288,6 +307,7 @@ export default function useAiChat(text: AiText) {
         input,
         loading,
         openConversation,
+        removeConversation,
         sendPrompt,
         session,
         setInput,

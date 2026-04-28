@@ -2,7 +2,7 @@ import { HideAction, HiddenToggle, PinAction, PinnedLine } from '@components/men
 import Text from '@components/shared/text'
 import T from '@styles/text'
 import { usePinnedRoutes } from '@utils/menu/pinnedRoutes'
-import { Plus } from 'lucide-react-native'
+import { Plus, Trash2 } from 'lucide-react-native'
 import { JSX, useMemo, useState } from 'react'
 import { Dimensions, Pressable, ScrollView, TouchableOpacity, View } from 'react-native'
 import Swipeable from 'react-native-gesture-handler/ReanimatedSwipeable'
@@ -13,6 +13,7 @@ type Props = {
     theme: Theme
     onSelect: (conversationId: string) => void
     onCreate: () => void
+    onDelete: (conversationId: string) => void
     currentConversationLabel: string
     newConversationLabel: string
 }
@@ -23,6 +24,7 @@ export default function ChatPicker({
     theme,
     onSelect,
     onCreate,
+    onDelete,
     currentConversationLabel,
     newConversationLabel
 }: Props): JSX.Element {
@@ -97,7 +99,16 @@ export default function ChatPicker({
                         <Swipeable
                             key={conversation.id}
                             renderLeftActions={() => <HideAction hidden={hidden} theme={theme} />}
-                            renderRightActions={() => <PinAction pinned={pinned} theme={theme} />}
+                            renderRightActions={() => (
+                                <View style={{ flexDirection: 'row', gap: 8 }}>
+                                    <Pressable onPress={() => onDelete(conversation.id)}>
+                                        <DeleteAction />
+                                    </Pressable>
+                                    <Pressable onPress={() => togglePinnedRoute(conversation.id)}>
+                                        <PinAction pinned={pinned} theme={theme} />
+                                    </Pressable>
+                                </View>
+                            )}
                             leftThreshold={44}
                             rightThreshold={44}
                             overshootLeft={false}
@@ -105,9 +116,6 @@ export default function ChatPicker({
                             onSwipeableOpen={(direction) => {
                                 if (direction === 'left') {
                                     toggleHiddenRoute(conversation.id)
-                                }
-                                if (direction === 'right') {
-                                    togglePinnedRoute(conversation.id)
                                 }
                             }}
                         >
@@ -145,6 +153,26 @@ export default function ChatPicker({
                 onToggle={() => setShowHidden(current => !current)}
                 theme={theme}
             />
+        </View>
+    )
+}
+
+function DeleteAction() {
+    return (
+        <View style={{
+            width: 76,
+            marginVertical: 6,
+            borderRadius: 18,
+            alignItems: 'center',
+            justifyContent: 'center',
+            backgroundColor: 'rgba(255, 76, 76, 0.12)',
+            borderColor: 'rgba(255, 76, 76, 0.24)',
+            borderWidth: 1,
+        }}>
+            <Trash2 color='#ff8b8b' size={18} strokeWidth={2.2} />
+            <Text style={{ ...T.text12, color: '#ff8b8b', marginTop: 4 }}>
+                Delete
+            </Text>
         </View>
     )
 }
