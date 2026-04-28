@@ -1,4 +1,5 @@
 import config from '@/constants'
+import { getResponseErrorMessage, parseResponseBody } from '@utils/http'
 
 function normalizeCourseList(raw: unknown): CourseAsList[] {
     if (!Array.isArray(raw)) {
@@ -57,27 +58,14 @@ function normalizeCourse(raw: unknown): Course {
 // Fetches courses from server, different url based on location, therefore the
 // location parameter to ensure all requests are successful
 export async function getCourses(): Promise<CourseAsList[] | string> {
-    try {
-        const response = await fetch(`${config.studentbee_api}/courses`, {
-            method: 'GET',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-        })
-
-        if (!response.ok) {
-            const data = await response.text()
-            throw new Error(data)
-        }
-
-        return normalizeCourseList(await response.json())
-    } catch (error) {
-        const err = error as Error
-        return err.message
-    }
+    return await fetchStudentbee('/courses', normalizeCourseList)
 }
 
 async function fetchCourse(path: string): Promise<Course | string> {
+    return await fetchStudentbee(path, normalizeCourse)
+}
+
+async function fetchStudentbee<T>(path: string, normalize: (raw: unknown) => T): Promise<T | string> {
     try {
         const response = await fetch(`${config.studentbee_api}${path}`, {
             method: 'GET',
@@ -91,7 +79,7 @@ async function fetchCourse(path: string): Promise<Course | string> {
             throw new Error(data)
         }
 
-        return normalizeCourse(await response.json())
+        return normalize(await response.json())
     } catch (error) {
         const err = error as Error
         return err.message
@@ -130,13 +118,8 @@ export async function updateCourseNotes(id: number, notes: string, token: string
 
         if (!response.ok) {
             const text = await response.text()
-
-            try {
-                const parsed = JSON.parse(text) as { error?: string }
-                return { ok: false, error: parsed.error || 'Failed to update notes' }
-            } catch {
-                return { ok: false, error: text || 'Failed to update notes' }
-            }
+            const parsed = parseResponseBody(text)
+            return { ok: false, error: getResponseErrorMessage(parsed) || 'Failed to update notes' }
         }
 
         return { ok: true }
