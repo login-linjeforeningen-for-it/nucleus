@@ -62,6 +62,17 @@ jobs:
       - name: Generate Android project locally
         run: npx expo prebuild --platform android --clean --no-install
 
+      - name: Configure Android SDK path
+        run: |
+          SDK_PATH="${ANDROID_HOME:-$HOME/Library/Android/sdk}"
+          if [ ! -d "$SDK_PATH" ]; then
+            echo "Android SDK not found at $SDK_PATH"
+            exit 1
+          fi
+          echo "ANDROID_HOME=$SDK_PATH" >> "$GITHUB_ENV"
+          echo "ANDROID_SDK_ROOT=$SDK_PATH" >> "$GITHUB_ENV"
+          printf 'sdk.dir=%s\n' "$SDK_PATH" > android/local.properties
+
       - name: Configure Android release signing
         run: node scripts/ci/configure-android-release-signing.mjs
 

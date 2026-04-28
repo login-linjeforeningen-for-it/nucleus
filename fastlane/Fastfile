@@ -1,6 +1,12 @@
 require 'base64'
+require 'shellwords'
 
 default_platform(:ios)
+
+repo_root = File.expand_path('..', __dir__)
+ios_dir = File.join(repo_root, 'ios')
+android_dir = File.join(repo_root, 'android')
+google_play_key = File.join(repo_root, 'google-play-service-account.json')
 
 platform :ios do
   lane :release do
@@ -11,10 +17,10 @@ platform :ios do
       is_key_content_base64: false
     )
 
-    sh('cd ios && bundle exec pod install')
+    sh("cd #{ios_dir.shellescape} && bundle exec pod install")
 
     build_app(
-      workspace: 'ios/Login.xcworkspace',
+      workspace: File.join(ios_dir, 'Login.xcworkspace'),
       scheme: 'Login',
       configuration: 'Release',
       export_method: 'app-store',
@@ -37,13 +43,13 @@ platform :android do
     gradle(
       task: 'bundle',
       build_type: 'Release',
-      project_dir: 'android'
+      project_dir: android_dir
     )
 
     upload_to_play_store(
-      json_key: 'google-play-service-account.json',
+      json_key: google_play_key,
       package_name: 'com.login.Login',
-      aab: 'android/app/build/outputs/bundle/release/app-release.aab',
+      aab: File.join(android_dir, 'app/build/outputs/bundle/release/app-release.aab'),
       track: ENV.fetch('GOOGLE_PLAY_TRACK', 'production')
     )
   end
