@@ -18,6 +18,7 @@ const iosEnv = [
     'ASC_ISSUER_ID',
     'ASC_PRIVATE_KEY_BASE64',
     'APPLE_TEAM_ID',
+    'MACOS_KEYCHAIN_PASSWORD',
 ]
 
 const androidEnv = [

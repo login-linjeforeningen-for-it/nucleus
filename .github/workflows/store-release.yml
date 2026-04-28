@@ -115,6 +115,7 @@ jobs:
       ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
       ASC_PRIVATE_KEY_BASE64: ${{ secrets.ASC_PRIVATE_KEY_BASE64 }}
       APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+      MACOS_KEYCHAIN_PASSWORD: ${{ secrets.MACOS_KEYCHAIN_PASSWORD }}
       RUNNER_TOOL_CACHE: /Users/tekkom/actions-runner/nucleus/_work/_tool
       CI: '1'
     steps:
@@ -154,6 +155,20 @@ jobs:
           xcodebuild -downloadPlatform iOS -exportPath "$PLATFORM_DMG" -buildVersion 26.2 -architectureVariant universal
           xcodebuild -importPlatform "$PLATFORM_DMG"
           xcodebuild -showsdks | grep -q iphoneos26.2
+
+      - name: Prepare macOS signing keychain
+        run: |
+          LOGIN_KEYCHAIN="$HOME/Library/Keychains/login.keychain-db"
+          if [ ! -f "$LOGIN_KEYCHAIN" ]; then
+            echo "Login keychain not found at $LOGIN_KEYCHAIN"
+            exit 1
+          fi
+
+          security list-keychains -d user -s "$LOGIN_KEYCHAIN" /Library/Keychains/System.keychain
+          security default-keychain -d user -s "$LOGIN_KEYCHAIN"
+          security unlock-keychain -p "$MACOS_KEYCHAIN_PASSWORD" "$LOGIN_KEYCHAIN"
+          security set-keychain-settings -lut 21600 "$LOGIN_KEYCHAIN"
+          security default-keychain -d user
 
       - name: Build and submit iOS directly with Fastlane
         run: bundle exec fastlane ios release
