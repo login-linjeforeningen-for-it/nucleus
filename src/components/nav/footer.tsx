@@ -2,12 +2,12 @@ import { View, TouchableOpacity, Platform } from 'react-native'
 import { useSelector } from 'react-redux'
 import MS from '@styles/menuStyles'
 import { BlurView } from 'expo-blur'
-import NotificationIcon from '@components/notification/notificationIcon'
 import { BottomTabNavigationOptions } from '@react-navigation/bottom-tabs'
 import { NavigationHelpers, ParamListBase, PartialState, Route, TabNavigationState } from '@react-navigation/native'
 import { BottomTabNavigationEventMap } from '@react-navigation/bottom-tabs'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
-import { JSX } from 'react'
+import AsyncStorage from '@react-native-async-storage/async-storage'
+import { JSX, useEffect, useState } from 'react'
 import Svg, { Path } from 'react-native-svg'
 
 type FooterProps = {
@@ -123,6 +123,66 @@ function CrownMenuIcon({ color }: { color: string }): JSX.Element {
             />
         </Svg>
     )
+}
+
+type NotificationIconProps = {
+    position: 'bottom' | 'left'
+}
+
+function NotificationIcon({ position }: NotificationIconProps) {
+    const [display, setDisplay] = useState<boolean>(false)
+    const { lang } = useSelector((state: ReduxState) => state.lang)
+    const { theme } = useSelector((state: ReduxState) => state.theme)
+
+    async function getNotifications() {
+        const unread = await unreadNotifications()
+
+        if (unread) {
+            setDisplay(true)
+        } else {
+            setDisplay(false)
+        }
+    }
+
+    useEffect(() => {
+        let interval: Interval = 0
+
+        interval = setInterval(() => {
+            getNotifications()
+        }, 5000)
+
+        return () => clearInterval(interval)
+    }, [])
+
+    if (!display) return <></>
+
+    return <View style={{
+        backgroundColor: theme.orange,
+        height: 6,
+        width: 6,
+        position: 'absolute',
+        borderRadius: 100,
+        right: position === 'bottom' ? 30 : undefined,
+        left: position === 'left' ? lang ? 88 : 108 : undefined,
+        top: position === 'bottom' ? 21 : 2,
+        zIndex: 10
+    }} />
+}
+
+async function unreadNotifications(): Promise<boolean> {
+    const notifications = await AsyncStorage.getItem('notificationList')
+
+    if (notifications) {
+        const parsed = JSON.parse(notifications)
+
+        for (let i = 0; i < parsed.length; i++) {
+            if (!('read' in parsed[i]) || parsed[i].read == false) {
+                return true
+            }
+        }
+    }
+
+    return false
 }
 
 function resolveMenuTarget(route: Route<string>) {
