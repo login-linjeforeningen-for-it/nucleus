@@ -2,8 +2,8 @@ import Cluster from '@/components/shared/cluster'
 import Text from '@components/shared/text'
 import { NavigationProp } from '@react-navigation/native'
 import T from '@styles/text'
-import { Pin } from 'lucide-react-native'
-import { Image, TouchableOpacity, View } from 'react-native'
+import { Eye, EyeOff, Pin } from 'lucide-react-native'
+import { Image, Pressable, TouchableOpacity, View } from 'react-native'
 import Swipeable from 'react-native-gesture-handler/ReanimatedSwipeable'
 import { useSelector } from 'react-redux'
 
@@ -62,24 +62,36 @@ export function ProfileMenuCard({
     )
 }
 
-export function MenuItem({ item, navigation, subtitle, pinned, onTogglePinned }: {
+export function MenuItem({ item, navigation, subtitle, pinned, hidden, onTogglePinned, onToggleHidden }: {
     item: ItemProps
     navigation: NavigationProp<MenuStackParamList, 'MenuScreen'>
     subtitle: string
     pinned: boolean
+    hidden: boolean
     onTogglePinned: () => void
+    onToggleHidden: () => void
 }) {
     const { theme } = useSelector((state: ReduxState) => state.theme)
 
     return (
         <Swipeable
+            renderLeftActions={() => <HideAction hidden={hidden} theme={theme} />}
             renderRightActions={() => <PinAction pinned={pinned} theme={theme} />}
+            leftThreshold={44}
             rightThreshold={44}
+            overshootLeft={false}
             overshootRight={false}
-            onSwipeableOpen={(direction) => direction === 'right' ? onTogglePinned() : undefined}
+            onSwipeableOpen={(direction) => {
+                if (direction === 'left') {
+                    onToggleHidden()
+                }
+                if (direction === 'right') {
+                    onTogglePinned()
+                }
+            }}
         >
             <TouchableOpacity onPress={() => navigation.navigate(item.nav as any)} activeOpacity={0.88}>
-                <Cluster style={{ paddingHorizontal: 0 }}>
+                <Cluster style={{ paddingHorizontal: 0, opacity: hidden ? 0.54 : 1 }}>
                     <View style={{ flexDirection: 'row', alignItems: 'stretch', paddingHorizontal: 14, paddingVertical: 6, gap: 12 }}>
                         <PinnedLine pinned={pinned} theme={theme} />
                         <View style={{ flex: 1 }}>
@@ -99,6 +111,57 @@ export function MenuItem({ item, navigation, subtitle, pinned, onTogglePinned }:
                 </Cluster>
             </TouchableOpacity>
         </Swipeable>
+    )
+}
+
+export function HiddenToggle({ hiddenCount, showHidden, onToggle, theme }: {
+    hiddenCount: number
+    showHidden: boolean
+    onToggle: () => void
+    theme: Theme
+}) {
+    if (!hiddenCount) return null
+
+    return (
+        <Pressable onPress={onToggle}>
+            <View style={{
+                alignItems: 'center',
+                alignSelf: 'center',
+                backgroundColor: showHidden ? theme.orangeTransparent : 'rgba(255,255,255,0.045)',
+                borderColor: showHidden ? theme.orangeTransparentBorder : 'rgba(255,255,255,0.08)',
+                borderRadius: 16,
+                borderWidth: 1,
+                height: 32,
+                justifyContent: 'center',
+                width: 44,
+            }}>
+                {showHidden
+                    ? <Eye color={theme.orange} size={17} strokeWidth={2.2} />
+                    : <EyeOff color={theme.oppositeTextColor} size={17} strokeWidth={2.2} />}
+            </View>
+        </Pressable>
+    )
+}
+
+export function HideAction({ hidden, theme }: { hidden: boolean, theme: Theme }) {
+    return (
+        <View style={{
+            width: 76,
+            marginVertical: 6,
+            borderRadius: 18,
+            alignItems: 'center',
+            justifyContent: 'center',
+            backgroundColor: 'rgba(255,255,255,0.06)',
+            borderColor: 'rgba(255,255,255,0.08)',
+            borderWidth: 1,
+        }}>
+            {hidden
+                ? <Eye color={theme.orange} size={18} strokeWidth={2.2} />
+                : <EyeOff color={theme.oppositeTextColor} size={18} strokeWidth={2.2} />}
+            <Text style={{ ...T.text12, color: hidden ? theme.orange : theme.oppositeTextColor, marginTop: 4 }}>
+                {hidden ? 'Show' : 'Hide'}
+            </Text>
+        </View>
     )
 }
 

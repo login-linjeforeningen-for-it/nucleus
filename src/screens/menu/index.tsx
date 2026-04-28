@@ -1,6 +1,6 @@
 import { nativeApplicationVersion } from 'expo-application'
 import Feedback from '@/components/menu/feedback'
-import { MenuItem, ProfileMenuCard } from '@/components/menu/root/menuCards'
+import { HiddenToggle, MenuItem, ProfileMenuCard } from '@/components/menu/root/menuCards'
 import LogoNavigation from '@/components/shared/logoNavigation'
 import Space from '@/components/shared/utils'
 import Swipe from '@components/nav/swipe'
@@ -31,10 +31,13 @@ export default function MenuScreen({ navigation }: MenuProps<'MenuScreen'>): JSX
     const dispatch = useDispatch()
     const [feedback, setFeedback] = useState(false)
     const { pinnedRoutes, togglePinnedRoute } = usePinnedRoutes('menu:pinned-routes', defaultPublicPinnedRoutes)
+    const { pinnedRoutes: hiddenRoutes, togglePinnedRoute: toggleHiddenRoute } = usePinnedRoutes('menu:hidden-routes', [])
+    const [showHidden, setShowHidden] = useState(false)
 
     const descriptions = useMemo(() => getMenuDescriptions(lang), [lang])
     const menuItems = useMemo(() => text.setting
         .filter((item) => item.nav !== 'ProfileScreen' && item.nav !== 'QueenbeeScreen')
+        .filter((item) => showHidden || !hiddenRoutes.includes(item.nav))
         .sort((a, b) => {
             const aPinnedIndex = pinnedRoutes.indexOf(a.nav)
             const bPinnedIndex = pinnedRoutes.indexOf(b.nav)
@@ -48,7 +51,14 @@ export default function MenuScreen({ navigation }: MenuProps<'MenuScreen'>): JSX
 
             return a.title.localeCompare(b.title, lang ? 'nb' : 'en')
         })
-    , [lang, pinnedRoutes, text.setting])
+    , [hiddenRoutes, lang, pinnedRoutes, showHidden, text.setting])
+    const hiddenCount = useMemo(
+        () => text.setting
+            .filter((item) => item.nav !== 'ProfileScreen' && item.nav !== 'QueenbeeScreen')
+            .filter((item) => hiddenRoutes.includes(item.nav))
+            .length,
+        [hiddenRoutes, text.setting]
+    )
 
     function toggleFeedback() {
         setFeedback((current) => !current)
@@ -120,10 +130,19 @@ export default function MenuScreen({ navigation }: MenuProps<'MenuScreen'>): JSX
                             navigation={navigation}
                             subtitle={descriptions[item.nav] || ''}
                             pinned={pinnedRoutes.includes(item.nav)}
+                            hidden={hiddenRoutes.includes(item.nav)}
                             onTogglePinned={() => togglePinnedRoute(item.nav)}
+                            onToggleHidden={() => toggleHiddenRoute(item.nav)}
                         />
                     ))}
 
+                    <Space height={12} />
+                    <HiddenToggle
+                        hiddenCount={hiddenCount}
+                        showHidden={showHidden}
+                        onToggle={() => setShowHidden(current => !current)}
+                        theme={theme}
+                    />
                     <Space height={12} />
                     <View style={{ alignItems: 'center' }}>
                         <Feedback

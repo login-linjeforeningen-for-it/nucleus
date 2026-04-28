@@ -1,8 +1,8 @@
-import { PinAction, PinnedLine } from '@components/menu/root/menuCards'
+import { HideAction, HiddenToggle, PinAction, PinnedLine } from '@components/menu/root/menuCards'
 import Text from '@components/shared/text'
 import T from '@styles/text'
 import { usePinnedRoutes } from '@utils/menu/pinnedRoutes'
-import { Eye, EyeOff, Plus } from 'lucide-react-native'
+import { Plus } from 'lucide-react-native'
 import { JSX, useMemo, useState } from 'react'
 import { Dimensions, Pressable, ScrollView, TouchableOpacity, View } from 'react-native'
 import Swipeable from 'react-native-gesture-handler/ReanimatedSwipeable'
@@ -139,47 +139,12 @@ export default function ChatPicker({
                     )
                 })}
             </ScrollView>
-            {hiddenCount ? (
-                <Pressable onPress={() => setShowHidden(current => !current)}>
-                    <View style={{
-                        alignItems: 'center',
-                        alignSelf: 'center',
-                        backgroundColor: showHidden ? theme.orangeTransparent : 'rgba(255,255,255,0.045)',
-                        borderColor: showHidden ? theme.orangeTransparentBorder : 'rgba(255,255,255,0.08)',
-                        borderRadius: 16,
-                        borderWidth: 1,
-                        height: 32,
-                        justifyContent: 'center',
-                        width: 44,
-                    }}>
-                        {showHidden
-                            ? <Eye color={theme.orange} size={17} strokeWidth={2.2} />
-                            : <EyeOff color={theme.oppositeTextColor} size={17} strokeWidth={2.2} />}
-                    </View>
-                </Pressable>
-            ) : null}
-        </View>
-    )
-}
-
-function HideAction({ hidden, theme }: { hidden: boolean, theme: Theme }) {
-    return (
-        <View style={{
-            width: 76,
-            marginVertical: 6,
-            borderRadius: 18,
-            alignItems: 'center',
-            justifyContent: 'center',
-            backgroundColor: 'rgba(255,255,255,0.06)',
-            borderColor: 'rgba(255,255,255,0.08)',
-            borderWidth: 1,
-        }}>
-            {hidden
-                ? <Eye color={theme.orange} size={18} strokeWidth={2.2} />
-                : <EyeOff color={theme.oppositeTextColor} size={18} strokeWidth={2.2} />}
-            <Text style={{ ...T.text12, color: hidden ? theme.orange : theme.oppositeTextColor, marginTop: 4 }}>
-                {hidden ? 'Show' : 'Hide'}
-            </Text>
+            <HiddenToggle
+                hiddenCount={hiddenCount}
+                showHidden={showHidden}
+                onToggle={() => setShowHidden(current => !current)}
+                theme={theme}
+            />
         </View>
     )
 }

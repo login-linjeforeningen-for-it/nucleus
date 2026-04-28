@@ -1,5 +1,5 @@
 import Space from '@/components/shared/utils'
-import { PinAction, PinnedLine } from '@components/menu/root/menuCards'
+import { HideAction, HiddenToggle, PinAction, PinnedLine } from '@components/menu/root/menuCards'
 import HeaderIconButton from '@components/nav/headerIconButton'
 import Text from '@components/shared/text'
 import T from '@styles/text'
@@ -88,6 +88,8 @@ export function NavDropdown({
     const { theme } = useSelector((state: ReduxState) => state.theme)
     const { lang } = useSelector((state: ReduxState) => state.lang)
     const { pinnedRoutes, togglePinnedRoute } = usePinnedRoutes('menu:internal-pinned-routes', defaultInternalPinnedRoutes)
+    const { pinnedRoutes: hiddenRoutes, togglePinnedRoute: toggleHiddenRoute } = usePinnedRoutes('menu:internal-hidden-routes', [])
+    const [showHidden, setShowHidden] = useState(false)
 
     const items = useMemo<InternalMenuItem[]>(() => {
         const internalItems: InternalMenuItem[] = [
@@ -165,6 +167,7 @@ export function NavDropdown({
 
         return internalItems
             .filter(item => item.route !== activeRoute)
+            .filter(item => showHidden || !hiddenRoutes.includes(item.route))
             .sort((first, second) => {
                 const firstPinnedIndex = pinnedRoutes.indexOf(first.route)
                 const secondPinnedIndex = pinnedRoutes.indexOf(second.route)
@@ -186,7 +189,27 @@ export function NavDropdown({
 
                 return first.label.localeCompare(second.label, lang ? 'nb' : 'en')
             })
-    }, [activeRoute, lang, pinnedRoutes])
+    }, [activeRoute, hiddenRoutes, lang, pinnedRoutes, showHidden])
+    const hiddenCount = useMemo(() => {
+        const internalRoutes = new Set<InternalNavRoute>([
+            'AlertsScreen',
+            'AnnouncementsScreen',
+            'QueenbeeScreen',
+            'ContentScreen',
+            'DatabaseScreen',
+            'HoneyScreen',
+            'StatusScreen',
+            'LoadBalancingScreen',
+            'LogsScreen',
+            'NucleusDocumentationScreen',
+            'TrafficScreen',
+            'VulnerabilitiesScreen',
+        ])
+
+        return hiddenRoutes.filter((route): route is InternalNavRoute =>
+            internalRoutes.has(route as InternalNavRoute) && route !== activeRoute
+        ).length
+    }, [activeRoute, hiddenRoutes])
 
     if (!open) {
         return null
@@ -215,52 +238,71 @@ export function NavDropdown({
                 blurMethod='dimezisBlurView'
                 intensity={Platform.OS === 'ios' ? 35 : 24}
             />
-            <ScrollView style={{
-                padding: 12,
-                maxHeight: Dimensions.get('window').height * 0.7,
-            }} contentContainerStyle={{ paddingBottom: 4 }}>
-                {items.map((item) => {
-                    const pinned = pinnedRoutes.includes(item.route)
+            <View style={{ padding: 12, gap: 10 }}>
+                <ScrollView style={{
+                    maxHeight: Dimensions.get('window').height * 0.64,
+                }} contentContainerStyle={{ paddingBottom: 4 }}>
+                    {items.map((item) => {
+                        const pinned = pinnedRoutes.includes(item.route)
+                        const hidden = hiddenRoutes.includes(item.route)
 
-                    return (
-                        <Swipeable
-                            key={item.route}
-                            renderRightActions={() => <PinAction pinned={pinned} theme={theme} />}
-                            rightThreshold={44}
-                            overshootRight={false}
-                            onSwipeableOpen={(direction) => direction === 'right' ? togglePinnedRoute(item.route) : undefined}
-                        >
-                            <Pressable
-                                onPress={() => onNavigate(item.route)}
-                                style={{
-                                    borderRadius: 16,
-                                    backgroundColor: '#ffffff08',
-                                    paddingHorizontal: 14,
-                                    paddingVertical: 10,
-                                    marginBottom: 8
+                        return (
+                            <Swipeable
+                                key={item.route}
+                                renderLeftActions={() => <HideAction hidden={hidden} theme={theme} />}
+                                renderRightActions={() => <PinAction pinned={pinned} theme={theme} />}
+                                leftThreshold={44}
+                                rightThreshold={44}
+                                overshootLeft={false}
+                                overshootRight={false}
+                                onSwipeableOpen={(direction) => {
+                                    if (direction === 'left') {
+                                        toggleHiddenRoute(item.route)
+                                    }
+                                    if (direction === 'right') {
+                                        togglePinnedRoute(item.route)
+                                    }
                                 }}
                             >
-                                <View style={{ flexDirection: 'row', alignItems: 'stretch', gap: 10 }}>
-                                    <PinnedLine pinned={pinned} theme={theme} />
-                                    <View style={{ flex: 1 }}>
-                                        <Text style={{
-                                            ...T.text15,
-                                            color: theme.textColor,
-                                            fontWeight: '700',
-                                        }}>
-                                            {item.label}
-                                        </Text>
-                                        <Space height={2} />
-                                        <Text style={{ ...T.text12, color: theme.oppositeTextColor }}>
-                                            {item.description}
-                                        </Text>
+                                <Pressable
+                                    onPress={() => onNavigate(item.route)}
+                                    style={{
+                                        borderRadius: 16,
+                                        backgroundColor: '#ffffff08',
+                                        paddingHorizontal: 14,
+                                        paddingVertical: 10,
+                                        marginBottom: 8,
+                                        opacity: hidden ? 0.54 : 1,
+                                    }}
+                                >
+                                    <View style={{ flexDirection: 'row', alignItems: 'stretch', gap: 10 }}>
+                                        <PinnedLine pinned={pinned} theme={theme} />
+                                        <View style={{ flex: 1 }}>
+                                            <Text style={{
+                                                ...T.text15,
+                                                color: theme.textColor,
+                                                fontWeight: '700',
+                                            }}>
+                                                {item.label}
+                                            </Text>
+                                            <Space height={2} />
+                                            <Text style={{ ...T.text12, color: theme.oppositeTextColor }}>
+                                                {item.description}
+                                            </Text>
+                                        </View>
                                     </View>
-                                </View>
-                            </Pressable>
-                        </Swipeable>
-                    )
-                })}
-            </ScrollView>
+                                </Pressable>
+                            </Swipeable>
+                        )
+                    })}
+                </ScrollView>
+                <HiddenToggle
+                    hiddenCount={hiddenCount}
+                    showHidden={showHidden}
+                    onToggle={() => setShowHidden(current => !current)}
+                    theme={theme}
+                />
+            </View>
         </View>
     )
 }
