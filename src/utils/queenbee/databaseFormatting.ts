@@ -6,6 +6,14 @@ export function formatBytes(bytes: number) {
     return `${value.toFixed(power === 0 ? 0 : 1)} ${units[power]}`
 }
 
+export function formatAvailableBytes(bytes: number) {
+    if (!Number.isFinite(bytes) || bytes <= 0) {
+        return 'Unavailable'
+    }
+
+    return formatBytes(bytes)
+}
+
 export function formatDuration(seconds: number | null) {
     if (seconds === null || seconds === undefined) {
         return 'No active queries'

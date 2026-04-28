@@ -1,4 +1,5 @@
 import config from '@/constants'
+import { formatAvailableBytes } from './databaseFormatting'
 import { isObject, requestApi } from './request'
 
 export async function getInternalDashboard(): Promise<System> {
@@ -49,7 +50,9 @@ function buildSystem(payload: unknown, dockerPayload: unknown): System {
         ?? 0
 
     return {
-        ram: typeof systemInfo.ram === 'string' ? systemInfo.ram : `${formatBytes(Number(metricsSystem.memory || 0))}`,
+        ram: typeof systemInfo.ram === 'string'
+            ? systemInfo.ram
+            : formatAvailableBytes(Number(metricsSystem.memory || 0)),
         processes: Number(systemInfo.processes ?? metricsSystem.processes ?? 0),
         disk: typeof systemInfo.disk === 'string' ? systemInfo.disk : String(metricsSystem.disk ?? 'Unavailable'),
         load: typeof systemInfo.load === 'string'
@@ -155,17 +158,6 @@ export async function getInternalLogs(params?: {
         config.beekeeper_api,
         suffix ? `/docker/logs?${suffix}` : '/docker/logs'
     )
-}
-
-function formatBytes(bytes: number) {
-    if (!Number.isFinite(bytes) || bytes <= 0) {
-        return 'Unavailable'
-    }
-
-    const units = ['B', 'KB', 'MB', 'GB', 'TB']
-    const power = Math.min(Math.floor(Math.log(bytes) / Math.log(1024)), units.length - 1)
-    const value = bytes / Math.pow(1024, power)
-    return `${value.toFixed(power === 0 ? 0 : 1)} ${units[power]}`
 }
 
 function readNumber(value: unknown) {
