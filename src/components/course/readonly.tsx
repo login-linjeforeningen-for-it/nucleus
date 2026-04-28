@@ -1,19 +1,16 @@
-import Markdown from './markdown'
 import { useEffect, useState } from 'react'
-import { Pressable, TextInput, View } from 'react-native'
+import { View } from 'react-native'
 import { useSelector } from 'react-redux'
 import Space from '@components/shared/utils'
-import Text from '@components/shared/text'
-import T from '@styles/text'
 import { updateCourseNotes } from '@utils/course/course'
+import NotesHeader from './notesHeader'
+import NotesEditor, { Mode } from './notesEditor'
 
 type ReadOnlyProps = {
     courseId: number
     text: string
     onSaved?: (notes: string) => void
 }
-
-type Mode = 'edit' | 'preview'
 
 function normalizeNotes(text: string) {
     return text.replace(/<br><\/br>/g, '\n').replace(/<br>/g, '\n')
@@ -103,211 +100,37 @@ export default function ReadOnly({ courseId, text, onSaved }: ReadOnlyProps) {
                 backgroundColor: '#ffffff08',
                 overflow: 'hidden',
             }}>
-                <View style={{
-                    paddingHorizontal: 16,
-                    paddingTop: 16,
-                    paddingBottom: 14,
-                    borderBottomWidth: 1,
-                    borderBottomColor: '#ffffff10',
-                    backgroundColor: '#ffffff05',
-                }}>
-                    <Text style={{ ...T.text20, color: theme.textColor }}>{title}</Text>
-                    <Space height={4} />
-                    <Text style={{ ...T.text12, color: theme.oppositeTextColor }}>{subtitle}</Text>
-                    <Space height={12} />
-                    <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
-                        <MetaPill label={lang ? 'Status' : 'Status'} value={stats} theme={theme} />
-                        <MetaPill label={lang ? 'Ord' : 'Words'} value={wordCount} theme={theme} />
-                        <MetaPill label='Markdown' value={lang ? 'Støttet' : 'Enabled'} theme={theme} />
-                    </View>
-                </View>
-                <View style={{ padding: 14 }}>
-                    <View style={{
-                        flexDirection: 'row',
-                        justifyContent: 'space-between',
-                        alignItems: 'center',
-                        gap: 10,
-                        flexWrap: 'wrap',
-                    }}>
-                        <View style={{
-                            flexDirection: 'row',
-                            gap: 8,
-                            flexWrap: 'wrap',
-                        }}>
-                            <ModeButton
-                                label={editLabel}
-                                active={mode === 'edit'}
-                                onPress={() => setMode('edit')}
-                                theme={theme}
-                            />
-                            <ModeButton
-                                label={previewLabel}
-                                active={mode === 'preview'}
-                                onPress={() => setMode('preview')}
-                                theme={theme}
-                            />
-                        </View>
-                        <View style={{
-                            flexDirection: 'row',
-                            gap: 8,
-                            flexWrap: 'wrap',
-                            justifyContent: 'flex-end',
-                        }}>
-                            <ActionButton
-                                label={resetLabel}
-                                onPress={handleReset}
-                                disabled={!dirty || saving}
-                                subtle
-                                theme={theme}
-                            />
-                            <ActionButton
-                                label={saveLabel}
-                                onPress={() => handleSave()}
-                                disabled={!canSave}
-                                theme={theme}
-                            />
-                        </View>
-                    </View>
-                    <Space height={14} />
-                    {mode === 'edit' ? (
-                        <TextInput
-                            value={draft}
-                            onChangeText={(value) => {
-                                setDraft(value)
-                                setStatus(null)
-                            }}
-                            multiline
-                            autoCorrect
-                            textAlignVertical='top'
-                            placeholder={emptyText}
-                            placeholderTextColor={theme.oppositeTextColor}
-                            style={{
-                                minHeight: 280,
-                                borderRadius: 20,
-                                borderWidth: 1,
-                                borderColor: '#ffffff14',
-                                backgroundColor: '#ffffff06',
-                                color: theme.textColor,
-                                paddingHorizontal: 16,
-                                paddingVertical: 16,
-                                ...T.text16,
-                            }}
-                        />
-                    ) : (
-                        <View style={{
-                            minHeight: 280,
-                            borderRadius: 20,
-                            borderWidth: 1,
-                            borderColor: '#ffffff14',
-                            backgroundColor: '#ffffff06',
-                            paddingHorizontal: 16,
-                            paddingVertical: 16,
-                        }}>
-                            <Markdown text={trimmedDraft.length ? draft : emptyText} />
-                        </View>
-                    )}
-                    {dirty && (
-                        <>
-                            <Space height={10} />
-                            <Text style={{
-                                ...T.text12,
-                                color: status
-                                    ? status.includes('saved') || status.includes('lagret')
-                                        ? theme.textColor
-                                        : '#ffb3b3'
-                                    : theme.oppositeTextColor,
-                            }}>
-                                {lang ? 'Du har ulagrede endringer.' : 'You have unsaved changes.'}
-                            </Text>
-                        </>
-                    )}
-                </View>
+                <NotesHeader
+                    title={title}
+                    subtitle={subtitle}
+                    stats={stats}
+                    wordCount={wordCount}
+                    lang={lang}
+                    theme={theme}
+                />
+                <NotesEditor
+                    mode={mode}
+                    setMode={setMode}
+                    draft={draft}
+                    setDraft={setDraft}
+                    setStatus={setStatus}
+                    trimmedDraft={trimmedDraft}
+                    dirty={dirty}
+                    saving={saving}
+                    canSave={canSave}
+                    status={status}
+                    emptyText={emptyText}
+                    editLabel={editLabel}
+                    previewLabel={previewLabel}
+                    resetLabel={resetLabel}
+                    saveLabel={saveLabel}
+                    lang={lang}
+                    theme={theme}
+                    onReset={handleReset}
+                    onSave={handleSave}
+                />
             </View>
             <Space height={120} />
         </View>
-    )
-}
-
-function MetaPill({ label, value, theme }: { label: string, value: string, theme: Theme }) {
-    return (
-        <View style={{
-            flexDirection: 'row',
-            alignItems: 'center',
-            gap: 6,
-            borderRadius: 999,
-            borderWidth: 1,
-            borderColor: theme.greyTransparentBorder,
-            backgroundColor: '#ffffff08',
-            paddingHorizontal: 10,
-            paddingVertical: 7,
-        }}>
-            <View style={{
-                width: 6,
-                height: 6,
-                borderRadius: 999,
-                backgroundColor: theme.orange,
-            }} />
-            <Text style={{ ...T.text12, color: theme.oppositeTextColor }}>{label}</Text>
-            <Text style={{ ...T.text12, color: theme.textColor }}>{value}</Text>
-        </View>
-    )
-}
-
-function ModeButton({
-    label,
-    active,
-    onPress,
-    theme,
-}: {
-    label: string
-    active: boolean
-    onPress: () => void
-    theme: Theme
-}) {
-    return (
-        <Pressable
-            onPress={onPress}
-            style={{
-                borderRadius: 999,
-                borderWidth: 1,
-                borderColor: active ? theme.orangeTransparentBorderHighlighted : theme.greyTransparentBorder,
-                backgroundColor: active ? theme.orangeTransparentHighlighted : '#ffffff08',
-                paddingHorizontal: 14,
-                paddingVertical: 9,
-            }}
-        >
-            <Text style={{ ...T.text12, color: theme.textColor }}>{label}</Text>
-        </Pressable>
-    )
-}
-
-function ActionButton({
-    label,
-    onPress,
-    disabled,
-    subtle,
-    theme,
-}: {
-    label: string
-    onPress: () => void
-    disabled?: boolean
-    subtle?: boolean
-    theme: Theme
-}) {
-    return (
-        <Pressable
-            onPress={disabled ? undefined : onPress}
-            style={{
-                opacity: disabled ? 0.45 : 1,
-                borderRadius: 999,
-                borderWidth: 1,
-                borderColor: subtle ? theme.greyTransparentBorder : theme.orangeTransparentBorder,
-                backgroundColor: subtle ? '#ffffff08' : theme.orangeTransparent,
-                paddingHorizontal: 14,
-                paddingVertical: 10,
-            }}
-        >
-            <Text style={{ ...T.text12, color: theme.textColor }}>{label}</Text>
-        </Pressable>
     )
 }
