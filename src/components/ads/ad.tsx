@@ -19,7 +19,6 @@ import {
 } from 'react-native'
 import RenderDescription from './adDescription'
 import { capitalizeFirstLetter } from '@utils/general'
-import { validFileType } from '@utils/format/validation'
 import config from '@/constants'
 
 type ActiveSocialProps = {
@@ -34,6 +33,13 @@ type InfoViewProps = {
 }
 
 const isIOS = Platform.OS === 'ios'
+const imageExtensions = ['.png', '.jpg', '.jpeg', '.gif'] as const
+
+function validFileType(url: string | undefined) {
+    const normalized = url?.toLowerCase()
+    return imageExtensions.some((extension) => normalized?.endsWith(extension))
+}
+
 /**
  * Function for drawing a small image on the left side of the ad cluster
  * @param ad Ad object to display the info for

@@ -6,7 +6,6 @@ import { formatProfileDate } from '@utils/auth/profile'
 import { Check, Copy } from 'lucide-react-native'
 import { copyToClipboard } from '@utils/general/clipboard'
 import { useEffect, useRef, useState } from 'react'
-import formatBoolean from '@utils/profile/formatBoolean'
 
 type ProfileElementprops = {
     profile: Profile | null
@@ -14,6 +13,14 @@ type ProfileElementprops = {
 
 type MainProfileInfoProps = {
     profile: Profile | null
+}
+
+function formatBoolean(value: boolean | null | undefined, lang: boolean) {
+    if (typeof value !== 'boolean') {
+        return lang ? 'Ukjent' : 'Unknown'
+    }
+
+    return value ? (lang ? 'Ja' : 'Yes') : 'No'
 }
 
 /**
