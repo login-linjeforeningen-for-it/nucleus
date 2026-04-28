@@ -28,23 +28,24 @@
 
 import Footer from '@nav/footer'
 import MS from '@styles/menuStyles'
-import T from '@styles/text'
-import NotificationModal from '@components/shared/notificationModal'
 import { Ads, Events, Menu } from './stacks'
+import {
+    NotificationModal,
+    TagInfo,
+    animateFromBottom,
+    animateFromTop,
+    modalTransitionSpec,
+} from './rootModals'
 import * as SystemUI from 'expo-system-ui'
 import * as NavigationBar from 'expo-navigation-bar'
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs'
-import { NavigationContainer, useNavigation } from '@react-navigation/native'
+import { NavigationContainer } from '@react-navigation/native'
 import linking from '@utils/app/linking'
 import NotificationRuntime from '@utils/notification/navigateFromPushNotification'
 import { navigationRef } from '@utils/app/navigationRef'
 import { useSelector } from 'react-redux'
-import { Image, Platform, Text, TouchableOpacity, View } from 'react-native'
-import {
-    StackCardInterpolatedStyle,
-    StackCardInterpolationProps,
-    createStackNavigator
-} from '@react-navigation/stack'
+import { Image, Platform } from 'react-native'
+import { createStackNavigator } from '@react-navigation/stack'
 import { JSX, useEffect } from 'react'
 
 // Defines the navigators
@@ -130,34 +131,6 @@ function Tabs(): JSX.Element {
     )
 }
 
-function TagInfo() {
-    const { theme } = useSelector((state: ReduxState) => state.theme)
-    const { tag } = useSelector((state: ReduxState) => state.event)
-    const navigation = useNavigation()
-
-    return (
-        <TouchableOpacity
-            style={{ flex: 1, justifyContent: 'flex-end' }}
-            onPress={() => navigation.goBack()}
-            activeOpacity={1}
-        >
-            <View
-                style={{
-                    backgroundColor: theme.dark,
-                    borderRadius: 20,
-                    justifyContent: 'center',
-                    alignItems: 'center',
-                }}
-                testID='TagInfo'
-            >
-                <Text style={{ ...T.text20, color: theme.textColor, marginTop: 5 }}>{tag.title}</Text>
-                <Text style={{ ...T.text18, color: theme.textColor, margin: 5, marginHorizontal: 12 }}>{tag.body}</Text>
-            </View>
-            <View style={{ height: 20, backgroundColor: theme.dark }} />
-        </TouchableOpacity>
-    )
-}
-
 /**
  * Declares navigator of the app, wraps the navigator in the container, and
  * declares the InfoModal and the tab navigation.
@@ -166,13 +139,6 @@ function TagInfo() {
  */
 export default function Navigator(): JSX.Element {
     SystemUI.setBackgroundColorAsync('black')
-
-    const config = {
-        animation: 'timing',
-        config: {
-            duration: 100,
-        }
-    } as any
 
     return (
         <NavigationContainer ref={navigationRef} linking={linking}>
@@ -186,7 +152,7 @@ export default function Navigator(): JSX.Element {
                         presentation: 'transparentModal',
                         cardOverlayEnabled: true,
                         cardStyleInterpolator: animateFromBottom,
-                        transitionSpec: { open: config, close: config },
+                        transitionSpec: { open: modalTransitionSpec, close: modalTransitionSpec },
                     }}
                     component={TagInfo}
                 />
@@ -195,57 +161,11 @@ export default function Navigator(): JSX.Element {
                     options={{
                         presentation: 'transparentModal',
                         cardStyleInterpolator: animateFromTop,
-                        transitionSpec: { open: config, close: config },
+                        transitionSpec: { open: modalTransitionSpec, close: modalTransitionSpec },
                     }}
                     component={NotificationModal}
                 />
             </Root.Navigator>
         </NavigationContainer>
     )
-}
-
-// Animation used for the InfoModal
-function animateFromBottom({ current }: StackCardInterpolationProps): StackCardInterpolatedStyle {
-    return ({
-        cardStyle: {
-            transform: [{
-                translateY: current.progress.interpolate({
-                    inputRange: [0, 1],
-                    outputRange: [200, 0],
-                    extrapolate: 'clamp',
-                })
-            }],
-        },
-        overlayStyle: {
-            backgroundColor: 'black',
-            opacity: current.progress.interpolate({
-                inputRange: [0, 1],
-                outputRange: [0, 0.4],
-                extrapolate: 'clamp',
-            })
-        }
-    })
-}
-
-// Animation used for the NotificationModal
-function animateFromTop({ current }: StackCardInterpolationProps): StackCardInterpolatedStyle {
-    return ({
-        cardStyle: {
-            transform: [{
-                translateY: current.progress.interpolate({
-                    inputRange: [0, 1],
-                    outputRange: [-200, 0],
-                    extrapolate: 'clamp',
-                })
-            }],
-        },
-        overlayStyle: {
-            backgroundColor: 'black',
-            opacity: current.progress.interpolate({
-                inputRange: [0, 1],
-                outputRange: [0, 0.4],
-                extrapolate: 'clamp',
-            })
-        }
-    })
 }
