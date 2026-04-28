@@ -75,8 +75,8 @@ export function MenuItem({ item, navigation, subtitle, pinned, hidden, onToggleP
 
     return (
         <Swipeable
-            renderLeftActions={() => <HideAction hidden={hidden} theme={theme} />}
-            renderRightActions={() => <PinAction pinned={pinned} theme={theme} />}
+            renderLeftActions={() => <HideAction hidden={hidden} onPress={onToggleHidden} theme={theme} />}
+            renderRightActions={() => <PinAction pinned={pinned} onPress={onTogglePinned} theme={theme} />}
             leftThreshold={44}
             rightThreshold={44}
             overshootLeft={false}
@@ -143,8 +143,8 @@ export function HiddenToggle({ hiddenCount, showHidden, onToggle, theme }: {
     )
 }
 
-export function HideAction({ hidden, theme }: { hidden: boolean, theme: Theme }) {
-    return (
+export function HideAction({ hidden, onPress, theme }: { hidden: boolean, onPress?: () => void, theme: Theme }) {
+    const content = (
         <View style={{
             width: 76,
             marginVertical: 6,
@@ -163,6 +163,12 @@ export function HideAction({ hidden, theme }: { hidden: boolean, theme: Theme })
             </Text>
         </View>
     )
+
+    if (!onPress) {
+        return content
+    }
+
+    return <Pressable onPress={onPress}>{content}</Pressable>
 }
 
 export function PinnedLine({ pinned, theme }: { pinned: boolean, theme: Theme }) {
@@ -196,8 +202,8 @@ export function PinnedLine({ pinned, theme }: { pinned: boolean, theme: Theme })
     )
 }
 
-export function PinAction({ pinned, theme }: { pinned: boolean, theme: Theme }) {
-    return (
+export function PinAction({ pinned, onPress, theme }: { pinned: boolean, onPress?: () => void, theme: Theme }) {
+    const content = (
         <View style={{
             width: 76,
             marginVertical: 6,
@@ -212,6 +218,12 @@ export function PinAction({ pinned, theme }: { pinned: boolean, theme: Theme }) 
             </Text>
         </View>
     )
+
+    if (!onPress) {
+        return content
+    }
+
+    return <Pressable onPress={onPress}>{content}</Pressable>
 }
 
 function ProfilePlaceholder() {

@@ -98,15 +98,25 @@ export default function ChatPicker({
                     return (
                         <Swipeable
                             key={conversation.id}
-                            renderLeftActions={() => <HideAction hidden={hidden} theme={theme} />}
+                            renderLeftActions={() => (
+                                <HideAction
+                                    hidden={hidden}
+                                    onPress={() => toggleHiddenRoute(conversation.id)}
+                                    theme={theme}
+                                />
+                            )}
                             renderRightActions={() => (
                                 <View style={{ flexDirection: 'row', alignItems: 'stretch' }}>
                                     <Pressable onPress={() => onDelete(conversation.id)}>
                                         <DeleteAction />
                                     </Pressable>
-                                    <Pressable onPress={() => togglePinnedRoute(conversation.id)} style={{ marginLeft: 8 }}>
-                                        <PinAction pinned={pinned} theme={theme} />
-                                    </Pressable>
+                                    <View style={{ marginLeft: 8 }}>
+                                        <PinAction
+                                            pinned={pinned}
+                                            onPress={() => togglePinnedRoute(conversation.id)}
+                                            theme={theme}
+                                        />
+                                    </View>
                                 </View>
                             )}
                             leftThreshold={44}

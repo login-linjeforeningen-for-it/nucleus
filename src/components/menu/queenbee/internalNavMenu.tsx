@@ -249,8 +249,20 @@ export function NavDropdown({
                         return (
                             <Swipeable
                                 key={item.route}
-                                renderLeftActions={() => <HideAction hidden={hidden} theme={theme} />}
-                                renderRightActions={() => <PinAction pinned={pinned} theme={theme} />}
+                                renderLeftActions={() => (
+                                    <HideAction
+                                        hidden={hidden}
+                                        onPress={() => toggleHiddenRoute(item.route)}
+                                        theme={theme}
+                                    />
+                                )}
+                                renderRightActions={() => (
+                                    <PinAction
+                                        pinned={pinned}
+                                        onPress={() => togglePinnedRoute(item.route)}
+                                        theme={theme}
+                                    />
+                                )}
                                 leftThreshold={44}
                                 rightThreshold={44}
                                 overshootLeft={false}
