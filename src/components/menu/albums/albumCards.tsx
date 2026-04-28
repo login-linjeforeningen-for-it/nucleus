@@ -299,58 +299,59 @@ export function AlbumDownloadSheet({
                         })}
                     </ScrollView>
                     <View style={{
-                        flexDirection: 'row',
                         gap: 10,
                         padding: 14,
                         borderTopWidth: 1,
                         borderTopColor: '#ffffff12',
                     }}>
-                        <Pressable
-                            onPress={onClose}
-                            style={({ pressed }) => ({
-                                flex: 0.9,
-                                borderRadius: 18,
-                                paddingVertical: 13,
-                                alignItems: 'center',
-                                backgroundColor: pressed ? '#ffffff12' : '#ffffff08',
-                                borderWidth: 1,
-                                borderColor: '#ffffff14',
-                            })}
-                        >
-                            <Text style={{ ...T.text15, color: theme.textColor }}>
-                                {text.close || 'Close'}
-                            </Text>
-                        </Pressable>
-                        <Pressable
-                            onPress={downloadAll}
-                            disabled={!images.length}
-                            testID='album-download-all'
-                            style={({ pressed }) => ({
-                                flex: 1,
-                                borderRadius: 18,
-                                paddingVertical: 13,
-                                alignItems: 'center',
-                                backgroundColor: images.length
-                                    ? pressed
-                                        ? '#ffffff16'
-                                        : '#ffffff08'
-                                    : '#ffffff06',
-                                borderWidth: 1,
-                                borderColor: images.length ? '#ffffff18' : '#ffffff12',
-                                opacity: images.length ? 1 : 0.55,
-                            })}
-                        >
-                            <Text style={{ ...T.text15, color: theme.textColor }}>
-                                {text.downloadAll || 'Download all'}
-                            </Text>
-                        </Pressable>
+                        <View style={{ flexDirection: 'row', gap: 10 }}>
+                            <Pressable
+                                onPress={onClose}
+                                style={({ pressed }) => ({
+                                    flex: 1,
+                                    borderRadius: 18,
+                                    paddingVertical: 13,
+                                    alignItems: 'center',
+                                    backgroundColor: pressed ? '#ffffff12' : '#ffffff08',
+                                    borderWidth: 1,
+                                    borderColor: '#ffffff14',
+                                })}
+                            >
+                                <Text style={{ ...T.text15, color: theme.textColor }}>
+                                    {text.close || 'Close'}
+                                </Text>
+                            </Pressable>
+                            <Pressable
+                                onPress={downloadAll}
+                                disabled={!images.length}
+                                testID='album-download-all'
+                                style={({ pressed }) => ({
+                                    flex: 1,
+                                    borderRadius: 18,
+                                    paddingVertical: 13,
+                                    alignItems: 'center',
+                                    backgroundColor: images.length
+                                        ? pressed
+                                            ? '#ffffff16'
+                                            : '#ffffff08'
+                                        : '#ffffff06',
+                                    borderWidth: 1,
+                                    borderColor: images.length ? '#ffffff18' : '#ffffff12',
+                                    opacity: images.length ? 1 : 0.55,
+                                })}
+                            >
+                                <Text style={{ ...T.text15, color: theme.textColor }}>
+                                    {text.downloadAll || 'Download all'}
+                                </Text>
+                            </Pressable>
+                        </View>
                         <Pressable
                             onPress={downloadSelected}
                             disabled={!selectedCount}
+                            testID='album-download-selected'
                             style={({ pressed }) => ({
-                                flex: 1.25,
                                 borderRadius: 18,
-                                paddingVertical: 13,
+                                paddingVertical: 14,
                                 alignItems: 'center',
                                 backgroundColor: selectedCount
                                     ? pressed
