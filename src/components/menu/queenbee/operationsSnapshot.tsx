@@ -7,6 +7,7 @@ import {
     getPrimarySiteColor,
     SnapshotPill,
 } from './snapshotPill'
+import { formatBytes } from '@utils/queenbee/databaseFormatting'
 
 type OperationsSnapshotProps = {
     system: System | null
@@ -102,16 +103,4 @@ export default function OperationsSnapshot({
             </View>
         </Cluster>
     )
-}
-
-function formatBytes(bytes: number) {
-    if (!bytes) {
-        return '0 B'
-    }
-
-    const units = ['B', 'KB', 'MB', 'GB', 'TB']
-    const power = Math.min(Math.floor(Math.log(bytes) / Math.log(1024)), units.length - 1)
-    const value = bytes / Math.pow(1024, power)
-
-    return `${value.toFixed(power === 0 ? 0 : 1)} ${units[power]}`
 }

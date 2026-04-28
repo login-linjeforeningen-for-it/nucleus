@@ -19,10 +19,6 @@ type FooterProps = {
 }
 
 export default function Footer({ state, descriptors, navigation }: FooterProps): JSX.Element {
-    return <Content state={state} descriptors={descriptors} navigation={navigation} />
-}
-
-function Content({ state, descriptors, navigation }: FooterProps) {
     const { theme, isDark } = useSelector((state: ReduxState) => state.theme)
     const { login, groups } = useSelector((state: ReduxState) => state.login)
     const navBar = useSafeAreaInsets().bottom

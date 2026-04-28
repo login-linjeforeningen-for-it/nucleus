@@ -3,7 +3,8 @@ import Swipe from '@components/nav/swipe'
 import ProfileInfo from '@/components/profile/profileInfo'
 import ProfileCard from '@/components/profile/profile'
 import ProfileActions from '@/components/profile/details/profileActions'
-import ProfileDetailsToggle from '@/components/profile/details/profileDetailsToggle'
+import Text from '@components/shared/text'
+import { Field } from '@components/profile/field'
 import { clearSession } from '@redux/loginStatus'
 import { clearProfile, setProfile } from '@redux/profile'
 import { fetchProfile } from '@utils/auth/profile'
@@ -11,8 +12,9 @@ import { buildDetailFields } from '@utils/profile/detailFields'
 import { JSX, useEffect, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { ScrollView } from 'react-native-gesture-handler'
-import { Dimensions, View } from 'react-native'
+import { Dimensions, TouchableOpacity, View } from 'react-native'
 import PS from '@styles/profileStyles'
+import T from '@styles/text'
 import Svg, { LinearGradient, Rect, Stop } from 'react-native-svg'
 
 type ScrollProps = {
@@ -168,6 +170,57 @@ function ProfileBackground({
                     fill='url(#profileGradient)'
                 />
             </Svg>
+        </>
+    )
+}
+
+function ProfileDetailsToggle({
+    fields,
+    lang,
+    showDetails,
+    theme,
+    onToggle
+}: {
+    fields: ProfileField[]
+    lang: boolean
+    showDetails: boolean
+    theme: Theme
+    onToggle: () => void
+}) {
+    return (
+        <>
+            <TouchableOpacity
+                onPress={onToggle}
+                style={{ paddingLeft: 24, paddingVertical: 16 }}
+            >
+                <Text style={{ ...T.text15, color: theme.oppositeTextColor, opacity: 0.55 }}>
+                    {showDetails
+                        ? (lang ? 'Skjul detaljer' : 'Hide details')
+                        : (lang ? 'Detaljer' : 'Details')}
+                </Text>
+            </TouchableOpacity>
+            {showDetails ? (
+                <View style={{
+                    borderTopColor: '#ffffff12',
+                    borderTopWidth: 1,
+                    gap: 12,
+                    paddingTop: 12,
+                    paddingHorizontal: 24,
+                    width: '100%'
+                }}>
+                    {fields.map((field) => (
+                        <Field
+                            key={field.title}
+                            title={field.title}
+                            theme={theme}
+                            text={field.text}
+                            copyValue={field.copyValue}
+                            verified={field.verified}
+                            wrapEvery={field.wrapEvery}
+                        />
+                    ))}
+                </View>
+            ) : null}
         </>
     )
 }

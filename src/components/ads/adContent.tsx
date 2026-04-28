@@ -4,7 +4,7 @@ import { SvgUri } from 'react-native-svg'
 import React from 'react'
 import { useSelector } from 'react-redux'
 import { capitalizeFirstLetter } from '@utils/general'
-import { resolveJobBanner, resolveOrganizationLogo } from './specificAdUtils'
+import { resolveAssetUrl } from './specificAdUtils'
 
 type AdClusterLocationProps = {
     ad: GetJobProps | undefined
@@ -24,8 +24,8 @@ export function AdClusterImage({
     bannerUrl?: string | undefined
     compact?: boolean
 }) {
-    const resolvedLogoUrl = resolveOrganizationLogo(logoUrl)
-    const resolvedBannerUrl = resolveJobBanner(bannerUrl)
+    const resolvedLogoUrl = resolveAssetUrl(logoUrl, 'organizations')
+    const resolvedBannerUrl = resolveAssetUrl(bannerUrl, 'jobs')
     const width = compact ? 74 : 90
     const height = compact ? 60 : 60
     const [candidateIndex, setCandidateIndex] = React.useState(0)
