@@ -98,8 +98,11 @@ jobs:
       - name: Test project
         run: npm test -- --runInBand
 
-      - name: Add bundled CocoaPods to PATH
-        run: echo "$PWD/vendor/bundle/ruby/3.3.0/bin" >> "$GITHUB_PATH"
+      - name: Expose bundled Apple build tools
+        run: |
+          bundle binstubs fastlane cocoapods --force --path vendor/bundle/bin
+          echo "$PWD/vendor/bundle/bin" >> "$GITHUB_PATH"
+          echo "$PWD/vendor/bundle/ruby/3.3.0/bin" >> "$GITHUB_PATH"
 
       - name: Build iOS locally
         run: |
