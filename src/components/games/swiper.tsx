@@ -1,25 +1,20 @@
-import T from '@styles/text'
 import { useState } from 'react'
-import { Text, View, Dimensions, StyleProp, TextStyle } from 'react-native'
+import { View, Dimensions } from 'react-native'
 import { Gesture, GestureDetector } from 'react-native-gesture-handler'
-import Animated, {
+import {
     useAnimatedStyle,
     useSharedValue,
     withSpring,
     interpolate,
 } from 'react-native-reanimated'
 import { scheduleOnRN } from 'react-native-worklets'
-import { useSelector } from 'react-redux'
+import { GameCardNumber, GameContent, GameStackCard } from './swiperCards'
 
 type GameListContentProps = {
     game: Question[] | NeverHaveIEver[] | OkRedFlagDealBreaker[]
     mode: number
     school: boolean
     ntnu: boolean
-}
-
-type GameContentProps = {
-    game: Question | NeverHaveIEver | OkRedFlagDealBreaker
 }
 
 type CategorizedGame = Question | NeverHaveIEver | OkRedFlagDealBreaker
@@ -34,7 +29,6 @@ const { height: SCREEN_HEIGHT } = Dimensions.get('window')
 const SWIPE_THRESHOLD = SCREEN_WIDTH * 0.25
 
 export default function Swiper({ game, mode, school, ntnu }: GameListContentProps) {
-    const { theme } = useSelector((state: ReduxState) => state.theme)
     const translateX = useSharedValue(0)
     const totalCards = game.length
     const startX = useSharedValue(0)
@@ -42,25 +36,6 @@ export default function Swiper({ game, mode, school, ntnu }: GameListContentProp
         dataIndex: 0,
         uxIndex: 1
     })
-    const textStyle: StyleProp<TextStyle> = {
-        position: 'absolute',
-        bottom: 15,
-        left: 15,
-        ...T.text20,
-        color: theme.orange,
-        fontWeight: '600'
-    }
-    const cardStyle: StyleProp<TextStyle> = {
-        justifyContent: 'center',
-        alignItems: 'center',
-        backgroundColor: theme.contrast,
-        borderRadius: 20,
-        elevation: 10,
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 10 },
-        shadowOpacity: 0.3,
-        shadowRadius: 10,
-    }
 
     function navigate(direction: 'next' | 'prev') {
         setNav((prev) => {
@@ -341,83 +316,53 @@ export default function Swiper({ game, mode, school, ntnu }: GameListContentProp
     return (
         <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
             {/* Fifth card */}
-            <Animated.View style={[{
-                ...cardStyle,
-                position: 'absolute',
+            <GameStackCard style={{
                 top: SCREEN_HEIGHT * 0.16 + 30,
                 width: SCREEN_WIDTH * 0.7,
                 height: SCREEN_HEIGHT * 0.45,
-            }]} />
+            }} />
 
             {/* Forth card */}
-            <Animated.View style={[{
-                ...cardStyle,
-                position: 'absolute',
+            <GameStackCard style={[{
                 top: SCREEN_HEIGHT * 0.16 + 30,
             }, animatedFourthCardStyle]} />
 
             {/* Third card */}
-            <Animated.View style={[{
-                ...cardStyle,
-                position: 'absolute',
+            <GameStackCard style={[{
                 top: SCREEN_HEIGHT * 0.16 + 20,
             }, animatedThirdCardStyle]} />
 
             {/* Second card (next card) */}
-            <Animated.View style={[{
-                ...cardStyle,
-                position: 'absolute',
+            <GameStackCard style={[{
                 top: SCREEN_HEIGHT * 0.16 + 10,
                 padding: 16,
             }, animatedSecondCardStyle]}>
-                <Text style={textStyle}>
-                    {nav.uxIndex + 1}
-                </Text>
+                <GameCardNumber value={nav.uxIndex + 1} />
                 <GameContent game={game[(nav.dataIndex + 1) % totalCards]} />
-            </Animated.View>
+            </GameStackCard>
 
             {/* Top card (current card) */}
             <GestureDetector gesture={panGesture}>
-                <Animated.View style={[{
-                    ...cardStyle,
+                <GameStackCard style={[{
                     top: SCREEN_HEIGHT * 0.16,
                     height: SCREEN_HEIGHT * 0.45,
                     padding: 16,
                 }, animatedStyle]}>
-                    <Text style={textStyle}>
-                        {nav.uxIndex}
-                    </Text>
+                    <GameCardNumber value={nav.uxIndex} />
                     <GameContent game={game[nav.dataIndex]} />
-                </Animated.View>
+                </GameStackCard>
             </GestureDetector>
 
             {/* Previous (hidden) card */}
-            {nav.dataIndex > 0 && <Animated.View style={[{
-                ...cardStyle,
-                position: 'absolute',
+            {nav.dataIndex > 0 && <GameStackCard style={[{
                 top: SCREEN_HEIGHT * 0.16,
                 width: SCREEN_WIDTH * 0.85,
                 height: SCREEN_HEIGHT * 0.45,
                 padding: 16,
             }, animatedHiddenCardStyle]} >
-                <Text style={{ ...textStyle }}>
-                    {nav.uxIndex - 1}
-                </Text>
+                <GameCardNumber value={nav.uxIndex - 1} />
                 <GameContent game={game[Math.max(0, nav.dataIndex - 1)]} />
-            </Animated.View>}
-        </View>
-    )
-}
-
-function GameContent({ game }: GameContentProps) {
-    const { lang } = useSelector((state: ReduxState) => state.lang)
-    const { theme } = useSelector((state: ReduxState) => state.theme)
-
-    return (
-        <View>
-            <Text style={{ color: theme.textColor, ...T.text20, margin: 8 }}>
-                {lang ? game?.title_no : game?.title_en}
-            </Text>
+            </GameStackCard>}
         </View>
     )
 }
