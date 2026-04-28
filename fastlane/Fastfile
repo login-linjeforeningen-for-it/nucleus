@@ -37,7 +37,7 @@ platform :ios do
 
     identities, identity_status = Open3.capture2('security', 'find-identity', '-v', '-p', 'codesigning', keychain_path)
     UI.user_error!("Unable to inspect code signing identities in #{keychain_path}") unless identity_status.success?
-    signing_identity = identities[/"(Apple Distribution:[^"]+)"/, 1] || 'Apple Distribution'
+    UI.user_error!("No Apple Distribution identity found in #{keychain_path}") unless identities.include?('Apple Distribution:')
 
     get_provisioning_profile(
       api_key: api_key,
@@ -65,7 +65,7 @@ platform :ios do
       targets: ['Login'],
       build_configurations: ['Release'],
       profile_name: profile_name,
-      code_sign_identity: signing_identity
+      code_sign_identity: 'Apple Distribution'
     )
 
     build_app(
@@ -86,6 +86,7 @@ platform :ios do
         "-authenticationKeyID #{ENV.fetch('ASC_KEY_ID').shellescape}",
         "-authenticationKeyIssuerID #{ENV.fetch('ASC_ISSUER_ID').shellescape}",
         "DEVELOPMENT_TEAM=#{ENV.fetch('APPLE_TEAM_ID').shellescape}",
+        'CODE_SIGN_IDENTITY=Apple\\ Distribution',
         "OTHER_CODE_SIGN_FLAGS=#{Shellwords.escape("--keychain #{keychain_path}")}"
       ].join(' ')
     )
