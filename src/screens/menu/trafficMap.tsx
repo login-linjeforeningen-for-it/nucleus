@@ -1,4 +1,5 @@
 import Space from '@/components/shared/utils'
+import Cluster from '@components/shared/cluster'
 import Swipe from '@components/nav/swipe'
 import Text from '@components/shared/text'
 import TopRefreshIndicator from '@components/shared/topRefreshIndicator'
@@ -14,8 +15,7 @@ import {
     buildMapPaths, clampViewBox, getCountryFocusView, haversineKilometers, hydrateCountries,
 } from './traffic/mapUtils'
 import TrafficMapPanel from './traffic/trafficMapPanel'
-import TrafficRecordPreview from './traffic/trafficRecordPreview'
-import { MetricList, SummaryCard, TrafficTabs } from './traffic/shared'
+import { MetricList, StatusBadge, SummaryCard, TrafficTabs } from './traffic/shared'
 
 export default function TrafficMapScreen({ navigation }: MenuProps<'TrafficMapScreen'>) {
     const { theme } = useSelector((state: ReduxState) => state.theme)
@@ -175,6 +175,31 @@ function TrafficSummary({ countryCount, requestCount, status }: { countryCount: 
             <SummaryCard label='Tracked requests' value={String(requestCount)} />
             <SummaryCard label='Status' value={status} />
         </View>
+    )
+}
+
+function TrafficRecordPreview({ record }: { record: TrafficRecord }) {
+    const { theme } = useSelector((state: ReduxState) => state.theme)
+
+    return (
+        <Cluster style={{
+            borderWidth: 1,
+            borderColor: theme.greyTransparentBorder,
+            backgroundColor: theme.greyTransparent,
+        }}>
+            <View style={{ padding: 12 }}>
+                <View style={{ flexDirection: 'row', justifyContent: 'space-between', gap: 10 }}>
+                    <Text style={{ ...T.text15, color: theme.textColor, flex: 1 }} numberOfLines={1}>
+                        {`${record.method} ${record.path}`}
+                    </Text>
+                    <StatusBadge status={record.status} />
+                </View>
+                <Space height={6} />
+                <Text style={{ ...T.text12, color: theme.oppositeTextColor }}>
+                    {`${record.domain} · ${record.request_time}ms`}
+                </Text>
+            </View>
+        </Cluster>
     )
 }
 
