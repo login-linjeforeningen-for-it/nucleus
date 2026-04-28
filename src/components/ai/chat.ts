@@ -3,28 +3,21 @@ import {
     deleteAiConversation,
     getAiConversation,
     getAiOwner,
-    getBeekeeperWsUrl,
     listAiClients,
     listAiConversations,
     selectBestNativeClient,
     switchAiConversationClient,
 } from '@utils/queenbee/api'
-import { parseResponseBody, toRecord } from '@utils/http'
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import {
     NativeChatSession,
     NativeChatOwner,
-    NativeSocketMessage,
     appendPendingPrompt,
-    applyPromptError,
-    applyPromptStarted,
     conversationToSession,
     createPromptRequest,
     createUserMessage,
-    normalizeClientUpdate,
-    updateLastAssistantMessage,
-    upsertNativeClient,
 } from './chatMessages'
+import { useAiSocket } from './useAiSocket'
 
 type AiText = {
     failedWorkspace: string
@@ -44,7 +37,6 @@ export default function useAiChat(text: AiText) {
     const [owner, setOwner] = useState<NativeChatOwner>({})
     const [loading, setLoading] = useState(false)
     const [error, setError] = useState<string | null>(null)
-    const socketRef = useRef<WebSocket | null>(null)
 
     const activeClient = useMemo(() =>
         clients.find(client => client.name === session?.clientName) || null,
@@ -54,32 +46,7 @@ export default function useAiChat(text: AiText) {
         refresh()
     }, [])
 
-    useEffect(() => {
-        const ws = new WebSocket(getBeekeeperWsUrl())
-        socketRef.current = ws
-
-        ws.onmessage = (event) => {
-            try {
-                const message = toRecord(parseResponseBody(event.data))
-                if (!message) {
-                    throw new Error('Invalid socket message')
-                }
-
-                handleSocketMessage(message)
-            } catch (err) {
-                console.log(err)
-            }
-        }
-
-        ws.onerror = () => {
-            setError(text.socketDisconnected)
-        }
-
-        return () => {
-            socketRef.current = null
-            ws.close()
-        }
-    }, [session?.conversationId, text.socketDisconnected])
+    const socketRef = useAiSocket({ session, text, setClients, setError, setSession, refresh })
 
     useEffect(() => {
         if (loading || session) {
@@ -184,38 +151,6 @@ export default function useAiChat(text: AiText) {
             await refresh()
         } catch (err) {
             setError(err instanceof Error ? err.message : text.failedSwitchModel)
-        }
-    }
-
-    function handleSocketMessage(message: NativeSocketMessage) {
-        if (message.type === 'update' && message.client) {
-            const nextClient = normalizeClientUpdate(message.client)
-            setClients(prev => upsertNativeClient(prev, nextClient))
-            return
-        }
-
-        if (!session || session.conversationId !== message.conversationId) {
-            return
-        }
-
-        if (message.type === 'prompt_started') {
-            setSession(applyPromptStarted)
-            return
-        }
-
-        if (message.type === 'prompt_delta') {
-            setSession(prev => updateLastAssistantMessage(prev, message, true))
-            return
-        }
-
-        if (message.type === 'prompt_complete') {
-            setSession(prev => updateLastAssistantMessage(prev, message, false))
-            refresh()
-            return
-        }
-
-        if (message.type === 'prompt_error') {
-            setSession(prev => applyPromptError(prev, message.error || text.modelFailed))
         }
     }
 
