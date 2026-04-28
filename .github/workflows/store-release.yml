@@ -11,8 +11,8 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  release:
-    name: Build and submit iOS + Android
+  android:
+    name: Build and submit Android
     runs-on:
       - self-hosted
       - macOS
@@ -20,10 +20,6 @@ jobs:
       - nucleus-release
     timeout-minutes: 180
     env:
-      ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
-      ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
-      ASC_PRIVATE_KEY_BASE64: ${{ secrets.ASC_PRIVATE_KEY_BASE64 }}
-      APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
       GOOGLE_PLAY_SERVICE_ACCOUNT_JSON_BASE64: ${{ secrets.GOOGLE_PLAY_SERVICE_ACCOUNT_JSON_BASE64 }}
       GOOGLE_PLAY_TRACK: internal
       RUNNER_TOOL_CACHE: /Users/tekkom/actions-runner/nucleus/_work/_tool
@@ -53,19 +49,66 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Preflight direct store release
-        run: node scripts/ci/verify-direct-store-release-env.mjs --strict
+      - name: Preflight Android store release
+        run: node scripts/ci/verify-direct-store-release-env.mjs --strict --platform=android
 
       - name: Test project
         run: npm test -- --runInBand
 
-      - name: Write release credentials
-        run: node scripts/ci/write-direct-store-credentials.mjs
+      - name: Write Android release credentials
+        run: node scripts/ci/write-direct-store-credentials.mjs --platform=android
 
       - name: Generate native projects
         run: npx expo prebuild --non-interactive --clean
 
-      - name: Build and submit to Apple and Google
-        run: |
-          bundle exec fastlane ios release
-          bundle exec fastlane android release
+      - name: Build and submit to Google Play internal testing
+        run: bundle exec fastlane android release
+
+  ios:
+    name: Build and submit iOS
+    runs-on:
+      - self-hosted
+      - macOS
+      - tekkommacmini
+      - nucleus-release
+    timeout-minutes: 180
+    env:
+      ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
+      ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
+      ASC_PRIVATE_KEY_BASE64: ${{ secrets.ASC_PRIVATE_KEY_BASE64 }}
+      APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+      RUNNER_TOOL_CACHE: /Users/tekkom/actions-runner/nucleus/_work/_tool
+      CI: '1'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 25.8.1
+          cache: npm
+
+      - name: Setup Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.3'
+          bundler-cache: true
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Preflight iOS store release
+        run: node scripts/ci/verify-direct-store-release-env.mjs --strict --platform=ios
+
+      - name: Test project
+        run: npm test -- --runInBand
+
+      - name: Write iOS release credentials
+        run: node scripts/ci/write-direct-store-credentials.mjs --platform=ios
+
+      - name: Generate native projects
+        run: npx expo prebuild --non-interactive --clean
+
+      - name: Build and submit to TestFlight
+        run: bundle exec fastlane ios release

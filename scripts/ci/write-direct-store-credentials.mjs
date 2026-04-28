@@ -3,6 +3,9 @@ import { chmodSync, mkdirSync, writeFileSync } from 'node:fs'
 import { homedir } from 'node:os'
 import { join } from 'node:path'
 
+const platformArg = process.argv.find((arg) => arg.startsWith('--platform='))
+const platform = platformArg ? platformArg.split('=')[1] : 'all'
+
 function writeBase64File(envName, path, mode = 0o600) {
     const value = process.env[envName]
     if (!value) {
@@ -12,10 +15,14 @@ function writeBase64File(envName, path, mode = 0o600) {
     chmodSync(path, mode)
 }
 
-writeBase64File('GOOGLE_PLAY_SERVICE_ACCOUNT_JSON_BASE64', 'google-play-service-account.json')
+if (platform === 'all' || platform === 'android') {
+    writeBase64File('GOOGLE_PLAY_SERVICE_ACCOUNT_JSON_BASE64', 'google-play-service-account.json')
+}
 
-const ascDir = join(homedir(), '.appstoreconnect', 'private_keys')
-mkdirSync(ascDir, { recursive: true })
-writeBase64File('ASC_PRIVATE_KEY_BASE64', join(ascDir, `AuthKey_${process.env.ASC_KEY_ID}.p8`))
+if (platform === 'all' || platform === 'ios') {
+    const ascDir = join(homedir(), '.appstoreconnect', 'private_keys')
+    mkdirSync(ascDir, { recursive: true })
+    writeBase64File('ASC_PRIVATE_KEY_BASE64', join(ascDir, `AuthKey_${process.env.ASC_KEY_ID}.p8`))
+}
 
-console.log('Direct store release credentials written to temporary CI paths.')
+console.log(`Direct store release credentials written to temporary CI paths (platform=${platform}).`)
