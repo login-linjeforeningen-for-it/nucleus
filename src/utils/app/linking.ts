@@ -51,6 +51,7 @@ const linking: LinkingOptions<RootStackParamList> = {
                             },
                             MusicScreen: 'music',
                             AlbumsScreen: 'albums',
+                            GameScreen: 'games',
                             FundScreen: 'fund',
                             VervScreen: 'verv',
                             PolicyScreen: 'policy',
