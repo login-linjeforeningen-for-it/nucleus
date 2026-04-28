@@ -1,21 +1,21 @@
 import Space from '@/components/shared/utils'
-import Cluster from '@components/shared/cluster'
 import Swipe from '@components/nav/swipe'
 import Text from '@components/shared/text'
 import TopRefreshIndicator from '@components/shared/topRefreshIndicator'
 import GS from '@styles/globalStyles'
 import T from '@styles/text'
-import { countryCentroids } from '@utils/traffic/geo'
 import { getTrafficMetrics, getTrafficRecords } from '@utils/queenbee/api'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { Dimensions, PanResponder, RefreshControl, ScrollView, View } from 'react-native'
 import { useSelector } from 'react-redux'
 import {
-    COUNTRY_EXPIRY_MS, INITIAL_VIEWBOX, NORWAY, POLL_INTERVAL_MS, TrafficCountryPoint, ViewBox,
-    buildMapPaths, clampViewBox, getCountryFocusView, haversineKilometers, hydrateCountries,
+    COUNTRY_EXPIRY_MS, INITIAL_VIEWBOX, POLL_INTERVAL_MS, TrafficCountryPoint, ViewBox,
+    buildMapPaths, clampViewBox, getCountryFocusView, hydrateCountries,
 } from './traffic/mapUtils'
+import { TrafficCountrySummary, TrafficRecordPreview, TrafficSummary } from './traffic/trafficMapCards'
 import TrafficMapPanel from './traffic/trafficMapPanel'
-import { MetricList, StatusBadge, SummaryCard, TrafficTabs } from './traffic/shared'
+import { useTrafficMapState } from './traffic/useTrafficMapState'
+import { MetricList, TrafficTabs } from './traffic/shared'
 
 export default function TrafficMapScreen({ navigation }: MenuProps<'TrafficMapScreen'>) {
     const { theme } = useSelector((state: ReduxState) => state.theme)
@@ -151,68 +151,4 @@ export default function TrafficMapScreen({ navigation }: MenuProps<'TrafficMapSc
         setSelectedCountry(iso)
         setViewBox(getCountryFocusView(coords))
     }
-}
-
-function useTrafficMapState(countries: Record<string, TrafficCountryPoint>, selectedCountry: string, records: TrafficRecord[]) {
-    const countryEntries = useMemo(() => Object.values(countries).sort((a, b) => b.count - a.count), [countries])
-    const selectedPoint = countries[selectedCountry] || null
-    const selectedCoords = countryCentroids[selectedCountry] || null
-    const totalTrackedRequests = countryEntries.reduce((sum, item) => sum + item.count, 0)
-    const selectedRank = countryEntries.findIndex(entry => entry.iso === selectedCountry) + 1
-    const selectedShare = selectedPoint && totalTrackedRequests
-        ? Math.round((selectedPoint.count / totalTrackedRequests) * 100)
-        : 0
-    const selectedRecords = records.filter(record => !selectedCountry || record.country_iso === selectedCountry).slice(0, 6)
-    const strongestCountryCount = countryEntries[0]?.count || 1
-
-    return { countryEntries, selectedCoords, selectedPoint, totalTrackedRequests, selectedRank, selectedShare, selectedRecords, strongestCountryCount }
-}
-
-function TrafficSummary({ countryCount, requestCount, status }: { countryCount: number, requestCount: number, status: string }) {
-    return (
-        <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 10 }}>
-            <SummaryCard label='Active countries' value={String(countryCount)} />
-            <SummaryCard label='Tracked requests' value={String(requestCount)} />
-            <SummaryCard label='Status' value={status} />
-        </View>
-    )
-}
-
-function TrafficRecordPreview({ record }: { record: TrafficRecord }) {
-    const { theme } = useSelector((state: ReduxState) => state.theme)
-
-    return (
-        <Cluster style={{
-            borderWidth: 1,
-            borderColor: theme.greyTransparentBorder,
-            backgroundColor: theme.greyTransparent,
-        }}>
-            <View style={{ padding: 12 }}>
-                <View style={{ flexDirection: 'row', justifyContent: 'space-between', gap: 10 }}>
-                    <Text style={{ ...T.text15, color: theme.textColor, flex: 1 }} numberOfLines={1}>
-                        {`${record.method} ${record.path}`}
-                    </Text>
-                    <StatusBadge status={record.status} />
-                </View>
-                <Space height={6} />
-                <Text style={{ ...T.text12, color: theme.oppositeTextColor }}>
-                    {`${record.domain} · ${record.request_time}ms`}
-                </Text>
-            </View>
-        </Cluster>
-    )
-}
-
-function TrafficCountrySummary({ selectedCountry, mapState }: { selectedCountry: string, mapState: ReturnType<typeof useTrafficMapState> }) {
-    return (
-        <>
-            <Space height={10} />
-            <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 10 }}>
-                <SummaryCard label={`Country · ${selectedCountry}`} value={String(mapState.selectedPoint?.count || 0)} detail='Requests observed' />
-                <SummaryCard label='Live share' value={mapState.selectedShare ? `${mapState.selectedShare}%` : '—'} detail={`Rank ${mapState.selectedRank || '—'}`} />
-                <SummaryCard label='Oslo distance' value={mapState.selectedCoords ? `${haversineKilometers(mapState.selectedCoords, NORWAY)} km` : '—'} />
-            </View>
-            <Space height={10} />
-        </>
-    )
 }
