@@ -1,7 +1,6 @@
 import Cluster from '@/components/shared/cluster'
 import Space from '@/components/shared/utils'
 import { AlbumImageGrid, AlbumPill } from '@/components/menu/albums/albumCards'
-import { formatAlbumDate, formatShortDate } from '@/components/menu/albums/albumDates'
 import Swipe from '@components/nav/swipe'
 import Text from '@components/shared/text'
 import TopRefreshIndicator from '@components/shared/topRefreshIndicator'
@@ -12,6 +11,36 @@ import { BottomTabNavigationProp } from '@react-navigation/bottom-tabs'
 import { JSX, useEffect, useState } from 'react'
 import { Dimensions, RefreshControl, ScrollView, TouchableOpacity, View } from 'react-native'
 import { useSelector } from 'react-redux'
+
+function formatAlbumDate(value?: string | null) {
+    if (!value) {
+        return ''
+    }
+
+    const date = new Date(value)
+    if (Number.isNaN(date.valueOf())) {
+        return ''
+    }
+
+    return `${new Intl.DateTimeFormat('nb-NO', {
+        day: '2-digit',
+        month: 'long',
+        year: 'numeric',
+    }).format(date)} - `
+}
+
+function formatShortDate(value: string) {
+    const date = new Date(value)
+    if (Number.isNaN(date.valueOf())) {
+        return value
+    }
+
+    return new Intl.DateTimeFormat('nb-NO', {
+        day: '2-digit',
+        month: 'short',
+        year: 'numeric',
+    }).format(date)
+}
 
 export default function SpecificAlbumScreen({
     navigation,
