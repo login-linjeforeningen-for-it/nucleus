@@ -24,32 +24,29 @@ export async function fetchAnnouncements(limit = 20): Promise<GetAnnouncementsPr
 export async function fetchAnnouncementRoles(token?: string | null): Promise<BotRole[]> {
     if (!token) return []
 
-    try {
-        const response = await fetch(`${config.tekkom_bot_api}/roles`, {
-            headers: { Authorization: `Bearer ${token}`, btg: 'tekkom-bot' },
-        })
-        if (!response.ok) throw new Error('Failed to fetch announcement roles')
-
-        const data = await response.json()
-        const roles: unknown[] = Array.isArray(data) ? data : Array.isArray(data?.roles) ? data.roles : []
-        return roles.map(normalizeAnnouncementRole).filter((role): role is BotRole => role !== null)
-    } catch {
-        return []
-    }
+    return await fetchBotDirectory('roles', token, normalizeAnnouncementRole)
 }
 
 export async function fetchAnnouncementChannels(token?: string | null): Promise<BotChannel[]> {
     if (!token) return []
 
+    return await fetchBotDirectory('channels', token, normalizeAnnouncementChannel)
+}
+
+async function fetchBotDirectory<T>(
+    key: 'roles' | 'channels',
+    token: string,
+    normalize: (value: unknown) => T | null
+): Promise<T[]> {
     try {
-        const response = await fetch(`${config.tekkom_bot_api}/channels`, {
+        const response = await fetch(`${config.tekkom_bot_api}/${key}`, {
             headers: { Authorization: `Bearer ${token}`, btg: 'tekkom-bot' },
         })
-        if (!response.ok) throw new Error('Failed to fetch announcement channels')
+        if (!response.ok) throw new Error(`Failed to fetch announcement ${key}`)
 
         const data = await response.json()
-        const channels: unknown[] = Array.isArray(data) ? data : Array.isArray(data?.channels) ? data.channels : []
-        return channels.map(normalizeAnnouncementChannel).filter((channel): channel is BotChannel => channel !== null)
+        const values: unknown[] = Array.isArray(data) ? data : Array.isArray(data?.[key]) ? data[key] : []
+        return values.map(normalize).filter((value): value is T => value !== null)
     } catch {
         return []
     }
