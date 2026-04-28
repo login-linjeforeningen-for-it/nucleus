@@ -33,5 +33,13 @@
                 "image": "latest"
             }
         }
+    },
+    "submit": {
+        "production": {
+            "android": {
+                "track": "internal"
+            },
+            "ios": {}
+        }
     }
 }

@@ -37,6 +37,15 @@ if (existsSync('eas.json')) {
     if (eas.build?.production?.distribution !== 'store') {
         failures.push('eas.json build.production.distribution must be "store"')
     }
+    if (!eas.submit?.production) {
+        failures.push('eas.json is missing submit.production')
+    }
+    if (eas.submit?.production && !eas.submit.production.android && !eas.submit.production.ios) {
+        failures.push('eas.json submit.production must configure android or ios')
+    }
+    if (eas.submit?.production?.android?.track !== 'internal') {
+        failures.push('eas.json submit.production.android.track must be "internal"')
+    }
 }
 
 if (strict) {
