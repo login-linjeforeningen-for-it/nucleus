@@ -1,37 +1,16 @@
 import Cluster from '@/components/shared/cluster'
 import Space from '@/components/shared/utils'
-import { AlbumDownloadSheet, AlbumImageGrid, AlbumPill } from '@/components/menu/albums/albumCards'
+import { AlbumDownloadSheet, AlbumImageGrid } from '@/components/menu/albums/albumCards'
+import { AlbumDownloadButton, SpecificAlbumSummary } from '@/components/menu/albums/specificAlbumParts'
 import Swipe from '@components/nav/swipe'
 import Text from '@components/shared/text'
 import TopRefreshIndicator from '@components/shared/topRefreshIndicator'
 import GS from '@styles/globalStyles'
 import T from '@styles/text'
 import { fetchAlbumDetails } from '@utils/fetch'
-import { formatNorwegianDate } from '@utils/general'
-import { BottomTabNavigationProp } from '@react-navigation/bottom-tabs'
 import { JSX, useEffect, useState } from 'react'
-import { X } from 'lucide-react-native'
-import { Dimensions, Image, Platform, Pressable, RefreshControl, ScrollView, TouchableOpacity, View } from 'react-native'
+import { Dimensions, Platform, RefreshControl, ScrollView, View } from 'react-native'
 import { useSelector } from 'react-redux'
-import MS from '@styles/menuStyles'
-
-function formatAlbumDate(value?: string | null) {
-    const formatted = formatNorwegianDate(value, {
-        day: '2-digit',
-        month: 'long',
-        year: 'numeric',
-    })
-
-    return formatted ? `${formatted} - ` : ''
-}
-
-function formatShortDate(value: string) {
-    return formatNorwegianDate(value, {
-        day: '2-digit',
-        month: 'short',
-        year: 'numeric',
-    }, value)
-}
 
 export default function SpecificAlbumScreen({
     navigation,
@@ -117,57 +96,15 @@ export default function SpecificAlbumScreen({
 
                     {album ? (
                         <>
-                            <Cluster>
-                                <View style={{ padding: 12 }}>
-                                    <Text style={{ ...T.text25, color: theme.textColor }}>
-                                        {title}
-                                    </Text>
-                                    <Space height={8} />
-                                    <Text style={{ ...T.text15, color: theme.oppositeTextColor }}>
-                                        {`${formatAlbumDate(album.event?.time_start)}${description}`}
-                                    </Text>
-                                    <Space height={12} />
-                                    <View style={{ flexDirection: 'row', gap: 8, flexWrap: 'wrap' }}>
-                                        <AlbumPill label={String(album.year)} />
-                                        <AlbumPill label={`${album.image_count || album.images?.length || 0} ${text.images}`} />
-                                        <AlbumPill label={`${text.updated} ${formatShortDate(album.updated_at)}`} />
-                                    </View>
-                                    {album.event ? (
-                                        <>
-                                            <Space height={12} />
-                                            <TouchableOpacity
-                                                onPress={() => {
-                                                    const tabNavigation = navigation
-                                                        .getParent<BottomTabNavigationProp<TabBarParamList>>()
-                                                    if (album.event?.id) {
-                                                        tabNavigation?.navigate('EventNav', {
-                                                            screen: 'SpecificEventScreen',
-                                                            params: { eventID: album.event.id },
-                                                        })
-                                                    }
-                                                }}
-                                                activeOpacity={0.88}
-                                            >
-                                                <View style={{
-                                                    borderRadius: 16,
-                                                    borderWidth: 1,
-                                                    borderColor: theme.orangeTransparentBorder,
-                                                    backgroundColor: theme.orangeTransparent,
-                                                    padding: 12,
-                                                }}>
-                                                    <Text style={{ ...T.text12, color: theme.oppositeTextColor }}>
-                                                        {text.event}
-                                                    </Text>
-                                                    <Space height={4} />
-                                                    <Text style={{ ...T.text15, color: theme.textColor }}>
-                                                        {lang ? album.event.name_no : album.event.name_en}
-                                                    </Text>
-                                                </View>
-                                            </TouchableOpacity>
-                                        </>
-                                    ) : null}
-                                </View>
-                            </Cluster>
+                            <SpecificAlbumSummary
+                                album={album}
+                                description={description}
+                                lang={lang}
+                                navigation={navigation}
+                                text={text}
+                                theme={theme}
+                                title={title}
+                            />
 
                             <Space height={10} />
                             <AlbumImageGrid
@@ -180,42 +117,13 @@ export default function SpecificAlbumScreen({
                 </ScrollView>
                 <TopRefreshIndicator refreshing={refreshing} theme={theme} top={112} />
                 {album?.images?.length ? (
-                    <Pressable
-                        accessibilityRole='button'
-                        accessibilityLabel={showDownloadSheet ? text.close : text.downloadImages}
-                        testID='album-download-button'
+                    <AlbumDownloadButton
+                        headerActionTop={headerActionTop}
                         onPress={toggleDownloadSheet}
-                        style={({ pressed }) => ({
-                            position: 'absolute',
-                            right: 18,
-                            top: headerActionTop,
-                            zIndex: 14,
-                            width: 42,
-                            height: 42,
-                            borderRadius: 21,
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            overflow: 'hidden',
-                            borderWidth: 1,
-                            borderColor: showDownloadSheet
-                                ? theme.orangeTransparentBorder
-                                : 'rgba(255,255,255,0.14)',
-                            backgroundColor: showDownloadSheet
-                                ? theme.orangeTransparent
-                                : pressed
-                                    ? 'rgba(255,255,255,0.10)'
-                                    : 'rgba(255,255,255,0.07)',
-                        })}
-                    >
-                        {showDownloadSheet ? (
-                            <X size={24} color={theme.orange} strokeWidth={2.4} />
-                        ) : (
-                            <Image
-                                source={require('@assets/icons/download-orange.png')}
-                                style={MS.multiIcon}
-                            />
-                        )}
-                    </Pressable>
+                        showDownloadSheet={showDownloadSheet}
+                        text={text}
+                        theme={theme}
+                    />
                 ) : null}
                 <AlbumDownloadSheet
                     album={album}
