@@ -23,6 +23,15 @@ platform :ios do
 
     sh("cd #{ios_dir.shellescape} && bundle exec pod install")
 
+    update_code_signing_settings(
+      path: File.join(ios_dir, 'Login.xcodeproj'),
+      use_automatic_signing: true,
+      team_id: ENV.fetch('APPLE_TEAM_ID'),
+      targets: ['Login'],
+      build_configurations: ['Release'],
+      code_sign_identity: 'Apple Distribution'
+    )
+
     build_app(
       workspace: File.join(ios_dir, 'Login.xcworkspace'),
       scheme: 'Login',
