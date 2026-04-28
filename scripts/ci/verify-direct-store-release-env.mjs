@@ -17,8 +17,6 @@ const requiredEnv = [
     'ASC_PRIVATE_KEY_BASE64',
     'APPLE_TEAM_ID',
     'GOOGLE_PLAY_SERVICE_ACCOUNT_JSON_BASE64',
-    'GOOGLE_SERVICES_JSON_BASE64',
-    'GOOGLE_SERVICES_PLIST_BASE64',
 ]
 
 for (const file of requiredFiles) {

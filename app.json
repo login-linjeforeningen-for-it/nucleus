@@ -18,9 +18,6 @@
     },
     "plugins": [
       [
-        "@react-native-firebase/app"
-      ],
-      [
         "expo-calendar",
         {
           "calendarPermission": "Login wants to save events to your calendar."
@@ -49,7 +46,6 @@
       "supportsTablet": true,
       "bundleIdentifier": "com.eirikhanasand.Login",
       "buildNumber": "155",
-      "googleServicesFile": "./GoogleService-Info.plist",
       "associatedDomains": [
         "applinks:login.no"
       ],
@@ -66,7 +62,6 @@
         "backgroundColor": "#000000"
       },
       "package": "com.login.Login",
-      "googleServicesFile": "./google-services.json",
       "versionCode": 108,
       "permissions": [
         "INTERNET",

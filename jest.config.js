@@ -8,13 +8,12 @@ module.exports = {
         '\\.(png|jpg|jpeg|gif|svg)$': 'jest-transform-stub',
     },
     transformIgnorePatterns: [
-        'node_modules/(?!(jest-)?react-native|@react-navigation|@react-native-firebase|@react-native|react-native|expo-calendar|expo-modules-core|expo-status-bar|expo-application|react-native-reanimated|@expo/vector-icons)',
+        'node_modules/(?!(jest-)?react-native|@react-navigation|@react-native|react-native|expo-calendar|expo-modules-core|expo-status-bar|expo-application|react-native-reanimated|@expo/vector-icons)',
     ],
     moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'json', 'node', 'ios.js', 'android.js'],
     moduleNameMapper: {
         '^react-native$': 'react-native',
         '^react-native/(.*)': 'react-native/$1',
-        '^@react-native-firebase/messaging$': '<rootDir>/src/tests/__mocks__/messaging.js',
         '^react-native-gesture-handler$': '<rootDir>/src/tests/__mocks__/react-native-gesture-handler.js',
         '^expo-modules-core$': '<rootDir>/src/tests/__mocks__/expo-modules-core.js',
         '^react-native-reanimated$': '<rootDir>/src/__mocks__/react-native-reanimated.js',

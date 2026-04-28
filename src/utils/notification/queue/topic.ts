@@ -106,7 +106,7 @@
 
 import { Dispatch, UnknownAction } from 'redux'
 import TopicManager from '../topicManager'
-import { setNotificationDidUpdateOnFirebase } from '@redux/notifications'
+import { setNotificationDidUpdateRemotely } from '@redux/notifications'
 
 type topicParams = {
     topicID?: string
@@ -189,7 +189,7 @@ topicParams) {
                     // Check if the result is successful
                     if (response.result) {
                         // Updates Redux if the topic was updated successfully
-                        dispatch(setNotificationDidUpdateOnFirebase({ category: keys[i] }))
+                        dispatch(setNotificationDidUpdateRemotely({ category: keys[i] }))
                     }
                 } catch (error) {
                     console.error('Error processing topic:', error)

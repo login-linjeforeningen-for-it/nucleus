@@ -1,8 +1,7 @@
 -- -- -- -- EXPO -- -- -- --
 Trying to access native module?
-Likely some firebase / messaging code has not been properly commented out.
-Comment out all native dependencies when testing in Expo, and try again.
-Note that these are no longer marked in the code after version 2.2.0.
+Confirm the feature is supported by Expo Go or run a development build. Nucleus
+uses Expo notifications instead of deprecated native service-file configuration.
 
 App crashes in Expo without any feedback?
 Likely there is a type issue, for example you have given a number where you need
@@ -14,11 +13,6 @@ Likely a bug or weakness in your connection line. Safe to ignore as the app
 utalizes caching, and a lack of connection will have little consequence. To
 permanently resolve, set up error handling and display a warning to their user
 letting them know that their connection line is weak.
-
-Missing google files?
-Contact eirikhanasand (TekKom leader) on Discord or in person. He will give you
-the relevant files. (This should be automated so we do not need to handle
-secrets in the future).
 
 App crashes on touch or when doing a specific task in the app?
 Likely a dependency is missing or not imported properly, make sure all

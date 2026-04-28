@@ -1,6 +1,4 @@
-# Create the directory if it doesn't exist
-mkdir -p ./googleServices
+#!/usr/bin/env bash
+set -euo pipefail
 
-# Decode the base64 strings and create the files
-echo $GOOGLE_SERVICES_JSON_BASE64 | base64 --decode > ./googleServices/google-services.json
-echo $GOOGLE_SERVICES_PLIST_BASE64 | base64 --decode > ./googleServices/GoogleService-Info.plist
+echo "No deprecated native service files are required; Nucleus uses Expo notifications."

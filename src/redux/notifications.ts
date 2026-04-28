@@ -161,7 +161,7 @@ export const NotificationSlice = createSlice({
             const category: NotificationCategory = action.payload.category
             state[category] = [!state[category][0], true]
         },
-        setNotificationDidUpdateOnFirebase(state, action) {
+        setNotificationDidUpdateRemotely(state, action) {
             const category: NotificationCategory = action.payload.category
             state[category] = [state[category][0], false]
         }
@@ -172,7 +172,7 @@ export const NotificationSlice = createSlice({
 export const {
     setNotificationStateTrue,
     changeNotificationState,
-    setNotificationDidUpdateOnFirebase
+    setNotificationDidUpdateRemotely
 } = NotificationSlice.actions
 
 // Exports the notification slice

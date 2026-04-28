@@ -9,7 +9,7 @@
 -- -- -- -- PHYSICAL TESTING -- -- -- --
 1. Complete local testing
 2. Increment the version numbers in app.json. For ios its "buildNumber" and for android its "versionCode" and version at the top. First digit for major overhauls. Second digit for larger updates and 3rd digit for small updates.
-3. Comment in all native code blocks (everything firebase / messaging related).
+3. Verify Expo notifications with a physical device.
 
 -- -- -- -- Ios - Local -- -- -- --
 1. Build for ios first using "eas build -p ios --local" (local) or "eas build -p ios --auto-submit" (cloud).
@@ -22,7 +22,7 @@
 2. Go to the Expo Developer dashboard and verify that the build has succeeded.
 3. Download the finished build.
 4. Test the Android build on a physical Android device.
-5. Push the repository to remote with the firebase / messaging code commented out.
+5. Push the repository to remote after physical Android testing.
 
 -- -- -- Android - Local -- -- --
 
@@ -43,7 +43,7 @@
 14. Select the keystore from eas, and fill in the credentials for the keystore
 15. Build the apk. The output is in android/build/output/debug
 16. Install the Android build on a physical Android device.
-17. Push the repository to remote with the firebase / messaging code commented out.
+17. Push the repository to remote after physical Android testing.
 
 
 -- -- -- -- RELEASE -- -- -- --

@@ -8,8 +8,6 @@ const requiredFiles = [
 
 const requiredEnv = [
     'EXPO_TOKEN',
-    'GOOGLE_SERVICES_JSON_BASE64',
-    'GOOGLE_SERVICES_PLIST_BASE64',
 ]
 
 const strict = process.argv.includes('--strict')
