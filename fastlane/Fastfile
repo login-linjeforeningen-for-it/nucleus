@@ -3,6 +3,7 @@ require 'fileutils'
 require 'open3'
 require 'shellwords'
 require 'tmpdir'
+require 'xcodeproj'
 
 default_platform(:ios)
 
@@ -67,6 +68,15 @@ platform :ios do
       profile_name: profile_name,
       code_sign_identity: 'Apple Distribution'
     )
+    project = Xcodeproj::Project.open(File.join(ios_dir, 'Login.xcodeproj'))
+    project.build_configurations.each do |configuration|
+      next unless configuration.name == 'Release'
+
+      configuration.build_settings['CODE_SIGN_IDENTITY'] = 'Apple Distribution'
+      configuration.build_settings['CODE_SIGN_IDENTITY[sdk=iphoneos*]'] = 'Apple Distribution'
+      configuration.build_settings['DEVELOPMENT_TEAM'] = ENV.fetch('APPLE_TEAM_ID')
+    end
+    project.save
 
     build_app(
       workspace: File.join(ios_dir, 'Login.xcworkspace'),
