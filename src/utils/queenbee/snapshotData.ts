@@ -1,3 +1,5 @@
+import { toRecord } from '@utils/http'
+
 export function getDatabaseCount(...sources: unknown[]) {
     const counts = sources
         .flatMap((source) => getDatabaseCountsFromSource(source))
@@ -152,12 +154,6 @@ function findRecords(source: unknown) {
     }
 
     return records
-}
-
-function toRecord(value: unknown): Record<string, unknown> | null {
-    return typeof value === 'object' && value !== null && !Array.isArray(value)
-        ? value as Record<string, unknown>
-        : null
 }
 
 function toArray(value: unknown): unknown[] {

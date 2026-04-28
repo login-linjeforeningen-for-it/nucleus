@@ -30,3 +30,7 @@ export function getResponseErrorMessage(data: unknown) {
 export function isObject(value: unknown): value is Record<string, unknown> {
     return typeof value === 'object' && value !== null
 }
+
+export function toRecord(value: unknown): Record<string, unknown> | null {
+    return isObject(value) && !Array.isArray(value) ? value : null
+}
