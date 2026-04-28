@@ -10,8 +10,10 @@ import { JSX, useEffect, useMemo, useState } from 'react'
 import {
     ActivityIndicator,
     Keyboard,
+    KeyboardEvent,
     Pressable,
-    View
+    View,
+    useWindowDimensions
 } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useSelector } from 'react-redux'
@@ -23,13 +25,14 @@ export default function AiScreen({ navigation }: MenuProps<'AiScreen'>): JSX.Ele
     const { lang } = useSelector((state: ReduxState) => state.lang)
     const text = lang ? require('@text/no.json').ai : require('@text/en.json').ai
     const insets = useSafeAreaInsets()
+    const { height } = useWindowDimensions()
     const [showConversations, setShowConversations] = useState(false)
     const [showModels, setShowModels] = useState(false)
-    const [keyboardHeight, setKeyboardHeight] = useState(0)
+    const [keyboardLift, setKeyboardLift] = useState(0)
     const ai = useAiChat(text)
     const composerBottom = useMemo(
-        () => keyboardHeight > 0 ? keyboardHeight + 12 : 160 + insets.bottom,
-        [insets.bottom, keyboardHeight]
+        () => keyboardLift > 0 ? keyboardLift + 12 : 160 + insets.bottom,
+        [insets.bottom, keyboardLift]
     )
 
     function formatClientSubtitle(client: NativeClient) {
@@ -87,18 +90,26 @@ export default function AiScreen({ navigation }: MenuProps<'AiScreen'>): JSX.Ele
     }, [navigation, showConversations, theme.orange])
 
     useEffect(() => {
-        const showSubscription = Keyboard.addListener('keyboardDidShow', (event) => {
-            setKeyboardHeight(event.endCoordinates.height)
+        function handleKeyboardShow(event: KeyboardEvent) {
+            setKeyboardLift(Math.max(0, height - event.endCoordinates.screenY))
+        }
+
+        const willShowSubscription = Keyboard.addListener('keyboardWillShow', handleKeyboardShow)
+        const showSubscription = Keyboard.addListener('keyboardDidShow', handleKeyboardShow)
+        const willHideSubscription = Keyboard.addListener('keyboardWillHide', () => {
+            setKeyboardLift(0)
         })
         const hideSubscription = Keyboard.addListener('keyboardDidHide', () => {
-            setKeyboardHeight(0)
+            setKeyboardLift(0)
         })
 
         return () => {
+            willShowSubscription.remove()
             showSubscription.remove()
+            willHideSubscription.remove()
             hideSubscription.remove()
         }
-    }, [])
+    }, [height])
 
     return (
         <Swipe left='MenuScreen'>

@@ -33,7 +33,6 @@ export default function AiComposer({ value, onChangeText, onSend, theme, placeho
                 value={value}
                 onChangeText={onChangeText}
                 placeholder={placeholder}
-                autoFocus={autoFocus}
                 autoCorrect={false}
                 returnKeyType='send'
                 onSubmitEditing={() => canSend && onSend()}
