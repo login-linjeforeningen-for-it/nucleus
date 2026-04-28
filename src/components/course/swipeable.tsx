@@ -1,27 +1,27 @@
 import { Dispatch, SetStateAction, useEffect } from 'react'
-import { View, Dimensions, Platform } from 'react-native'
+import { View } from 'react-native'
 import { Gesture, GestureDetector } from 'react-native-gesture-handler'
 import {
-    useAnimatedStyle,
     useSharedValue,
     withSpring,
-    interpolate
 } from 'react-native-reanimated'
 import { scheduleOnRN } from 'react-native-worklets'
 import CourseContent from './content'
 import ReadOnly from './readonly'
-import { CourseStackCard, getCourseCardHeight } from './swipeCards'
+import { CourseStackCard } from './swipeCards'
 import { useCourseSwiperNavigation } from './useCourseSwiperNavigation'
+import {
+    COURSE_CARD_HEIGHT,
+    SCREEN_WIDTH,
+    SWIPE_THRESHOLD,
+    useCourseSwiperStyles,
+} from './useCourseSwiperStyles'
 
 type CourseContentProps = {
     course: Course,
     clicked: number[],
     setClicked: Dispatch<SetStateAction<number[]>>
 }
-
-const { width: SCREEN_WIDTH } = Dimensions.get('window')
-const { height: SCREEN_HEIGHT } = Dimensions.get('window')
-const SWIPE_THRESHOLD = SCREEN_WIDTH * (Platform.OS === 'ios' ? 0.25 : 0.32)
 
 export default function Swiper({ course, clicked, setClicked }: CourseContentProps) {
     const translateX = useSharedValue(0)
@@ -55,6 +55,8 @@ export default function Swiper({ course, clicked, setClicked }: CourseContentPro
         startX.value = 0
     }, [cardID, startX, translateX])
 
+    const styles = useCourseSwiperStyles(translateX)
+
     const panGesture = Gesture.Pan()
         .onBegin(() => {
             startX.value = translateX.value
@@ -76,176 +78,6 @@ export default function Swiper({ course, clicked, setClicked }: CourseContentPro
             }
         })
 
-    // Animated styles for the top card (current card)
-    const animatedStyle = useAnimatedStyle(() => {
-        if (translateX.value < 0) {
-            const translateY = interpolate(
-                translateX.value,
-                [-SCREEN_WIDTH, 0, SCREEN_WIDTH],
-                [10, 0, 10],
-            )
-
-            const width = interpolate(
-                translateX.value,
-                [-SCREEN_WIDTH, 0, SCREEN_WIDTH],
-                [SCREEN_WIDTH * 0.9, SCREEN_WIDTH * 0.95, SCREEN_WIDTH * 0.9],
-            )
-
-            const opacity = interpolate(
-                translateX.value,
-                [-SCREEN_WIDTH * 1.1, -SCREEN_WIDTH * 0.75, 0],
-                [0, 0.1, 1],
-            )
-
-            return {
-                width,
-                opacity,
-                transform: [{ translateY }],
-            }
-        }
-
-        const rotate = `${(translateX.value / SCREEN_WIDTH) * 15}deg`
-        const opacity = interpolate(
-            translateX.value,
-            [0, SCREEN_WIDTH * 0.75, SCREEN_WIDTH * 1.1],
-            [1, 0.1, 0],
-        )
-
-        return {
-            width: SCREEN_WIDTH * 0.95,
-            opacity,
-            transform: [
-                { translateX: translateX.value },
-                { rotate: rotate },
-            ],
-        }
-    })
-
-    // Animated styles for the second card in the stack
-    const animatedSecondCardStyle = useAnimatedStyle(() => {
-        if (translateX.value < 0) {
-            const translateY = interpolate(
-                translateX.value,
-                [-SCREEN_WIDTH, 0, SCREEN_WIDTH],
-                [10, 0, 10],
-            )
-
-            const width = interpolate(
-                translateX.value,
-                [-SCREEN_WIDTH, 0, SCREEN_WIDTH],
-                [SCREEN_WIDTH * 0.85, SCREEN_WIDTH * 0.9, SCREEN_WIDTH * 0.85],
-            )
-
-            return {
-                width,
-                transform: [{ translateY }],
-            }
-        }
-
-        const translateY = interpolate(
-            translateX.value,
-            [SCREEN_HEIGHT * 0.45, 0, SCREEN_HEIGHT * 0.45],
-            [-3.5, 0, -3.5],
-        )
-
-        const width = interpolate(
-            translateX.value,
-            [-SCREEN_WIDTH, 0, SCREEN_WIDTH],
-            [SCREEN_WIDTH * 0.94, SCREEN_WIDTH * 0.9, SCREEN_WIDTH * 0.94],
-        )
-
-        return {
-            width,
-            height: getCourseCardHeight(SCREEN_HEIGHT),
-            transform: [{ translateY }],
-        }
-    })
-
-    // Animated styles for the third card
-    const animatedThirdCardStyle = useAnimatedStyle(() => {
-        if (translateX.value < 0) {
-            const translateY = interpolate(
-                translateX.value,
-                [-SCREEN_WIDTH, 0, SCREEN_WIDTH],
-                [10, 0, 10],
-            )
-
-            const width = interpolate(
-                translateX.value,
-                [-SCREEN_WIDTH, 0, SCREEN_WIDTH],
-                [SCREEN_WIDTH * 0.8, SCREEN_WIDTH * 0.85, SCREEN_WIDTH * 0.8],
-            )
-
-            return {
-                width,
-                transform: [{ translateY }],
-            }
-        }
-
-        const translateY = interpolate(
-            translateX.value,
-            [SCREEN_HEIGHT * 0.45, 0, SCREEN_HEIGHT * 0.45],
-            [-3.5, 0, -3.5],
-        )
-
-        const width = interpolate(
-            translateX.value,
-            [-SCREEN_WIDTH, 0, SCREEN_WIDTH],
-            [SCREEN_WIDTH * 0.9, SCREEN_WIDTH * 0.85, SCREEN_WIDTH * 0.9],
-        )
-
-        return {
-            width,
-            height: getCourseCardHeight(SCREEN_HEIGHT),
-            transform: [{ translateY }],
-        }
-    })
-
-    // Animated styles for the fourth card
-    const animatedFourthCardStyle = useAnimatedStyle(() => {
-        const translateY = interpolate(
-            translateX.value,
-            [-SCREEN_WIDTH, 0, SCREEN_WIDTH],
-            [-3.5, 0, -3.5],
-        )
-
-        const width = interpolate(
-            translateX.value,
-            [-SCREEN_WIDTH, 0, SCREEN_WIDTH],
-            [SCREEN_WIDTH * 0.85, SCREEN_WIDTH * 0.8, SCREEN_WIDTH * 0.85],
-        )
-
-        return {
-            width,
-            height: getCourseCardHeight(SCREEN_HEIGHT),
-            transform: [{ translateY }],
-        }
-    })
-
-    const animatedHiddenCardStyle = useAnimatedStyle(() => {
-        if (translateX.value > 0) {
-            return {}
-        }
-
-        const left = interpolate(
-            translateX.value,
-            [-SCREEN_WIDTH, 0, SCREEN_WIDTH],
-            [SCREEN_WIDTH * 0.125, SCREEN_WIDTH * 2, SCREEN_WIDTH * 0.125],
-        )
-
-        const rotation = interpolate(
-            translateX.value,
-            [-SCREEN_WIDTH, 0, SCREEN_WIDTH],
-            [0, 15, 0],
-        )
-
-        return {
-            width: SCREEN_WIDTH * 0.85,
-            left,
-            transform: [{ rotate: `${rotation + 0.5}deg` }],
-        }
-    })
-
     return (
         <View style={{
             flex: 1,
@@ -258,24 +90,24 @@ export default function Swiper({ course, clicked, setClicked }: CourseContentPro
             {/* Fifth card */}
             <CourseStackCard style={{
                 width: SCREEN_WIDTH * 0.75,
-                height: getCourseCardHeight(SCREEN_HEIGHT),
+                height: COURSE_CARD_HEIGHT,
                 top: 16,
             }} />
 
             {/* Forth card */}
             <CourseStackCard style={[{
                 top: 12,
-            }, animatedFourthCardStyle]} />
+            }, styles.fourthCard]} />
 
             {/* Third card */}
             <CourseStackCard style={[{
                 top: 8,
-            }, animatedThirdCardStyle]} />
+            }, styles.thirdCard]} />
 
             {/* Second card (next card) */}
             <CourseStackCard style={[{
                 top: 4,
-            }, animatedSecondCardStyle]}>
+            }, styles.secondCard]}>
                 <CourseContent
                     course={course}
                     clicked={clicked}
@@ -292,8 +124,8 @@ export default function Swiper({ course, clicked, setClicked }: CourseContentPro
             {/* Top card (current card) */}
             <GestureDetector gesture={panGesture}>
                 <CourseStackCard style={[{
-                    height: getCourseCardHeight(SCREEN_HEIGHT),
-                }, animatedStyle]}>
+                    height: COURSE_CARD_HEIGHT,
+                }, styles.topCard]}>
                     <CourseContent
                         course={course}
                         clicked={clicked}
@@ -309,9 +141,9 @@ export default function Swiper({ course, clicked, setClicked }: CourseContentPro
             {/* Previous (hidden) card */}
             {cardID !== 0 && <CourseStackCard style={[{
                 left: SCREEN_WIDTH * 0.025,
-                height: getCourseCardHeight(SCREEN_HEIGHT),
+                height: COURSE_CARD_HEIGHT,
                 width: SCREEN_WIDTH * 0.95,
-            }, animatedHiddenCardStyle]} >
+            }, styles.hiddenCard]} >
                 <CourseContent
                     course={course}
                     clicked={clicked}
