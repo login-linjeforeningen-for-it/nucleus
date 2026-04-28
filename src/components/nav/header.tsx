@@ -6,7 +6,6 @@
  * so it might be worth rewriting this component/checking if the default header can be used
  */
 import GS from '@styles/globalStyles'
-import GM from '@styles/gameStyles'
 import { getCategories, getHeight } from '@utils/general'
 import { PropsWithChildren, ReactNode, useMemo, useState } from 'react'
 import { InternalNavMenuButton, InternalNavMenuDropdown, InternalNavRoute } from '@components/menu/queenbee/internalNavMenu'
@@ -25,6 +24,36 @@ const HEADER_ACTION_GAP = 24
 const HEADER_MENU_ACTION_GAP = 24
 const HEADER_RIGHT_INSET = 18
 const HEADER_TITLE_GAP = 16
+const GAME_IMAGE_STYLES = StyleSheet.create({
+    terning: {
+        width: 200,
+        height: 200,
+        top: 100,
+        left: '25%',
+        resizeMode: 'contain'
+    },
+    questions: {
+        width: 180,
+        height: 135,
+        top: 55,
+        left: '27%',
+        resizeMode: 'contain'
+    },
+    neverhaveiever: {
+        width: 130,
+        height: 130,
+        top: 57,
+        left: '34%',
+        resizeMode: 'contain'
+    },
+    okredflagdealbreaker: {
+        width: 180,
+        height: 160,
+        top: 85,
+        left: '27.5%',
+        resizeMode: 'contain',
+    }
+})
 
 export default function Header({ options, route, navigation }: HeaderProps): ReactNode {
     const { theme, isDark } = useSelector((state: ReduxState) => state.theme)
@@ -292,10 +321,10 @@ function BlurWrapper(props: PropsWithChildren) {
 
     const gameID = (route.params as any)?.gameID
     const gameImages = [
-        { style: GM.terning, icon: require('@assets/games/terning.png') },
-        { style: GM.questions, icon: require('@assets/games/100questions.png') },
-        { style: GM.neverhaveiever, icon: require('@assets/games/neverhaveiever.png') },
-        { style: GM.okredflagdealbreaker, icon: require('@assets/games/okredflagdealbreaker.png') }
+        { style: GAME_IMAGE_STYLES.terning, icon: require('@assets/games/terning.png') },
+        { style: GAME_IMAGE_STYLES.questions, icon: require('@assets/games/100questions.png') },
+        { style: GAME_IMAGE_STYLES.neverhaveiever, icon: require('@assets/games/neverhaveiever.png') },
+        { style: GAME_IMAGE_STYLES.okredflagdealbreaker, icon: require('@assets/games/okredflagdealbreaker.png') }
     ]
 
     return (
@@ -313,7 +342,7 @@ function BlurWrapper(props: PropsWithChildren) {
                     source={gameImages[gameID + 1].icon}
                 />}
                 {route.name === 'DiceScreen' && <Image
-                    style={GM.terning}
+                    style={GAME_IMAGE_STYLES.terning}
                     source={gameImages[0].icon}
                 />}
                 {props.children}
