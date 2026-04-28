@@ -175,4 +175,35 @@ jobs:
           security find-identity -v -p codesigning "$LOGIN_KEYCHAIN"
 
       - name: Build and submit iOS directly with Fastlane
-        run: bundle exec fastlane ios release
+        run: |
+          RELEASE_ENV="$RUNNER_TEMP/ios-release-env.sh"
+          export RELEASE_ENV
+          trap 'rm -f "$RELEASE_ENV"' EXIT
+          {
+            printf 'export ASC_KEY_ID=%q\n' "$ASC_KEY_ID"
+            printf 'export ASC_ISSUER_ID=%q\n' "$ASC_ISSUER_ID"
+            printf 'export ASC_PRIVATE_KEY_BASE64=%q\n' "$ASC_PRIVATE_KEY_BASE64"
+            printf 'export APPLE_TEAM_ID=%q\n' "$APPLE_TEAM_ID"
+            printf 'export MACOS_KEYCHAIN_PASSWORD=%q\n' "$MACOS_KEYCHAIN_PASSWORD"
+            printf 'export RUNNER_TOOL_CACHE=%q\n' "$RUNNER_TOOL_CACHE"
+            printf 'export CI=%q\n' "$CI"
+            printf 'cd %q\n' "$GITHUB_WORKSPACE"
+            printf 'bundle exec fastlane ios release\n'
+          } > "$RELEASE_ENV"
+          chmod 600 "$RELEASE_ENV"
+          /usr/bin/expect <<'EXPECT'
+          set timeout -1
+          set password $env(MACOS_KEYCHAIN_PASSWORD)
+          set script $env(RELEASE_ENV)
+          spawn ssh -o StrictHostKeyChecking=no -o PreferredAuthentications=password -o PubkeyAuthentication=no tekkom@localhost "bash $script"
+          expect {
+            "password:" {
+              send "$password\r"
+              exp_continue
+            }
+            eof {
+              catch wait result
+              exit [lindex $result 3]
+            }
+          }
+          EXPECT
