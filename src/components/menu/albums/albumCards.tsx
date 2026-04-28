@@ -19,6 +19,7 @@ import { useSelector } from 'react-redux'
 
 type AlbumText = {
     close?: string
+    downloadAll?: string
     downloadImages?: string
     downloadSelected?: string
     noImagesSelected?: string
@@ -171,12 +172,12 @@ export function AlbumDownloadSheet({
         link.remove()
     }
 
-    async function downloadSelected() {
-        if (!album || !selectedImages.length) {
+    async function downloadImages(imagesToDownload: string[]) {
+        if (!album || !imagesToDownload.length) {
             return
         }
 
-        for (const image of selectedImages) {
+        for (const image of imagesToDownload) {
             const uri = `${config.cdn}/albums/${album.id}/${image}`
             if (Platform.OS === 'web') {
                 downloadOnWeb(uri, image)
@@ -184,6 +185,14 @@ export function AlbumDownloadSheet({
                 await Linking.openURL(uri)
             }
         }
+    }
+
+    async function downloadSelected() {
+        await downloadImages(selectedImages)
+    }
+
+    async function downloadAll() {
+        await downloadImages(images)
     }
 
     return (
@@ -299,7 +308,7 @@ export function AlbumDownloadSheet({
                         <Pressable
                             onPress={onClose}
                             style={({ pressed }) => ({
-                                flex: 1,
+                                flex: 0.9,
                                 borderRadius: 18,
                                 paddingVertical: 13,
                                 alignItems: 'center',
@@ -313,10 +322,33 @@ export function AlbumDownloadSheet({
                             </Text>
                         </Pressable>
                         <Pressable
+                            onPress={downloadAll}
+                            disabled={!images.length}
+                            testID='album-download-all'
+                            style={({ pressed }) => ({
+                                flex: 1,
+                                borderRadius: 18,
+                                paddingVertical: 13,
+                                alignItems: 'center',
+                                backgroundColor: images.length
+                                    ? pressed
+                                        ? '#ffffff16'
+                                        : '#ffffff08'
+                                    : '#ffffff06',
+                                borderWidth: 1,
+                                borderColor: images.length ? '#ffffff18' : '#ffffff12',
+                                opacity: images.length ? 1 : 0.55,
+                            })}
+                        >
+                            <Text style={{ ...T.text15, color: theme.textColor }}>
+                                {text.downloadAll || 'Download all'}
+                            </Text>
+                        </Pressable>
+                        <Pressable
                             onPress={downloadSelected}
                             disabled={!selectedCount}
                             style={({ pressed }) => ({
-                                flex: 1.3,
+                                flex: 1.25,
                                 borderRadius: 18,
                                 paddingVertical: 13,
                                 alignItems: 'center',
