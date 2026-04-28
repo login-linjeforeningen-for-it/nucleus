@@ -5,6 +5,16 @@ on:
     branches:
       - main
   workflow_dispatch:
+    inputs:
+      platform:
+        description: Store platform to release
+        required: true
+        default: all
+        type: choice
+        options:
+          - all
+          - android
+          - ios
 
 concurrency:
   group: nucleus-store-release
@@ -13,6 +23,7 @@ concurrency:
 jobs:
   android:
     name: Build locally and submit Android
+    if: github.event_name != 'workflow_dispatch' || github.event.inputs.platform == 'all' || github.event.inputs.platform == 'android'
     runs-on:
       - self-hosted
       - macOS
@@ -92,6 +103,7 @@ jobs:
 
   ios:
     name: Build locally and submit iOS
+    if: github.event_name != 'workflow_dispatch' || github.event.inputs.platform == 'all' || github.event.inputs.platform == 'ios'
     runs-on:
       - self-hosted
       - macOS
