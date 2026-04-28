@@ -138,7 +138,10 @@ jobs:
           if xcodebuild -showsdks | grep -q iphoneos26.2; then
             exit 0
           fi
-          xcodebuild -downloadPlatform iOS -buildVersion 26.2
+          PLATFORM_DMG="$RUNNER_TEMP/iOS-26.2.dmg"
+          xcodebuild -downloadPlatform iOS -exportPath "$PLATFORM_DMG" -buildVersion 26.2 -architectureVariant universal
+          xcodebuild -importPlatform "$PLATFORM_DMG"
+          xcodebuild -showsdks | grep -q iphoneos26.2
 
       - name: Build and submit iOS directly with Fastlane
         run: bundle exec fastlane ios release
