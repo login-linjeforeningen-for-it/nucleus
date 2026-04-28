@@ -1,10 +1,38 @@
 import { useRef, useState } from 'react'
-import { Image, TextInput, TouchableOpacity, View } from 'react-native'
+import { Dimensions, Image, StyleSheet, TextInput, TouchableOpacity, View } from 'react-native'
 import { useSelector } from 'react-redux'
 import TopicManager from '@utils/notification/topicManager'
 import Text from '@components/shared/text'
 import T from '@styles/text'
-import IS from '@styles/internalStyles'
+
+const TOPIC_MANAGER_STYLES = StyleSheet.create({
+    inputText: {
+        minWidth: '80%',
+        height: 35,
+        borderRadius: 20,
+        top: 25,
+        ...T.text15,
+        marginBottom: 25
+    },
+    dropImage: {
+        alignSelf: 'center',
+        height: 80,
+        width: 40,
+        top: -20,
+        left: 0.8
+    },
+    touch: {
+        height: 40,
+        width: 40,
+        right: Dimensions.get('window').width / 8,
+        top: 35,
+        borderRadius: 10
+    },
+    feedback: {
+        alignSelf: 'center',
+        top: 20,
+    }
+})
 
 enum Topic {
     Subscribe = 1,
@@ -58,7 +86,7 @@ export default function ManageTopics() {
     return (
         <View style={{ flexDirection: 'row' }}>
             <View style={{ width: '100%' }}>
-                <TextInput style={{ ...IS.inputText, color: theme.textColor }}
+                <TextInput style={{ ...TOPIC_MANAGER_STYLES.inputText, color: theme.textColor }}
                     ref={textInputRef}
                     placeholder={`Enter topic to ${mode ? 'subscribe to' : 'unsubscribe from'}...`}
                     placeholderTextColor={theme.titleTextColor}
@@ -73,15 +101,15 @@ export default function ManageTopics() {
                     </Text>
                 </TouchableOpacity>
 
-                {display ? <Text style={{ ...IS.feedback, color: result.result ? 'green' : 'red' }}>
+                {display ? <Text style={{ ...TOPIC_MANAGER_STYLES.feedback, color: result.result ? 'green' : 'red' }}>
                     {result.feedback}
                 </Text> : <Text style={{}}> </Text>}
             </View>
             <TouchableOpacity
                 onPress={() => handleAction()}
-                style={{ ...IS.touch, backgroundColor: theme.dark }}
+                style={{ ...TOPIC_MANAGER_STYLES.touch, backgroundColor: theme.dark }}
             >
-                <Image style={IS.dropImage} source={require('@assets/icons/plane-orange.png')} />
+                <Image style={TOPIC_MANAGER_STYLES.dropImage} source={require('@assets/icons/plane-orange.png')} />
             </TouchableOpacity>
         </View>
     )
