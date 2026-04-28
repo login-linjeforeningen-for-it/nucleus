@@ -100,7 +100,8 @@ jobs:
 
       - name: Expose bundled Apple build tools
         run: |
-          bundle binstubs fastlane cocoapods --force --path vendor/bundle/bin
+          bundle config set bin vendor/bundle/bin
+          bundle binstubs fastlane cocoapods --force
           echo "$PWD/vendor/bundle/bin" >> "$GITHUB_PATH"
           echo "$PWD/vendor/bundle/ruby/3.3.0/bin" >> "$GITHUB_PATH"
 
