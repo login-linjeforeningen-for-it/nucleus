@@ -3,7 +3,7 @@ import Cluster from '@/components/shared/cluster'
 import { useSelector } from 'react-redux'
 import { Field } from './field'
 import { formatProfileDate } from '@utils/auth/profile'
-import toField from '@utils/format/toField'
+import { toField } from '@utils/format/profileFields'
 
 type ProfileInfoProps = {
     profile: Profile | null
