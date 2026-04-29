@@ -42,18 +42,26 @@ import VervScreen from '@screens/menu/verv'
 import VulnerabilitiesScreen from '@screens/menu/vulnerabilities'
 import { createStackNavigator } from '@react-navigation/stack'
 import Header from './header'
+import { useSelector } from 'react-redux'
 
 const EventStack = createStackNavigator<EventStackParamList>()
 const AdStack = createStackNavigator<AdStackParamList>()
 const MenuStack = createStackNavigator<MenuStackParamList>()
 
-const screenOptions = {
-    animation: 'none' as const,
-    headerTransparent: true,
-    header: (props: any) => <Header {...props} />,
+function useScreenOptions() {
+    const { theme } = useSelector((state: ReduxState) => state.theme)
+
+    return {
+        animation: 'none' as const,
+        headerTransparent: true,
+        header: (props: any) => <Header {...props} />,
+        cardStyle: { backgroundColor: theme.darker },
+    }
 }
 
 export function Events() {
+    const screenOptions = useScreenOptions()
+
     return (
         <EventStack.Navigator screenOptions={screenOptions}>
             <EventStack.Screen name='EventScreen' component={EventScreen} />
@@ -63,6 +71,8 @@ export function Events() {
 }
 
 export function Ads() {
+    const screenOptions = useScreenOptions()
+
     return (
         <AdStack.Navigator screenOptions={screenOptions}>
             <AdStack.Screen name='AdScreen' component={AdScreen} />
@@ -72,6 +82,8 @@ export function Ads() {
 }
 
 export function Menu() {
+    const screenOptions = useScreenOptions()
+
     return (
         <MenuStack.Navigator screenOptions={screenOptions}>
             <MenuStack.Screen name='MenuScreen' component={MenuScreen} />

@@ -36,6 +36,7 @@ export default function AiScreen({ navigation }: MenuProps<'AiScreen'>): JSX.Ele
         [insets.bottom, keyboardLift]
     )
     const messageBottomInset = keyboardLift > 0 ? 108 : 88
+    const messageBottomOffset = keyboardLift > 0 ? keyboardLift + 72 : 50
 
     function formatClientSubtitle(client: NativeClient) {
         const parts = []
@@ -154,6 +155,7 @@ export default function AiScreen({ navigation }: MenuProps<'AiScreen'>): JSX.Ele
                         theme={theme}
                         isLoggedIn={login}
                         bottomInset={messageBottomInset}
+                        bottomOffset={messageBottomOffset}
                         text={text}
                     />
                     {showModels ? (

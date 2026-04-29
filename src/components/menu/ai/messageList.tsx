@@ -3,7 +3,7 @@ import T from '@styles/text'
 import { copyToClipboard } from '@utils/general/clipboard'
 import { Copy } from 'lucide-react-native'
 import { JSX, useEffect, useRef, useState } from 'react'
-import { Dimensions, Pressable, ScrollView, View } from 'react-native'
+import { Pressable, ScrollView, View } from 'react-native'
 
 type Props = {
     session: {
@@ -13,6 +13,7 @@ type Props = {
     theme: Theme
     isLoggedIn: boolean
     bottomInset: number
+    bottomOffset: number
     text: {
         typing: string
         preparingConversation: string
@@ -22,7 +23,7 @@ type Props = {
     }
 }
 
-export default function AiMessageList({ session, theme, isLoggedIn, bottomInset, text }: Props): JSX.Element {
+export default function AiMessageList({ session, theme, isLoggedIn, bottomInset, bottomOffset, text }: Props): JSX.Element {
     const [copiedMessageId, setCopiedMessageId] = useState<string | null>(null)
     const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
     const scrollRef = useRef<ScrollView | null>(null)
@@ -50,14 +51,11 @@ export default function AiMessageList({ session, theme, isLoggedIn, bottomInset,
     return (
         <ScrollView
             ref={scrollRef}
-            style={{ flex: 1 }}
+            style={{ flex: 1, marginBottom: bottomOffset }}
             showsVerticalScrollIndicator={false}
             contentContainerStyle={{
                 flexGrow: 1,
                 paddingBottom: bottomInset,
-                minHeight: Dimensions.get('window').height * 0.66,
-                maxHeight: Dimensions.get('window').height * 0.66,
-                overflow: 'hidden',
             }}
             keyboardShouldPersistTaps='handled'
         >

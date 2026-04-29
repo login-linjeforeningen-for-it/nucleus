@@ -58,7 +58,7 @@ const Tab = createBottomTabNavigator<TabBarParamList>()
  * @returns Application with navigation
  */
 function Tabs(): JSX.Element {
-    const { isDark, value } = useSelector((state: ReduxState) => state.theme)
+    const { isDark, value, theme } = useSelector((state: ReduxState) => state.theme)
 
     useEffect(() => {
         if (Platform.OS !== 'ios') {
@@ -71,7 +71,10 @@ function Tabs(): JSX.Element {
             // Set initialscreen at to not defaut to top of tab stack
             initialRouteName={'EventNav'}
             backBehavior='history'
-            screenOptions={{ headerShown: false }}
+            screenOptions={{
+                headerShown: false,
+                sceneStyle: { backgroundColor: theme.darker },
+            }}
             // Sets the tab bar component
             tabBar={props => <Footer
                 state={props.state}
@@ -138,12 +141,39 @@ function Tabs(): JSX.Element {
  * @returns Application with navigation
  */
 export default function Navigator(): JSX.Element {
-    SystemUI.setBackgroundColorAsync('black')
+    const { theme, isDark } = useSelector((state: ReduxState) => state.theme)
+
+    useEffect(() => {
+        SystemUI.setBackgroundColorAsync(theme.darker)
+    }, [theme.darker])
 
     return (
-        <NavigationContainer ref={navigationRef} linking={linking}>
+        <NavigationContainer
+            ref={navigationRef}
+            linking={linking}
+            theme={{
+                dark: isDark,
+                colors: {
+                    primary: theme.orange,
+                    background: theme.darker,
+                    card: theme.darker,
+                    text: theme.textColor,
+                    border: theme.greyTransparentBorder,
+                    notification: theme.orange,
+                },
+                fonts: {
+                    regular: { fontFamily: 'System', fontWeight: '400' },
+                    medium: { fontFamily: 'System', fontWeight: '500' },
+                    bold: { fontFamily: 'System', fontWeight: '700' },
+                    heavy: { fontFamily: 'System', fontWeight: '800' },
+                },
+            }}
+        >
             <NotificationRuntime />
-            <Root.Navigator screenOptions={{ headerShown: false }}>
+            <Root.Navigator screenOptions={{
+                headerShown: false,
+                cardStyle: { backgroundColor: theme.darker },
+            }}>
                 <Root.Screen name='Tabs' component={Tabs} />
                 {/* <Root.Screen name="NotificationScreen" component={NotificationScreen as any} /> */}
                 <Root.Screen
