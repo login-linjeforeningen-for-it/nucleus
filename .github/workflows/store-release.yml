@@ -20,10 +20,55 @@ concurrency:
   group: nucleus-store-release
   cancel-in-progress: false
 
+permissions:
+  contents: write
+
 jobs:
+  prepare-release-version:
+    name: Increment native build numbers
+    if: github.event_name != 'push' || !contains(github.event.head_commit.message, '[skip release-bump]')
+    runs-on:
+      - self-hosted
+      - macOS
+      - tekkommacmini
+      - nucleus-release
+    timeout-minutes: 10
+    outputs:
+      release_ref: ${{ steps.commit.outputs.release_ref }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 25.8.1
+
+      - name: Increment iOS and Android build numbers
+        run: node scripts/ci/bump-native-build-numbers.mjs
+
+      - name: Commit and push release build numbers
+        id: commit
+        run: |
+          if git diff --quiet -- app.json; then
+            echo "release_ref=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add app.json
+          git commit -m "chore(release): bump native build numbers [skip release-bump]"
+          git push origin HEAD:${GITHUB_REF_NAME}
+          echo "release_ref=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+
   android:
     name: Build locally and submit Android
-    if: github.event_name != 'workflow_dispatch' || github.event.inputs.platform == 'all' || github.event.inputs.platform == 'android'
+    needs: prepare-release-version
+    if: needs.prepare-release-version.result == 'success' && (github.event_name != 'workflow_dispatch' || github.event.inputs.platform == 'all' || github.event.inputs.platform == 'android')
     runs-on:
       - self-hosted
       - macOS
@@ -42,6 +87,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.prepare-release-version.outputs.release_ref }}
 
       - name: Setup Node
         uses: actions/setup-node@v4
@@ -112,7 +159,8 @@ jobs:
 
   ios:
     name: Build locally and submit iOS
-    if: github.event_name != 'workflow_dispatch' || github.event.inputs.platform == 'all' || github.event.inputs.platform == 'ios'
+    needs: prepare-release-version
+    if: needs.prepare-release-version.result == 'success' && (github.event_name != 'workflow_dispatch' || github.event.inputs.platform == 'all' || github.event.inputs.platform == 'ios')
     runs-on:
       - self-hosted
       - macOS
@@ -130,6 +178,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.prepare-release-version.outputs.release_ref }}
 
       - name: Setup Node
         uses: actions/setup-node@v4
