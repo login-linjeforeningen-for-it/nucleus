@@ -48,7 +48,7 @@ if (!versionMatch) {
 
 const nextIosBuildNumber = currentIosBuildNumber + 1
 const nextAndroidVersionCode = currentAndroidVersionCode + 1
-const nextVersion = `${versionMatch[1]}.${Number(versionMatch[2]) + 1}.0`
+const nextVersion = `${versionMatch[1]}.${versionMatch[2]}.${Number(versionMatch[3]) + 1}`
 
 expo.version = nextVersion
 expo.ios.buildNumber = String(nextIosBuildNumber)
