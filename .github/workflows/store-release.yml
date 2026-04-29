@@ -69,7 +69,12 @@ jobs:
           bundler-cache: true
 
       - name: Install dependencies
-        run: bun install --frozen-lockfile
+        run: |
+          export BUN_INSTALL_CACHE_DIR="$RUNNER_TEMP/bun-install-cache"
+          bun install --frozen-lockfile || {
+            rm -rf "$BUN_INSTALL_CACHE_DIR"
+            bun install --frozen-lockfile
+          }
 
       - name: Preflight direct store release
         run: node scripts/ci/verify-direct-store-release-env.mjs --strict --platform=android
@@ -143,7 +148,12 @@ jobs:
           bundler-cache: true
 
       - name: Install dependencies
-        run: bun install --frozen-lockfile
+        run: |
+          export BUN_INSTALL_CACHE_DIR="$RUNNER_TEMP/bun-install-cache"
+          bun install --frozen-lockfile || {
+            rm -rf "$BUN_INSTALL_CACHE_DIR"
+            bun install --frozen-lockfile
+          }
 
       - name: Preflight direct store release
         run: node scripts/ci/verify-direct-store-release-env.mjs --strict --platform=ios
