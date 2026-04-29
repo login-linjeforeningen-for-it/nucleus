@@ -47,7 +47,11 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 25.8.1
-          cache: npm
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
 
       - name: Setup Java for Android local build
         uses: actions/setup-java@v4
@@ -65,16 +69,16 @@ jobs:
           bundler-cache: true
 
       - name: Install dependencies
-        run: npm ci
+        run: bun install --frozen-lockfile
 
       - name: Preflight direct store release
         run: node scripts/ci/verify-direct-store-release-env.mjs --strict --platform=android
 
       - name: Test project
-        run: npm test -- --runInBand
+        run: bun run test -- --runInBand
 
       - name: Generate Android project locally
-        run: npx expo prebuild --platform android --clean --no-install
+        run: bunx expo prebuild --platform android --clean --no-install
 
       - name: Configure Android SDK path
         run: |
@@ -126,7 +130,11 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 25.8.1
-          cache: npm
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
 
       - name: Setup Ruby for Fastlane and CocoaPods
         uses: ruby/setup-ruby@v1
@@ -135,17 +143,17 @@ jobs:
           bundler-cache: true
 
       - name: Install dependencies
-        run: npm ci
+        run: bun install --frozen-lockfile
 
       - name: Preflight direct store release
         run: node scripts/ci/verify-direct-store-release-env.mjs --strict --platform=ios
 
       - name: Test project
-        run: npm test -- --runInBand
+        run: bun run test -- --runInBand
 
       - name: Generate iOS project locally
         run: |
-          npx expo prebuild --platform ios --clean --no-install
+          bunx expo prebuild --platform ios --clean --no-install
           node scripts/ci/disable-pods-code-signing.mjs
 
       - name: Ensure iOS platform is installed
