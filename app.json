@@ -45,7 +45,7 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.eirikhanasand.Login",
-      "buildNumber": "155",
+      "buildNumber": "156",
       "associatedDomains": [
         "applinks:login.no"
       ],
@@ -62,7 +62,7 @@
         "backgroundColor": "#000000"
       },
       "package": "com.login.Login",
-      "versionCode": 109,
+      "versionCode": 110,
       "permissions": [
         "INTERNET",
         "NOTIFICATIONS",
