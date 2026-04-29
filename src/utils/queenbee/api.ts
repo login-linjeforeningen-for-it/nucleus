@@ -61,17 +61,17 @@ function isServiceNotification(value: unknown): value is NativeServiceNotificati
 
 export async function listProtectedEvents(limit = 25): Promise<GetEventsProps> {
     return await requestApi<GetEventsProps>(
-        config.api,
+        config.workerbee,
         `/events/protected?limit=${limit}&offset=0&order_by=time_start&sort=asc&historical=false`
     )
 }
 
 export async function getProtectedEvent(id: number): Promise<GetEventProps> {
-    return await requestApi<GetEventProps>(config.api, `/events/protected/${id}`)
+    return await requestApi<GetEventProps>(config.workerbee, `/events/protected/${id}`)
 }
 
 export async function updateProtectedEvent(id: number, body: object): Promise<GetEventProps> {
-    return await requestApi<GetEventProps>(config.api, `/events/${id}`, {
+    return await requestApi<GetEventProps>(config.workerbee, `/events/${id}`, {
         method: 'PUT',
         body
     })

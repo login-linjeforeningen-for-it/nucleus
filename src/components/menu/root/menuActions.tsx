@@ -75,12 +75,40 @@ export function PinnedLine({ pinned, theme }: { pinned: boolean, theme: Theme })
     }
 
     return (
-        <View style={{ width: 10, alignSelf: 'stretch', alignItems: 'center', marginTop: 2 }}>
-            <View style={{ width: 3, borderRadius: 99, backgroundColor: theme.orange, opacity: 0.55 }} />
-            <View style={{ height: 14, width: 14, borderRadius: 7, alignItems: 'center', justifyContent: 'center' }}>
-                <Pin color={theme.orange} size={9} strokeWidth={2.4} fill={theme.orange} />
+        <View style={{
+            width: 10,
+            alignSelf: 'stretch',
+            alignItems: 'center',
+            marginTop: 2,
+            marginLeft: -3.2
+        }}>
+            <View style={{
+                width: 3,
+                borderRadius: 99,
+                backgroundColor: theme.orange,
+                opacity: 0.55
+            }} />
+            <View style={{
+                height: 14,
+                width: 14,
+                borderRadius: 7,
+                alignItems: 'center',
+                justifyContent: 'center'
+            }}>
+                <Pin
+                    color={theme.orange}
+                    size={9}
+                    strokeWidth={2.4}
+                    fill={theme.orange}
+                />
             </View>
-            <View style={{ width: 3, flex: 1, borderRadius: 99, backgroundColor: theme.orange, opacity: 0.55 }} />
+            <View style={{
+                width: 3,
+                flex: 1,
+                borderRadius: 99,
+                backgroundColor: theme.orange,
+                opacity: 0.6
+            }} />
         </View>
     )
 }

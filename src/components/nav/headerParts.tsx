@@ -25,7 +25,7 @@ export function HeaderBackButton({ isDark, theme, onPress }: HeaderBackButtonPro
                 overflow: 'hidden',
                 borderWidth: 1,
                 borderColor: theme.greyTransparentBorder,
-                backgroundColor: pressed ? theme.glassButtonPressed : 'transparent',
+                backgroundColor: pressed ? theme.greyTransparent : 'transparent',
                 alignItems: 'center',
                 justifyContent: 'center',
                 shadowColor: theme.greyTransparent,

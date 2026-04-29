@@ -8,6 +8,7 @@ export default function ForceUpdate() {
     const { lang } = useSelector((state: ReduxState) => state.lang)
     const { theme } = useSelector((state: ReduxState) => state.theme)
     const [updateRequired, setUpdateRequired] = useState(false)
+
     const apiUrl = `${config.app_api}/version?version=${nativeApplicationVersion}&lang=${lang}`
     const appUrls = {
         ios: config.app_store,

@@ -72,7 +72,7 @@ export function FilterUI(): JSX.Element {
                                 alignItems: 'center',
                                 justifyContent: 'center',
                                 borderRadius: 19,
-                                backgroundColor: theme.filterResetBackground,
+                                backgroundColor: theme.greyTransparent,
                             }}
                             onPress={() => {
                                 if (isSearchingEvents) {

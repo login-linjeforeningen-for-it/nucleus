@@ -1,6 +1,11 @@
 import Cluster from '@/components/shared/cluster'
 import Space from '@/components/shared/utils'
-import config from '@/constants'
+import {
+    albumImageUri,
+    pauseAlbumImagePrefetch,
+    prioritizeAlbumImages,
+    resumeAlbumImagePrefetch,
+} from '@/utils/albums/imagePrefetch'
 import Text from '@components/shared/text'
 import T from '@styles/text'
 import { Image, Platform, Pressable, TouchableOpacity, View } from 'react-native'
@@ -16,20 +21,27 @@ export function AlbumCard({
     album,
     imageLabel,
     onPress,
+    previewImageCount,
 }: {
     album: GetAlbumProps
     imageLabel: string
     onPress: () => void
+    previewImageCount: number
 }) {
     const { theme } = useSelector((state: ReduxState) => state.theme)
     const { lang } = useSelector((state: ReduxState) => state.lang)
     const title = lang ? album.name_no : album.name_en
     const description = lang ? album.description_no : album.description_en
-    const images = Array.isArray(album.images) ? album.images.slice(0, 3) : []
+    const images = Array.isArray(album.images) ? album.images.slice(0, previewImageCount) : []
+
+    function openAlbum() {
+        prioritizeAlbumImages(album, 0)
+        onPress()
+    }
 
     return (
         <>
-            <TouchableOpacity onPress={onPress} activeOpacity={0.88}>
+            <TouchableOpacity onPress={openAlbum} activeOpacity={0.88}>
                 <Cluster style={{ paddingHorizontal: 0 }}>
                     <View style={{ padding: 12 }}>
                         <View style={{ height: 170, marginBottom: 12 }}>
@@ -65,6 +77,31 @@ export function AlbumImageGrid({
     const { theme } = useSelector((state: ReduxState) => state.theme)
     const images = Array.isArray(album.images) ? album.images : []
     const [selectedImage, setSelectedImage] = useState<string | null>(null)
+    const [focusedImageReady, setFocusedImageReady] = useState(false)
+    const imageUris = images.map((image) => albumImageUri(album.id, image))
+
+    function openImage(uri: string) {
+        pauseAlbumImagePrefetch()
+        setFocusedImageReady(false)
+        setSelectedImage(uri)
+    }
+
+    function changeImage(uri: string) {
+        pauseAlbumImagePrefetch()
+        setFocusedImageReady(false)
+        setSelectedImage(uri)
+    }
+
+    function closeImage() {
+        resumeAlbumImagePrefetch()
+        setSelectedImage(null)
+        setFocusedImageReady(false)
+    }
+
+    function settleFocusedImage() {
+        setFocusedImageReady(true)
+        resumeAlbumImagePrefetch()
+    }
 
     if (!images.length) {
         return (
@@ -79,22 +116,25 @@ export function AlbumImageGrid({
     return (
         <>
             <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 10 }}>
-                {images.map((image, index) => (
+                {(!selectedImage || focusedImageReady) ? images.map((image, index) => (
                     <AlbumGridImage
                         key={image}
                         albumID={album.id}
                         image={image}
                         index={index}
                         title={title}
-                        onOpen={setSelectedImage}
+                        onOpen={openImage}
                         onSelectImage={onSelectImage}
                     />
-                ))}
+                )) : null}
             </View>
             <AlbumImageViewer
                 title={title}
                 imageUri={selectedImage}
-                onClose={() => setSelectedImage(null)}
+                imageUris={imageUris}
+                onChangeImage={changeImage}
+                onClose={closeImage}
+                onImageLoadEnd={settleFocusedImage}
             />
         </>
     )
@@ -117,8 +157,10 @@ function AlbumGridImage({
 }) {
     const { theme } = useSelector((state: ReduxState) => state.theme)
     const longPressHandled = useRef(false)
-    const uri = `${config.cdn}/albums/${albumID}/${image}`
-    const openImage = () => {
+    const uri = albumImageUri(albumID, image)
+    const previewUri = albumImageUri(albumID, image, 'preview')
+
+    function openImage() {
         if (longPressHandled.current) {
             longPressHandled.current = false
             return
@@ -126,7 +168,8 @@ function AlbumGridImage({
 
         onOpen(uri)
     }
-    const selectImage = () => {
+
+    function selectImage() {
         longPressHandled.current = true
         onSelectImage?.(image)
     }
@@ -157,7 +200,7 @@ function AlbumGridImage({
             })}
         >
             <Image
-                source={{ uri, cache: 'force-cache' }}
+                source={{ uri: previewUri, cache: 'force-cache' }}
                 accessibilityLabel={`${title} ${index + 1}`}
                 style={{ width: '100%', height: '100%' }}
             />

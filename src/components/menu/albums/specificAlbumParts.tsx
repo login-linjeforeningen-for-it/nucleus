@@ -1,12 +1,11 @@
 import Cluster from '@/components/shared/cluster'
 import Space from '@/components/shared/utils'
 import Text from '@components/shared/text'
-import MS from '@styles/menuStyles'
 import T from '@styles/text'
 import { formatNorwegianDate } from '@utils/general'
 import { BottomTabNavigationProp } from '@react-navigation/bottom-tabs'
-import { X } from 'lucide-react-native'
-import { Image, Pressable, TouchableOpacity, View } from 'react-native'
+import { Download, X } from 'lucide-react-native'
+import { Pressable, TouchableOpacity, View } from 'react-native'
 import { AlbumPill } from './albumCards'
 
 export function formatAlbumDate(value?: string | null) {
@@ -67,18 +66,20 @@ export function SpecificAlbumSummary({
 }
 
 export function AlbumDownloadButton({
-    headerActionTop,
+    downloading,
     onPress,
     showDownloadSheet,
     text,
     theme,
 }: {
-    headerActionTop: number
+    downloading?: boolean
     onPress: () => void
     showDownloadSheet: boolean
     text: any
     theme: Theme
 }) {
+    const active = showDownloadSheet || downloading
+
     return (
         <Pressable
             accessibilityRole='button'
@@ -87,8 +88,6 @@ export function AlbumDownloadButton({
             onPress={onPress}
             style={({ pressed }) => ({
                 position: 'absolute',
-                right: 18,
-                top: headerActionTop,
                 zIndex: 14,
                 width: 42,
                 height: 42,
@@ -97,16 +96,16 @@ export function AlbumDownloadButton({
                 justifyContent: 'center',
                 overflow: 'hidden',
                 borderWidth: 1,
-                borderColor: showDownloadSheet ? theme.orangeTransparentBorder : 'rgba(255,255,255,0.14)',
-                backgroundColor: showDownloadSheet
+                borderColor: active ? theme.orangeTransparentBorder : theme.greyTransparentBorder,
+                backgroundColor: active
                     ? theme.orangeTransparent
-                    : pressed ? 'rgba(255,255,255,0.10)' : 'rgba(255,255,255,0.07)',
+                    : pressed ? theme.greyTransparent : 'transparent',
             })}
         >
             {showDownloadSheet ? (
                 <X size={24} color={theme.orange} strokeWidth={2.4} />
             ) : (
-                <Image source={require('@assets/icons/download-orange.png')} style={MS.multiIcon} />
+                <Download size={22} color={active ? theme.orange : theme.oppositeTextColor} strokeWidth={2.3} />
             )}
         </Pressable>
     )

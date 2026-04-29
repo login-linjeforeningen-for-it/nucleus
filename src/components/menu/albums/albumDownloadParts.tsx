@@ -1,4 +1,5 @@
 import config from '@/constants'
+import { albumImageUri } from '@/utils/albums/imagePrefetch'
 import Text from '@components/shared/text'
 import T from '@styles/text'
 import { Image, Pressable, ScrollView, View } from 'react-native'
@@ -43,7 +44,7 @@ export function AlbumDownloadGrid({
         >
             {images.map((image, index) => {
                 const selected = selectedImages.includes(image)
-                const uri = `${config.cdn}/albums/${album?.id}/${image}`
+                const uri = album?.id ? albumImageUri(album.id, image, 'preview') : `${config.cdn}/albums/${image}`
 
                 return (
                     <Pressable

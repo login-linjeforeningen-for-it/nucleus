@@ -11,6 +11,7 @@ export function AlbumDownloadSheet({
     album,
     initialSelectedImage,
     onClose,
+    onDownloadingChange,
     text,
     title,
     visible,
@@ -18,6 +19,7 @@ export function AlbumDownloadSheet({
     album: GetAlbumProps | null
     initialSelectedImage?: string | null
     onClose: () => void
+    onDownloadingChange?: (downloading: boolean) => void
     text: AlbumText
     title: string
     visible: boolean
@@ -26,6 +28,7 @@ export function AlbumDownloadSheet({
     const viewport = useWindowDimensions()
     const images = useMemo(() => Array.isArray(album?.images) ? album.images : [], [album?.images])
     const [selectedImages, setSelectedImages] = useState<string[]>(images)
+    const [downloading, setDownloading] = useState(false)
     const selectedCount = selectedImages.length
 
     useEffect(() => {
@@ -53,17 +56,25 @@ export function AlbumDownloadSheet({
     }
 
     async function downloadImages(imagesToDownload: string[]) {
-        if (!album || !imagesToDownload.length) {
+        if (!album || !imagesToDownload.length || downloading) {
             return
         }
 
-        for (const image of imagesToDownload) {
-            const uri = `${config.cdn}/albums/${album.id}/${image}`
-            if (Platform.OS === 'web') {
-                downloadOnWeb(uri, image)
-            } else {
-                await Linking.openURL(uri)
+        setDownloading(true)
+        onDownloadingChange?.(true)
+
+        try {
+            for (const image of imagesToDownload) {
+                const uri = `${config.cdn}/albums/${album.id}/${image}`
+                if (Platform.OS === 'web') {
+                    downloadOnWeb(uri, image)
+                } else {
+                    await Linking.openURL(uri)
+                }
             }
+        } finally {
+            setDownloading(false)
+            onDownloadingChange?.(false)
         }
     }
 

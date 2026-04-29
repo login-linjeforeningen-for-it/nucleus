@@ -2,7 +2,7 @@ import config from '@/constants'
 import { toRecord } from '@utils/http'
 
 export async function fetchEventDetails(id: number): Promise<GetEventProps> {
-    const response = await fetch(`${config.api}/events/${id}`)
+    const response = await fetch(`${config.workerbee}/events/${id}`)
     return await response.json()
 }
 
@@ -85,7 +85,7 @@ async function fetchCollection<Key extends keyof PublicContentCollections>(
     limit: number
 ): Promise<PublicContentCollections[Key]> {
     try {
-        const response = await fetch(`${config.api}/${key}?limit=${limit}`)
+        const response = await fetch(`${config.workerbee}/${key}?limit=${limit}`)
         if (!response.ok) throw new Error(`Failed to fetch ${key}`)
         const data = await response.json()
 
@@ -99,7 +99,7 @@ async function fetchCollection<Key extends keyof PublicContentCollections>(
 }
 
 async function fetchPublicJson(path: string, error: string) {
-    const response = await fetch(`${config.api}${path}`)
+    const response = await fetch(`${config.workerbee}${path}`)
     if (!response.ok) throw new Error(error)
     return toRecord(await response.json())
 }

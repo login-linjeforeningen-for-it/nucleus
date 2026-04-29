@@ -18,7 +18,7 @@ const config = {
     beekeeper_wss: 'wss://beekeeper.login.no/api',
     tekkom_bot_api: 'https://bot.login.no/api',
     support_mail: 'tekkom@login.no',
-    api: 'https://workerbee.login.no/api/v2',
+    workerbee: 'https://workerbee.login.no/api/v2',
     app_api: 'https://app.login.no/api'
 }
 

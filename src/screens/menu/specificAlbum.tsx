@@ -23,6 +23,7 @@ export default function SpecificAlbumScreen({
     const [refreshing, setRefreshing] = useState(false)
     const [error, setError] = useState('')
     const [showDownloadSheet, setShowDownloadSheet] = useState(false)
+    const [downloadingImages, setDownloadingImages] = useState(false)
     const [initialDownloadImage, setInitialDownloadImage] = useState<string | null>(null)
 
     async function load() {
@@ -47,11 +48,13 @@ export default function SpecificAlbumScreen({
 
     const title = album ? (lang ? album.name_no : album.name_en) : ''
     const description = album ? (lang ? album.description_no : album.description_en) : ''
-    const closeDownloadSheet = () => {
+
+    function closeDownloadSheet() {
         setShowDownloadSheet(false)
         setInitialDownloadImage(null)
     }
-    const toggleDownloadSheet = () => {
+
+    function toggleDownloadSheet() {
         setShowDownloadSheet((current) => {
             if (current) {
                 setInitialDownloadImage(null)
@@ -62,7 +65,8 @@ export default function SpecificAlbumScreen({
             return true
         })
     }
-    const selectImageForDownload = (image: string) => {
+
+    function selectImageForDownload(image: string) {
         setInitialDownloadImage(image)
         setShowDownloadSheet(true)
     }
@@ -73,6 +77,7 @@ export default function SpecificAlbumScreen({
                 right: album?.images?.length ? [
                     <AlbumDownloadButton
                         key='album-download'
+                        downloading={downloadingImages}
                         onPress={toggleDownloadSheet}
                         showDownloadSheet={showDownloadSheet}
                         text={text}
@@ -81,7 +86,7 @@ export default function SpecificAlbumScreen({
                 ] : []
             }
         } as any)
-    }, [album?.images?.length, navigation, showDownloadSheet, text, theme])
+    }, [album?.images?.length, downloadingImages, navigation, showDownloadSheet, text, theme])
 
     return (
         <Swipe left='AlbumsScreen'>
@@ -138,6 +143,7 @@ export default function SpecificAlbumScreen({
                     text={text}
                     visible={showDownloadSheet}
                     onClose={closeDownloadSheet}
+                    onDownloadingChange={setDownloadingImages}
                 />
             </View>
         </Swipe>

@@ -74,7 +74,8 @@ export default function QueenbeeScreen({ navigation }: MenuProps<'QueenbeeScreen
 
         const errors: string[] = []
         let pending = 6
-        const finishRequest = () => {
+
+        function finishRequest() {
             pending -= 1
             if (pending === 0) {
                 setError(errors.length ? errors.join(' ') : null)

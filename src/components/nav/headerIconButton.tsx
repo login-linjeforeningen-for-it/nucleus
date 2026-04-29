@@ -4,11 +4,12 @@ import { Platform, Pressable, StyleSheet, View } from 'react-native'
 import { useSelector } from 'react-redux'
 
 type HeaderIconButtonProps = {
+    active?: boolean
     children: ReactNode
     onPress: () => void
 }
 
-export default function HeaderIconButton({ children, onPress }: HeaderIconButtonProps): JSX.Element {
+export default function HeaderIconButton({ active, children, onPress }: HeaderIconButtonProps): JSX.Element {
     const { theme } = useSelector((state: ReduxState) => state.theme)
 
     return (
@@ -27,9 +28,11 @@ export default function HeaderIconButton({ children, onPress }: HeaderIconButton
                     width: '100%',
                     height: '100%',
                     borderRadius: 19,
-                    backgroundColor: pressed
-                        ? theme.glassButtonPressed
-                        : 'transparent',
+                    backgroundColor: active
+                        ? theme.greyTransparent
+                        : pressed
+                            ? theme.greyTransparent
+                            : 'transparent',
                     alignItems: 'center',
                     justifyContent: 'center',
                     overflow: 'hidden',

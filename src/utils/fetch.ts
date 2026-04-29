@@ -58,7 +58,7 @@ export async function fetchFundHoldingsHistory(range: FundHoldingsRange = '1m'):
 
 export async function fetchHoneyServices(): Promise<string[]> {
     try {
-        const data = await fetchJson(`${config.api}/text`, 'Failed to fetch honey services')
+        const data = await fetchJson(`${config.workerbee}/text`, 'Failed to fetch honey services')
         return Array.isArray(data) ? data.filter((service): service is string => typeof service === 'string') : []
     } catch {
         return []
@@ -72,12 +72,12 @@ async function fetchJson(url: string, error: string) {
 }
 
 export async function fetchHoneyList(service: string, limit = 20): Promise<GetHoneyListProps> {
-    return await fetchCountedCollection('honeys', `${config.api}/text/${service}?limit=${limit}`)
+    return await fetchCountedCollection('honeys', `${config.workerbee}/text/${service}?limit=${limit}`)
 }
 
 export async function fetchAlerts(limit = 20): Promise<GetAlertsProps> {
     const params = new URLSearchParams({ limit: String(limit) })
-    return await fetchCountedCollection('alerts', `${config.api}/alerts?${params.toString()}`)
+    return await fetchCountedCollection('alerts', `${config.workerbee}/alerts?${params.toString()}`)
 }
 
 type CountedCollections = {

@@ -1,4 +1,4 @@
-import config from '@/constants'
+import { albumImageUri } from '@/utils/albums/imagePrefetch'
 import Text from '@components/shared/text'
 import T from '@styles/text'
 import { Image, View } from 'react-native'
@@ -11,7 +11,7 @@ export function AlbumPill({ label }: { label: string }) {
         <View style={{
             borderRadius: 999,
             borderWidth: 1,
-            borderColor: theme.orangeTransparentBorder,
+            borderColor: theme.greyTransparent,
             backgroundColor: theme.orangeTransparent,
             paddingHorizontal: 10,
             paddingVertical: 5,
@@ -49,7 +49,7 @@ export function AlbumImageStack({ albumID, images, title }: {
             {images.map((image, index) => (
                 <Image
                     key={image}
-                    source={{ uri: `${config.cdn}/albums/${albumID}/${image}`, cache: 'force-cache' }}
+                    source={{ uri: albumImageUri(albumID, image, 'preview'), cache: 'force-cache' }}
                     accessibilityLabel={title}
                     style={{
                         position: 'absolute',
