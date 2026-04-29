@@ -60,7 +60,7 @@ export default function ContentScreen(): JSX.Element {
         <Swipe left='QueenbeeScreen'>
             <View style={{ flex: 1, backgroundColor: theme.darker }}>
                 <ScrollView
-                    refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => void load()} tintColor={theme.orange} colors={[theme.orange]} progressViewOffset={0} />}
+                    refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => load()} tintColor={theme.orange} colors={[theme.orange]} progressViewOffset={0} />}
                     style={GS.content}
                     contentContainerStyle={{ paddingTop: 90, paddingHorizontal: 4, paddingBottom: 80 }}
                     showsVerticalScrollIndicator={false}

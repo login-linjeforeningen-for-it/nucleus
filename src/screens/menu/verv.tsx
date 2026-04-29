@@ -68,7 +68,7 @@ export default function VervScreen(): JSX.Element {
                             <Text style={{ ...T.text15, color: theme.oppositeTextColor }}>{text.apply.body}</Text>
                             <Space height={12} />
                             <TouchableOpacity
-                                onPress={() => void Linking.openURL('https://forms.gle/nQrJuqo3C9URLRM29')}
+                                onPress={() => Linking.openURL('https://forms.gle/nQrJuqo3C9URLRM29')}
                                 activeOpacity={0.88}
                             >
                                 <View style={{

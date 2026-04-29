@@ -18,6 +18,7 @@ import {
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useSelector } from 'react-redux'
 import useAiChat from '@components/ai/chat'
+import { Sparkles } from 'lucide-react-native'
 
 export default function AiScreen({ navigation }: MenuProps<'AiScreen'>): JSX.Element {
     const { theme } = useSelector((state: ReduxState) => state.theme)
@@ -31,9 +32,10 @@ export default function AiScreen({ navigation }: MenuProps<'AiScreen'>): JSX.Ele
     const [keyboardLift, setKeyboardLift] = useState(0)
     const ai = useAiChat(text)
     const composerBottom = useMemo(
-        () => keyboardLift > 0 ? keyboardLift + 12 : 160 + insets.bottom,
+        () => keyboardLift > 0 ? keyboardLift + 12 : 60 + insets.bottom,
         [insets.bottom, keyboardLift]
     )
+    const messageBottomInset = keyboardLift > 0 ? 108 : 88
 
     function formatClientSubtitle(client: NativeClient) {
         const parts = []
@@ -57,41 +59,36 @@ export default function AiScreen({ navigation }: MenuProps<'AiScreen'>): JSX.Ele
                             setShowConversations((current) => !current)
                         }}
                         style={({ pressed }) => ({
-                            marginRight: 10,
                             width: 42,
                             height: 42,
                             borderRadius: 21,
                             borderWidth: 1,
-                            borderColor: showConversations ? 'rgba(253,135,56,0.24)' : 'rgba(255,255,255,0.08)',
-                            backgroundColor: showConversations
-                                ? 'rgba(253,135,56,0.12)'
-                                : pressed
-                                    ? 'rgba(255,255,255,0.10)'
-                                    : 'rgba(255,255,255,0.05)',
+                            borderColor: theme.greyTransparentBorder,
+                            backgroundColor: pressed ? theme.greyTransparentBorder : theme.greyTransparent,
                             alignItems: 'center',
                             justifyContent: 'center',
                         })}
                     >
-                        <Text style={{
-                            ...T.text20,
-                            color: theme.orange,
-                            fontSize: 30,
-                            lineHeight: 24,
-                            fontWeight: '600',
-                            marginTop: 7,
-                            marginLeft: 1
-                        }}>
-                            ≡
-                        </Text>
+                        <Sparkles
+                            height={20}
+                            color={showConversations ? theme.orange : '#555'}
+                        />
                     </Pressable>
                 ]
             }
         } as any)
-    }, [navigation, showConversations, theme.orange])
+    }, [
+        navigation,
+        showConversations,
+        theme.greyTransparent,
+        theme.greyTransparentBorder,
+        theme.orange,
+    ])
 
     useEffect(() => {
         function handleKeyboardShow(event: KeyboardEvent) {
-            setKeyboardLift(Math.max(0, height - event.endCoordinates.screenY))
+            const visibleLift = Math.max(0, height - event.endCoordinates.screenY)
+            setKeyboardLift(Math.max(visibleLift, event.endCoordinates.height || 0))
         }
 
         const willShowSubscription = Keyboard.addListener('keyboardWillShow', handleKeyboardShow)
@@ -114,9 +111,9 @@ export default function AiScreen({ navigation }: MenuProps<'AiScreen'>): JSX.Ele
     return (
         <Swipe left='MenuScreen'>
             <View
-                style={{ flex: 1, backgroundColor: theme.darker, paddingTop: 100 }}
+                style={{ flex: 1, backgroundColor: theme.darker, paddingTop: 108 }}
             >
-                <View style={{ ...GS.content, flex: 1, paddingBottom: 0 }}>
+                <View style={{ ...GS.content, flex: 1, minHeight: 0, paddingBottom: 0 }}>
                     {ai.activeClient ? (
                         <View style={{
                             flexDirection: 'row',
@@ -151,11 +148,14 @@ export default function AiScreen({ navigation }: MenuProps<'AiScreen'>): JSX.Ele
                     <Space height={14} />
                     {ai.loading && <ActivityIndicator color={theme.orange} />}
                     {ai.error && <Text style={{ ...T.centered15, color: 'red' }}>{ai.error}</Text>}
-
-                    <Space height={14} />
-                    <View style={{ flex: 1, minHeight: 0, paddingBottom: 108 + insets.bottom }}>
-                        <AiMessageList session={ai.session} theme={theme} isLoggedIn={login} text={text} />
-                    </View>
+                    {ai.loading && <Space height={14} />}
+                    <AiMessageList
+                        session={ai.session}
+                        theme={theme}
+                        isLoggedIn={login}
+                        bottomInset={messageBottomInset}
+                        text={text}
+                    />
                     {showModels ? (
                         <ModelMenu ai={ai} theme={theme} onClose={() => setShowModels(false)} />
                     ) : null}
@@ -171,7 +171,7 @@ export default function AiScreen({ navigation }: MenuProps<'AiScreen'>): JSX.Ele
                         <AiComposer
                             value={ai.input}
                             onChangeText={ai.setInput}
-                            onSend={() => void ai.sendPrompt()}
+                            onSend={() => ai.sendPrompt()}
                             theme={theme}
                             placeholder={text.composerPlaceholder}
                             autoFocus

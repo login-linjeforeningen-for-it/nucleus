@@ -43,10 +43,11 @@ const committeeImages = [
     barkomSVG
 ]
 
-export function CommitteeImage({ id, theme, style }: {
+export function CommitteeImage({ id, active, theme, style }: {
     style?: StyleProp<ViewStyle>
     id: number
-    theme: string
+    theme: Theme
+    active: string
 }) {
     const colors: { [key: string]: string } = {
         dark: '#ffffff',
@@ -58,7 +59,7 @@ export function CommitteeImage({ id, theme, style }: {
     return (
         <SvgXml
             xml={committeeImages[id]}
-            color={colors[theme] || '#fd8738'}
+            color={colors[active] || theme.orange}
             style={[style, barkomScaleStyle]}
         />
     )
@@ -81,8 +82,18 @@ export function CommitteeView({ setCommittee, committee }: CommitteeViewProps) {
     const rows = buildRows(numCols)
 
     return (
-        <View style={{ backgroundColor: theme.contrast, borderRadius: 16, paddingHorizontal: 10, paddingVertical: 10, marginBottom: 2 }}>
-            <View style={{ display: 'flex', aspectRatio: numCols / numRows, justifyContent: 'space-between' }}>
+        <View style={{
+            backgroundColor: theme.contrast,
+            borderRadius: 16,
+            paddingHorizontal: 10,
+            paddingVertical: 10,
+            marginBottom: 2
+        }}>
+            <View style={{
+                display: 'flex',
+                aspectRatio: numCols / numRows,
+                justifyContent: 'space-between'
+            }}>
                 {rows.map((row, rowIndex) => (
                     <View key={rowIndex} style={{ display: 'flex', width: '100%', flexDirection: 'row', justifyContent: 'space-between', gap: 8 }}>
                         {row.map((_, index) => {
@@ -95,16 +106,21 @@ export function CommitteeView({ setCommittee, committee }: CommitteeViewProps) {
                                     onPress={() => setCommittee(itemId)}
                                     style={{
                                         ...GS.committee,
-                                        backgroundColor: isActive ? 'rgba(253, 135, 56, 0.12)' : theme.darker,
+                                        backgroundColor: isActive ? theme.greyTransparent : theme.darker,
                                         flex: 1,
                                         aspectRatio: 1,
                                         justifyContent: 'center',
                                         alignItems: 'center',
                                         borderWidth: isActive ? 1 : 0,
-                                        borderColor: isActive ? theme.orange : 'transparent',
+                                        borderColor: isActive ? theme.greyTransparentBorder : 'transparent',
                                     }}
                                 >
-                                    <CommitteeImage id={itemId} theme={isActive ? '' : isDark ? 'dark' : 'gray'} style={{ width: '76%', aspectRatio: 1 }} />
+                                    <CommitteeImage
+                                        id={itemId}
+                                        theme={theme}
+                                        active={isActive ? '' : isDark ? 'dark' : 'gray'}
+                                        style={{ width: '76%', aspectRatio: 1 }}
+                                    />
                                 </TouchableOpacity>
                             )
                         })}
@@ -121,7 +137,12 @@ export function CommitteeContent({ index, relevantCommittee }: CommitteeContentP
     return (
         <View key={index}>
             <Text style={{ ...T.text30, color: theme.textColor }}>
-                <CommitteeImage id={relevantCommittee.id} style={GS.small} theme={isDark ? 'dark' : 'gray'} />
+                <CommitteeImage
+                    id={relevantCommittee.id}
+                    style={GS.small}
+                    theme={theme}
+                    active={isDark ? 'dark' : 'gray'}
+                />
                 {relevantCommittee.title}
             </Text>
             {relevantCommittee.quote.length > 0 ? (

@@ -55,7 +55,7 @@ export default function AiComposer({ value, onChangeText, onSend, theme, placeho
                         top: 8,
                         width: 32,
                         height: 32,
-                        borderRadius: 10,
+                        borderRadius: 20,
                         backgroundColor: theme.orange,
                         alignItems: 'center',
                         justifyContent: 'center',

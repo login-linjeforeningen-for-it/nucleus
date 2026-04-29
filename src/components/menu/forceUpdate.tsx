@@ -1,4 +1,4 @@
-import { View, Alert, Linking, Platform } from 'react-native'
+import { View, Alert, Linking, Platform, type AlertButton } from 'react-native'
 import { nativeApplicationVersion } from 'expo-application'
 import { useSelector } from 'react-redux'
 import { useEffect, useState } from 'react'
@@ -35,19 +35,21 @@ export default function ForceUpdate() {
             }
 
             const data = await response.json()
-            if (!data?.update) {
+            const shouldShowUpdate = data?.updateRequired === true || data?.updateAvailable === true
+            if (!shouldShowUpdate || !data?.update) {
+                setUpdateRequired(false)
                 return
             }
 
             const { updateRequired, update, buttons } = data
             setUpdateRequired(!!updateRequired)
 
-            const alertButtons = buttons.map((btn: { text: string; action: string }) => {
+            const alertButtons: AlertButton[] = (Array.isArray(buttons) ? buttons : []).map((btn: { text: string; action: string }) => {
                 if (btn.action === 'update') {
                     return { text: btn.text, onPress: openStore }
                 }
 
-                return { text: btn.text, style: 'cancel' }
+                return { text: btn.text, style: 'cancel' as const }
             })
 
             Alert.alert(

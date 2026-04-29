@@ -91,22 +91,22 @@ export default function Swiper({ course, clicked, setClicked }: CourseContentPro
             <CourseStackCard style={{
                 width: SCREEN_WIDTH * 0.75,
                 height: COURSE_CARD_HEIGHT,
-                top: 16,
+                top: 28,
             }} />
 
             {/* Forth card */}
             <CourseStackCard style={[{
-                top: 12,
+                top: 25,
             }, styles.fourthCard]} />
 
             {/* Third card */}
             <CourseStackCard style={[{
-                top: 8,
+                top: 20,
             }, styles.thirdCard]} />
 
             {/* Second card (next card) */}
             <CourseStackCard style={[{
-                top: 4,
+                top: 15,
             }, styles.secondCard]}>
                 <CourseContent
                     course={course}
@@ -125,6 +125,7 @@ export default function Swiper({ course, clicked, setClicked }: CourseContentPro
             <GestureDetector gesture={panGesture}>
                 <CourseStackCard style={[{
                     height: COURSE_CARD_HEIGHT,
+                    top: 10
                 }, styles.topCard]}>
                     <CourseContent
                         course={course}
@@ -143,6 +144,7 @@ export default function Swiper({ course, clicked, setClicked }: CourseContentPro
                 left: SCREEN_WIDTH * 0.025,
                 height: COURSE_CARD_HEIGHT,
                 width: SCREEN_WIDTH * 0.95,
+                top: 10
             }, styles.hiddenCard]} >
                 <CourseContent
                     course={course}

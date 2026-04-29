@@ -75,7 +75,7 @@ export default function CourseScreen({ navigation }: MenuProps<'CourseScreen'>):
                 <ScrollView
                     showsVerticalScrollIndicator={false}
                     scrollEventThrottle={100}
-                    style={{ paddingTop: 100 }}
+                    style={{ paddingTop: 110 }}
                     refreshControl={
                         <RefreshControl
                             refreshing={refresh}

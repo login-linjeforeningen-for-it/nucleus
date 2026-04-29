@@ -78,8 +78,8 @@ export default function ChatPicker({
                         </Text>
                         <View style={{
                             alignItems: 'center',
-                            backgroundColor: theme.orangeTransparentHighlighted,
-                            borderColor: theme.orangeTransparentBorderHighlighted,
+                            backgroundColor: theme.greyTransparent,
+                            borderColor: theme.greyTransparentBorder,
                             borderRadius: 13,
                             borderWidth: 1,
                             height: 26,

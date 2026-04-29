@@ -32,7 +32,7 @@ export function FundSupportCard({ text, lang }: { text: FundSupportText, lang: b
                 <InfoLine label={lang ? 'Søknadsperiode' : 'Application period'} value={text.period} />
                 <InfoLine label={lang ? 'Slik søker du' : 'How to apply'} value={text.apply} />
                 <Space height={8} />
-                <TouchableOpacity onPress={() => void Linking.openURL('mailto:fondet@login.no')} activeOpacity={0.88}>
+                <TouchableOpacity onPress={() => Linking.openURL('mailto:fondet@login.no')} activeOpacity={0.88}>
                     <View style={{
                         borderRadius: 999,
                         backgroundColor: theme.orange,

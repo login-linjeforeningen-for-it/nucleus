@@ -48,7 +48,7 @@ export default function GameScreen({ navigation }: MenuProps<'GameScreen'>): JSX
                 <ScrollView
                     showsVerticalScrollIndicator={false}
                     contentContainerStyle={{
-                        paddingTop: 100, paddingBottom: 120,
+                        paddingTop: 100, paddingBottom: 120
                     }}
                     refreshControl={
                         <RefreshControl
