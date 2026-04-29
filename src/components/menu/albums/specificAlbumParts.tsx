@@ -1,11 +1,12 @@
 import Cluster from '@/components/shared/cluster'
 import Space from '@/components/shared/utils'
 import Text from '@components/shared/text'
+import HeaderIconButton from '@components/nav/headerIconButton'
 import T from '@styles/text'
 import { formatNorwegianDate } from '@utils/general'
 import { BottomTabNavigationProp } from '@react-navigation/bottom-tabs'
 import { Download, X } from 'lucide-react-native'
-import { Pressable, TouchableOpacity, View } from 'react-native'
+import { TouchableOpacity, View } from 'react-native'
 import { AlbumPill } from './albumCards'
 
 export function formatAlbumDate(value?: string | null) {
@@ -69,45 +70,23 @@ export function AlbumDownloadButton({
     downloading,
     onPress,
     showDownloadSheet,
-    text,
     theme,
 }: {
     downloading?: boolean
     onPress: () => void
     showDownloadSheet: boolean
-    text: any
     theme: Theme
 }) {
     const active = showDownloadSheet || downloading
 
     return (
-        <Pressable
-            accessibilityRole='button'
-            accessibilityLabel={showDownloadSheet ? text.close : text.downloadImages}
-            testID='album-download-button'
-            onPress={onPress}
-            style={({ pressed }) => ({
-                position: 'absolute',
-                zIndex: 14,
-                width: 42,
-                height: 42,
-                borderRadius: 21,
-                alignItems: 'center',
-                justifyContent: 'center',
-                overflow: 'hidden',
-                borderWidth: 1,
-                borderColor: active ? theme.orangeTransparentBorder : theme.greyTransparentBorder,
-                backgroundColor: active
-                    ? theme.orangeTransparent
-                    : pressed ? theme.greyTransparent : 'transparent',
-            })}
-        >
+        <HeaderIconButton active={active} onPress={onPress}>
             {showDownloadSheet ? (
                 <X size={24} color={theme.orange} strokeWidth={2.4} />
             ) : (
-                <Download size={22} color={active ? theme.orange : theme.oppositeTextColor} strokeWidth={2.3} />
+                <Download size={20} color={active ? theme.orange : '#555'} strokeWidth={2.3} />
             )}
-        </Pressable>
+        </HeaderIconButton>
     )
 }
 

@@ -56,7 +56,7 @@ export default function Header({ options, route, navigation }: HeaderProps): Rea
     const rightRailWidth = getRightRailWidth(rightComponents.length)
     const titleLeft = Number(GS.headerLeftRail.width) + HEADER_TITLE_GAP
     const titleRight = HEADER_RIGHT_INSET + rightRailWidth + HEADER_TITLE_GAP
-    const titleWidth = Math.min(260, Math.max(120, Dimensions.get('window').width - titleLeft - titleRight))
+    const titleWidth = Math.min(270, Math.max(120, Dimensions.get('window').width - titleLeft - titleRight))
     const headerOffset = Dimensions.get('window').height / 17 + (Platform.OS === 'ios' ? 8 : 0)
 
     function navigateInternalRoute(targetRoute: InternalNavRoute) {

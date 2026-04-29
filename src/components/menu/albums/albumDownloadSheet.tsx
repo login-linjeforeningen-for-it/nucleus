@@ -1,8 +1,8 @@
 import Space from '@/components/shared/utils'
-import config from '@/constants'
+import { AlbumDownloadProgress, downloadAlbumImages } from '@/utils/albums/downloadImages'
 import Text from '@components/shared/text'
 import T from '@styles/text'
-import { Linking, Modal, Platform, useWindowDimensions, View } from 'react-native'
+import { Alert, Modal, useWindowDimensions, View } from 'react-native'
 import { useEffect, useMemo, useState } from 'react'
 import { useSelector } from 'react-redux'
 import { AlbumDownloadActions, AlbumDownloadGrid, AlbumText } from './albumDownloadParts'
@@ -29,6 +29,8 @@ export function AlbumDownloadSheet({
     const images = useMemo(() => Array.isArray(album?.images) ? album.images : [], [album?.images])
     const [selectedImages, setSelectedImages] = useState<string[]>(images)
     const [downloading, setDownloading] = useState(false)
+    const [downloadAction, setDownloadAction] = useState<'all' | 'selected' | null>(null)
+    const [downloadProgress, setDownloadProgress] = useState<AlbumDownloadProgress | null>(null)
     const selectedCount = selectedImages.length
 
     useEffect(() => {
@@ -45,35 +47,33 @@ export function AlbumDownloadSheet({
             : [...current, image])
     }
 
-    function downloadOnWeb(uri: string, image: string) {
-        const link = document.createElement('a')
-        link.href = uri
-        link.download = image
-        link.target = '_blank'
-        document.body.appendChild(link)
-        link.click()
-        link.remove()
-    }
-
-    async function downloadImages(imagesToDownload: string[]) {
+    async function downloadImages(imagesToDownload: string[], action: 'all' | 'selected') {
         if (!album || !imagesToDownload.length || downloading) {
             return
         }
 
         setDownloading(true)
+        setDownloadAction(action)
+        setDownloadProgress({ completed: 0, total: Array.from(new Set(imagesToDownload)).filter(Boolean).length })
         onDownloadingChange?.(true)
 
         try {
-            for (const image of imagesToDownload) {
-                const uri = `${config.cdn}/albums/${album.id}/${image}`
-                if (Platform.OS === 'web') {
-                    downloadOnWeb(uri, image)
-                } else {
-                    await Linking.openURL(uri)
-                }
+            const result = await downloadAlbumImages({
+                albumId: album.id,
+                images: imagesToDownload,
+                onProgress: setDownloadProgress,
+            })
+
+            if (result.failed.length) {
+                Alert.alert(
+                    text.downloadImages || 'Download images',
+                    `${result.saved.length} downloaded, ${result.failed.length} failed.`
+                )
             }
         } finally {
             setDownloading(false)
+            setDownloadAction(null)
+            setDownloadProgress(null)
             onDownloadingChange?.(false)
         }
     }
@@ -115,11 +115,14 @@ export function AlbumDownloadSheet({
                     />
                     <AlbumDownloadActions
                         imageCount={images.length}
+                        downloadAction={downloadAction}
+                        downloadProgress={downloadProgress}
+                        downloading={downloading}
                         selectedCount={selectedCount}
                         text={text}
                         onClose={onClose}
-                        onDownloadAll={() => downloadImages(images)}
-                        onDownloadSelected={() => downloadImages(selectedImages)}
+                        onDownloadAll={() => downloadImages(images, 'all')}
+                        onDownloadSelected={() => downloadImages(selectedImages, 'selected')}
                     />
                 </View>
             </View>

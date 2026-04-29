@@ -6,7 +6,7 @@ import Text from '@components/shared/text'
 import TopRefreshIndicator from '@components/shared/topRefreshIndicator'
 import GS from '@styles/globalStyles'
 import T from '@styles/text'
-import { getAlbumPreviewImages, stageAlbumListImages } from '@/utils/albums/imagePrefetch'
+import { getAlbumPreviewImages, getCachedAlbumPreviewCounts, stageAlbumListImages } from '@/utils/albums/imagePrefetch'
 import { fetchAlbums } from '@utils/fetch'
 import { JSX, useEffect, useMemo, useRef, useState } from 'react'
 import { Dimensions, FlatList, RefreshControl, View, ViewToken } from 'react-native'
@@ -29,6 +29,7 @@ export default function AlbumsScreen({ navigation }: MenuProps<'AlbumsScreen'>):
         try {
             const nextAlbums = await fetchAlbums()
             setAlbums(nextAlbums.albums)
+            setPreviewCounts(getCachedAlbumPreviewCounts(nextAlbums.albums))
             setTotalCount(nextAlbums.total_count)
             setError('')
         } catch (loadError) {

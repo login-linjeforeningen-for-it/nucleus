@@ -172,7 +172,7 @@ export const GS = StyleSheet.create({
         position: 'absolute',
         left: 0,
         top: 0,
-        width: 60,
+        width: 48,
         height: 42,
     },
     headerLeftSlot: {

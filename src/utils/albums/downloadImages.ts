@@ -1,5 +1,6 @@
 import config from '@/constants'
 import * as FileSystem from 'expo-file-system/legacy'
+import { ImageManipulator, SaveFormat } from 'expo-image-manipulator'
 import * as MediaLibrary from 'expo-media-library'
 import { Platform } from 'react-native'
 
@@ -12,15 +13,54 @@ export type AlbumDownloadResult = {
 type DownloadAlbumImagesProps = {
     albumId: number | string
     images: string[]
+    onProgress?: (progress: AlbumDownloadProgress) => void
 }
 
-function albumImageUrl(albumId: number | string, image: string) {
-    return `${config.cdn}/albums/${albumId}/${encodeURIComponent(image)}`
+export type AlbumDownloadProgress = {
+    completed: number
+    total: number
 }
 
-function safeFileName(image: string) {
-    const clean = image.split('/').pop()?.replace(/[^\w.-]/g, '_') || `album-${Date.now()}.jpg`
-    return /\.(jpe?g|png|gif|webp|heic|heif)$/i.test(clean) ? clean : `${clean}.jpg`
+
+export async function downloadAlbumImages({
+    albumId,
+    images,
+    onProgress,
+}: DownloadAlbumImagesProps): Promise<AlbumDownloadResult> {
+    const uniqueImages = Array.from(new Set(images)).filter(Boolean)
+    if (!uniqueImages.length) {
+        return { errors: [], failed: [], saved: [] }
+    }
+
+    if (Platform.OS !== 'web') {
+        await ensureMediaPermission()
+    }
+
+    const result: AlbumDownloadResult = { errors: [], failed: [], saved: [] }
+    onProgress?.({ completed: 0, total: uniqueImages.length })
+    for (const image of uniqueImages) {
+        const url = albumImageUrl(albumId, image)
+        try {
+            if (Platform.OS === 'web') {
+                await downloadOnWeb(url, image)
+            } else {
+                await downloadOnDevice(url, image)
+            }
+            result.saved.push(image)
+        } catch (error) {
+            const message = error instanceof Error ? error.message : 'Unknown download error'
+            console.warn(`Album download failed for ${image}: ${message}`)
+            result.errors.push(`${image}: ${message}`)
+            result.failed.push(image)
+        } finally {
+            onProgress?.({
+                completed: result.saved.length + result.failed.length,
+                total: uniqueImages.length,
+            })
+        }
+    }
+
+    return result
 }
 
 async function downloadOnWeb(url: string, image: string) {
@@ -58,39 +98,54 @@ async function downloadOnDevice(url: string, image: string) {
         throw new Error(`Download failed with ${download.status}`)
     }
 
-    await MediaLibrary.saveToLibraryAsync(download.uri)
+    const cleanupUris = [download.uri]
+    try {
+        const saveUri = /\.webp$/i.test(image)
+            ? await convertWebpToJpeg(download.uri, image, cleanupUris)
+            : download.uri
+
+        await saveToPhotoLibrary(saveUri)
+    } finally {
+        await Promise.all(cleanupUris.map((uri) => FileSystem.deleteAsync(uri, { idempotent: true })))
+    }
 }
 
-export async function downloadAlbumImages({
-    albumId,
-    images,
-}: DownloadAlbumImagesProps): Promise<AlbumDownloadResult> {
-    const uniqueImages = Array.from(new Set(images)).filter(Boolean)
-    if (!uniqueImages.length) {
-        return { errors: [], failed: [], saved: [] }
+async function convertWebpToJpeg(uri: string, image: string, cleanupUris: string[]) {
+    if (!FileSystem.cacheDirectory) {
+        throw new Error('File cache is unavailable')
     }
 
-    if (Platform.OS !== 'web') {
-        await ensureMediaPermission()
-    }
+    const imageRef = await ImageManipulator.manipulate(uri).renderAsync()
+    const converted = await imageRef.saveAsync({
+        compress: 0.92,
+        format: SaveFormat.JPEG,
+    })
+    cleanupUris.push(converted.uri)
 
-    const result: AlbumDownloadResult = { errors: [], failed: [], saved: [] }
-    for (const image of uniqueImages) {
-        const url = albumImageUrl(albumId, image)
-        try {
-            if (Platform.OS === 'web') {
-                await downloadOnWeb(url, image)
-            } else {
-                await downloadOnDevice(url, image)
-            }
-            result.saved.push(image)
-        } catch (error) {
-            const message = error instanceof Error ? error.message : 'Unknown download error'
-            console.warn(`Album download failed for ${image}: ${message}`)
-            result.errors.push(`${image}: ${message}`)
-            result.failed.push(image)
-        }
-    }
+    const destination = `${FileSystem.cacheDirectory}${Date.now()}-${safeJpegFileName(image)}`
+    await FileSystem.copyAsync({ from: converted.uri, to: destination })
+    cleanupUris.push(destination)
 
-    return result
+    return destination
+}
+
+async function saveToPhotoLibrary(uri: string) {
+    try {
+        await MediaLibrary.saveToLibraryAsync(uri)
+    } catch {
+        await MediaLibrary.createAssetAsync(uri)
+    }
+}
+
+function albumImageUrl(albumId: number | string, image: string) {
+    return `${config.cdn}/albums/${albumId}/${encodeURIComponent(image)}`
+}
+
+function safeFileName(image: string) {
+    const clean = image.split('/').pop()?.replace(/[^\w.-]/g, '_') || `album-${Date.now()}.jpg`
+    return /\.(jpe?g|png|gif|webp|heic|heif)$/i.test(clean) ? clean : `${clean}.jpg`
+}
+
+function safeJpegFileName(image: string) {
+    return safeFileName(image).replace(/\.[^.]+$/i, '.jpg')
 }

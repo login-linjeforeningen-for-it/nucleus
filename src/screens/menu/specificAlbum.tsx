@@ -80,7 +80,6 @@ export default function SpecificAlbumScreen({
                         downloading={downloadingImages}
                         onPress={toggleDownloadSheet}
                         showDownloadSheet={showDownloadSheet}
-                        text={text}
                         theme={theme}
                     />
                 ] : []

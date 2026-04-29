@@ -11,6 +11,7 @@ type QueueItem = {
 const PREVIEW_CACHE_TTL = 60 * 60 * 1000
 const MAX_IN_FLIGHT = 2
 const previewCache = new Map<string, number>()
+const previewCountCache = new Map<number, { count: number, timestamp: number }>()
 const uriCache = new Map<string, number>()
 const fullAlbumCache = new Map<number, number>()
 const queuedKeys = new Set<string>()
@@ -34,6 +35,27 @@ export function albumImageUri(albumId: number | string, image: string, variant: 
 
 export function getAlbumPreviewImages(album: GetAlbumProps, count: number) {
     return Array.isArray(album.images) ? album.images.slice(0, count) : []
+}
+
+export function getCachedAlbumPreviewCounts(albums: GetAlbumProps[]) {
+    const counts: Record<number, number> = {}
+    const now = Date.now()
+
+    albums.forEach((album) => {
+        const cached = previewCountCache.get(album.id)
+        if (!cached) {
+            return
+        }
+
+        if (now - cached.timestamp >= PREVIEW_CACHE_TTL) {
+            previewCountCache.delete(album.id)
+            return
+        }
+
+        counts[album.id] = Math.min(cached.count, getAlbumPreviewImages(album, 3).length)
+    })
+
+    return counts
 }
 
 export function prefetchAlbumPreview(album: GetAlbumProps, indexes: number[], priority = 5) {
@@ -86,23 +108,39 @@ export async function stageAlbumListImages({
     const visibleAlbums = albums.filter((album) => fallbackVisibleIds.has(album.id))
     const restAlbums = albums.filter((album) => !fallbackVisibleIds.has(album.id))
 
-    onPreviewCount(visibleAlbums.map((album) => album.id), 1)
+    function revealPreviewCount(albumIds: number[], count: number) {
+        rememberAlbumPreviewCount(albumIds, count)
+        onPreviewCount(albumIds, count)
+    }
+
+    revealPreviewCount(visibleAlbums.map((album) => album.id), 1)
     visibleAlbums.forEach((album) => prefetchAlbumPreview(album, [0], 1))
     await phaseDelay()
 
     visibleAlbums.forEach((album) => prefetchAlbumPreview(album, [1, 2], 2))
-    onPreviewCount(visibleAlbums.map((album) => album.id), 3)
+    revealPreviewCount(visibleAlbums.map((album) => album.id), 3)
     await phaseDelay()
 
     restAlbums.forEach((album) => prefetchAlbumPreview(album, [0], 5))
-    onPreviewCount(restAlbums.map((album) => album.id), 1)
+    revealPreviewCount(restAlbums.map((album) => album.id), 1)
     await phaseDelay()
 
     restAlbums.forEach((album) => prefetchAlbumPreview(album, [1, 2], 6))
-    onPreviewCount(restAlbums.map((album) => album.id), 3)
+    revealPreviewCount(restAlbums.map((album) => album.id), 3)
     await phaseDelay()
 
     visibleAlbums.forEach((album) => prefetchAlbumDetails(album.id, 8))
+}
+
+function rememberAlbumPreviewCount(albumIds: number[], count: number) {
+    const now = Date.now()
+    albumIds.forEach((id) => {
+        const current = previewCountCache.get(id)
+        previewCountCache.set(id, {
+            count: Math.max(current?.count || 0, count),
+            timestamp: now,
+        })
+    })
 }
 
 function prefetchAlbumDetails(albumId: number, priority: number) {

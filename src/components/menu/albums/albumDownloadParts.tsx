@@ -1,4 +1,5 @@
 import config from '@/constants'
+import { AlbumDownloadProgress } from '@/utils/albums/downloadImages'
 import { albumImageUri } from '@/utils/albums/imagePrefetch'
 import Text from '@components/shared/text'
 import T from '@styles/text'
@@ -61,7 +62,7 @@ export function AlbumDownloadGrid({
                             overflow: 'hidden',
                             backgroundColor: theme.contrast,
                             borderWidth: 1,
-                            borderColor: selected ? theme.orangeTransparentBorder : '#ffffff14',
+                            borderColor: selected ? theme.orangeTransparentBorder : theme.greyTransparentBorder,
                             opacity: pressed ? 0.82 : 1,
                         })}
                     >
@@ -79,6 +80,9 @@ export function AlbumDownloadGrid({
 }
 
 export function AlbumDownloadActions({
+    downloadAction,
+    downloadProgress,
+    downloading,
     imageCount,
     onClose,
     onDownloadAll,
@@ -86,6 +90,9 @@ export function AlbumDownloadActions({
     selectedCount,
     text,
 }: {
+    downloadAction: 'all' | 'selected' | null
+    downloadProgress: AlbumDownloadProgress | null
+    downloading: boolean
     imageCount: number
     onClose: () => void
     onDownloadAll: () => void
@@ -96,22 +103,34 @@ export function AlbumDownloadActions({
     const { theme } = useSelector((state: ReduxState) => state.theme)
 
     return (
-        <View style={{ gap: 10, padding: 14, borderTopWidth: 1, borderTopColor: '#ffffff12' }}>
+        <View style={{
+            gap: 10,
+            padding: 14,
+            borderTopWidth: 1,
+            borderTopColor: theme.greyTransparentBorder
+        }}>
             <View style={{ flexDirection: 'row', gap: 10 }}>
-                <AlbumDownloadButton flex={1} label={text.close || 'Close'} onPress={onClose} />
                 <AlbumDownloadButton
-                    disabled={!imageCount}
+                    disabled={downloading}
+                    flex={1}
+                    label={text.close || 'Close'}
+                    onPress={onClose}
+                />
+                <AlbumDownloadButton
+                    disabled={!imageCount || downloading}
                     flex={1}
                     label={text.downloadAll || 'Download all'}
+                    progress={downloadAction === 'all' ? downloadProgress : null}
                     onPress={onDownloadAll}
                     testID='album-download-all'
                 />
             </View>
             <AlbumDownloadButton
                 accent={Boolean(selectedCount)}
-                disabled={!selectedCount}
+                disabled={!selectedCount || downloading}
                 label={selectedCount ? text.downloadSelected || 'Download selected' : text.noImagesSelected || 'No images selected'}
                 labelColor={selectedCount ? theme.orange : theme.oppositeTextColor}
+                progress={downloadAction === 'selected' ? downloadProgress : null}
                 onPress={onDownloadSelected}
                 testID='album-download-selected'
             />
@@ -132,9 +151,9 @@ function SelectionDot({ selected }: { selected: boolean }) {
             borderRadius: 14,
             alignItems: 'center',
             justifyContent: 'center',
-            backgroundColor: selected ? 'rgba(253,135,56,0.22)' : 'rgba(8,8,8,0.58)',
+            backgroundColor: selected ? theme.orangeTransparent : theme.greyTransparent,
             borderWidth: 1,
-            borderColor: selected ? theme.orangeTransparentBorder : '#ffffff42',
+            borderColor: selected ? theme.orangeTransparentBorder : theme.greyTransparentBorder,
         }}>
             {selected ? (
                 <View style={{
@@ -155,6 +174,7 @@ function AlbumDownloadButton({
     label,
     labelColor,
     onPress,
+    progress,
     testID,
 }: {
     accent?: boolean
@@ -163,9 +183,12 @@ function AlbumDownloadButton({
     label: string
     labelColor?: string
     onPress: () => void
+    progress?: AlbumDownloadProgress | null
     testID?: string
 }) {
     const { theme } = useSelector((state: ReduxState) => state.theme)
+    const progressRatio = progress?.total ? progress.completed / progress.total : 0
+    const progressLabel = progress ? `${progress.completed}/${progress.total}` : label
 
     return (
         <Pressable
@@ -178,15 +201,24 @@ function AlbumDownloadButton({
                 paddingVertical: flex ? 13 : 14,
                 alignItems: 'center',
                 backgroundColor: accent
-                    ? pressed ? 'rgba(253,135,56,0.24)' : theme.orangeTransparent
-                    : pressed ? '#ffffff16' : '#ffffff08',
+                    ? pressed ? theme.orangeTransparent : theme.orangeTransparent
+                    : pressed ? theme.greyTransparent : theme.greyTransparent,
                 borderWidth: 1,
-                borderColor: accent ? theme.orangeTransparentBorder : disabled ? '#ffffff12' : '#ffffff18',
-                opacity: disabled ? 0.55 : 1,
+                borderColor: accent ? theme.orangeTransparentBorder : theme.greyTransparentBorder,
             })}
         >
-            <Text style={{ ...T.text15, color: labelColor || theme.textColor }}>
-                {label}
+            {progress ? (
+                <View style={{
+                    position: 'absolute',
+                    left: 0,
+                    top: 0,
+                    bottom: 0,
+                    width: `${Math.max(3, Math.min(100, progressRatio * 100))}%`,
+                    backgroundColor: theme.orangeTransparent,
+                }} />
+            ) : null}
+            <Text style={{ ...T.text15, color: progress ? theme.orange : labelColor || theme.textColor }}>
+                {progressLabel}
             </Text>
         </Pressable>
     )

@@ -24,7 +24,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     owner: 'loginapp',
     name: 'Login',
     slug: 'Login',
-    version: '2.9.7',
+    version: '2.9.8',
     orientation: 'portrait',
     icon: './public/assets/logo/icon.png',
     userInterfaceStyle: 'dark',
@@ -62,7 +62,14 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
                 photosPermission: 'Login needs photo access if you want a profile picture.',
                 cameraPermission: 'Login needs camera access if you want to take a selfie.'
             }
-        ]
+        ],
+        [
+            'expo-media-library',
+            {
+                photosPermission: 'Login needs photo access so album images can be saved.',
+                savePhotosPermission: 'Login needs permission to save album images to your photo library.'
+            }
+        ],
     ],
     assetBundlePatterns: [
         '**/*'
