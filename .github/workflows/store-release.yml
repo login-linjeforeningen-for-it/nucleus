@@ -70,7 +70,7 @@ jobs:
     needs:
       - prepare-release-version
       - ios
-    if: always() && needs.prepare-release-version.result == 'success' && (needs.ios.result == 'success' || needs.ios.result == 'skipped') && (github.event_name != 'workflow_dispatch' || github.event.inputs.platform == 'all' || github.event.inputs.platform == 'android')
+    if: always() && needs.prepare-release-version.result == 'success' && needs.ios.result != 'cancelled' && (github.event_name != 'workflow_dispatch' || github.event.inputs.platform == 'all' || github.event.inputs.platform == 'android')
     runs-on:
       - self-hosted
       - macOS
