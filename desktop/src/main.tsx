@@ -1664,7 +1664,7 @@ function VervPage() {
       <div className="verv-photo-rail">
         {text.photos.map((photo) => (
           <article key={photo.image}>
-            <img src={`https://cdn.login.no/img/imagecarousel/${photo.image}`} alt="" />
+            <img src={`https://s3.login.no/beehive/img/imagecarousel/${photo.image}`} alt="" />
             <strong>{photo.title}</strong>
             <span>{photo.description}</span>
           </article>
@@ -1686,7 +1686,7 @@ function VervPage() {
               <p>{committee.body}</p>
             </div>
             <div className="leader-lockup">
-              {leader?.image ? <img src={`https://cdn.login.no/img/board/portraits/2026/${leader.image}`} alt="" /> : <span>{(leader?.name || committee.title).slice(0, 1)}</span>}
+              {leader?.image ? <img src={`https://s3.login.no/beehive/img/board/portraits/2026/${leader.image}`} alt="" /> : <span>{(leader?.name || committee.title).slice(0, 1)}</span>}
               <strong>{leader?.name || committee.title}</strong>
               <small>{leaderTitle}{leader?.discord ? ` · ${leader.discord}` : ''}</small>
             </div>
@@ -1856,7 +1856,7 @@ function PwnedPage() {
     <PagePanel title="Pwned" status="live">
       <section className="docs-card pwned-card">
         <h3>{meme.text}</h3>
-        <img src={`https://cdn.login.no/img/pwned/${meme.image}`} alt="" />
+        <img src={`https://s3.login.no/beehive/img/pwned/${meme.image}`} alt="" />
         <p>{pwnedText.text.replace('{time}', `${secondsElapsed} ${secondsElapsed === 1 ? pwnedText.second : pwnedText.seconds}`)}</p>
         <button onClick={() => setMemeIndex((current) => (current + 1) % memes.length)}>{pwnedText.shuffle}</button>
       </section>

@@ -733,7 +733,7 @@ export async function loadDashboardData(): Promise<DashboardData> {
 }
 
 export function eventImageUrl(filename?: string) {
-  return filename ? `https://cdn.login.no/img/events/${filename}` : ''
+  return filename ? `https://s3.login.no/beehive/img/events/${filename}` : ''
 }
 
 export function albumImageUrl(albumId: number | string, filename?: string) {
