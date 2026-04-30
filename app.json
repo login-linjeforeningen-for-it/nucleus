@@ -3,7 +3,7 @@
     "owner": "loginapp",
     "slug": "Login",
     "scheme": "login",
-    "version": "2.10.1",
+    "version": "2.10.2",
     "orientation": "portrait",
     "icon": "./public/assets/logo/icon.png",
     "userInterfaceStyle": "dark",
@@ -45,7 +45,7 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.eirikhanasand.Login",
-      "buildNumber": "158",
+      "buildNumber": "159",
       "associatedDomains": [
         "applinks:login.no"
       ],
@@ -62,7 +62,7 @@
         "backgroundColor": "#000000"
       },
       "package": "com.login.Login",
-      "versionCode": 112,
+      "versionCode": 113,
       "permissions": [
         "INTERNET",
         "NOTIFICATIONS",
