@@ -45,7 +45,7 @@ export function AlbumDownloadGrid({
         >
             {images.map((image, index) => {
                 const selected = selectedImages.includes(image)
-                const uri = album?.id ? albumImageUri(album.id, image, 'preview') : `${config.cdn}/albums/${image}`
+                const uri = album?.id ? albumImageUri(album.id, image, 'preview') : `${config.albumCdn}/albums/${image}`
 
                 return (
                     <Pressable

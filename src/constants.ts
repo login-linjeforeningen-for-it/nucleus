@@ -9,6 +9,7 @@ const config = {
     instagram: 'https://www.instagram.com/login_linjeforening/',
     discord: 'https://discord.com/invite/login-ntnu',
     cdn: 'https://cdn.login.no',
+    albumCdn: 'https://s3.login.no/beehive',
     portrait: 'https://cdn.login.no/img/board/portraits/2026',
     mail: 'kontakt@login.no',
     mailto: 'mailto:kontakt@login.no',

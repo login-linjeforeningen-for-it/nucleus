@@ -25,7 +25,7 @@ let paused = false
 export type AlbumImageVariant = 'original' | 'preview'
 
 export function albumImageUri(albumId: number | string, image: string, variant: AlbumImageVariant = 'original') {
-    const uri = `${config.cdn}/albums/${albumId}/${image}`
+    const uri = `${config.albumCdn}/albums/${albumId}/${encodeURIComponent(image)}`
     if (variant === 'original') {
         return uri
     }

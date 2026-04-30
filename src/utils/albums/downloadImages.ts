@@ -138,7 +138,7 @@ async function saveToPhotoLibrary(uri: string) {
 }
 
 function albumImageUrl(albumId: number | string, image: string) {
-    return `${config.cdn}/albums/${albumId}/${encodeURIComponent(image)}`
+    return `${config.albumCdn}/albums/${albumId}/${encodeURIComponent(image)}`
 }
 
 function safeFileName(image: string) {

@@ -737,5 +737,5 @@ export function eventImageUrl(filename?: string) {
 }
 
 export function albumImageUrl(albumId: number | string, filename?: string) {
-  return filename ? `https://cdn.login.no/albums/${albumId}/${filename}` : ''
+  return filename ? `https://s3.login.no/beehive/albums/${albumId}/${encodeURIComponent(filename)}` : ''
 }
