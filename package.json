@@ -33,7 +33,6 @@
     "expo-device": "~55.0.15",
     "expo-file-system": "~55.0.17",
     "expo-image-manipulator": "~55.0.15",
-    "expo-image-picker": "~55.0.19",
     "expo-linear-gradient": "~55.0.13",
     "expo-linking": "~55.0.14",
     "expo-media-library": "~55.0.15",

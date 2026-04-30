@@ -20,7 +20,6 @@
         "expo-device": "~55.0.15",
         "expo-file-system": "~55.0.17",
         "expo-image-manipulator": "~55.0.15",
-        "expo-image-picker": "~55.0.19",
         "expo-linear-gradient": "~55.0.13",
         "expo-linking": "~55.0.14",
         "expo-media-library": "~55.0.15",
@@ -867,8 +866,6 @@
     "expo-image-loader": ["expo-image-loader@55.0.0", "", { "peerDependencies": { "expo": "*" } }, "sha512-NOjp56wDrfuA5aiNAybBIjqIn1IxKeGJ8CECWZncQ/GzjZfyTYAHTCyeApYkdKkMBLHINzI4BbTGSlbCa0fXXQ=="],
 
     "expo-image-manipulator": ["expo-image-manipulator@55.0.15", "", { "dependencies": { "expo-image-loader": "~55.0.0" }, "peerDependencies": { "expo": "*" } }, "sha512-AbwC1PHhoJb7OeMlbb52RK/nsTZMAuJDz2RlbDHtrD6zFOKV1LcMomdJqVYCC5v7ILH5qLF01iygpZt54GlydQ=="],
-
-    "expo-image-picker": ["expo-image-picker@55.0.19", "", { "dependencies": { "expo-image-loader": "~55.0.0" }, "peerDependencies": { "expo": "*" } }, "sha512-PqOOfRz7+hbB9IFN0LfNxpJJwuPlUG0Abr0qM3Wc61OJ7FFyuKJ50QJ/fFItzSuoXifET1YIFBiXx5nA8Gkinw=="],
 
     "expo-json-utils": ["expo-json-utils@55.0.2", "", {}, "sha512-QJMOZOPOG7CTnKcrdVaiummn2va1MCO56z++eyWkDv3GBRODldM6MFMDf/jTREWthFc2Nxo6TuyWRrEV9S6n/Q=="],
 

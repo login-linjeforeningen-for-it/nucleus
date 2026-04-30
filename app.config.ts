@@ -57,13 +57,6 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
             }
         ],
         [
-            'expo-image-picker',
-            {
-                photosPermission: 'Login needs photo access if you want a profile picture.',
-                cameraPermission: 'Login needs camera access if you want to take a selfie.'
-            }
-        ],
-        [
             'expo-media-library',
             {
                 photosPermission: 'Login needs photo access so album images can be saved.',

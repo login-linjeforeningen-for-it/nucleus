@@ -30,13 +30,6 @@
             "useFrameworks": "static"
           }
         }
-      ],
-      [
-        "expo-image-picker",
-        {
-          "photosPermission": "Login needs photo access if you want a profile picture.",
-          "cameraPermission": "Login needs camera access if you want to take a selfie."
-        }
       ]
     ],
     "assetBundlePatterns": [
