@@ -8,6 +8,7 @@ import { RefreshControl, Text, View } from 'react-native'
 import Swipeable from '@components/course/swipeable'
 import { ScrollView } from 'react-native-gesture-handler'
 import T from '@styles/text'
+import config from '@/constants'
 
 export default function SpecificCourseScreen({ route }: MenuProps<'SpecificCourseScreen'>): JSX.Element {
     const { theme } = useSelector((state: ReduxState) => state.theme)
@@ -61,7 +62,7 @@ export default function SpecificCourseScreen({ route }: MenuProps<'SpecificCours
                         refreshing={refresh}
                         onRefresh={onRefresh}
                         tintColor={theme.refresh}
-                        progressViewOffset={100}
+                        progressViewOffset={config.progressViewOffset}
                     />
                 }
             >

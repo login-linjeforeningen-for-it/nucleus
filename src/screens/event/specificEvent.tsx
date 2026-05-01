@@ -10,6 +10,7 @@ import EventDetails from '@components/event/eventDetails'
 import { useDispatch } from 'react-redux'
 import { fetchEventDetails } from '@utils/fetch'
 import { setEventName } from '@redux/event'
+import config from '@/constants'
 
 /**
  * @param eventID - The ID of the event to be displayed
@@ -80,7 +81,7 @@ export default function SpecificEventScreen({
                             onRefresh={onRefresh}
                             tintColor={theme.refresh}
                             titleColor={refreshColor}
-                            progressViewOffset={100}
+                            progressViewOffset={config.progressViewOffset}
                         />
                     }
                 >

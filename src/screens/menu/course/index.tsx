@@ -9,6 +9,7 @@ import { getCourses } from '@utils/course/course'
 import { JSX, useCallback, useEffect, useState } from 'react'
 import { View, Image, TouchableOpacity, Dimensions, RefreshControl, Text } from 'react-native'
 import { StackNavigationProp } from '@react-navigation/stack'
+import config from '@/constants'
 
 type CourseListProps = {
     course: CourseAsList
@@ -80,7 +81,7 @@ export default function CourseScreen({ navigation }: MenuProps<'CourseScreen'>):
                             refreshing={refresh}
                             onRefresh={onRefresh}
                             tintColor={theme.refresh}
-                            progressViewOffset={100}
+                            progressViewOffset={config.progressViewOffset}
                         />
                     }
                 >

@@ -8,7 +8,6 @@ import { useState, useCallback, JSX } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { RefreshControl, ScrollView, View } from 'react-native'
 import getListOffset from '@utils/general/getListOffset'
-import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import config from '@/constants'
 
 type ContentProps = {
@@ -24,8 +23,6 @@ export default function EventList(): JSX.Element {
     const { theme } = useSelector((state: ReduxState) => state.theme)
     const [refresh, setRefresh] = useState(false)
     const dispatch = useDispatch()
-    const insets = useSafeAreaInsets()
-    const refreshIndicatorTop = insets.top + config.progressViewOffset
 
     async function getDetails() {
         const { events, ok } = await fetchEventsResult()
@@ -62,7 +59,7 @@ export default function EventList(): JSX.Element {
                             refreshing={refresh}
                             onRefresh={onRefresh}
                             tintColor={theme.refresh}
-                            progressViewOffset={refreshIndicatorTop}
+                            progressViewOffset={config.progressViewOffset}
                         />
                     }
                 >

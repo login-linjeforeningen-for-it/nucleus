@@ -9,6 +9,7 @@ import T from '@styles/text'
 import SpecificAdSections from '@/components/ads/specificAdSections'
 import { setAdName } from '@redux/ad'
 import { fetchAdDetails } from '@utils/fetch'
+import config from '@/constants'
 
 export default function SpecificAdScreen({ route: { params: { adID } } }: AdScreenProps<'SpecificAdScreen'>): JSX.Element {
     const { theme } = useSelector((state: ReduxState) => state.theme)
@@ -70,7 +71,7 @@ export default function SpecificAdScreen({ route: { params: { adID } } }: AdScre
                             refreshing={refresh}
                             onRefresh={onRefresh}
                             tintColor={theme.refresh}
-                            progressViewOffset={100}
+                            progressViewOffset={config.progressViewOffset}
                         />
                     }
                 >

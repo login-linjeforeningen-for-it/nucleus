@@ -27,6 +27,7 @@ import {
 import { JSX, useEffect, useMemo, useState } from 'react'
 import { Dimensions, RefreshControl, ScrollView, View } from 'react-native'
 import { useSelector } from 'react-redux'
+import config from '@/constants'
 
 export default function QueenbeeScreen({ navigation }: MenuProps<'QueenbeeScreen'>): JSX.Element {
     const { theme } = useSelector((state: ReduxState) => state.theme)
@@ -137,7 +138,7 @@ export default function QueenbeeScreen({ navigation }: MenuProps<'QueenbeeScreen
                         refreshing={loading}
                         onRefresh={() => refresh()}
                         tintColor={theme.refresh}
-                        progressViewOffset={100}
+                        progressViewOffset={config.progressViewOffset}
                     />}
                     contentContainerStyle={{ paddingBottom: 40 }}
                 >

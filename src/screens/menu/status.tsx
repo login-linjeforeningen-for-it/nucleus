@@ -9,6 +9,7 @@ import { useSelector } from 'react-redux'
 import { ServiceRow } from './status/statusCards'
 import { NotificationForm, ServiceForm } from './status/statusForms'
 import useStatusServices from './status/useStatusServices'
+import config from '@/constants'
 
 export default function StatusScreen(): JSX.Element {
     const { theme } = useSelector((state: ReduxState) => state.theme)
@@ -45,7 +46,7 @@ export default function StatusScreen(): JSX.Element {
                             refreshing={status.refreshing}
                             onRefresh={() => status.load()}
                             tintColor={theme.refresh}
-                            progressViewOffset={100}
+                            progressViewOffset={config.progressViewOffset}
                         />
                     }
                     style={GS.content}

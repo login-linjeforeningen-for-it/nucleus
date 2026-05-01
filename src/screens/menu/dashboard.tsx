@@ -9,6 +9,7 @@ import { getDashboardSummary } from '@utils/discovery/discoveryApi'
 import { JSX, useEffect, useState } from 'react'
 import { RefreshControl, ScrollView, View } from 'react-native'
 import { useSelector } from 'react-redux'
+import config from '@/constants'
 
 export default function DashboardScreen(): JSX.Element {
     const { theme } = useSelector((state: ReduxState) => state.theme)
@@ -41,7 +42,7 @@ export default function DashboardScreen(): JSX.Element {
                             refreshing={refreshing}
                             onRefresh={() => load()}
                             tintColor={theme.refresh}
-                            progressViewOffset={100}
+                            progressViewOffset={config.progressViewOffset}
                         />
                     }
                     style={GS.content}

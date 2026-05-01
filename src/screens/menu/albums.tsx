@@ -10,6 +10,7 @@ import { fetchAlbums } from '@utils/fetch'
 import { JSX, useEffect, useMemo, useRef, useState } from 'react'
 import { Dimensions, FlatList, RefreshControl, View, ViewToken } from 'react-native'
 import { useSelector } from 'react-redux'
+import config from '@/constants'
 
 export default function AlbumsScreen({ navigation }: MenuProps<'AlbumsScreen'>): JSX.Element {
     const { theme } = useSelector((state: ReduxState) => state.theme)
@@ -89,7 +90,7 @@ export default function AlbumsScreen({ navigation }: MenuProps<'AlbumsScreen'>):
                             refreshing={refreshing}
                             onRefresh={() => load()}
                             tintColor={theme.refresh}
-                            progressViewOffset={100}
+                            progressViewOffset={config.progressViewOffset}
                         />
                     }
                     style={GS.content}

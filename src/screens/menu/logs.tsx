@@ -1,5 +1,6 @@
 import Cluster from '@/components/shared/cluster'
 import Space from '@/components/shared/utils'
+import config from '@/constants'
 import LogSourceCard from '@components/menu/logs/logSourceCard'
 import Swipe from '@components/nav/swipe'
 import Text from '@components/shared/text'
@@ -43,7 +44,7 @@ export default function LogsScreen(): JSX.Element {
                         refreshing={refreshing}
                         onRefresh={() => load()}
                         tintColor={theme.refresh}
-                        progressViewOffset={100}
+                        progressViewOffset={config.progressViewOffset}
                     />}
                     style={GS.content}
                     contentContainerStyle={{ paddingBottom: 80 }}

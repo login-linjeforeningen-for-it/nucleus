@@ -1,5 +1,6 @@
 import Cluster from '@/components/shared/cluster'
 import Space from '@/components/shared/utils'
+import config from '@/constants'
 import HoneyCard from '@components/menu/honey/honeyCard'
 import Swipe from '@components/nav/swipe'
 import Text from '@components/shared/text'
@@ -52,7 +53,7 @@ export default function HoneyScreen(): JSX.Element {
                         refreshing={refreshing}
                         onRefresh={() => load()}
                         tintColor={theme.refresh}
-                        progressViewOffset={100}
+                        progressViewOffset={config.progressViewOffset}
                     />}
                     showsVerticalScrollIndicator={false}
                 >

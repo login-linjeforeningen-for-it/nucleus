@@ -9,6 +9,7 @@ import { Dimensions, Pressable, RefreshControl, ScrollView, View } from 'react-n
 import { useSelector } from 'react-redux'
 import { SummaryCard, TrafficRecordCard } from './traffic/cards'
 import { DomainPicker, TrafficTabs } from './traffic/nav'
+import config from '@/constants'
 
 const PAGE_SIZE = 25
 
@@ -53,7 +54,7 @@ export default function TrafficRecordsScreen({ navigation }: MenuProps<'TrafficR
                             refreshing={refreshing}
                             onRefresh={() => load()}
                             tintColor={theme.refresh}
-                            progressViewOffset={100}
+                            progressViewOffset={config.progressViewOffset}
                         />
                     }
                     style={GS.content}

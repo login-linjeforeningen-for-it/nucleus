@@ -16,6 +16,7 @@ import TrafficMapPanel from './traffic/trafficMapPanel'
 import { useTrafficMapState } from './traffic/useTrafficMapState'
 import { MetricList } from './traffic/cards'
 import { TrafficTabs } from './traffic/nav'
+import config from '@/constants'
 
 export default function TrafficMapScreen({ navigation }: MenuProps<'TrafficMapScreen'>) {
     const { theme } = useSelector((state: ReduxState) => state.theme)
@@ -112,7 +113,7 @@ export default function TrafficMapScreen({ navigation }: MenuProps<'TrafficMapSc
                         refreshing={refreshing}
                         onRefresh={() => load()}
                         tintColor={theme.refresh}
-                        progressViewOffset={100}
+                        progressViewOffset={config.progressViewOffset}
                     />}
                     style={GS.content}
                     contentContainerStyle={{ paddingBottom: 80 }}

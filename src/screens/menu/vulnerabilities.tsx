@@ -14,6 +14,7 @@ import { getScoutOverview, getVulnerabilitiesOverview, triggerVulnerabilityScan 
 import { JSX, useEffect, useState } from 'react'
 import { Dimensions, RefreshControl, ScrollView, View } from 'react-native'
 import { useSelector } from 'react-redux'
+import config from '@/constants'
 
 type ExpandedState = Record<string, boolean>
 
@@ -71,7 +72,7 @@ export default function VulnerabilitiesScreen(): JSX.Element {
                         refreshing={refreshing}
                         onRefresh={() => load()}
                         tintColor={theme.refresh}
-                        progressViewOffset={100}
+                        progressViewOffset={config.progressViewOffset}
                     />}
                     style={GS.content}
                     contentContainerStyle={{ paddingBottom: 80 }}

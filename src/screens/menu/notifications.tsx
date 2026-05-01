@@ -19,6 +19,7 @@ import {
     parseNotificationList,
     pruneOldNotifications,
 } from '@utils/notification/list'
+import config from '@/constants'
 
 type ReadListProps = {
     list: NotificationListProps[]
@@ -68,7 +69,7 @@ export default function NotificationScreen(): JSX.Element {
                             refreshing={refresh}
                             onRefresh={onRefresh}
                             tintColor={theme.refresh}
-                            progressViewOffset={100}
+                            progressViewOffset={config.progressViewOffset}
                         />
                     }
                 >

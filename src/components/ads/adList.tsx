@@ -7,6 +7,7 @@ import LastFetch, { fetchAdDetails, fetchAds } from '@utils/fetch'
 import { setAds, setLastFetch } from '@redux/ad'
 import { RefreshControl, ScrollView, View } from 'react-native'
 import getListOffset from '@utils/general/getListOffset'
+import config from '@/constants'
 
 /**
  * Displays the ad list
@@ -63,7 +64,7 @@ export default function AdList(): JSX.Element {
                             refreshing={refresh}
                             onRefresh={onRefresh}
                             tintColor={theme.refresh}
-                            progressViewOffset={100}
+                            progressViewOffset={config.progressViewOffset}
                         />
                     }
                 >

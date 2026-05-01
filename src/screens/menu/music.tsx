@@ -1,5 +1,6 @@
 import Cluster from '@/components/shared/cluster'
 import Space from '@/components/shared/utils'
+import config from '@/constants'
 import SongList from '@components/music/songList'
 import Swipe from '@components/nav/swipe'
 import Text from '@components/shared/text'
@@ -44,7 +45,7 @@ export default function MusicScreen(): JSX.Element {
                             refreshing={refreshing}
                             onRefresh={() => load()}
                             tintColor={theme.refresh}
-                            progressViewOffset={100}
+                            progressViewOffset={config.progressViewOffset}
                         />
                     }
                     style={GS.content}

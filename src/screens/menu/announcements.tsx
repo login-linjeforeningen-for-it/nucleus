@@ -1,5 +1,6 @@
 import Cluster from '@/components/shared/cluster'
 import Space from '@/components/shared/utils'
+import config from '@/constants'
 import AnnouncementCard, { filterAnnouncements } from '@components/menu/announcements/announcementCard'
 import Swipe from '@components/nav/swipe'
 import Text from '@components/shared/text'
@@ -58,7 +59,7 @@ export default function AnnouncementsScreen(): JSX.Element {
                         refreshing={refreshing}
                         onRefresh={() => load()}
                         tintColor={theme.refresh}
-                        progressViewOffset={100}
+                        progressViewOffset={config.progressViewOffset}
                     />}
                     style={GS.content}
                     contentContainerStyle={{ paddingHorizontal: 4, paddingBottom: 90 }}

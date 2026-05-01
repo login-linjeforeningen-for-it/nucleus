@@ -10,6 +10,7 @@ import { fetchAlbumDetails } from '@utils/fetch'
 import { JSX, useEffect, useState } from 'react'
 import { Dimensions, RefreshControl, ScrollView, View } from 'react-native'
 import { useSelector } from 'react-redux'
+import config from '@/constants'
 
 export default function SpecificAlbumScreen({
     navigation,
@@ -95,7 +96,7 @@ export default function SpecificAlbumScreen({
                             refreshing={refreshing}
                             onRefresh={() => load()}
                             tintColor={theme.refresh}
-                            progressViewOffset={100}
+                            progressViewOffset={config.progressViewOffset}
                         />
                     }
                     style={GS.content}

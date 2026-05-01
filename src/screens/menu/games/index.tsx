@@ -13,6 +13,7 @@ import {
 } from 'react-native'
 import GS from '@styles/globalStyles'
 import T from '@styles/text'
+import config from '@/constants'
 
 export default function GameScreen({ navigation }: MenuProps<'GameScreen'>): JSX.Element {
     const [games, setGames] = useState<string | Game[]>([])
@@ -54,7 +55,7 @@ export default function GameScreen({ navigation }: MenuProps<'GameScreen'>): JSX
                             refreshing={refreshing}
                             onRefresh={onRefresh}
                             tintColor={theme.refresh}
-                            progressViewOffset={100}
+                            progressViewOffset={config.progressViewOffset}
                         />
                     }
                 >
