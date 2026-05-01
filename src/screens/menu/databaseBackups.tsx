@@ -3,7 +3,6 @@ import Space from '@/components/shared/utils'
 import { BackupCard, BackupFileCard, EmptyCard, MessageCard, TabPill } from '@components/menu/databaseBackups/backupCards'
 import Swipe from '@components/nav/swipe'
 import Text from '@components/shared/text'
-import TopRefreshIndicator from '@components/shared/topRefreshIndicator'
 import GS from '@styles/globalStyles'
 import T from '@styles/text'
 import { filterByContentQuery } from '@utils/content/content'
@@ -80,7 +79,14 @@ export default function DatabaseBackupsScreen(): JSX.Element {
         <Swipe left='DatabaseScreen'>
             <View style={{ flex: 1, backgroundColor: theme.darker }}>
                 <ScrollView
-                    refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => load()} tintColor={theme.orange} colors={[theme.orange]} progressViewOffset={0} />}
+                    refreshControl={
+                        <RefreshControl
+                            refreshing={refreshing}
+                            onRefresh={() => load()}
+                            tintColor={theme.refresh}
+                            progressViewOffset={100}
+                        />
+                    }
                     style={GS.content}
                     contentContainerStyle={{ paddingHorizontal: 4, paddingBottom: 90 }}
                     keyboardShouldPersistTaps='handled'
@@ -107,7 +113,6 @@ export default function DatabaseBackupsScreen(): JSX.Element {
                         onRestore={(file) => confirmRestore(file, () => restoreBackup(file))}
                     />
                 </ScrollView>
-                <TopRefreshIndicator refreshing={refreshing} theme={theme} top={112} />
             </View>
         </Swipe>
     )

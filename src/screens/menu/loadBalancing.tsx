@@ -3,7 +3,6 @@ import Space from '@/components/shared/utils'
 import { LoadBalancingSiteCard, LoadBalancingSummary } from '@/components/menu/loadBalancing/loadBalancingCards'
 import Swipe from '@components/nav/swipe'
 import Text from '@components/shared/text'
-import TopRefreshIndicator from '@components/shared/topRefreshIndicator'
 import GS from '@styles/globalStyles'
 import T from '@styles/text'
 import { getLoadBalancingSites, setPrimaryLoadBalancingSite } from '@utils/queenbee/api'
@@ -60,9 +59,8 @@ export default function LoadBalancingScreen(): JSX.Element {
                         <RefreshControl
                             refreshing={refreshing}
                             onRefresh={() => load()}
-                            tintColor={theme.orange}
-                            colors={[theme.orange]}
-                            progressViewOffset={0}
+                            tintColor={theme.refresh}
+                            progressViewOffset={100}
                         />
                     }
                     style={GS.content}
@@ -95,7 +93,6 @@ export default function LoadBalancingScreen(): JSX.Element {
                         />
                     ))}
                 </ScrollView>
-                <TopRefreshIndicator refreshing={refreshing} theme={theme} top={112} />
             </View>
         </Swipe>
     )

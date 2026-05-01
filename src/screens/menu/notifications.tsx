@@ -2,7 +2,6 @@ import Space from '@/components/shared/utils'
 import GS from '@styles/globalStyles'
 import { JSX, useCallback, useEffect, useState } from 'react'
 import { useSelector } from 'react-redux'
-import TopRefreshIndicator from '@components/shared/topRefreshIndicator'
 import {
     View,
     Text,
@@ -68,9 +67,8 @@ export default function NotificationScreen(): JSX.Element {
                         <RefreshControl
                             refreshing={refresh}
                             onRefresh={onRefresh}
-                            tintColor={theme.orange}
-                            colors={[theme.orange]}
-                            progressViewOffset={0}
+                            tintColor={theme.refresh}
+                            progressViewOffset={100}
                         />
                     }
                 >
@@ -90,7 +88,6 @@ export default function NotificationScreen(): JSX.Element {
                                 : 'You have no notifications at this time. Check back later.'}
                         </Text>}
                 </ScrollView>
-                <TopRefreshIndicator refreshing={refresh} theme={theme} top={112} />
             </View>
         </Swipe>
     )

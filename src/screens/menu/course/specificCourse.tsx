@@ -1,7 +1,6 @@
 import { useDispatch, useSelector } from 'react-redux'
 import Parent from '@components/shared/parent'
 import ReadOnly from '@components/course/readonly'
-import TopRefreshIndicator from '@components/shared/topRefreshIndicator'
 import { setLocalTitle } from '@redux/misc'
 import { getCourseByCode } from '@utils/course/course'
 import { JSX, useCallback, useEffect, useState } from 'react'
@@ -61,9 +60,8 @@ export default function SpecificCourseScreen({ route }: MenuProps<'SpecificCours
                     <RefreshControl
                         refreshing={refresh}
                         onRefresh={onRefresh}
-                        tintColor={theme.orange}
-                        colors={[theme.orange]}
-                        progressViewOffset={0}
+                        tintColor={theme.refresh}
+                        progressViewOffset={100}
                     />
                 }
             >
@@ -79,7 +77,6 @@ export default function SpecificCourseScreen({ route }: MenuProps<'SpecificCours
                     />
                 }
             </ScrollView>
-            <TopRefreshIndicator refreshing={refresh} theme={theme} top={112} />
         </Parent>
     )
 }

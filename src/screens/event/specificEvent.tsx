@@ -5,7 +5,6 @@ import ES from '@styles/eventStyles'
 import { Dimensions, Platform, RefreshControl, ScrollView, View, Text } from 'react-native'
 import Swipe from '@components/nav/swipe'
 import Cluster from '@components/shared/cluster'
-import TopRefreshIndicator from '@components/shared/topRefreshIndicator'
 import T from '@styles/text'
 import EventDetails from '@components/event/eventDetails'
 import { useDispatch } from 'react-redux'
@@ -79,11 +78,9 @@ export default function SpecificEventScreen({
                         <RefreshControl
                             refreshing={refresh}
                             onRefresh={onRefresh}
-                            tintColor={refreshColor}
-                            colors={[refreshColor]}
-                            progressBackgroundColor={theme.darker || theme.background}
+                            tintColor={theme.refresh}
                             titleColor={refreshColor}
-                            progressViewOffset={0}
+                            progressViewOffset={100}
                         />
                     }
                 >
@@ -98,7 +95,6 @@ export default function SpecificEventScreen({
                     {event?.id ? <EventDetails event={event} /> : null}
                     <Space height={Dimensions.get('window').height / (Platform.OS === 'ios' ? 3 : 2.75)} />
                 </ScrollView>
-                <TopRefreshIndicator color={refreshColor} refreshing={refresh} theme={theme} top={112} />
             </View>
         </Swipe>
     )

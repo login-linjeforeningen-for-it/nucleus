@@ -4,7 +4,6 @@ import GS from '@styles/globalStyles'
 import { useSelector } from 'react-redux'
 import T from '@styles/text'
 import Swipe from '@components/nav/swipe'
-import TopRefreshIndicator from '@components/shared/topRefreshIndicator'
 import { ScrollView } from 'react-native-gesture-handler'
 import { getCourses } from '@utils/course/course'
 import { JSX, useCallback, useEffect, useState } from 'react'
@@ -80,9 +79,8 @@ export default function CourseScreen({ navigation }: MenuProps<'CourseScreen'>):
                         <RefreshControl
                             refreshing={refresh}
                             onRefresh={onRefresh}
-                            tintColor={theme.orange}
-                            colors={[theme.orange]}
-                            progressViewOffset={0}
+                            tintColor={theme.refresh}
+                            progressViewOffset={100}
                         />
                     }
                 >
@@ -96,7 +94,6 @@ export default function CourseScreen({ navigation }: MenuProps<'CourseScreen'>):
                     )}
                     <Space height={Dimensions.get('window').height / 8.5} />
                 </ScrollView>
-                <TopRefreshIndicator refreshing={refresh} theme={theme} top={112} />
             </View>
         </Swipe>
     )

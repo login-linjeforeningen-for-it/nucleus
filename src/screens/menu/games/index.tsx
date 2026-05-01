@@ -2,7 +2,6 @@ import Cluster from '@/components/shared/cluster'
 import Space from '@/components/shared/utils'
 import { FeaturedGame, GameList, GameScreenText, SectionTitle } from '@components/games/cards'
 import Swipe from '@components/nav/swipe'
-import TopRefreshIndicator from '@components/shared/topRefreshIndicator'
 import { getGames } from '@utils/games/game'
 import { JSX, useCallback, useEffect, useMemo, useState } from 'react'
 import { useSelector } from 'react-redux'
@@ -54,9 +53,8 @@ export default function GameScreen({ navigation }: MenuProps<'GameScreen'>): JSX
                         <RefreshControl
                             refreshing={refreshing}
                             onRefresh={onRefresh}
-                            tintColor={theme.orange}
-                            colors={[theme.orange]}
-                            progressViewOffset={0}
+                            tintColor={theme.refresh}
+                            progressViewOffset={100}
                         />
                     }
                 >
@@ -105,7 +103,6 @@ export default function GameScreen({ navigation }: MenuProps<'GameScreen'>): JSX
                         ))
                     )}
                 </ScrollView>
-                <TopRefreshIndicator refreshing={refreshing} theme={theme} top={112} />
             </View>
         </Swipe>
     )

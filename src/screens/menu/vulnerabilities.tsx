@@ -9,7 +9,6 @@ import {
 } from '@components/menu/vulnerabilities/vulnerabilityOverview'
 import ImageCard from '@components/menu/vulnerabilities/imageCard'
 import Swipe from '@components/nav/swipe'
-import TopRefreshIndicator from '@components/shared/topRefreshIndicator'
 import GS from '@styles/globalStyles'
 import { getScoutOverview, getVulnerabilitiesOverview, triggerVulnerabilityScan } from '@utils/queenbee/api'
 import { JSX, useEffect, useState } from 'react'
@@ -71,9 +70,8 @@ export default function VulnerabilitiesScreen(): JSX.Element {
                     refreshControl={<RefreshControl
                         refreshing={refreshing}
                         onRefresh={() => load()}
-                        tintColor={theme.orange}
-                        colors={[theme.orange]}
-                        progressViewOffset={0}
+                        tintColor={theme.refresh}
+                        progressViewOffset={100}
                     />}
                     style={GS.content}
                     contentContainerStyle={{ paddingBottom: 80 }}
@@ -97,7 +95,6 @@ export default function VulnerabilitiesScreen(): JSX.Element {
                         </>
                     ) : null}
                 </ScrollView>
-                <TopRefreshIndicator refreshing={refreshing} theme={theme} top={112} />
             </View>
         </Swipe>
     )

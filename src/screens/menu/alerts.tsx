@@ -2,7 +2,6 @@ import Cluster from '@/components/shared/cluster'
 import Space from '@/components/shared/utils'
 import Swipe from '@components/nav/swipe'
 import Text from '@components/shared/text'
-import TopRefreshIndicator from '@components/shared/topRefreshIndicator'
 import GS from '@styles/globalStyles'
 import T from '@styles/text'
 import { filterByContentQuery, formatContentDate } from '@utils/content/content'
@@ -63,9 +62,8 @@ export default function AlertsScreen(): JSX.Element {
                         <RefreshControl
                             refreshing={refreshing}
                             onRefresh={() => load()}
-                            tintColor={theme.orange}
-                            colors={[theme.orange]}
-                            progressViewOffset={0}
+                            tintColor={theme.refresh}
+                            progressViewOffset={100}
                         />
                     }
                     style={GS.content}
@@ -131,7 +129,6 @@ export default function AlertsScreen(): JSX.Element {
                         </TouchableOpacity>
                     )}
                 </ScrollView>
-                <TopRefreshIndicator refreshing={refreshing} theme={theme} top={112} />
             </View>
         </Swipe>
     )

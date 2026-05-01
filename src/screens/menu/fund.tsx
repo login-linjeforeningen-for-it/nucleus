@@ -4,7 +4,6 @@ import { BoardCard, FundSupportCard, HoldingsCard, SectionCard } from '@/compone
 import { FundSection } from '@/components/menu/fund/fundContent'
 import Swipe from '@components/nav/swipe'
 import Text from '@components/shared/text'
-import TopRefreshIndicator from '@components/shared/topRefreshIndicator'
 import GS from '@styles/globalStyles'
 import T from '@styles/text'
 import { fetchFundHoldings, fetchFundHoldingsHistory } from '@utils/fetch'
@@ -43,9 +42,8 @@ export default function FundScreen(): JSX.Element {
                         <RefreshControl
                             refreshing={refreshing}
                             onRefresh={() => load()}
-                            tintColor={theme.orange}
-                            colors={[theme.orange]}
-                            progressViewOffset={0}
+                            tintColor={theme.refresh}
+                            progressViewOffset={100}
                         />
                     }
                     style={GS.content}
@@ -75,7 +73,6 @@ export default function FundScreen(): JSX.Element {
                     <Space height={10} />
                     <BoardCard text={text.board} />
                 </ScrollView>
-                <TopRefreshIndicator refreshing={refreshing} theme={theme} top={112} />
             </View>
         </Swipe>
     )

@@ -56,13 +56,6 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
                 }
             }
         ],
-        [
-            'expo-media-library',
-            {
-                photosPermission: 'Login needs photo access so album images can be saved.',
-                savePhotosPermission: 'Login needs permission to save album images to your photo library.'
-            }
-        ],
     ],
     assetBundlePatterns: [
         '**/*'
@@ -77,6 +70,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
         ],
         infoPlist: {
             ITSAppUsesNonExemptEncryption: false,
+            NSPhotoLibraryAddUsageDescription: 'Login can save selected album images to your photo library when you ask it to.',
             UIBackgroundModes: [
                 'fetch',
                 'remote-notification'
@@ -96,6 +90,15 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
             'PUSH_NOTIFICATIONS',
             'READ_CALENDAR',
             'WRITE_CALENDAR'
+        ],
+        blockedPermissions: [
+            'android.permission.READ_MEDIA_IMAGES',
+            'android.permission.READ_MEDIA_VIDEO',
+            'android.permission.READ_MEDIA_AUDIO',
+            'android.permission.READ_MEDIA_VISUAL_USER_SELECTED',
+            'android.permission.READ_EXTERNAL_STORAGE',
+            'android.permission.WRITE_EXTERNAL_STORAGE',
+            'android.permission.ACCESS_MEDIA_LOCATION'
         ],
         intentFilters: [
             {

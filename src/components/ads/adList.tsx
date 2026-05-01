@@ -2,7 +2,6 @@ import { useDispatch, useSelector } from 'react-redux'
 import AdCluster from './adCluster'
 import { ErrorMessage } from '@components/shared/utils'
 import Space from '@/components/shared/utils'
-import TopRefreshIndicator from '@components/shared/topRefreshIndicator'
 import { JSX, useCallback, useState } from 'react'
 import LastFetch, { fetchAdDetails, fetchAds } from '@utils/fetch'
 import { setAds, setLastFetch } from '@redux/ad'
@@ -63,16 +62,14 @@ export default function AdList(): JSX.Element {
                         <RefreshControl
                             refreshing={refresh}
                             onRefresh={onRefresh}
-                            tintColor={theme.orange}
-                            colors={[theme.orange]}
-                            progressViewOffset={0}
+                            tintColor={theme.refresh}
+                            progressViewOffset={100}
                         />
                     }
                 >
                     {adList.map((ad, index) => <AdCluster index={index} ad={ad} key={index} />)}
                     <Space height={offset} />
                 </ScrollView>
-                <TopRefreshIndicator refreshing={refresh} theme={theme} top={112} />
             </View>
         )
     }

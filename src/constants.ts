@@ -20,7 +20,8 @@ const config = {
     tekkom_bot_api: 'https://bot.login.no/api',
     support_mail: 'tekkom@login.no',
     workerbee: 'https://workerbee.login.no/api/v2',
-    app_api: 'https://app.login.no/api'
+    app_api: 'https://app.login.no/api',
+    progressViewOffset: 100
 }
 
 export default config

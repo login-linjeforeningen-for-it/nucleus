@@ -1,5 +1,5 @@
 import { createSlice } from '@reduxjs/toolkit'
-import { Abyss, Christmas, Dark, Easter, Light, Sunset } from '@themes/index'
+import { Abyss, Christmas, Dark, Easter, Light, Sunset } from '@styles/themes'
 
 // Declares the theme slice
 export const ThemeSlice = createSlice({

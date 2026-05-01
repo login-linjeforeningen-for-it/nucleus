@@ -8,6 +8,7 @@ export const EventSlice = createSlice({
         eventName: '',
         clickedEvents: [] as GetEventProps[],
         renderedEvents: [] as GetEventProps[],
+        fetchError: false,
         lastFetch: '',
         lastSave: '',
         search: false,
@@ -25,10 +26,14 @@ export const EventSlice = createSlice({
         setEvents(state, action) {
             state.events = action.payload
             state.categories = setCategories(state.events, state.clickedEvents)
+            state.fetchError = false
 
             if (!state.search) {
                 state.renderedEvents = action.payload
             }
+        },
+        setEventFetchError(state, action) {
+            state.fetchError = action.payload
         },
         // Sets the event to be displayed on SES
         setEventName(state, action) {
@@ -98,6 +103,7 @@ export const {
     setClickedCategories,
     setClickedEvents,
     setEvents,
+    setEventFetchError,
     setEventName,
     setInput,
     setLastFetch,

@@ -2,16 +2,24 @@ import Text from '@components/shared/text'
 import { useSwipeNavigationLock } from '@components/nav/swipe'
 import T from '@styles/text'
 import { Image, Modal, PanResponder, Pressable, ScrollView, useWindowDimensions, View } from 'react-native'
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { Gesture, GestureDetector } from 'react-native-gesture-handler'
+import { ReactNode, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useSelector } from 'react-redux'
-import { Minus, Plus, X } from 'lucide-react-native'
+import { Minus, Plus, RotateCcw, X } from 'lucide-react-native'
 
 const MAX_ZOOM = 20
-const SWIPE_DISTANCE = 20
-const DISMISS_DISTANCE = 20
+const SWIPE_DISTANCE = 10
+const DISMISS_DISTANCE = 10
+const VIEWPORT_CENTER = 'viewport-center'
+
+type ZoomAnchor = {
+    x: number
+    y: number
+}
 
 export function AlbumImageViewer({
+    footer,
     imageUri,
     imageUris = [],
     onChangeImage,
@@ -19,6 +27,7 @@ export function AlbumImageViewer({
     onImageLoadEnd,
     title,
 }: {
+    footer?: ReactNode
     imageUri: string | null
     imageUris?: string[]
     onChangeImage?: (uri: string) => void
@@ -31,6 +40,9 @@ export function AlbumImageViewer({
     const horizontalScrollRef = useRef<ScrollView>(null)
     const verticalScrollRef = useRef<ScrollView>(null)
     const lastImageTap = useRef(0)
+    const pinchStartZoom = useRef(1)
+    const currentZoom = useRef(1)
+    const scrollOffset = useRef({ x: 0, y: 0 })
     const swipeNavigation = useSwipeNavigationLock()
     const viewport = useWindowDimensions()
     const insets = useSafeAreaInsets()
@@ -48,6 +60,9 @@ export function AlbumImageViewer({
 
     useEffect(() => {
         setZoom(1)
+        pinchStartZoom.current = 1
+        currentZoom.current = 1
+        scrollOffset.current = { x: 0, y: 0 }
         lastImageTap.current = 0
     }, [imageUri])
 
@@ -57,15 +72,16 @@ export function AlbumImageViewer({
         }
 
         const centerFrame = requestAnimationFrame(() => {
-            const x = Math.max(0, (scaledWidth - viewport.width) / 2)
-            const y = Math.max(0, (scaledHeight - viewerHeight) / 2)
+            const x = Math.max(0, (initialSize.width - viewport.width) / 2)
+            const y = Math.max(0, (initialSize.height - viewerHeight) / 2)
 
             horizontalScrollRef.current?.scrollTo({ x, animated: false })
             verticalScrollRef.current?.scrollTo({ y, animated: false })
+            scrollOffset.current = { x, y }
         })
 
         return () => cancelAnimationFrame(centerFrame)
-    }, [imageUri, scaledHeight, scaledWidth, viewerHeight, viewport.width, zoom])
+    }, [imageUri, initialSize.height, initialSize.width, viewerHeight, viewport.width])
 
     useEffect(() => {
         if (!imageUri) {
@@ -78,8 +94,71 @@ export function AlbumImageViewer({
 
     function close() {
         setZoom(1)
+        pinchStartZoom.current = 1
+        currentZoom.current = 1
+        scrollOffset.current = { x: 0, y: 0 }
         onClose()
     }
+
+    const applyZoom = useCallback((value: number, anchor: ZoomAnchor | typeof VIEWPORT_CENTER = VIEWPORT_CENTER) => {
+        const oldZoom = currentZoom.current
+        const nextZoom = Math.min(MAX_ZOOM, Math.max(1, value))
+
+        if (nextZoom === oldZoom) {
+            return
+        }
+
+        const anchorPoint = anchor === VIEWPORT_CENTER
+            ? { x: viewport.width / 2, y: viewerHeight / 2 }
+            : {
+                x: Math.min(Math.max(anchor.x, 0), viewport.width),
+                y: Math.min(Math.max(anchor.y, 0), viewerHeight),
+            }
+        const oldContent = {
+            width: Math.max(viewport.width, initialSize.width * oldZoom),
+            height: Math.max(viewerHeight, initialSize.height * oldZoom),
+        }
+        const newContent = {
+            width: Math.max(viewport.width, initialSize.width * nextZoom),
+            height: Math.max(viewerHeight, initialSize.height * nextZoom),
+        }
+        const nextOffset = {
+            x: clamp(
+                ((scrollOffset.current.x + anchorPoint.x) / oldContent.width) * newContent.width - anchorPoint.x,
+                0,
+                Math.max(0, newContent.width - viewport.width),
+            ),
+            y: clamp(
+                ((scrollOffset.current.y + anchorPoint.y) / oldContent.height) * newContent.height - anchorPoint.y,
+                0,
+                Math.max(0, newContent.height - viewerHeight),
+            ),
+        }
+
+        currentZoom.current = nextZoom
+        setZoom(nextZoom)
+
+        requestAnimationFrame(() => {
+            horizontalScrollRef.current?.scrollTo({ x: nextOffset.x, animated: false })
+            verticalScrollRef.current?.scrollTo({ y: nextOffset.y, animated: false })
+            scrollOffset.current = nextOffset
+        })
+    }, [initialSize.height, initialSize.width, viewerHeight, viewport.width])
+
+    const resetZoom = useCallback(() => {
+        currentZoom.current = 1
+        pinchStartZoom.current = 1
+        setZoom(1)
+
+        requestAnimationFrame(() => {
+            const x = Math.max(0, (initialSize.width - viewport.width) / 2)
+            const y = Math.max(0, (initialSize.height - viewerHeight) / 2)
+
+            horizontalScrollRef.current?.scrollTo({ x, animated: false })
+            verticalScrollRef.current?.scrollTo({ y, animated: false })
+            scrollOffset.current = { x, y }
+        })
+    }, [initialSize.height, initialSize.width, viewerHeight, viewport.width])
 
     function handleImagePress() {
         const now = Date.now()
@@ -87,7 +166,7 @@ export function AlbumImageViewer({
         lastImageTap.current = now
 
         if (isDoubleTap) {
-            setZoom((value) => value === 1 ? 2 : 1)
+            applyZoom(zoom === 1 ? 2 : 1, VIEWPORT_CENTER)
             lastImageTap.current = 0
         }
     }
@@ -102,8 +181,13 @@ export function AlbumImageViewer({
         }
     }
     const panResponder = useMemo(() => PanResponder.create({
-        onMoveShouldSetPanResponderCapture: (_, gesture) => {
-            const horizontalSwipe = canNavigateImages
+        onMoveShouldSetPanResponderCapture: (event, gesture) => {
+            if (event.nativeEvent.touches.length > 1) {
+                return false
+            }
+
+            const horizontalSwipe = zoom < 2
+                && canNavigateImages
                 && Math.abs(gesture.dx) > 10
                 && Math.abs(gesture.dx) > Math.abs(gesture.dy)
             const downwardDismiss = zoom < 2
@@ -129,6 +213,21 @@ export function AlbumImageViewer({
         },
         onPanResponderRelease: () => {}
     }), [canNavigateImages, currentIndex, imageUris, zoom])
+
+    const pinchGesture = useMemo(() => Gesture.Pinch()
+        .onBegin(() => {
+            pinchStartZoom.current = currentZoom.current
+        })
+        .onUpdate((event) => {
+            applyZoom(pinchStartZoom.current * event.scale, {
+                x: event.focalX,
+                y: event.focalY,
+            })
+        })
+        .onEnd(() => {
+            pinchStartZoom.current = currentZoom.current
+        })
+        .runOnJS(true), [applyZoom])
 
     return (
         <Modal
@@ -156,6 +255,10 @@ export function AlbumImageViewer({
                     centerContent
                     showsHorizontalScrollIndicator={zoom > 1}
                     showsVerticalScrollIndicator={zoom > 1}
+                    scrollEventThrottle={16}
+                    onScroll={(event) => {
+                        scrollOffset.current.x = event.nativeEvent.contentOffset.x
+                    }}
                     contentContainerStyle={{
                         width: Math.max(viewport.width, scaledWidth),
                         height: viewerHeight,
@@ -174,6 +277,10 @@ export function AlbumImageViewer({
                         bouncesZoom={false}
                         centerContent
                         showsVerticalScrollIndicator={zoom > 1}
+                        scrollEventThrottle={16}
+                        onScroll={(event) => {
+                            scrollOffset.current.y = event.nativeEvent.contentOffset.y
+                        }}
                         contentContainerStyle={{
                             minWidth: Math.max(viewport.width, scaledWidth),
                             minHeight: Math.max(viewerHeight, scaledHeight),
@@ -182,28 +289,30 @@ export function AlbumImageViewer({
                         }}
                     >
                         {imageUri ? (
-                            <Pressable
-                                accessibilityRole='imagebutton'
-                                accessibilityLabel={title}
-                                onPress={handleImagePress}
-                                style={{
-                                    width: scaledWidth,
-                                    height: scaledHeight,
-                                    borderRadius: Math.max(8, 24 / zoom),
-                                    overflow: 'hidden',
-                                }}
-                            >
-                                <Image
-                                    source={{ uri: imageUri, cache: 'force-cache' }}
+                            <GestureDetector gesture={pinchGesture}>
+                                <Pressable
+                                    accessibilityRole='imagebutton'
                                     accessibilityLabel={title}
-                                    onLoadEnd={onImageLoadEnd}
-                                    resizeMode='contain'
+                                    onPress={handleImagePress}
                                     style={{
-                                        width: '100%',
-                                        height: '100%',
+                                        width: scaledWidth,
+                                        height: scaledHeight,
+                                        borderRadius: Math.max(8, 24 / zoom),
+                                        overflow: 'hidden',
                                     }}
-                                />
-                            </Pressable>
+                                >
+                                    <Image
+                                        source={{ uri: imageUri, cache: 'force-cache' }}
+                                        accessibilityLabel={title}
+                                        onLoadEnd={onImageLoadEnd}
+                                        resizeMode='contain'
+                                        style={{
+                                            width: '100%',
+                                            height: '100%',
+                                        }}
+                                    />
+                                </Pressable>
+                            </GestureDetector>
                         ) : null}
                     </ScrollView>
                 </ScrollView>
@@ -211,9 +320,21 @@ export function AlbumImageViewer({
                     zoom={zoom}
                     top={controlsTop}
                     onClose={close}
-                    onZoomIn={() => setZoom((value) => Math.min(MAX_ZOOM, value + 1))}
-                    onZoomOut={() => setZoom((value) => Math.max(1, value - 0.5))}
+                    onResetZoom={resetZoom}
+                    onZoomIn={() => applyZoom(zoom + 1)}
+                    onZoomOut={() => applyZoom(zoom - 0.5)}
                 />
+                {footer ? (
+                    <View style={{
+                        position: 'absolute',
+                        left: 18,
+                        right: canNavigateImages ? 90 : 18,
+                        bottom: insets.bottom + 18,
+                        zIndex: 10,
+                    }}>
+                        {footer}
+                    </View>
+                ) : null}
                 {canNavigateImages ? (
                     <AlbumImageCounter
                         current={currentIndex + 1}
@@ -224,6 +345,10 @@ export function AlbumImageViewer({
             </View>
         </Modal>
     )
+}
+
+function clamp(value: number, min: number, max: number) {
+    return Math.min(Math.max(value, min), max)
 }
 
 function AlbumImageCounter({
@@ -260,12 +385,14 @@ function AlbumImageCounter({
 
 function AlbumImageViewerActions({
     onClose,
+    onResetZoom,
     onZoomIn,
     onZoomOut,
     top,
     zoom,
 }: {
     onClose: () => void
+    onResetZoom: () => void
     onZoomIn: () => void
     onZoomOut: () => void
     top: number
@@ -284,6 +411,7 @@ function AlbumImageViewerActions({
             gap: 8,
         }}>
             <AlbumViewerButton label='-' testID='album-image-zoom-out' theme={theme} onPress={onZoomOut} />
+            <AlbumViewerButton label='reset' testID='album-image-reset-zoom' theme={theme} onPress={onResetZoom} />
             <View style={{
                 minWidth: 58,
                 height: 38,
@@ -319,6 +447,7 @@ function AlbumViewerButton({
             case 'x': return <X height={18} color={theme.orange} />
             case '+': return <Plus height={18} color={theme.orange} />
             case '-': return <Minus height={18} color={theme.orange} />
+            case 'reset': return <RotateCcw height={17} color={theme.orange} />
         }
     }
 

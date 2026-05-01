@@ -43,6 +43,7 @@
         "applinks:login.no"
       ],
       "infoPlist": {
+        "NSPhotoLibraryAddUsageDescription": "Login can save selected album images to your photo library when you ask it to.",
         "UIBackgroundModes": [
           "fetch",
           "remote-notification"
@@ -55,13 +56,22 @@
         "backgroundColor": "#000000"
       },
       "package": "com.login.Login",
-      "versionCode": 115,
+      "versionCode": 116,
       "permissions": [
         "INTERNET",
         "NOTIFICATIONS",
         "PUSH_NOTIFICATIONS",
         "READ_CALENDAR",
         "WRITE_CALENDAR"
+      ],
+      "blockedPermissions": [
+        "android.permission.READ_MEDIA_IMAGES",
+        "android.permission.READ_MEDIA_VIDEO",
+        "android.permission.READ_MEDIA_AUDIO",
+        "android.permission.READ_MEDIA_VISUAL_USER_SELECTED",
+        "android.permission.READ_EXTERNAL_STORAGE",
+        "android.permission.WRITE_EXTERNAL_STORAGE",
+        "android.permission.ACCESS_MEDIA_LOCATION"
       ],
       "intentFilters": [
         {

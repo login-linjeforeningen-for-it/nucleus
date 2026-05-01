@@ -3,7 +3,6 @@ import Space from '@/components/shared/utils'
 import { AlbumCard } from '@/components/menu/albums/albumCards'
 import Swipe from '@components/nav/swipe'
 import Text from '@components/shared/text'
-import TopRefreshIndicator from '@components/shared/topRefreshIndicator'
 import GS from '@styles/globalStyles'
 import T from '@styles/text'
 import { getAlbumPreviewImages, getCachedAlbumPreviewCounts, stageAlbumListImages } from '@/utils/albums/imagePrefetch'
@@ -89,9 +88,8 @@ export default function AlbumsScreen({ navigation }: MenuProps<'AlbumsScreen'>):
                         <RefreshControl
                             refreshing={refreshing}
                             onRefresh={() => load()}
-                            tintColor={theme.orange}
-                            colors={[theme.orange]}
-                            progressViewOffset={0}
+                            tintColor={theme.refresh}
+                            progressViewOffset={100}
                         />
                     }
                     style={GS.content}
@@ -157,7 +155,6 @@ export default function AlbumsScreen({ navigation }: MenuProps<'AlbumsScreen'>):
                         </View>
                     ) : null}
                 />
-                <TopRefreshIndicator refreshing={refreshing} theme={theme} top={112} />
             </View>
         </Swipe>
     )

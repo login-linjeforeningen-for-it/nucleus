@@ -3,7 +3,6 @@ import Space from '@/components/shared/utils'
 import LogSourceCard from '@components/menu/logs/logSourceCard'
 import Swipe from '@components/nav/swipe'
 import Text from '@components/shared/text'
-import TopRefreshIndicator from '@components/shared/topRefreshIndicator'
 import GS from '@styles/globalStyles'
 import T from '@styles/text'
 import { getInternalLogs } from '@utils/queenbee/api'
@@ -43,9 +42,8 @@ export default function LogsScreen(): JSX.Element {
                     refreshControl={<RefreshControl
                         refreshing={refreshing}
                         onRefresh={() => load()}
-                        tintColor={theme.orange}
-                        colors={[theme.orange]}
-                        progressViewOffset={0}
+                        tintColor={theme.refresh}
+                        progressViewOffset={100}
                     />}
                     style={GS.content}
                     contentContainerStyle={{ paddingBottom: 80 }}
@@ -68,7 +66,6 @@ export default function LogsScreen(): JSX.Element {
                         />
                     ))}
                 </ScrollView>
-                <TopRefreshIndicator refreshing={refreshing} theme={theme} top={112} />
             </View>
         </Swipe>
     )

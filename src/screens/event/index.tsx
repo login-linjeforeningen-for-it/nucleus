@@ -3,14 +3,14 @@ import EventList from '@components/event/eventList'
 import GS from '@styles/globalStyles'
 import initializeNotifications
     from '@utils/notification/notificationSetup'
-import LastFetch, { fetchEvents } from '@/utils/fetch'
+import LastFetch, { fetchEventsResult } from '@/utils/fetch'
 import LogoNavigation from '@/components/shared/logoNavigation'
 import Swipe from '@components/nav/swipe'
 import DownloadButton from '@components/shared/downloadButton'
 import { useFocusEffect } from '@react-navigation/native'
 import { useDispatch, useSelector } from 'react-redux'
 import { StatusBar } from 'expo-status-bar'
-import { setEvents, setLastFetch, setLastSave } from '@redux/event'
+import { setEventFetchError, setEvents, setLastFetch, setLastSave } from '@redux/event'
 import { View } from 'react-native'
 import { FilterButton, FilterUI } from '@components/shared/filter'
 
@@ -35,6 +35,7 @@ export default function EventScreen({ navigation }: EventScreenProps<'EventScree
     const { clickedEvents, lastSave } = useSelector((state: ReduxState) => state.event)
     const { theme, isDark } = useSelector((state: ReduxState) => state.theme)
     const dispatch = useDispatch()
+    const setupNotifications = notification['SETUP']
 
     // Fetches events when screen is focused
     useFocusEffect(
@@ -42,9 +43,10 @@ export default function EventScreen({ navigation }: EventScreenProps<'EventScree
         React.useCallback(() => {
             // IIFE to fetch clicked events
             (async () => {
-                const events = await fetchEvents()
+                const { events, ok } = await fetchEventsResult()
 
-                if (events.length) {
+                dispatch(setEventFetchError(!ok))
+                if (ok) {
                     dispatch(setEvents(events))
                     dispatch(setLastFetch(LastFetch()))
                 }
@@ -56,9 +58,10 @@ export default function EventScreen({ navigation }: EventScreenProps<'EventScree
     useEffect(() => {
         // IIFE to fetch API
         (async () => {
-            const events = await fetchEvents()
+            const { events, ok } = await fetchEventsResult()
 
-            if (events.length) {
+            dispatch(setEventFetchError(!ok))
+            if (ok) {
                 dispatch(setEvents(events))
                 dispatch(setLastFetch(LastFetch()))
             }
@@ -90,12 +93,14 @@ export default function EventScreen({ navigation }: EventScreenProps<'EventScree
         } as any)
     }, [clickedEvents.length, navigation])
 
-    initializeNotifications({
-        shouldRun: shouldSetupNotifications,
-        hasBeenSet: notification['SETUP'],
-        setShouldSetupNotifications,
-        dispatch
-    })
+    useEffect(() => {
+        initializeNotifications({
+            shouldRun: shouldSetupNotifications,
+            hasBeenSet: setupNotifications,
+            setShouldSetupNotifications,
+            dispatch
+        })
+    }, [dispatch, setupNotifications, shouldSetupNotifications])
 
     // Displays the EventScreen
     return (

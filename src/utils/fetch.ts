@@ -7,6 +7,7 @@ export {
     fetchAlbums,
     fetchEventDetails,
     fetchEvents,
+    fetchEventsResult,
     fetchLocations,
     fetchOrganizations,
     fetchRules,

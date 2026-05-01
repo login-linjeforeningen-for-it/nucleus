@@ -1,14 +1,15 @@
 import EventCluster from './eventCluster'
 import { getCategories } from '@utils/general'
-import LastFetch, { fetchEvents } from '@utils/fetch'
+import LastFetch, { fetchEventsResult } from '@utils/fetch'
 import Separator from './separator'
 import Space, { ErrorMessage } from '@components/shared/utils'
-import TopRefreshIndicator from '@components/shared/topRefreshIndicator'
-import { setEvents, setLastFetch } from '@redux/event'
+import { setEventFetchError, setEvents, setLastFetch } from '@redux/event'
 import { useState, useCallback, JSX } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { RefreshControl, ScrollView, View } from 'react-native'
 import getListOffset from '@utils/general/getListOffset'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
+import config from '@/constants'
 
 type ContentProps = {
     usedIndexes: number[]
@@ -18,15 +19,18 @@ type ContentProps = {
  * Displays the event list
  */
 export default function EventList(): JSX.Element {
-    const { events, renderedEvents, search, categories, clickedEvents } = useSelector((state: ReduxState) => state.event)
+    const { fetchError, renderedEvents, search, categories, clickedEvents } = useSelector((state: ReduxState) => state.event)
     const { lang } = useSelector((state: ReduxState) => state.lang)
     const { theme } = useSelector((state: ReduxState) => state.theme)
     const [refresh, setRefresh] = useState(false)
     const dispatch = useDispatch()
+    const insets = useSafeAreaInsets()
+    const refreshIndicatorTop = insets.top + config.progressViewOffset
 
     async function getDetails() {
-        const events = await fetchEvents()
-        if (events.length) {
+        const { events, ok } = await fetchEventsResult()
+        dispatch(setEventFetchError(!ok))
+        if (ok) {
             dispatch(setEvents(events))
             dispatch(setLastFetch(LastFetch()))
             return true
@@ -57,21 +61,19 @@ export default function EventList(): JSX.Element {
                         <RefreshControl
                             refreshing={refresh}
                             onRefresh={onRefresh}
-                            tintColor={theme.orange}
-                            colors={[theme.orange]}
-                            progressViewOffset={0}
+                            tintColor={theme.refresh}
+                            progressViewOffset={refreshIndicatorTop}
                         />
                     }
                 >
                     <Content usedIndexes={usedIndexes} />
                     <Space height={getListOffset({ search, categories: cat, clickedEvents, bottom: true })} />
                 </ScrollView>
-                <TopRefreshIndicator refreshing={refresh} theme={theme} top={112} />
             </View>
         )
     }
 
-    return <ErrorMessage argument={!events ? 'wifi' : 'nomatch'} screen='event' />
+    return <ErrorMessage argument={fetchError ? 'wifi' : 'nomatch'} screen='event' />
 }
 
 function Content({ usedIndexes }: ContentProps) {

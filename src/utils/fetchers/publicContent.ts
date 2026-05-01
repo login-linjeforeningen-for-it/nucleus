@@ -7,12 +7,20 @@ export async function fetchEventDetails(id: number): Promise<GetEventProps> {
 }
 
 export async function fetchEvents(): Promise<GetEventProps[]> {
+    const result = await fetchEventsResult()
+    return result.events
+}
+
+export async function fetchEventsResult(): Promise<{ events: GetEventProps[], ok: boolean }> {
     try {
         const data = await fetchPublicJson('/events', 'Failed to fetch events from API')
-        return Array.isArray(data?.events) ? data.events : []
+        return {
+            events: Array.isArray(data?.events) ? data.events : [],
+            ok: true,
+        }
     } catch (error) {
         console.log(error)
-        return []
+        return { events: [], ok: false }
     }
 }
 

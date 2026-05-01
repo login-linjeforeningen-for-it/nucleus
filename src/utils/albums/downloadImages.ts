@@ -32,7 +32,7 @@ export async function downloadAlbumImages({
         return { errors: [], failed: [], saved: [] }
     }
 
-    if (Platform.OS !== 'web') {
+    if (Platform.OS === 'ios') {
         await ensureMediaPermission()
     }
 
@@ -81,7 +81,7 @@ async function downloadOnWeb(url: string, image: string) {
 }
 
 async function ensureMediaPermission() {
-    const permission = await MediaLibrary.requestPermissionsAsync(true, ['photo'])
+    const permission = await MediaLibrary.requestPermissionsAsync(true)
     if (!permission.granted) {
         throw new Error('Photo library permission was denied')
     }
@@ -130,6 +130,11 @@ async function convertWebpToJpeg(uri: string, image: string, cleanupUris: string
 }
 
 async function saveToPhotoLibrary(uri: string) {
+    if (Platform.OS === 'android') {
+        await MediaLibrary.saveToLibraryAsync(uri)
+        return
+    }
+
     try {
         await MediaLibrary.saveToLibraryAsync(uri)
     } catch {

@@ -3,7 +3,6 @@ import Space from '@/components/shared/utils'
 import HoneyCard from '@components/menu/honey/honeyCard'
 import Swipe from '@components/nav/swipe'
 import Text from '@components/shared/text'
-import TopRefreshIndicator from '@components/shared/topRefreshIndicator'
 import GS from '@styles/globalStyles'
 import T from '@styles/text'
 import { fetchHoneyList, fetchHoneyServices } from '@utils/fetch'
@@ -52,9 +51,8 @@ export default function HoneyScreen(): JSX.Element {
                     refreshControl={<RefreshControl
                         refreshing={refreshing}
                         onRefresh={() => load()}
-                        tintColor={theme.orange}
-                        colors={[theme.orange]}
-                        progressViewOffset={0}
+                        tintColor={theme.refresh}
+                        progressViewOffset={100}
                     />}
                     showsVerticalScrollIndicator={false}
                 >
@@ -81,7 +79,6 @@ export default function HoneyScreen(): JSX.Element {
                         />
                     )}
                 </ScrollView>
-                <TopRefreshIndicator refreshing={refreshing} theme={theme} top={112} />
             </View>
         </Swipe>
     )

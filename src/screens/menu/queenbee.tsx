@@ -6,7 +6,6 @@ import { FailoverState, getFailoverTone } from '@components/menu/queenbee/snapsh
 import SummaryListCard from '@components/menu/queenbee/summaryListCard'
 import Swipe from '@components/nav/swipe'
 import Text from '@components/shared/text'
-import TopRefreshIndicator from '@components/shared/topRefreshIndicator'
 import GS from '@styles/globalStyles'
 import T from '@styles/text'
 import { getDashboardSummary } from '@utils/discovery/discoveryApi'
@@ -137,9 +136,8 @@ export default function QueenbeeScreen({ navigation }: MenuProps<'QueenbeeScreen
                     refreshControl={<RefreshControl
                         refreshing={loading}
                         onRefresh={() => refresh()}
-                        tintColor={theme.orange}
-                        colors={[theme.orange]}
-                        progressViewOffset={0}
+                        tintColor={theme.refresh}
+                        progressViewOffset={100}
                     />}
                     contentContainerStyle={{ paddingBottom: 40 }}
                 >
@@ -172,7 +170,6 @@ export default function QueenbeeScreen({ navigation }: MenuProps<'QueenbeeScreen
                     <SummaryListCard title='Database clusters' items={clusterItems} theme={theme} />
                     <Space height={30} />
                 </ScrollView>
-                <TopRefreshIndicator refreshing={loading} theme={theme} top={112} />
             </View>
         </Swipe>
     )

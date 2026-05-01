@@ -3,7 +3,6 @@ import Space from '@/components/shared/utils'
 import { ClusterCard } from '@components/menu/database/databaseCards'
 import Swipe from '@components/nav/swipe'
 import Text from '@components/shared/text'
-import TopRefreshIndicator from '@components/shared/topRefreshIndicator'
 import GS from '@styles/globalStyles'
 import T from '@styles/text'
 import { getDatabaseOverview } from '@utils/queenbee/api'
@@ -42,9 +41,8 @@ export default function DatabaseScreen({ navigation }: MenuProps<'DatabaseScreen
                     refreshControl={<RefreshControl
                         refreshing={refreshing}
                         onRefresh={() => load()}
-                        tintColor={theme.orange}
-                        colors={[theme.orange]}
-                        progressViewOffset={0}
+                        tintColor={theme.refresh}
+                        progressViewOffset={100}
                     />}
                     style={GS.content}
                     contentContainerStyle={{ paddingBottom: 80 }}
@@ -70,7 +68,6 @@ export default function DatabaseScreen({ navigation }: MenuProps<'DatabaseScreen
                         </>
                     )}
                 </ScrollView>
-                <TopRefreshIndicator refreshing={refreshing} theme={theme} top={112} />
             </View>
         </Swipe>
     )

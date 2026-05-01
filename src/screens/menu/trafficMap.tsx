@@ -1,7 +1,6 @@
 import Space from '@/components/shared/utils'
 import Swipe from '@components/nav/swipe'
 import Text from '@components/shared/text'
-import TopRefreshIndicator from '@components/shared/topRefreshIndicator'
 import GS from '@styles/globalStyles'
 import T from '@styles/text'
 import { getTrafficMetrics, getTrafficRecords } from '@utils/queenbee/api'
@@ -112,9 +111,8 @@ export default function TrafficMapScreen({ navigation }: MenuProps<'TrafficMapSc
                     refreshControl={<RefreshControl
                         refreshing={refreshing}
                         onRefresh={() => load()}
-                        tintColor={theme.orange}
-                        colors={[theme.orange]}
-                        progressViewOffset={0}
+                        tintColor={theme.refresh}
+                        progressViewOffset={100}
                     />}
                     style={GS.content}
                     contentContainerStyle={{ paddingBottom: 80 }}
@@ -143,7 +141,6 @@ export default function TrafficMapScreen({ navigation }: MenuProps<'TrafficMapSc
                     <Space height={10} />
                     {mapState.selectedRecords.map(record => <TrafficRecordPreview key={record.id} record={record} />)}
                 </ScrollView>
-                <TopRefreshIndicator refreshing={refreshing} theme={theme} top={112} />
             </View>
         </Swipe>
     )

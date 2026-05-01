@@ -1019,6 +1019,7 @@ type ReduxState = {
         eventName: string
         clickedEvents: GetEventProps[]
         renderedEvents: GetEventProps[]
+        fetchError: boolean
         lastFetch: string
         lastSave: string
         search: boolean
@@ -1215,6 +1216,7 @@ type Theme = {
     transparent: string
     transparentAndroid: string
     orange: string
+    refresh: string
     orangeTransparent: string
     orangeTransparentBorder: string
     orangeTransparentHighlighted: string

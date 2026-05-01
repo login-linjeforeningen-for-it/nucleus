@@ -7,7 +7,6 @@ import Swipe from '@components/nav/swipe'
 import Space from '@/components/shared/utils'
 import T from '@styles/text'
 import SpecificAdSections from '@/components/ads/specificAdSections'
-import TopRefreshIndicator from '@components/shared/topRefreshIndicator'
 import { setAdName } from '@redux/ad'
 import { fetchAdDetails } from '@utils/fetch'
 
@@ -70,9 +69,8 @@ export default function SpecificAdScreen({ route: { params: { adID } } }: AdScre
                         <RefreshControl
                             refreshing={refresh}
                             onRefresh={onRefresh}
-                            tintColor={theme.orange}
-                            colors={[theme.orange]}
-                            progressViewOffset={0}
+                            tintColor={theme.refresh}
+                            progressViewOffset={100}
                         />
                     }
                 >
@@ -86,7 +84,6 @@ export default function SpecificAdScreen({ route: { params: { adID } } }: AdScre
                     {ad?.id ? <SpecificAdSections ad={ad} /> : null}
                     <Space height={22} />
                 </ScrollView>
-                <TopRefreshIndicator refreshing={refresh} theme={theme} top={112} />
             </View>
         </Swipe>
     )

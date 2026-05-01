@@ -3,7 +3,6 @@ import Space from '@/components/shared/utils'
 import { ContentCard, EmptyContent, LoadMoreButton, OrganizationCard, TabPill } from '@components/menu/content/contentCards'
 import Swipe from '@components/nav/swipe'
 import Text from '@components/shared/text'
-import TopRefreshIndicator from '@components/shared/topRefreshIndicator'
 import GS from '@styles/globalStyles'
 import T from '@styles/text'
 import { filterByContentQuery, formatContentDate, formatLocationDetails } from '@utils/content/content'
@@ -60,7 +59,14 @@ export default function ContentScreen(): JSX.Element {
         <Swipe left='QueenbeeScreen'>
             <View style={{ flex: 1, backgroundColor: theme.darker }}>
                 <ScrollView
-                    refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => load()} tintColor={theme.orange} colors={[theme.orange]} progressViewOffset={0} />}
+                    refreshControl={
+                        <RefreshControl
+                            refreshing={refreshing}
+                            onRefresh={() => load()}
+                            tintColor={theme.refresh}
+                            progressViewOffset={100}
+                        />
+                    }
                     style={GS.content}
                     contentContainerStyle={{ paddingTop: 90, paddingHorizontal: 4, paddingBottom: 80 }}
                     showsVerticalScrollIndicator={false}
@@ -79,9 +85,14 @@ export default function ContentScreen(): JSX.Element {
                     />
                     <Space height={10} />
                     <ContentResults activeTab={activeTab} labels={labels} lang={lang} visible={visible} />
-                    {hasMore && <><LoadMoreButton label={labels.loadMore} onPress={() => setLimit(current => current + CONTENT_PAGE_SIZE)} /><Space height={10} /></>}
+                    {hasMore && <>
+                        <LoadMoreButton
+                            label={labels.loadMore}
+                            onPress={() => setLimit(current => current + CONTENT_PAGE_SIZE)}
+                        />
+                        <Space height={10} />
+                    </>}
                 </ScrollView>
-                <TopRefreshIndicator refreshing={refreshing} theme={theme} top={112} />
             </View>
         </Swipe>
     )

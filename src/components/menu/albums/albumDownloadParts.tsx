@@ -7,17 +7,23 @@ import { Image, Pressable, ScrollView, View } from 'react-native'
 import { useSelector } from 'react-redux'
 
 export type AlbumText = {
+    clearSelection?: string
     close?: string
     downloadAll?: string
     downloadImages?: string
     downloadSelected?: string
+    inspectHint?: string
+    inspectImage?: string
+    notSelected?: string
     noImagesSelected?: string
     selectedImages?: string
+    toggleSelection?: string
 }
 
 export function AlbumDownloadGrid({
     album,
     images,
+    onInspect,
     onToggle,
     selectedImages,
     title,
@@ -25,6 +31,7 @@ export function AlbumDownloadGrid({
 }: {
     album: GetAlbumProps | null
     images: string[]
+    onInspect: (image: string) => void
     onToggle: (image: string) => void
     selectedImages: string[]
     title: string
@@ -51,6 +58,8 @@ export function AlbumDownloadGrid({
                     <Pressable
                         key={image}
                         onPress={() => onToggle(image)}
+                        onLongPress={() => onInspect(image)}
+                        delayLongPress={320}
                         accessibilityRole='checkbox'
                         accessibilityState={{ checked: selected }}
                         accessibilityLabel={`${title} ${index + 1}`}
@@ -63,7 +72,8 @@ export function AlbumDownloadGrid({
                             backgroundColor: theme.contrast,
                             borderWidth: 1,
                             borderColor: selected ? theme.orangeTransparentBorder : theme.greyTransparentBorder,
-                            opacity: pressed ? 0.82 : 1,
+                            opacity: pressed ? 0.9 : 1,
+                            transform: [{ scale: pressed ? 1.05 : 1 }],
                         })}
                     >
                         <Image
@@ -85,6 +95,7 @@ export function AlbumDownloadActions({
     downloading,
     imageCount,
     onClose,
+    onClearSelection,
     onDownloadAll,
     onDownloadSelected,
     selectedCount,
@@ -95,6 +106,7 @@ export function AlbumDownloadActions({
     downloading: boolean
     imageCount: number
     onClose: () => void
+    onClearSelection: () => void
     onDownloadAll: () => void
     onDownloadSelected: () => void
     selectedCount: number
@@ -115,6 +127,14 @@ export function AlbumDownloadActions({
                     flex={1}
                     label={text.close || 'Close'}
                     onPress={onClose}
+                />
+                <AlbumDownloadButton
+                    flex={1}
+                    disabled={!selectedCount || downloading}
+                    label={text.clearSelection || 'Clear selection'}
+                    labelColor={selectedCount ? theme.textColor : theme.oppositeTextColor}
+                    onPress={onClearSelection}
+                    testID='album-download-clear-selection'
                 />
                 <AlbumDownloadButton
                     disabled={!imageCount || downloading}
